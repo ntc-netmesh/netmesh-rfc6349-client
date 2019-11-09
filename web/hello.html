@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RFC 6349</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <!--Include eel.js - note this file doesn't exist in the 'web' directory -->
+    <link rel = "stylesheet" href="main.css">
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script type="text/javascript" src="main.js"></script>
+  </head>
+
+  <body onload="eel.retrieve_servers()">
+  <div id = "login" class = "modal">
+    <form class="modal-content animate" action= "javascript:void(0);" onsubmit="user_login()">
+      <div class="imgcontainer">
+        <img src="user_login.png" alt="Avatar" class="avatar">
+      </div>
+
+      <div class="container2">
+        <label for="uname"><b>Username</b></label>
+        <input type="text" placeholder="Enter Username" name="uname" id="uname" required="">
+
+        </br>
+
+        <label for="psw"><b>Password</b></label>
+        <input type="password" placeholder="Enter Password" name="psw" id="psw" required="">
+
+        </br>
+
+        <button type="submit" class="btn btn-success">Login</button>
+        <label>
+          <input type="checkbox" checked="checked" name="remember"> Remember me
+        </label>
+      </div>
+    </form>
+
+  </div>
+
+    <script>
+      document.getElementById('login').style.display='block';
+    </script>
+
+    <div class = "container">
+      <h1>RFC 6349 Application</h1>
+      <div class = "container">
+      <form>
+
+        <div class="column">
+          <label for="cir"><b>Internet Subscription Rate</b></label>
+          <input type = "text" id = "cir" class = "form-control email" placeholder="Enter Mbps" required>
+        </div>
+
+        <div class="column">
+          <label for="server"><b>Test Server</b></label>
+          <select class="form-control" id="server"></select>
+        </div>
+
+        </br>
+
+        <div class = "column">
+        <label for="lat"><b>GPS Latitude</b></label>
+        <input type = "text" id = "lat" class = "form-control email" placeholder="Latitude" required>
+        </div>
+        <div class = "column">
+        <label for="lon"><b>GPS Longitude</b></label>
+        <input type = "text" id = "lon" class = "form-control email" placeholder="Longitude" required>
+        </div>
+      </form>
+      </div>
+      
+      </br>
+
+      <button class = "btn btn-primary" role ="button" onclick="normal_mode()">Normal Mode</button>
+
+      <button class = "btn btn-primary" role ="button" onclick="reverse_mode()">Reverse Mode</button>
+
+      <button class = "btn btn-primary" role ="button" onclick="bidirectional()">Bidirectional Mode</button>
+
+      <button class = "btn btn-primary" role ="button" onclick="simultaneous()">Simultaneous Mode</button>
+      </div>
+
+    </br>
+
+    <div class = "container">
+      <h4>Current Progress for </h4>
+      <h4 id = "mode"></h4>
+      <button class = "btn btn-primary" role ="button" id = "cancel" onclick="cancel()" style = "display:none;">Cancel</button>
+      <div class = "progress">
+        <div id="dynamic" class = "progress-bar progress-bar-striped progress-bar-animated" id = "prog_bar" role = "progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%"></div>
+      </div>
+      <p id = "progress"></p>
+
+    </div>
+
+    <div class = "container">
+      <div class = "column">
+        <h4>Local to Remote Result</h4>
+        <p id = "local_result" cols = "50"></p>
+        </br>
+        </br>
+        <h5>Window Scan Test Results</h5>
+        <table id = "local_wnd_stats" width = "20" class="table table-hover" border = 1> </table>
+
+        <div id = "tab0" onClick="JavaScript:selectTab(0);">Window Scan Test</div>
+        <div id = "tab1" onClick="JavaScript:selectTab(1);">Throughput</div>
+        <div id = "tab2" onClick="JavaScript:selectTab(2);">RTT</div>
+        <div id = "tab3" onClick="JavaScript:selectTab(3);">Efficiency</div>
+        </br>
+        </br>
+        <div id="tab0Content">
+          
+        </div>
+
+        <div id="tab1Content">
+          
+        </div>
+        <div id="tab2Content">
+          
+        </div>
+        <div id="tab3Content">
+          
+        </div>
+      </div>
+
+      <div class = "column">
+        <h4>Remote to Local Result</h4>
+        <p id = "remote_result" cols = "50"></p>
+        </br>
+        </br>
+        <h5>Window Scan Test Results</h5>
+        <table id = "remote_wnd_stats" width = "20" class="table table-hover" border = 1> </table>
+
+        <div id = "rtab0" onClick="JavaScript:rselectTab(0);">Window Scan Test</div>
+        <div id = "rtab1" onClick="JavaScript:rselectTab(1);">Throughput</div>
+        <div id = "rtab3" onClick="JavaScript:rselectTab(3);">RTT</div>
+        <div id = "rtab2" onClick="JavaScript:rselectTab(2);">Efficiency</div>
+
+        </br>
+        </br>
+
+        <div id="rtab0Content">
+          
+        </div>
+
+        <div id="rtab1Content">
+          
+        </div>
+        <div id="rtab2Content">
+          
+        </div>
+        <div id="rtab3Content">
+          
+        </div>
+      </div>
+    </div>    
+  </body>
+</html>

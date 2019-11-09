@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Terminal=true
+Name=install_app
+Icon=utilities-terminal
+Exec=gnome-terminal -- bash -c ~/Desktop/6349_App/install.sh
+Categories=Application;

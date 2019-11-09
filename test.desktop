@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Terminal=true
+Name=start_main_client
+Icon=utilities-terminal
+Categories=Application;
+Path=sh -e -c "exec \\"\\$(dirname \\"\\$0\\")\\";$SHELL" %k
+Exec=./test.py
