@@ -4,5 +4,5 @@ Terminal=true
 Name=start_main_client
 Icon=utilities-terminal
 Categories=Application;
-Exec="/home/netmesh/Desktop/6349_App/main_client.py"
-Path=/home/netmesh/Desktop/6349_App/
+Exec="/home/event1/Desktop/updater/main_client.py"
+Path=/home/event1/Desktop/updater/
