@@ -10,9 +10,6 @@ pip3 install --pre scapy[basic]
 pip3 install PyQt5
 pip3 install requests
 pip3 install wget
-pip3 install zipfile
-pip3 install glob
-pip3 install shutil
 apt --yes --force-yes install iperf3
 sudo apt --yes --force-yes install traceroute
 sudo apt --yes --force-yes install net-tools
