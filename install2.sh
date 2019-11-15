@@ -12,7 +12,7 @@ pip3 install requests
 pip3 install wget
 pip3 install zipfile
 pip3 install glob
-pip3 install shuti
+pip3 install shutil
 apt --yes --force-yes install iperf3
 sudo apt --yes --force-yes install traceroute
 sudo apt --yes --force-yes install net-tools
@@ -23,9 +23,5 @@ sudo apt --yes --force-yes install wireshark
 sudo dpkg-reconfigure wireshark-common
 sudo usermod -a -G wireshark $1
 sudo chmod 4711 `sudo which dumpcap`
-sudo chmod 777 $2/plpmtu
-sudo chmod 777 $2/start_main_client.desktop
-sudo chmod 777 $2/plpmtu-reverse
-sudo chmod 777 $2/main_client.py
-sudo chmod 777 $2/new_dev_reg
+sudo chmod 777 $2/*
 echo "$1 ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
