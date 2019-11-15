@@ -131,7 +131,7 @@ def download_update():
             shutil.rmtree(x)
 
     #install updated files
-    p = subprocess.Popen(["sudo", "./update.sh"])
+    p = subprocess.Popen(["sudo", "./install.sh"])
     p.wait()
 
 if __name__ == "__main__":
