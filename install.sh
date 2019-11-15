@@ -1,3 +1,4 @@
 #!/bin/sh
 EVENT1=$USER
-pkexec bash $HOME/Desktop/6349_App/install2.sh $EVENT1
+PWDPATH=$(pwd)
+pkexec bash $PWDPATH/install2.sh $EVENT1 $PWDPATH
