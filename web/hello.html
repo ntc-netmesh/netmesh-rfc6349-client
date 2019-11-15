@@ -53,8 +53,24 @@
         </div>
 
         <div class="column">
+          <label for="net_type"><b>Network Connection Type</b></label>
+          <select class="form-control" id="net_type">
+            <option value = "dial_up">Dial-up</option>
+            <option value = "dsl">DSL</option>
+            <option value = "fiber">Fiber-optic</option>
+            <option value = "cable">Cable Internet</option>
+            <option value = "fixed">Fixed Wireless</option>
+            <option value = "broadband">Broadband</option>
+          </select>
+        </div>
+
+        </br>
+        </br>
+
+        <div class>
           <label for="server"><b>Test Server</b></label>
-          <select class="form-control" id="server"></select>
+          <select class="form-control" id="server">
+          </select>
         </div>
 
         </br>
@@ -76,7 +92,9 @@
 
       <button class = "btn btn-primary" role ="button" onclick="reverse_mode()">Download Mode</button>
 
+      <!--
       <button class = "btn btn-primary" role ="button" onclick="bidirectional()">Bidirectional Mode</button>
+      -->
 
       <button class = "btn btn-primary" role ="button" onclick="simultaneous()">Simultaneous Mode</button>
       </div>

@@ -38,10 +38,11 @@ function user_login(){
 }
 
 function normal_mode(){
-    var lat = document.getElementById("lat").value
-    var lon = document.getElementById("lon").value
-    var cir = document.getElementById("cir").value
-    var server_ip = document.getElementById("server").value
+    var lat = document.getElementById("lat").value;
+    var lon = document.getElementById("lon").value;
+    var cir = document.getElementById("cir").value;
+    var server_ip = document.getElementById("server").value;
+    var net_type = document.getElementById("net_type").value;
 
     document.getElementById("local_result").innerHTML = "";
     document.getElementById("remote_result").innerHTML = "";
@@ -57,7 +58,7 @@ function normal_mode(){
     document.getElementById("rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
-        eel.normal(lat, lon, cir, server_ip);
+        eel.normal(lat, lon, cir, server_ip, net_type);
         var cancel = document.getElementById("cancel");
         cancel.style.display = "block";
     }
@@ -69,10 +70,11 @@ function normal_mode(){
 }
 
 function reverse_mode(){
-    var lat = document.getElementById("lat").value
-    var lon = document.getElementById("lon").value
-    var cir = document.getElementById("cir").value
-    var server_ip = document.getElementById("server").value
+    var lat = document.getElementById("lat").value;
+    var lon = document.getElementById("lon").value;
+    var cir = document.getElementById("cir").value;
+    var server_ip = document.getElementById("server").value;
+    var net_type = document.getElementById("net_type").value;
 
     document.getElementById("local_result").innerHTML = "";
     document.getElementById("remote_result").innerHTML = "";
@@ -88,35 +90,7 @@ function reverse_mode(){
     document.getElementById("rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
-        eel.rev(lat, lon);
-    }
-
-    else{
-        alert("Latitude and Longitude must be filled out");
-    }
-}
-
-function bidirectional(){
-    var lat = document.getElementById("lat").value
-    var lon = document.getElementById("lon").value
-    var cir = document.getElementById("cir").value
-    var server_ip = document.getElementById("server").value
-
-    document.getElementById("local_result").innerHTML = "";
-    document.getElementById("remote_result").innerHTML = "";
-
-    document.getElementById("tab0Content").innerHTML = "";
-    document.getElementById("tab1Content").innerHTML = "";
-    document.getElementById("tab2Content").innerHTML = "";
-    document.getElementById("tab3Content").innerHTML = "";
-
-    document.getElementById("rtab0Content").innerHTML = "";
-    document.getElementById("rtab1Content").innerHTML = "";
-    document.getElementById("rtab2Content").innerHTML = "";
-    document.getElementById("rtab3Content").innerHTML = "";
-
-    if(lat != "" && lon != ""){
-        eel.bi(lat, lon);
+        eel.rev(lat, lon, cir, server_ip, net_type);
     }
 
     else{
@@ -125,10 +99,11 @@ function bidirectional(){
 }
 
 function simultaneous(){
-    var lat = document.getElementById("lat").value
-    var lon = document.getElementById("lon").value
-    var cir = document.getElementById("cir").value
-    var server_ip = document.getElementById("server").value
+    var lat = document.getElementById("lat").value;
+    var lon = document.getElementById("lon").value;
+    var cir = document.getElementById("cir").value;
+    var server_ip = document.getElementById("server").value;
+    var net_type = document.getElementById("net_type").value;
 
     document.getElementById("local_result").innerHTML = "";
     document.getElementById("remote_result").innerHTML = "";
@@ -144,7 +119,7 @@ function simultaneous(){
     document.getElementById("rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
-        eel.sim(lat, lon);
+        eel.sim(lat, lon, cir, server_ip, net_type);
     }
 
     else{

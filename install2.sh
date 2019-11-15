@@ -7,6 +7,7 @@ sudo apt --yes --force-yes install iperf3
 pip3 install websockets
 pip3 install eel
 pip3 install --pre scapy[basic]
+pip3 install pyqt5
 apt --yes --force-yes install iperf3
 sudo apt --yes --force-yes install traceroute
 sudo apt --yes --force-yes install net-tools

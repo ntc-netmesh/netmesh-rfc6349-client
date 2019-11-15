@@ -1,0 +1,8 @@
+.column{
+    float: left;
+    width: 50%
+}
+
+img{
+    float: right;
+}

@@ -10,6 +10,8 @@ import os
 import signal
 from threading import Thread
 
+import store_pcap
+
 import requests
 import json
 import ast
@@ -26,20 +28,27 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 def retrieve_servers():
     response = requests.get("https://sago-gulaman.xyz/api/servers/")
     server_list = response.json()
+    index=0
     for i in server_list:
         print(i["nickname"])
-        location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
-        eel.add_server(i["nickname"]+location,i["ip_address"])
+        if (i["test_method"] == "2"):
+            location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
+            eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
 
 ###results server credentials###
 global dev_hash
 dev_hash = ""
+global region
+region = ""
+global pcap
+pcap = ""
 global token
 token = ""
+global net_type
+net_type = ""
 url = "https://www.sago-gulaman.xyz"
-server1 = "334b293b-1ebe-4195-a3ec-eaa3f8f37b23"
-server2 = "a83250c2-4125-4a58-a183-6c90bcf16e43"
-server3 = "334b293b-1ebe-4195-a3ec-eaa3f8f37b23"
+global server_uuid
+server_uuid = ""
 
 @eel.expose
 def login(username,password):
@@ -77,8 +86,11 @@ def read_hash():
     if os.path.exists("hash.txt"):
         file = open("hash.txt","r")
         global dev_hash
-        dev_hash = file.readline()
+        dev_hash = file.readline()[:-1]
         print(dev_hash)
+        global region
+        region = file.readline()[:-1]
+        print(region)
         file.close()
         return True
     else:
@@ -143,7 +155,7 @@ def parse_results(results,direction):
 
     data = {
         "ts": datetime.now(),   # TODO: add timezone information, or assume that clients will always send in UTC
-        "server": server1,
+        "server": server_uuid,
         "direction": direction,
         "path_mtu": mtu,
         "baseline_rtt": base_rtt,
@@ -183,11 +195,14 @@ def send_res(results, mode, lat, lon):
             "set1": parse_results(results[0],'forward'),
             "set2": parse_results(results[1],'reverse'),
         }
+
+    global pcap
+    global net_type
     data_point = {
         "hash": dev_hash,
         "test_type": "RFC6349",
-        "network": "dsl",
-        "pcap": "sample.pcap",
+        "network": net_type,
+        "pcap": pcap,
         "lat": lat,
         "long": lon,
         "mode": mode,
@@ -230,11 +245,17 @@ for line in p.stdout:
     break
 
 @eel.expose 
-def normal(lat, lon, cir, serv_ip):
+def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
 
+    ip = re.split(",", serv_ip)
+    global server_uuid
+    server_uuid = ip[1]
     global server_ip
-    server_ip = serv_ip
+    server_ip = ip[0]
+    global net_type
+    net_type = network_type
+
 
     global ws_url
     ws_url = "ws://" + server_ip + ":3001"
@@ -246,30 +267,47 @@ def start_normal_thread(lat, lon, cir):
     asyncio.get_event_loop().run_until_complete(l_to_r(lat, lon, cir))
 
 @eel.expose 
-def rev(lat, lon, cir, serv_ip):
+def rev(lat, lon, cir, serv_ip, network_type):
     print("reverse mode")
 
+    ip = re.split(",", serv_ip)
+    global server_uuid
+    server_uuid = ip[1]
     global server_ip
-    server_ip = serv_ip
+    server_ip = ip[0]
+    global net_type
+    net_type = network_type
+
 
     global ws_url
     ws_url = "ws://" + server_ip + ":3001"
     
-    thread_a = Thread(target=start_reverse_thread(lat,lon,cir), daemon=True)
+    thread_a = Thread(target=start_reverse_thread(lat,lon, cir), daemon=True)
     thread_a.start()
 
-def start_reverse_thread(lat, lon, cir):
+def start_reverse_thread(lat, lon, cir, serv_ip):
     asyncio.get_event_loop().run_until_complete(r_to_l(lat, lon, cir))
 
 @eel.expose 
-def bi(lat, lon):
-    print("bidirectional mode")
-    asyncio.get_event_loop().run_until_complete(bidirectional(lat, lon))
-
-@eel.expose 
-def sim(lat, lon):
+def sim(lat, lon, cir, serv_ip, network_type):
     print("simultaneous mode")
-    asyncio.get_event_loop().run_until_complete(simultaneous(lat, lon))
+
+    ip = re.split(",", serv_ip)
+    global server_uuid
+    server_uuid = ip[1]
+    global server_ip
+    server_ip = ip[0]
+    global net_type
+    net_type = network_type
+
+    global ws_url
+    ws_url = "ws://" + server_ip + ":3001"
+    
+    thread_a = Thread(target=start_sim_thread(lat,lon, cir), daemon=True)
+    thread_a.start()
+
+def start_sim_thread(lat, lon, cir):
+    asyncio.get_event_loop().run_until_complete(simultaneous(lat, lon, cir))
 
 def traceroute(server_ip):
     p = subprocess.Popen(["traceroute", server_ip], stdout = subprocess.PIPE)
@@ -776,6 +814,10 @@ async def l_to_r(lat, lon, cir):
             eel.printprogress("Done")
             eel.progress_now(100)
 
+            #store pcap file to pcap-files directory
+            global pcap
+            pcap = store_pcap.move_pcap("normal")
+
             send_res(results,'normal', lat, lon)
 
         except (websockets.exceptions.ConnectionClosed, websockets.exceptions.ConnectionClosedError) :
@@ -784,7 +826,7 @@ async def l_to_r(lat, lon, cir):
             pass
 
 async def r_to_l(lat, lon, cir):
-    traceroute(server_ip)
+    #traceroute(server_ip)
 
     results = []
     async with websockets.connect(ws_url, ping_timeout=600) as websocket:
@@ -1029,6 +1071,16 @@ async def r_to_l(lat, lon, cir):
                 print("Cannot process Buffer Delay")
                 return
 
+            file = open("hash.txt", "r")
+            file.readline()
+            region = file.readline()[:-1]
+            serial = file.readline()
+            file.close()
+            await websocket.send(region)
+            await websocket.send(serial)
+            global pcap
+            pcap = await websocket.recv()
+
             state = await websocket.recv()
             print(state)
             wnd_eff.append(state)
@@ -1114,457 +1166,7 @@ async def r_to_l(lat, lon, cir):
             eel.alert_debug("Cannot connect to selected server. Please connect to a different server or try again later.")
             pass
 
-async def bidirectional(lat, lon):
-    traceroute(server_ip)
-
-    results = []
-    results_reverse = []
-    async with websockets.connect(ws_url, ping_timeout=600) as websocket:
-
-    	#NORMAL MODE
-        try:
-            await websocket.send("bidirectional")
-            eel.mode("Normal Mode")
-            
-            #mtu test
-            state = await websocket.recv()
-            print(state)
-            if state == "plpmtu started":
-                eel.printprogress("PLPMTUD started")
-
-                max_retr = 0
-                while True:
-                    p = subprocess.Popen(["sudo", "./plpmtu", "-p", "udp", "-s", server_ip + ":3002"], stdout = subprocess.PIPE)
-                    for line in p.stdout:
-                        temp = line.decode("utf-8")
-                        if "PLPMTUD" in temp:
-                            mtu = re.split(" ", temp)[3]
-                            results.append("Path MTU: " + mtu)
-
-                    max_retr += 1
-                    if max_retr>=5:
-                        print("Cannot perform PLPMTUD")
-                        return
-
-                    try:
-                        if results[0]:
-                            break
-                    except IndexError:
-                        pass
-
-                await websocket.send("plpmtu done")
-                eel.progress_now(100/12)
-
-            #ping
-            state = await websocket.recv()
-            print(state)
-            if state == "mtu done":
-                eel.printprogress("Ping started")
-
-                max_retr = 0
-                while True:
-                    p = subprocess.Popen(["ping", server_ip, "-c", "10"], stdout = subprocess.PIPE)
-                    p.wait()
-                    for line in p.stdout:
-                        temp = line.decode("utf-8")
-                        if "avg" in temp:
-                            rtt = re.split(" ", temp)[3]
-                            ave_rtt = re.split("/", rtt)[2]
-                            results.append("Baseline RTT: " + ave_rtt + " ms")
-
-                    max_retr += 1
-                    if max_retr >=5:
-                        print("Cannot perform Ping")
-                        return
-
-                    try:
-                        if results[1]:
-                            break
-                    except IndexError:
-                        pass
-
-                await websocket.send("ping done")
-                eel.progress_now(100/12*2)
-            
-            #iperf udp and tcp mode
-            state = await websocket.recv()
-            print(state)
-            if state == "iperf server started":
-                #UDP mode
-                eel.printprogress("iPerf UDP started")
-
-                max_retr = 0
-                while True:
-                    #p = subprocess.Popen(["iperf3", "-c", "202.92.132.191", "-u", "-t", "10", "-f", "m"], stdout = subprocess.PIPE)
-                    p = subprocess.Popen(["iperf3", "-c", server_ip, "-u", "-t", "10", "-f", "m", "-b", "1000M"], stdout = subprocess.PIPE)
-                    flag=0
-                    for line in p.stdout:
-                        temp = line.decode("utf-8")
-                        if "Jitter" in temp:
-                            flag = 1
-                            continue
-                        if flag == 1:
-                            entries = re.findall(r'\S+',temp)
-
-                            #check if test ran in 10s
-                            timecheck = float(re.split("-",entries[2])[1])
-                            if timecheck < 10:
-                                print("iPerf UDP incomplete")
-                                break
-
-                            bb = entries[6]
-                            results.append("Bottleneck Bandwidth: " + bb + " Mbits/sec")
-                            bdp = (float(re.split(" ", results[1])[2]) /1000) * (float(bb)* 1000000)
-                            results.append("BDP: " + str(bdp) + " bits")
-                            results.append("Min RWND: " + str(bdp/8 / 1000) + " Kbytes")
-                            break
-
-                    max_retr += 1
-                    if max_retr >= 5:
-                        print("Cannot perform iPerf")
-                        return
-
-                    try:
-                        if results[2] and results[3] and results[4]:
-                            eel.progress_now(100/12*3)
-                            break
-                    except IndexError:
-                        pass
-
-                
-                #TCP mode - run for 5s to keep pcap small
-                eel.printprogress("iPerf TCP started")
-                max_retr = 0
-                while True:
-                    if os.path.exists("testresults.pcapng"):
-                        os.remove("testresults.pcapng")
-
-                    t = subprocess.Popen(["tshark", "-w", "testresults.pcapng"])
-                    rwnd = re.split(" ", results[4])[3]
-                    p = subprocess.Popen(["iperf3", "-c", server_ip, "-t", "5", "-w", rwnd+"K", "-f", "m", "-b", "1000M"], stdout = subprocess.PIPE)
-                    speed_plot = []
-                    p.wait()
-
-                    for line in p.stdout:
-                        temp = line.decode("utf-8")
-                        if "sender" in temp:
-                            entries = re.findall(r'\S+',temp)
-
-                            #check if test ran in 5s
-                            timecheck = float(re.split("-",entries[2])[1])
-                            if timecheck < 5:
-                                print("iPerf TCP incomplete")
-                                t.kill()
-                                break
-                            
-                            results.append("Average TCP Throughput: " + entries[6] + " Mbits/s")
-
-                            mtu = int(re.split(" ", results[0])[2])
-                            max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
-                            results.append("Ideal TCP Throughput: " + str(max_throughput) + " Mbits/s")
-
-                            temp2 = re.split("-",entries[2])
-                            actual = float(temp2[1])
-                            results.append("Actual Transfer Time: " + str(actual))
-                                    
-                            ideal = float(entries[4]) * 8 / max_throughput
-                            results.append("Ideal Transfer Time: " + str(ideal))
-                                
-                            ttr = actual / ideal
-                            results.append("TCP TTR: " + str(ttr))
-
-                        elif "KBytes" in temp:
-                            entries = re.findall(r'\S+',temp)
-                            x_axis = re.split("-",entries[2])
-                            x_axis = int(float(x_axis[1]))
-                            speed_plot.append([x_axis,float(entries[6])])
-
-                    max_retr += 1
-                    if max_retr == 5:
-                        print("Cannot perform iPerf")
-                        return
-
-                    try:
-                        if results[5] and results[6] and results[7] and results[8] and results[9]:
-                            eel.progress_now(100/12*4)
-                            break
-                    except IndexError:
-                        pass
-
-                await websocket.send("iperf done")
-                t.kill()
-                eel.printprogress("iPerf Done")
-
-                #TCP Efficiency Processing... takes some time
-                print("Processing Efficiency")
-                eel.printprogress("Processing Efficiency")
-                max_retr += 0
-                while True:
-                    p = subprocess.Popen(["python3", "scapy-tcp-eff-expt2.py", "testresults.pcapng", client_ip], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-                    p.wait()
-                    for line in p.stdout:
-                        temp = line.decode("utf-8")
-
-                        if "plot" in temp:
-                            temp = re.split(":", temp)[1]
-                            temp = temp[1:-2]
-                            print(temp)
-
-                            neff_plot = []
-                            for i in re.split("], ", temp):
-                                temp_list = re.split(", ", i[1:-1])
-                                temp_list[0] = int(temp_list[0])
-                                temp_list[1] = float(temp_list[1])
-
-                                neff_plot.append(temp_list)
-                        else:
-                            results.append(temp)
-
-                    max_retr += 1
-                    if max_retr >=5:
-                        print("Cannot process PCAP efficiency")
-                        return
-
-                    try:
-                        if results[10] and results[11] and results[12]:
-                            eel.progress_now(100/12*5)
-                            break
-                    except IndexError:
-                        pass
-
-
-                #Buffer Delay Processing... takes some time
-                print("Processing Buffer Delay")
-                eel.printprogress("Processing Buffer Delay")
-                max_retr = 0
-                while True:
-                    p = subprocess.Popen(["python3", "buffer-delay.py", "testresults.pcapng", client_ip, server_ip, re.split(" ", results[1])[2]], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-                    for line in p.stdout:
-                        temp = line.decode("utf-8")
-                        if "plot" in temp:
-                            temp = re.split(":", temp)[1]
-                            temp = temp[1:-2]
-
-                            nbuffer_plot = []
-                            for i in re.split("], ", temp):
-                                temp_list = re.split(", ", i[1:-1])
-                                temp_list[0] = int(temp_list[0])
-                                temp_list[1] = float(temp_list[1])
-
-                                nbuffer_plot.append(temp_list)
-                        else:
-                            results.append(temp)
-
-                    max_retr += 1
-                    if max_retr >=5:
-                        print("Cannot process PCAP buffer delay")
-                        return
-
-                    try:
-                        if results[13] and results[14]:
-                            break
-                    except IndexError:
-                        pass
-                
-
-            #show all results
-            for line in results:
-                print(line)
-                eel.printlocal(line)
-
-            eel.lgraph(speed_plot)
-            eel.legraph(neff_plot)
-            eel.lbgraph(nbuffer_plot)
-            eel.progress_now(100/12*6)
-
-        except websockets.exceptions.ConnectionClosed:
-            print("connection closed")
-            pass
-
-
-        #REVERSE MODE
-        try:
-            await websocket.send("reverse")
-            eel.mode("Reverse Mode")
-
-            #mtu test
-            state = await websocket.recv()
-            print(state)
-            if state == "plpmtu started":
-                eel.printprogress("PLPMTUD started")
-                max_retr = 0
-                while True:
-                    p = subprocess.Popen(["sudo", "./plpmtu-reverse", "-p", "udp", "-s", server_ip +":3002"])
-                    #await websocket.send("plpmtu done")
-                    state = await websocket.recv()
-                    print(state)
-                    if state == "mtu done":
-                        eel.progress_now(100/12*7)
-                        break
-                    elif state == "mtu error":
-                        print("Cannot perform PLPMTUD")
-                        return
-
-                    max_retr += 1
-                    if max_retr >=5 :
-                        print("Cannot perform PLPMTUD")
-                        return
-            #ping
-            max_retr = 0
-            while True:
-                state = await websocket.recv()
-                print(state)
-                if state == "start ping":
-                    eel.printprogress("Ping started")
-
-                    p = subprocess.Popen(["python3", "udp-ping-client.py", server_ip])
-
-                state = await websocket.recv()
-                print(state)
-                if state == "ping done":
-                    eel.progress_now(100/12*8)
-                    break
-                elif state == "ping error":
-                    print("Cannot perform Ping")
-                    return
-
-                max_retr += 1
-                if max_retr >=5 :
-                    print("Cannot perform PLPMTUD")
-                    return
-
-            max_retr = 0
-            while True:
-                #iperf udp and tcp mode
-                state = await websocket.recv()
-                print(state)
-                if state == "iperf server started":
-                    #UDP mode
-                    eel.printprogress("iPerf UDP started")
-                    ####ADD -b 100M#####
-                    p = subprocess.Popen(["iperf3", "-c", server_ip, "-u", "-R", "-b", "1000M", "-t", "10", "-f", "m"], stdout = subprocess.PIPE)
-                    p.wait()
-                    await websocket.send("iperf udp done")
-
-                elif state == "iPerf UDP done":
-                    eel.progress_now(100/12*9)
-                    break
-
-                max_retr += 1
-                if max_retr >=5 :
-                    print("Cannot perform iPerf UDP")
-                    return
-
-            max_retr = 0
-            while True:
-                state = await websocket.recv()
-                print(state)
-                if "start iperf tcp" in state:
-                    rwnd = re.split(" ", state)[3]
-                    #TCP mode - run for 5s to keep pcap small
-                    eel.printprogress("iPerf TCP started")
-                    p = subprocess.Popen(["iperf3", "-c", server_ip, "-t", "5", "-b", "1000M", "-w", rwnd+"K", "-R", "-f", "m"], stdout = subprocess.PIPE)
-                    p.wait()
-                    await websocket.send("iperf tcp done")
-
-                elif "iPerf TCP done" in state:
-                    eel.progress_now(100/12*10)
-                    break
-
-                max_retr += 1
-                if max_retr >= 5:
-                    print("Cannot perform iPerf TCP")
-                    return
-
-            state = await websocket.recv()
-            print(state)
-            eel.printprogress("Processing Efficiency")
-
-            state = await websocket.recv()
-            print(state)
-            if state == "Cannot process TCP Efficiency":
-                return
-
-            state = await websocket.recv()
-            print(state)
-            eel.printprogress("Processing Buffer Delay")
-            eel.progress_now(100/12*11)
-
-            state = await websocket.recv()
-            print(state)
-            if state == "Cannot process Buffer Delay":
-                return
-
-            while True:
-                line = await websocket.recv()
-                print(line)
-                results_reverse.append(line)
-                eel.printremote(line)
-                if "buffer" in line:
-                    break
-
-            #Receive speed plot and format to list of list for graph function
-            await websocket.send("bandwidth")
-            speed_plot_reverse  = await websocket.recv()
-            speed_plot_reverse  = speed_plot_reverse[1:-1]
-            print(speed_plot_reverse)
-
-            speed_plot_list = []
-            for i in re.split("], ", speed_plot_reverse):
-                temp_list = re.split(", ", i[1:-1])
-                temp_list[0] = int(temp_list[0])
-                temp_list[1] = float(temp_list[1])
-
-                speed_plot_list.append(temp_list)
-
-
-
-            #efficiency
-            await websocket.send("speed_plot received")
-            reff_plot  = await websocket.recv()
-            reff_plot = re.split(":", reff_plot)[1]
-            reff_plot  = reff_plot[1:-2]
-            print(reff_plot)
-
-            
-            reff_plot_list = []
-            for i in re.split("], ", reff_plot):
-                temp_list = re.split(", ", i[1:-1])
-                temp_list[0] = int(temp_list[0])
-                temp_list[1] = float(temp_list[1])
-
-                reff_plot_list.append(temp_list)
-
-            #buffer delay
-            await websocket.send("reff_plot received")
-            rbuffer_plot  = await websocket.recv()
-            rbuffer_plot = re.split(":", rbuffer_plot)[1]
-            rbuffer_plot  = rbuffer_plot[1:-2]
-            print(rbuffer_plot)
-
-            rbuffer_plot_list = []
-            for i in re.split("], ", rbuffer_plot):
-                temp_list = re.split(", ", i[1:-1])
-                temp_list[0] = int(temp_list[0])
-                temp_list[1] = float(temp_list[1])
-
-                rbuffer_plot_list.append(temp_list)
-
-
-            eel.rgraph(speed_plot_list)
-            eel.regraph(reff_plot_list)
-            eel.rbgraph(rbuffer_plot_list)
-            eel.printprogress("Done")
-            eel.progress_now(100)
-
-            send_res([results,results_reverse],'bidirectional', lat, lon)
-
-        except websockets.exceptions.ConnectionClosed:
-            print("connection closed")
-            eel.alert_debug("Cannot connect to selected server. Please connect to a different server or try again later.")
-            pass
-
-async def simultaneous(lat, lon):
+async def simultaneous(lat, lon, cir):
     #traceroute(server_ip)
 
     results = []
@@ -1911,6 +1513,18 @@ async def simultaneous(lat, lon):
                 print("Cannot process reverse Buffer Delay")
                 return
 
+            #store pcap file to pcap-files directory
+            global pcap
+            pcap = store_pcap.move_pcap("sim")
+
+            file = open("hash.txt", "r")
+            file.readline()
+            region = file.readline()[:-1]
+            serial = file.readline()
+            file.close()
+            await websocket.send(region)
+            await websocket.send(serial)
+            await websocket.recv()
 
             #show all results
             for line in results:
