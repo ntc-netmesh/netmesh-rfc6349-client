@@ -83,6 +83,9 @@ def get_latest_release():
         MainWindow.show()
         sys.exit(app.exec_())
 
+    else:
+        import main_client
+
 def download_update():
     dir_path = os.path.dirname(os.path.realpath(__file__)) 
     wget.download(dl_link,dir_path)
