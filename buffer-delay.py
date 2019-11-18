@@ -84,7 +84,7 @@ for cnt, i in enumerate(seen):
 		temp = time.strftime('%H:%M:%S', time.localtime(end_time))
 		if curr_sec == -1:
 			curr_sec = get_sec(temp)
-		if get_sec(temp) != curr_sec:
+		if (get_sec(temp) != curr_sec) and (len(rtt_hold) != 0):
 			inst_ave = sum(rtt_hold)/len(rtt_hold)
 			rtt_plot.append([rtt_cnt,inst_ave])
 			curr_sec = get_sec(temp)
