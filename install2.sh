@@ -1,7 +1,13 @@
 #!/bin/sh
 sudo apt-get update
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
+tester=$(dpkg -l | grep google-chrome-stable)
+if [[ $tester ]]; then
+    echo "Google Chrome already installed"
+else
+	wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+	sudo dpkg -i google-chrome-stable_current_amd64.deb
+fi
+
 sudo apt --yes --force-yes install python3-pip
 sudo apt --yes --force-yes install iperf3
 pip3 install websockets
