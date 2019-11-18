@@ -30,7 +30,6 @@ def retrieve_servers():
     server_list = response.json()
     index=0
     for i in server_list:
-        print(i["nickname"])
         if (i["test_method"] == "2"):
             location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
             eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
@@ -65,21 +64,20 @@ def login(username,password):
         print(e)
 
     if r.status_code == 401:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        #print("Exiting due to status code %s: %s" % (r.status_code, r.text))
         eel.alert_debug("Invalid username/password!")
         return
     elif r.status_code == 400:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        #print("Exiting due to status code %s: %s" % (r.status_code, r.text))
         eel.alert_debug("Device not registered. Please register the device using new_dev_reg")
         return
     elif r.status_code != 200:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        #print("Exiting due to status code %s: %s" % (r.status_code, r.text))
         eel.alert_debug("Error occured")
         return
 
     global token
     token = ast.literal_eval(r.text)['Token']
-    print(token)
     eel.hide_login()
 
 def read_hash():
@@ -87,14 +85,11 @@ def read_hash():
         file = open("hash.txt","r")
         global dev_hash
         dev_hash = file.readline()[:-1]
-        print(dev_hash)
         global region
         region = file.readline()[:-1]
-        print(region)
         file.close()
         return True
     else:
-        print("error")
         eel.alert_debug("Device not registered! Please register the device before using.")
     return False
 
@@ -246,7 +241,7 @@ for line in p.stdout:
 
 @eel.expose 
 def normal(lat, lon, cir, serv_ip, network_type):
-    print("normal mode")
+    #print("normal mode")
 
     ip = re.split(",", serv_ip)
     global server_uuid
@@ -268,7 +263,7 @@ def start_normal_thread(lat, lon, cir):
 
 @eel.expose 
 def rev(lat, lon, cir, serv_ip, network_type):
-    print("reverse mode")
+    #print("reverse mode")
 
     ip = re.split(",", serv_ip)
     global server_uuid
@@ -285,12 +280,12 @@ def rev(lat, lon, cir, serv_ip, network_type):
     thread_a = Thread(target=start_reverse_thread(lat,lon, cir), daemon=True)
     thread_a.start()
 
-def start_reverse_thread(lat, lon, cir, serv_ip):
+def start_reverse_thread(lat, lon, cir):
     asyncio.get_event_loop().run_until_complete(r_to_l(lat, lon, cir))
 
 @eel.expose 
 def sim(lat, lon, cir, serv_ip, network_type):
-    print("simultaneous mode")
+    #print("simultaneous mode")
 
     ip = re.split(",", serv_ip)
     global server_uuid
@@ -317,15 +312,20 @@ def traceroute(server_ip):
     hop = {}
     for line in p.stdout:
         temp = line.decode("utf-8")
+        print(temp)
         if hop_num >= 1:
             entries = re.findall(r'\S+',temp)
 
             curr_hop = entries[0]
 
+            ip_add = ""
             for i in range(1,4):
                 if "(" in entries[i]:
                     ip_add = entries[i][1:-1]
                     ip_name = entries[i-1]
+
+            if ip_add == "":
+            	continue
 
             ping = []
             for i in range(3,len(entries)):
@@ -338,7 +338,7 @@ def traceroute(server_ip):
             for ix, i in enumerate(ping):
                 route["t"+str(ix+1)] = i
 
-            hop[curr_hop] = route
+            hop[hop_num] = route
         else:
             entries = re.findall(r'\S+',temp)
             dest_name = entries[2]
@@ -381,7 +381,8 @@ def cancel_test():
 
                       
 async def l_to_r(lat, lon, cir):
-    #traceroute(server_ip)
+    global server_ip
+    traceroute(server_ip)
 
     results = []
     async with websockets.connect(ws_url) as websocket:
@@ -826,7 +827,8 @@ async def l_to_r(lat, lon, cir):
             pass
 
 async def r_to_l(lat, lon, cir):
-    #traceroute(server_ip)
+    global server_ip
+    traceroute(server_ip)
 
     results = []
     async with websockets.connect(ws_url, ping_timeout=600) as websocket:
@@ -1167,7 +1169,8 @@ async def r_to_l(lat, lon, cir):
             pass
 
 async def simultaneous(lat, lon, cir):
-    #traceroute(server_ip)
+    global server_ip
+    traceroute(server_ip)
 
     results = []
     results_reverse = []

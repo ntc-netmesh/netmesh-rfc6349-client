@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Terminal=true
-Name=install_app
+Name=installer
 Icon=utilities-terminal
 Exec=gnome-terminal -- bash -c "cd $(dirname %k) && sh ./install.sh";
 Categories=Application;

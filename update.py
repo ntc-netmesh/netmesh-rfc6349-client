@@ -16,24 +16,27 @@ global MainWindow
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setFixedSize(436, 121)
+        MainWindow.setFixedSize(436, 131)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.update = QtWidgets.QPushButton(self.centralwidget)
-        self.update.setGeometry(QtCore.QRect(120, 60, 81, 41))
+        self.update.setGeometry(QtCore.QRect(120, 80, 81, 41))
         self.update.setAutoFillBackground(False)
         self.update.setObjectName("update")
         self.update.clicked.connect(self.update_app)
         self.dont_update = QtWidgets.QPushButton(self.centralwidget)
-        self.dont_update.setGeometry(QtCore.QRect(250, 60, 81, 41))
+        self.dont_update.setGeometry(QtCore.QRect(250, 80, 81, 41))
         self.dont_update.setObjectName("dont_update")
-        self.dont_update.clicked.connect(self.close_app)
+        self.dont_update.clicked.connect(QtWidgets.qApp.quit)
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(150, 10, 200, 31))
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(110, 30, 240, 31))
         self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(100, 50, 280, 31))
+        self.label_3.setObjectName("label_2")
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -46,6 +49,7 @@ class Ui_MainWindow(object):
         self.dont_update.setText(_translate("RFC 6349 Application Updater", "No"))
         self.label.setText(_translate("MainWindow", "A new update is available."))
         self.label_2.setText(_translate("MainWindow", "Would you like to download it now?"))
+        self.label_3.setText(_translate("MainWindow", "Application will not start unless updated."))
 
     def update_app(self):
         global MainWindow
@@ -53,13 +57,6 @@ class Ui_MainWindow(object):
         download_update()
         
         import main_client
-
-    def close_app(self):
-        global MainWindow
-        MainWindow.close()
-
-        import main_client
-
 
 def get_latest_release():
     #insert github link here
