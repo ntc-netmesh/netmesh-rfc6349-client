@@ -369,7 +369,7 @@ def traceroute(server_ip):
 
     if r.status_code != 200:
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))    
-        quit()
+        #quit()
 
 global flag
 flag = 0
