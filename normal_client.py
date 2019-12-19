@@ -139,7 +139,7 @@ async def normal_client(logger):
         pass
 
 
-if __name__ == "__main__":
+def start_normal_client():
     logger = getStreamLogger()
     try:
         client_utils.file_setter(LOGFILE)
@@ -148,4 +148,9 @@ if __name__ == "__main__":
         pass
 
     ret_val = asyncio.get_event_loop().run_until_complete(normal_client(logger))
+    return ret_val
+
+
+if __name__ == "__main__":
+    ret_val = start_normal_client()
     print(ret_val)
