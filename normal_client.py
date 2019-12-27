@@ -35,9 +35,9 @@ LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
         <done>                    < OUTPUT_PRINTING >                <done>
                                 < CONNECTION_TEARDOWN >
 '''
-async def normal_client(logger):
+async def normal_client(logger, SERVER_IP):
     results = {}
-    ws_url = WEBSOCKET_URL
+    ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
     mtu = None
     rtt = None
@@ -139,7 +139,7 @@ async def normal_client(logger):
         pass
 
 
-def start_normal_client():
+def start_normal_client(server_url=DEFAULT_SERVER):
     logger = getStreamLogger()
     try:
         client_utils.file_setter(LOGFILE)
@@ -147,7 +147,8 @@ def start_normal_client():
     except:
         pass
 
-    ret_val = asyncio.get_event_loop().run_until_complete(normal_client(logger))
+    #ret_val = asyncio.get_event_loop().run_until_complete(normal_client(logger))
+    ret_val = asyncio.get_event_loop().create_task(normal_client(logger, server_url))
     return ret_val
 
 

@@ -75,7 +75,7 @@ def mtu_process(server_ip, udp_port):
 
 
 if __name__ == "__main__":
-    mtu_process(SERVER_IP, UDP_PORT)
+    mtu_process("202.92.132.191", UDP_PORT)
 
 #async def mtu_reverse_test():
 #    try:
