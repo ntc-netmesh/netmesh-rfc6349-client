@@ -17,6 +17,16 @@ FALLBACK_LOGGER = getStreamLogger()
 
 '''
         retrieves the MTU from the server-side handler
+        using the ./plpmtu-reverse C binary
+        @PARAMS:
+            SERVER_IP       :   server IPv4 address
+            handler_port    :   port number of the application handling the
+                                    mtu measurement process
+            udp_port        :   port number of the application that performs the
+                                    actual mtu process
+            logger          :   logger object
+        @RETURN:
+            mtu             :   Maximum transmission unit in json string format
 '''
 async def mtu_process(SERVER_IP, handler_port, udp_port, logger=FALLBACK_LOGGER):
     plpmtu_process = None
@@ -48,6 +58,14 @@ async def mtu_process(SERVER_IP, handler_port, udp_port, logger=FALLBACK_LOGGER)
 
 '''
         retrieves the RTT from the server-side handler
+        using the udp-ping-client python script
+        @PARAMS:
+            SERVER_IP       :   server IPv4 address
+            handler_port    :   port number of the application handling the
+                                    rtt measurement process
+            logger          :   logger object
+        @RETURN:
+            rtt             :   Baseline Round Trip Time in json string format
 '''
 async def rtt_process(SERVER_IP, handler_port, logger=FALLBACK_LOGGER):
     rtt_process = None
@@ -75,7 +93,18 @@ async def rtt_process(SERVER_IP, handler_port, logger=FALLBACK_LOGGER):
     return
 
 '''
-        retrieves the Baseline Bandwidth from the server-side handler
+        retrieves the bandwidth metrics from the server-side handler
+        using the iperf3
+        @PARAMS:
+            SERVER_IP       :   server IPv4 address
+            handler_port    :   port number of the application handling the
+                                    bandwidth measurement process
+            bandwidth_port  :   port number of the application that performs the
+                                    actual bandwidth measurement process
+            rtt             :   baseline round trip time value
+            logger          :   logger object
+        @RETURN:
+            bb              :   baseline bandwidth process metrics in json string format
 '''
 async def bandwidth_process(SERVER_IP, handler_port, bandwidth_port, rtt, logger=FALLBACK_LOGGER):
     bb_process = None
@@ -109,7 +138,19 @@ async def bandwidth_process(SERVER_IP, handler_port, bandwidth_port, rtt, logger
     return
 
 '''
-        retrieves the throughput metrics from the server-side handler
+        retrieves the throughput metrics from
+        the server-side handler using iperf3
+        @PARAMS:
+            SERVER_IP       :   server IPv4 address
+            handler_port    :   port number of the application handling the
+                                    throughput measurement process
+            throughput_port :   port number of the application that performs the
+                                    actual throughput measurement process
+            recv_window     :   receiver window size
+            rtt             :   baseline round trip time value
+            logger          :   logger object
+        @RETURN:
+            thpt_results    :   throughput process metrics in json string format
 '''
 async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_window, mtu, rtt, logger=FALLBACK_LOGGER):
     thpt_process = None
@@ -147,7 +188,21 @@ async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_wind
     return
 
 '''
-        retrieves the throughput metrics from the server-side handler
+    performs the window scan process by invoking the throghput measurement
+    proces 4 times with varying receiver window sizes with a multiplier of
+    0.25, 0.5, 0.75 and 1 respectively.
+        @PARAMS: (keyword arguments)
+            SERVER_IP       :   server IPv4 address
+            handler_port    :   port number of the application handling the
+                                    throughput measurement process
+            throughput_port :   port number of the application that performs the
+                                    actual throughput measurement process
+            recv_window     :   receiver window size
+            rtt             :   baseline round trip time value
+            logger          :   logger object
+        @RETURN:
+                            :   list of return values from the throughput
+                                    process handler
 '''
 async def scan_process(**kwargs):
     scan_results = {"WINDOW_SCAN":[]}
@@ -261,6 +316,15 @@ async def reverse_client(logger, SERVER_IP):
 
     return results
 
+'''
+    start_reverse_test is a wrapper for retrieving the reverse_mode 
+    protocol into a coroutine object and return it
+    @PARAMS:
+        server_url  :   the IPv4 address of the server hosting the
+                        normal_mode's server side protocol
+    @RETURN:
+        ret_val     :   an async task object that is meant to be awaited
+'''
 def start_reverse_test(server_ip):
     logger = getStreamLogger()
     try:

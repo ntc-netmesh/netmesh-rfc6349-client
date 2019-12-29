@@ -18,6 +18,8 @@ import ast
 from datetime import datetime
 import random ##for testing purposes only##
 import pytz
+import queue_process
+from constants import NORMAL_MODE, REVERSE_MODE
 
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
@@ -276,6 +278,7 @@ def normal(lat, lon, cir, serv_ip, network_type):
     set_location(lat, lon)
 
     #####CALL NORMAL MODE HERE#####
+    #results = queue_process.join_queue(NORMAL_MODE, server_ip)
     #CALL eel.printlocal(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR REVERSE MODE
@@ -297,6 +300,7 @@ def rev(lat, lon, cir, serv_ip, network_type):
     set_location(lat, lon)
 
     #####CALL REVERSE MODE HERE#####
+    #results = queue_process.join_queue(REVERSE_MODE, server_ip)
     #CALL eel.printremote(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR SIMULTANEOUS MODE

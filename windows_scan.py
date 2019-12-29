@@ -210,6 +210,14 @@ def window_scan(filename, client_ip, server_ip, recv_window, rtt):
             client_ip   :   IPv4 of the client host
             server_ip   :   IPv4 of the server host
             rtt         :   round trip time
+        @RETURN:
+            window_size    :   list of the receive window sizes used per scan test
+            average_tcp    :   average tcp throughput value for each scan test
+            ideal_tcp      :   ideal tcp throughput value for each scan test
+            neff_plot      :   tcp efficiency plot
+            nbuffer_plot   :   buffer delay ploy
+
+            
 '''
 def main_window_scan(**kwargs):
     average_tcp = []

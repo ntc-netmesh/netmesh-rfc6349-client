@@ -37,11 +37,9 @@ def start_mtu_process(server_ip, o_file):
     return plpmtu_process
 
 '''
-        Waits for a plpmtu process to end
-        and returns its parsed output
+    Parses the output file of the mtu subprocess and returns the MTU value
         @PARAMS:
-            *mtu_proc    : mtu process object
-            o_file      : the output file of the mtu process
+            o_file      : the output filenem of the mtu process
         @RETURN:
             mtu_results : the mtu value
 '''
@@ -58,6 +56,14 @@ def end_mtu_process(o_file):
 '''
         Wraps the entire plpmtu attainment process
         into one method
+        @PARAMS:
+            server_ip      : the IPv4 address of the server
+            udp_port       : port number of the hosted application for
+                                retrieving the MTU
+        @RETURNS:
+            mtu            : the Maximum Transmission Unit value of the
+                                connection from client to server
+
 '''
 def mtu_process(server_ip, udp_port):
     try:
@@ -67,7 +73,8 @@ def mtu_process(server_ip, udp_port):
         mtu_proc = start_mtu_process(server_ip+":"+udp_port, output_file)
         mtu_proc.wait()
         output_file.close()
-        return end_mtu_process(fname)
+        mtu = end_mtu_process(fname)
+        return mtu
     except:
         GLOBAL_LOGGER.error("plpmtu failed")
         raise
@@ -75,16 +82,5 @@ def mtu_process(server_ip, udp_port):
 
 
 if __name__ == "__main__":
-    mtu_process("202.92.132.191", UDP_PORT)
+    mtu_process(DEFAULT_SERVER, UDP_PORT)
 
-#async def mtu_reverse_test():
-#    try:
-#        mtu_reverse_proc = mtu_procs.start_mtu_reverse()
-#        await websocket.send("plpmtu started")
-#        mtu_result = mtu_procs.end_mtu_reverse(mtu_reverse_proc)
-#    except:
-#        GLOBAL_LOGGER.("plpmtu failed")
-#        await websocket.send("mtu error")
-#        traceback.print_exc()
-#
-#

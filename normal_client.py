@@ -19,21 +19,22 @@ LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
     LOCAL TO REMOTE PROTOCOL HANDLER
     serial steps are as follows (client side view):
 
-        client                                                       server
-                               < CONNECTION_ESTABLISHED >
-                         ---- send arbitrary start message >>>>      <recv()>
-        <recv()>               < SERVER_PROCESSING_TIME >          <start_udp_server>
-        <recv()>               < SERVER_PROCESSING_TIME >         <start_iperf_server>
-        <recv()>         <<<<  send servers are up signal  ----      <recv()>
-        <mtu_test>             < CLIENT_PROCESSING_TIME >            <recv()>
-        <rtt_test>             < CLIENT_PROCESSING_TIME >            <recv()>
-        <BB_test>              < CLIENT_PROCESSING_TIME >            <recv()>
-        <windows_scan>         < CLIENT_PROCESSING_TIME >            <recv()>
-        <thpt_test>            < CLIENT_PROCESSING_TIME >            <recv()>
-        <send()>         ----     send finish message      >>>>      <recv()>
-        <analyzers>            < CLIENT_PROCESSING_TIME >         <kill_service_apps>
-        <done>                    < OUTPUT_PRINTING >                <done>
-                                < CONNECTION_TEARDOWN >
+        client                                                                   server
+                                         < CONNECTION_ESTABLISHED >
+                                   ---- send arbitrary start message >>>>        <recv()>
+        <recv()>                         < SERVER_PROCESSING_TIME >            <start_udp_server>
+        <recv()>                         < SERVER_PROCESSING_TIME >           <start_iperf_server>
+        <recv()>                   <<<<  send servers are up signal  ----        <recv()>
+        <mtu_test>                       < CLIENT_PROCESSING_TIME >              <recv()>
+        <rtt_test>                       < CLIENT_PROCESSING_TIME >              <recv()>
+        <BB_test>                        < CLIENT_PROCESSING_TIME >              <recv()>
+        <windows_scan>                   < CLIENT_PROCESSING_TIME >              <recv()>
+        <thpt_test>                      < CLIENT_PROCESSING_TIME >              <recv()>
+        <send()>                   ----     send finish message      >>>>        <recv()>
+        <efficiency_analyzer>            < CLIENT_PROCESSING_TIME >              <done>
+        <buffer_delay_analyzer>          < CLIENT_PROCESSING_TIME >              <done>
+        <done>                              < OUTPUT_PRINTING >                  <done>
+                                           < CONNECTION_TEARDOWN >
 '''
 async def normal_client(logger, SERVER_IP):
     results = {}
@@ -114,7 +115,6 @@ async def normal_client(logger, SERVER_IP):
                 results["TRANS_BYTES"] = transmitted_bytes
                 results["RETX_BYTES"]  = retransmitted_bytes
                 results["TCP_EFF"]     = tcp_efficiency
-                #results["NEFF_PLOT"]   = neff_plot
             except:
                 traceback.print_exc(file=logf)
 
@@ -125,7 +125,6 @@ async def normal_client(logger, SERVER_IP):
                         (filename, client_ip, SERVER_IP, rtt)
                 results["AVE_RTT"]   = average_rtt
                 results["BUF_DELAY"] = buffer_delay
-                #results["NBUF_PLOT"] = nbuffer_plot
             except:
                 traceback.print_exc(file=logf)
 
@@ -139,6 +138,15 @@ async def normal_client(logger, SERVER_IP):
         pass
 
 
+'''
+    start_normal_client is a wrapper for retrieving the normal_mode 
+    protocol into a coroutine object and return it
+    @PARAMS:
+        server_url  :   the IPv4 address of the server hosting the
+                        normal_mode's server side protocol
+    @RETURN:
+        ret_val     :   an async task object that is meant to be awaited
+'''
 def start_normal_client(server_url=DEFAULT_SERVER):
     logger = getStreamLogger()
     try:
@@ -147,11 +155,14 @@ def start_normal_client(server_url=DEFAULT_SERVER):
     except:
         pass
 
-    #ret_val = asyncio.get_event_loop().run_until_complete(normal_client(logger))
     ret_val = asyncio.get_event_loop().create_task(normal_client(logger, server_url))
     return ret_val
 
 
 if __name__ == "__main__":
-    ret_val = start_normal_client()
-    print(ret_val)
+    loop = asyncio.get_event_loop()
+    group = asyncio.gather(start_normal_client())
+    all_groups = asyncio.gather(group)
+    results = loop.run_until_complete(all_groups)
+    loop.close()
+    print(results)

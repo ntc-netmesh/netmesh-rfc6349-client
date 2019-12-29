@@ -15,6 +15,9 @@ GLOBAL_LOGGER = getStreamLogger()
         @PARAMS
             server_ip   : IPv4 address of the server
             o_file      : output file of the bb process
+        @RETURNS
+            bb_process  : the subprocess object of the 
+                            baseline bandwidhth measurer
 '''
 def start_bandwidth_measure(server_ip, o_file):
     bb_process = None
@@ -37,12 +40,11 @@ def start_bandwidth_measure(server_ip, o_file):
     return bb_process
 
 '''
-        Waits for the passed process
-        to end and returns its parsed output
+    Parses the output of the passed subprocess object by inspecting
+        the file contents of where the output was piped into
         @PARAMS:
-            *bb_proc      : the process object
             baseline_rtt : baseline rtt value
-            o_file       : output file of bb_proc
+            o_file       : output filename of bandwidth measurer process
         @RETURN:
             bb_result    : the baseline bandwidth value
             bdp_result   : bandwidth delay product
@@ -63,6 +65,13 @@ def end_bandwidth_measure(baseline_rtt, o_file):
 '''
         Wraps the entire Baseline Bandwidth
         attainment process into one method
+        @PARAMS:
+            server_ip : IPv4 Address of the server
+            rtt       : baseline RTT value
+        @RETURN:
+                      : the Baseline bandwidth,
+                         Bandwidth Delay Product,
+                         and Receive window values
 '''
 def bandwidth_measure(server_ip, rtt):
     try:
@@ -78,14 +87,3 @@ def bandwidth_measure(server_ip, rtt):
         raise
     return
 
-#async def mtu_reverse_test():
-#    try:
-#        mtu_reverse_proc = mtu_procs.start_mtu_reverse()
-#        await websocket.send("plpmtu started")
-#        mtu_result = mtu_procs.end_mtu_reverse(mtu_reverse_proc)
-#    except:
-#        GLOBAL_LOGGER.("plpmtu failed")
-#        await websocket.send("mtu error")
-#        traceback.print_exc()
-#
-#

@@ -13,6 +13,12 @@ import time
             client_ip   :   the IPv4 address of the client
                             for filtering the packets
         
+        @RETURN:
+            transmitted_bytes       :   total transmitted bytes by the client_ip during
+                                           packet capture
+            retransmitted_bytes     :   total retransmitted bytes by the client_ip during
+                                            packet capture
+            tcp_efficiency          :   ratio of non-retransmitted bytes over total bytes sent
 '''
 def get_tcp_metrics(filename, client_ip):
 

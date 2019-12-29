@@ -17,6 +17,8 @@ GLOBAL_LOGGER = getStreamLogger()
             server_ip   : the ipv4 address of the server
                           whose RTT would be measured from
             o_file      : output file for the RTT value
+        @RETURN:
+            rtt_process : the rtt subprocess object
 '''
 def start_baseline_measure(server_ip, o_file):
     rtt_process = None
@@ -36,11 +38,11 @@ def start_baseline_measure(server_ip, o_file):
     return rtt_process
 
 '''
-        Waits for a baseline_rtt process
-        to end and returns its parsed output
+    Parses output from the output file of the RTT subprocess
         @PARAMS:
-            *baseline_rtt_proc : rtt measuring process object
-            o_file            : output file of the RTT value
+            o_file            : output filename of the RTT subprocess
+        @RETURN:
+            rtt_results       : the baseline RTT value
 '''
 def end_baseline_measure(o_file):
     rtt_results = None
@@ -55,6 +57,10 @@ def end_baseline_measure(o_file):
 '''
         Wraps the entire rtt attainment process
         into one method
+        @PARAMS:
+            server_ip         : IPv4 address of the server 
+        @RETURN:
+            rtt               : the baseline RTT value
 '''
 def measure_rtt(server_ip):
     try:
@@ -64,8 +70,10 @@ def measure_rtt(server_ip):
         rtt_proc = start_baseline_measure(server_ip, output_file)
         rtt_proc.wait()
         output_file.close()
-        return end_baseline_measure(fname)
+        rtt = end_baseline_measure(fname)
+        return rtt
     except:
         GLOBAL_LOGGER.error("RTT failed")
         raise
     return
+

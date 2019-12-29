@@ -16,12 +16,14 @@ GLOBAL_LOGGER = getStreamLogger()
         and returns both subproc objects
 
         @PARAMS:
-            filename        : filename for network tracefile (pcapng)
-            o_file          : output file for the process output
+            filename             : filename for network tracefile (pcapng)
+            o_file               : output file for the process output
+            server_ip            : IPv4 address of the server
+            recv_window          : receiver window value
 
         @RETURNS:
-            shark_proc      : shark process object
-            throughput_proc : throughput measurer process object
+            shark_proc           : shark process object
+            throughput_proc      : throughput measurer process object
 '''
 def start_throughput_measure(filename, server_ip, recv_window, o_file):
     shark_proc = None
@@ -49,17 +51,16 @@ def start_throughput_measure(filename, server_ip, recv_window, o_file):
 
 
 '''
-        Ends a shark process and throughput measuring process
+    Parses the output of the throughput test from a file
         @PARAMS:
-            *shark_proc            : shark process object
-            *throughput_proc       : throughput measurer process object
             rtt                    : RTT value used for result computation
-            o_file                 : file containing the output of 
-                                     throughput_proc
+            recv_window            : Receiver window value
+            o_file                 : filename containing the output of 
+                                        throughput_proc
 
         @RETURNS:
             speed_plot             : a list of plot points for plotting
-                                     throughput test results
+                                        throughput test results
             throughput_average     : average throughput measured
             throughput_ideal       : calculated ideal throughput
             transfer_time_average  : average transfer time measured
@@ -87,6 +88,13 @@ def end_throughput_measure(rtt, recv_window, o_file):
 '''
         Wraps the entire throughput
         attainment process into one method
+        @PARAMS:
+            filename            : RTT value used for result computation
+            server_ip           : IPv4 address of the server
+            recv_wnd            : Receiver window value
+            rtt                 : baseline round trip time value 
+        @RETURNS:
+                                : output metrics of the TCP throughput process
 '''
 def measure_throughput(filename, server_ip, recv_wnd, rtt):
     try:
