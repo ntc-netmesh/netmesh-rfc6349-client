@@ -284,7 +284,7 @@ async def reverse_client(logger, SERVER_IP):
 
     try:
         rtt = results["RTT"]
-        bb_return = await bandwidth_process(SERVER_IP, BANDWIDTH_HANDLER_PORT,, BANDWIDTH_SERVICE_PORT , rtt, logger)
+        bb_return = await bandwidth_process(SERVER_IP, BANDWIDTH_HANDLER_PORT, BANDWIDTH_SERVICE_PORT , rtt, logger)
         results = {**results, **json.loads(bb_return)}
     except:
         try:

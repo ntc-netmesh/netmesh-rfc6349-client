@@ -84,4 +84,4 @@ if __name__ == "__main__":
     all_groups = asyncio.gather(group)
     results = loop.run_until_complete(all_groups)
     loop.close()
-    return results
+    print(results)
