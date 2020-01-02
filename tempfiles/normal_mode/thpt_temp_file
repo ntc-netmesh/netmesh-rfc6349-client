@@ -1,14 +1,14 @@
 Connecting to host 202.92.132.191, port 5201
-[  4] local 192.168.60.33 port 36088 connected to 202.92.132.191 port 5201
+[  4] local 192.168.60.33 port 36380 connected to 202.92.132.191 port 5201
 [ ID] Interval           Transfer     Bandwidth       Retr  Cwnd
-[  4]   0.00-1.00   sec  11.0 MBytes  92.1 Mbits/sec    0   28.3 KBytes       
-[  4]   1.00-2.00   sec  11.9 MBytes   100 Mbits/sec    0   28.3 KBytes       
-[  4]   2.00-3.00   sec  11.9 MBytes   100 Mbits/sec    0   28.3 KBytes       
-[  4]   3.00-4.00   sec  11.9 MBytes   100 Mbits/sec    0   28.3 KBytes       
-[  4]   4.00-5.00   sec  11.9 MBytes   100 Mbits/sec    0   28.3 KBytes       
+[  4]   0.00-1.00   sec  10.9 MBytes  91.8 Mbits/sec    0   15.6 KBytes       
+[  4]   1.00-2.00   sec  11.9 MBytes  99.9 Mbits/sec    0   15.6 KBytes       
+[  4]   2.00-3.00   sec  11.9 MBytes  99.9 Mbits/sec    0   15.6 KBytes       
+[  4]   3.00-4.00   sec  11.9 MBytes   100 Mbits/sec    0   15.6 KBytes       
+[  4]   4.00-5.00   sec  11.9 MBytes  99.9 Mbits/sec    0   18.4 KBytes       
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bandwidth       Retr
-[  4]   0.00-5.00   sec  58.7 MBytes  98.4 Mbits/sec    0             sender
-[  4]   0.00-5.00   sec  58.5 MBytes  98.2 Mbits/sec                  receiver
+[  4]   0.00-5.00   sec  58.6 MBytes  98.3 Mbits/sec    0             sender
+[  4]   0.00-5.00   sec  58.5 MBytes  98.1 Mbits/sec                  receiver
 
 iperf Done.
