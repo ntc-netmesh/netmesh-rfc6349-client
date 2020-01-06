@@ -771,6 +771,27 @@ function printlocal(result){
     document.getElementById("local_result").innerHTML += result + "<br>";
 }
 
+eel.expose(printnormal);
+function printnormal(result){
+    console.log(result);
+    //document.getElementById("local_result").value += result + "\n";
+    document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "<br>";
+    document.getElementById("local_result").innerHTML += "RTT: " + result["RTT"] + "<br>";
+    document.getElementById("local_result").innerHTML += "BB: " + result["BB"] + "<br>";
+    document.getElementById("local_result").innerHTML += "BDP: " + result["BDP"] + "<br>";
+    document.getElementById("local_result").innerHTML += "TCP RWND: " + result["RWND"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Average TCP Throughput: " + result["THPT_AVG"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Ideal TCP Throughput: " + result["THPT_IDEAL"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Average Transfer Time: " + result["TRANSFER_AVG"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Ideal Transfer Time: " + result["TRANSFER_IDEAL"] + "<br>";
+    document.getElementById("local_result").innerHTML += "TCP TTR: " + result["TCP_TTR"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Transmitted Bytes: " + result["TRANS_BYTES"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Retransmitted Bytes: " + result["RETX_BYTES"] + "<br>";
+    document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Average RTT: " + result["AVE_RTT"] + "<br>";
+    document.getElementById("local_result").innerHTML += "Buffer Delay: " + result["BUF_DELAY"] + "<br>";
+}
+
 eel.expose(printremote);
 function printremote(result){
 	console.log(result);

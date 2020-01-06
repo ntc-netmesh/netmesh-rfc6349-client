@@ -106,57 +106,49 @@ def read_hash():
 def parse_results(results,direction):
     for i in results:
         if "MTU" in i:
-            mtu = re.split(": ",i)[1] 
+            mtu = results["MTU"]
 
         elif "Baseline" in i:
-            temp = re.split(": ",i)[1]
-            base_rtt = re.split(" ",temp)[0]
+            base_rtt = results["RTT"]
 
         elif "Bottleneck" in i:
-            temp = re.split(": ",i)[1]
-            bb = re.split(" ",temp)[0]
+            bb = results["BB"]
 
         elif "BDP" in i:
-            temp = re.split(": ",i)[1]
-            bdp = re.split(" ",temp)[0]
+            bdp = results["BDP"]
 
         elif "RWND" in i:
-            temp = re.split(": ",i)[1]
-            rwnd = re.split(" ",temp)[0]
+            rwnd = results["RWND"]
 
         elif "Average TCP Throughput" in i:
-            temp = re.split(": ",i)[1]
-            tcp_tput = re.split(" ",temp)[0]
+            tcp_tput = results["THPT_AVG"]
 
         elif "Ideal TCP Throughput" in i:
-            temp = re.split(": ",i)[1]
-            ideal_tput = re.split(" ",temp)[0]
+            ideal_tput = results["THPT_IDEAL"]
 
         elif "Actual Transfer" in i:
-            att = re.split(": ",i)[1]
+            att = results["TRANSFER_AVG"]
 
         elif "Ideal Transfer" in i:
-            itt = re.split(": ",i)[1]
+            itt = results["TRANSFER_IDEAL"]
 
         elif "TTR" in i:
-            ttr = re.split(": ",i)[1]
+            ttr = results["TCP_TTR"]
 
         elif "Transmitted Bytes" in i:
-            trans_bytes = re.split(": ",i)[1][:-1]
+            trans_bytes = results["TRANS_BYTES"]
 
         elif "Retransmitted" in i:
-            retrans_bytes = re.split(": ",i)[1][:-1]
+            retrans_bytes = results["RETX_BYTES"]
 
         elif "Efficiency" in i:
-            eff = re.split(": ",i)[1][:-1]
+            eff = results["TCP_EFF"]
 
         elif "ave RTT" in i:
-            temp = re.split(": ",i)[1]
-            ave_rtt = re.split(" ",temp)[0]
+            ave_rtt = results["AVE_RTT"]
 
         elif "buffer delay" in i:
-            temp = re.split(": ",i)[1]
-            buff_delay = re.split(" ",temp)[0]
+            buff_delay = results["BUF_DELAY"]
 
     data = {
         "ts": datetime.now(),   # TODO: add timezone information, or assume that clients will always send in UTC
