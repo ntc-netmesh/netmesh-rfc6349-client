@@ -172,6 +172,7 @@ async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_wind
             thpt_process.wait()
             await websocket.send("stop")
             thpt_results = await websocket.recv()
+            logger.debug(str(thpt_results))
             thpt_results = json.loads(thpt_results)
             thpt_results["IDEAL_COMPUTED"] = recv_window * 8 / (float(rtt))/1000/1000
             try:
@@ -333,7 +334,7 @@ def start_reverse_test(server_ip):
     except:
         pass
 
-    ret_val = asyncio.get_event_loop().run_until_complete(reverse_client(logger, server_ip))
+    ret_val = asyncio.get_event_loop().create_task(reverse_client(logger, server_ip))
     return ret_val
 
 if __name__ == "__main__":

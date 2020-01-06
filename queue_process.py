@@ -80,7 +80,8 @@ def join_queue(mode, server_ip):
 '''
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
+    #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
+    group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
     all_groups = asyncio.gather(group)
     results = loop.run_until_complete(all_groups)
     loop.close()
