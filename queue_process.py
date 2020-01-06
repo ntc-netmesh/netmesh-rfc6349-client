@@ -21,8 +21,7 @@ async def queue_client(mode_function, server_ip):
         port_num = await socket.recv()
         #await the function mode
         results = mode_function(server_ip)
-        results = await results
-        print(results)
+        results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
         await socket.send("done")
         print_this = await socket.recv()
         print(print_this)
@@ -62,6 +61,7 @@ def retrieve_function(mode):
                                 modules for more details.
 '''
 def join_queue(mode, server_ip):
+    filename = "tempfiles/queue/queue_log"
     try:
         mode_function = retrieve_function(mode)
         loop = asyncio.get_event_loop()
@@ -71,7 +71,12 @@ def join_queue(mode, server_ip):
         loop.close()
         return results
     except:
-        pass
+        try:
+            logf = open(filename,"w+")
+            traceback.print_exc(file=logf)
+            logf.close()
+        except:
+            pass
     return
 
 '''
@@ -80,8 +85,8 @@ def join_queue(mode, server_ip):
 '''
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
-    group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
+    group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
+    #group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
     all_groups = asyncio.gather(group)
     results = loop.run_until_complete(all_groups)
     loop.close()
