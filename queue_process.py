@@ -16,7 +16,7 @@ import normal_client, reverse_client
 '''
 async def queue_client(mode_function, server_ip):
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-        await socket.send("asdffdafsf")
+        await socket.send("asdafsf")
         #go signal
         port_num = await socket.recv()
         #await the function mode
@@ -25,6 +25,7 @@ async def queue_client(mode_function, server_ip):
         await socket.send("done")
         print_this = await socket.recv()
         print(print_this)
+        return results
 
 '''
     returns an awaitable async coroutine based on the mode value passed
