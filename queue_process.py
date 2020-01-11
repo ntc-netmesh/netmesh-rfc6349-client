@@ -14,9 +14,9 @@ import normal_client, reverse_client
                             start_reverse_client for reverse mode
         server_ip       :   IPv4 address of the server
 '''
-async def queue_client(mode_function, server_ip):
+async def queue_client(mode_function, server_ip, client_hash):
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-        await socket.send("asdafsf")
+        await socket.send(str(client_hash))
         #go signal
         port_num = await socket.recv()
         #await the function mode
@@ -56,17 +56,18 @@ def retrieve_function(mode):
                                 NORMAL_MODE for normal mode
                                 REVERSE_MODE for reverse mode
         server_ip       :   IPv4 address of the server
+        client_hash     :   the provided hash value of the client host
     @RETURN:
         results         :   results of either the normal or reverse mode
                                 process. Check the normal_client/reverse_client
                                 modules for more details.
 '''
-def join_queue(mode, server_ip):
+def join_queue(mode, server_ip, client_hash):
     filename = "tempfiles/queue/queue_log"
     try:
         mode_function = retrieve_function(mode)
         loop = asyncio.get_event_loop()
-        group = asyncio.gather(queue_client(mode_function, server_ip))
+        group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
         all_groups = asyncio.gather(group)
         results = loop.run_until_complete(all_groups)
         loop.close()
