@@ -18,7 +18,14 @@ async def queue_client(mode_function, server_ip, client_hash):
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
         await socket.send(str(client_hash))
         #go signal
-        port_num = await socket.recv()
+        current_turn = None
+        while "CURRENT_TURN" not in current_turn: 
+            current_turn = await socket.recv()
+            queue_placement_filename = "tempfiles/queue/queue_place"
+            with open(queue_placement_filename, "w+") as f:
+                f.write(current_turn)
+
+            # send current_turn data to api endpoint
         #await the function mode
         results = mode_function(server_ip)
         results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
