@@ -4,6 +4,7 @@ import json
 import random
 import sys
 from constants import *
+import traceback
 import normal_client, reverse_client
 
 '''
@@ -40,10 +41,10 @@ async def queue_client(mode_function, server_ip, client_hash):
     except:
         try:
             filename = "tempfiles/queue/queue_log"
-            logf = open(filename,"w+")
+            logf = open(filename,"a+")
             traceback.print_exc(file=logf)
             logf.close()
-            socket.close()
+            await socket.close()
         except:
             pass
 
@@ -96,7 +97,7 @@ def join_queue(mode, server_ip, client_hash):
         return results
     except:
         try:
-            logf = open(filename,"w+")
+            logf = open(filename,"a+")
             traceback.print_exc(file=logf)
             logf.close()
         except:

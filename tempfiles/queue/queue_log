@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "queue_process.py", line 27, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 484, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
