@@ -9,6 +9,7 @@ from utilities import client_utils
 
 GLOBAL_LOGGER = getStreamLogger()
 
+
 '''
         Starts throughput measuring subproc instances
         one process for packet measuring (shark)
@@ -26,6 +27,19 @@ GLOBAL_LOGGER = getStreamLogger()
             throughput_proc      : throughput measurer process object
 '''
 def start_throughput_measure(filename, server_ip, recv_window, o_file):
+    """Starts throughput measuring subproc instances
+    
+    :param filename: filename for network tracefile (pcapng)
+    :type filename: str
+    :param server_ip: IPv4 address of the server
+    :type server_ip: str
+    :param recv_window: receiver window value
+    :type recv_window: int
+    :param o_file: output file for the process output
+    :type o_file: str
+    :return: returns shark process object and throughput measurer process object
+    :rtype: subprocess
+    """    
     shark_proc = None
     throughput_proc = None
     try:
