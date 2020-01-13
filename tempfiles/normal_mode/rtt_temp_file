@@ -1,15 +1,15 @@
 PING 202.92.132.191 (202.92.132.191) 56(84) bytes of data.
-64 bytes from 202.92.132.191: icmp_seq=1 ttl=50 time=667 ms
-64 bytes from 202.92.132.191: icmp_seq=2 ttl=50 time=958 ms
-64 bytes from 202.92.132.191: icmp_seq=3 ttl=50 time=151 ms
-64 bytes from 202.92.132.191: icmp_seq=4 ttl=50 time=106 ms
-64 bytes from 202.92.132.191: icmp_seq=5 ttl=50 time=1084 ms
-64 bytes from 202.92.132.191: icmp_seq=6 ttl=50 time=129 ms
-64 bytes from 202.92.132.191: icmp_seq=7 ttl=50 time=1055 ms
-64 bytes from 202.92.132.191: icmp_seq=8 ttl=50 time=102 ms
-64 bytes from 202.92.132.191: icmp_seq=9 ttl=50 time=1932 ms
-64 bytes from 202.92.132.191: icmp_seq=10 ttl=50 time=918 ms
+64 bytes from 202.92.132.191: icmp_seq=1 ttl=55 time=6.96 ms
+64 bytes from 202.92.132.191: icmp_seq=2 ttl=55 time=7.73 ms
+64 bytes from 202.92.132.191: icmp_seq=3 ttl=55 time=7.72 ms
+64 bytes from 202.92.132.191: icmp_seq=4 ttl=55 time=6.88 ms
+64 bytes from 202.92.132.191: icmp_seq=5 ttl=55 time=7.56 ms
+64 bytes from 202.92.132.191: icmp_seq=6 ttl=55 time=7.82 ms
+64 bytes from 202.92.132.191: icmp_seq=7 ttl=55 time=8.17 ms
+64 bytes from 202.92.132.191: icmp_seq=8 ttl=55 time=8.13 ms
+64 bytes from 202.92.132.191: icmp_seq=9 ttl=55 time=7.34 ms
+64 bytes from 202.92.132.191: icmp_seq=10 ttl=55 time=8.31 ms
 
 --- 202.92.132.191 ping statistics ---
-10 packets transmitted, 10 received, 0% packet loss, time 9034ms
-rtt min/avg/max/mdev = 102.519/710.704/1932.814/569.683 ms, pipe 2
+10 packets transmitted, 10 received, 0% packet loss, time 9013ms
+rtt min/avg/max/mdev = 6.887/7.667/8.316/0.465 ms

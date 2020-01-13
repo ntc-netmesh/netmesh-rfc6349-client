@@ -6,3 +6,35 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
+Traceback (most recent call last):
+  File "/home/event1/Desktop/6349_app2/netmesh-rfc6349-client/queue_process.py", line 27, in queue_client
+    current_turn = await socket.recv()
+  File "/home/event1/.local/lib/python3.6/site-packages/websockets/protocol.py", line 484, in recv
+    await self.ensure_open()
+  File "/home/event1/.local/lib/python3.6/site-packages/websockets/protocol.py", line 780, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
+Traceback (most recent call last):
+  File "/home/event1/Desktop/6349_app2/netmesh-rfc6349-client/queue_process.py", line 93, in join_queue
+    group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
+    fut = ensure_future(arg, loop=loop)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 519, in ensure_future
+    task = loop.create_task(coro_or_future)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 302, in create_task
+    self._check_closed()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+Traceback (most recent call last):
+  File "/home/event1/Desktop/6349_app2/netmesh-rfc6349-client/queue_process.py", line 91, in join_queue
+    mode_function = retrieve_function(mode)
+  File "/home/event1/Desktop/6349_app2/netmesh-rfc6349-client/queue_process.py", line 69, in retrieve_function
+    return reverse_mode.start_reverse_test
+NameError: name 'reverse_mode' is not defined
+Traceback (most recent call last):
+  File "/home/event1/Desktop/6349_app2/netmesh-rfc6349-client/queue_process.py", line 91, in join_queue
+    mode_function = retrieve_function(mode)
+  File "/home/event1/Desktop/6349_app2/netmesh-rfc6349-client/queue_process.py", line 69, in retrieve_function
+    return reverse_mode.start_reverse_test
+NameError: name 'reverse_mode' is not defined
