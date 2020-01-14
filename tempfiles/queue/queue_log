@@ -46,3 +46,58 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
     raise OSError(err, 'Connect call failed %s' % (address,))
 ConnectionRefusedError: [Errno 111] Connect call failed ('202.92.132.191', 10015)
+Traceback (most recent call last):
+  File "queue_process.py", line 21, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 519, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 537, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.92.132.191', 10015)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 102, in read_http_response
+    status_code, reason, headers = await read_response(self.reader)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 139, in read_response
+    status_line = await read_line(stream)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 213, in read_line
+    line = await stream.readline()
+  File "/usr/lib/python3.6/asyncio/streams.py", line 488, in readline
+    line = yield from self.readuntil(sep)
+  File "/usr/lib/python3.6/asyncio/streams.py", line 581, in readuntil
+    yield from self._wait_for_data('readuntil')
+  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
+    yield from self._waiter
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 714, in _read_ready
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "queue_process.py", line 21, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 519, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 549, in __await_impl__
+    extra_headers=protocol.extra_headers,
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 291, in handshake
+    status_code, response_headers = await self.read_http_response()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 104, in read_http_response
+    raise InvalidMessage("did not receive a valid HTTP response") from exc
+websockets.exceptions.InvalidMessage: did not receive a valid HTTP response
+Traceback (most recent call last):
+  File "queue_process.py", line 27, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 484, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason

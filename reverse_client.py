@@ -202,7 +202,7 @@ async def scan_process(**kwargs):
     thpt_process = None
     try:
         for x in range(1,5):
-            rwnd = kwargs["recv_window"]*1000*x*0.25
+            rwnd = kwargs["recv_window"]*x*0.25
             modified_kwargs = {**kwargs}
             modified_kwargs["recv_window"] = rwnd
             thpt_results = await throughput_process(**modified_kwargs)
