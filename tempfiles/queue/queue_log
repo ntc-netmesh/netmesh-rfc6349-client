@@ -101,3 +101,63 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
+Traceback (most recent call last):
+  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 21, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
+Traceback (most recent call last):
+  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 21, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
+Traceback (most recent call last):
+  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 21, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
+Traceback (most recent call last):
+  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 93, in join_queue
+    group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
+    fut = ensure_future(arg, loop=loop)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 519, in ensure_future
+    task = loop.create_task(coro_or_future)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 302, in create_task
+    self._check_closed()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed

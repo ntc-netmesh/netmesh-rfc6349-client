@@ -55,34 +55,34 @@ server_uuid = ""
 #Verify test agent user login
 @eel.expose
 def login(username,password):
-    global dev_hash
-    read_hash()
-    hash_data = {
-        "hash": dev_hash
-    }
+    # global dev_hash
+    # read_hash()
+    # hash_data = {
+    #     "hash": dev_hash
+    # }
 
-    try:
-        # Request for Agent token
-        r = requests.post(url=url+"/api/gettoken", data=hash_data, auth = (username, password))
-    except Exception as e:
-        print(e)
+    # try:
+    #     # Request for Agent token
+    #     r = requests.post(url=url+"/api/gettoken", data=hash_data, auth = (username, password))
+    # except Exception as e:
+    #     print(e)
 
-    if r.status_code == 401:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-        eel.alert_debug("Invalid username/password!")
-        return
-    elif r.status_code == 400:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-        eel.alert_debug("Device not registered. Please register the device using new_dev_reg")
-        return
-    elif r.status_code != 200:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-        eel.alert_debug("Error occured")
-        return
+    # if r.status_code == 401:
+    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+    #     eel.alert_debug("Invalid username/password!")
+    #     return
+    # elif r.status_code == 400:
+    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+    #     eel.alert_debug("Device not registered. Please register the device using new_dev_reg")
+    #     return
+    # elif r.status_code != 200:
+    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+    #     eel.alert_debug("Error occured")
+    #     return
 
-    global token
-    token = ast.literal_eval(r.text)['Token']
-    print(token)
+    # global token
+    # token = ast.literal_eval(r.text)['Token']
+    # print(token)
     eel.hide_login()
 
 #Verify if laptop is registered.
@@ -256,11 +256,33 @@ def set_location(x,y):
 def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
 
+    # for i in range(1, 7):
+    #     if i == 1:
+    #         eel.printprogress("Performing PLPMTUD...")
+    #     elif i == 2:
+    #         eel.printprogress("Measuring Ping...")
+    #     elif i == 3:
+    #         eel.printprogress("Executing iPerf UDP...")
+    #     elif i == 4:
+    #         eel.printprogress("Executing iPerf TCP...")
+    #     elif i == 5:
+    #         eel.printprogress("Measuring TCP Efficiency...")
+    #     elif i == 6:
+    #         eel.printprogress("Measuring Buffer Delay...")
+
+    #     time.sleep(3)
+    #     eel.progress_now(100/6*i)
+
+    # eel.printprogress("Done")
+    # eel.progress_now(100)
+
     ip = re.split(",", serv_ip)
     global server_uuid
     server_uuid = ip[1]
+    
     global server_ip
     server_ip = ip[0]
+
     global net_type
     net_type = network_type
 
@@ -394,4 +416,4 @@ def cancel_test():
     global flag
     flag = 1
 
-eel.start('hello.html', size=(1100,600), port=8080)             # Start (this blocks and enters loop)
+eel.start('login.html', size=(1024,768), port=8080)             # Start (this blocks and enters loop)

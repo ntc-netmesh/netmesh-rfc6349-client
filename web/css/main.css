@@ -3,6 +3,10 @@
 	width:50%
 }
 
+/* .card {
+
+} */
+
 .container:after{
 	content: "";
 	display: table;
@@ -15,14 +19,14 @@
     stroke-width:5px;
 }
 
-body{
-	background-image:url("ntc_logo.png");
+/* body{
+	background-image:url("../images/ntc_logo.png");
 	background-repeat: no-repeat;
 	background-position: center;
 	background-attachment: fixed;
-}
+} */
 
-#tab0,#tab1,#tab2,#tab3,#rtab0,#rtab1,#rtab2,#rtab3{
+/* #tab0,#tab1,#tab2,#tab3,#rtab0,#rtab1,#rtab2,#rtab3{
 	float:left;
 	padding: 5px 10px 5px 10px;
 	background:#63ABF7;
@@ -30,7 +34,7 @@ body{
 	margin:0px 5px 0px 5px;
 	cursor: pointer;
 	border-radius: 5px;
-}
+} */
 
 #tab0Content{
 	display:block;
@@ -48,9 +52,10 @@ body{
 	display:none;
 }
 
-.progress{
+.progress.prog_bar{
 	margin: 10px;
-	width: 700px;
+	min-width: 200px;
+	/* max-width: 800px; */
 }
 
 .imgcontainer{

@@ -1,177 +1,262 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>RFC 6349</title>
-    <link rel="stylesheet" href="bootstrap.css">
+    <title>RFC-6349</title>
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <script src="js/jquery-3.4.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="https://kit.fontawesome.com/dabe6c4264.js" crossorigin="anonymous"></script>
     <!--Include eel.js - note this file doesn't exist in the 'web' directory -->
-    <link rel = "stylesheet" href="main.css">
+    <link rel = "stylesheet" href="css/main.css">
+    <style>
+      .nav-item .active {
+        background-color: #6c757d!important;
+      }
+      
+    </style>
+
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
     <script type="text/javascript" src="/eel.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script type="text/javascript" src="main.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script>
+      $(function () {
+        $('#queue-status-info').hide();
+        $('#progress-status-info').hide();
+        $('#progress-finished-title').hide();
+        // $('#results-info').hide();
+      });
+
+      // document.getElementById('login').style.display='block';
+      (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+          // Fetch all the forms we want to apply custom Bootstrap validation styles to
+          var forms = document.getElementsByClassName('needs-validation');
+          // Loop over them and prevent submission
+          var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
+    </script>
   </head>
 
   <body onload="eel.retrieve_servers()">
-  <div id = "login" class = "modal">
-    <form class="modal-content animate" action= "javascript:void(0);" onsubmit="user_login()">
-      <div class="imgcontainer">
-        <img src="user_login.png" alt="Avatar" class="avatar">
+    <nav class="navbar sticky-top navbar-expand navbar-light bg-light shadow">
+      <a class="navbar-brand" href="#">
+        <img src="/images/user_login.png" title="RFC-6349 Appllication" alt="Avatar" style="width: 48px;" >
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Link</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Dropdown
+            </a>
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <a class="dropdown-item" href="#">Action</a>
+              <a class="dropdown-item" href="#">Another action</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+          </li>
+        </ul>
       </div>
+    </nav>
 
-      <div class="container2">
-        <label for="uname"><b>Username</b></label>
-        <input type="text" placeholder="Enter Username" name="uname" id="uname" required="">
-
-        </br>
-
-        <label for="psw"><b>Password</b></label>
-        <input type="password" placeholder="Enter Password" name="psw" id="psw" required="">
-
-        </br>
-
-        <button type="submit" class="btn btn-success">Login</button>
-        <label>
-          <input type="checkbox" checked="checked" name="remember"> Remember me
-        </label>
-      </div>
-    </form>
-
-  </div>
-
-    <script>
-      document.getElementById('login').style.display='block';
-    </script>
-
-    <div class = "container">
-      <h1>RFC 6349 Application</h1>
-      <div class = "container">
-      <form>
-
-        <div class="column">
-          <label for="cir"><b>Internet Subscription Rate</b></label>
-          <input type = "text" id = "cir" class = "form-control email" placeholder="Enter Mbps" required>
-        </div>
-
-        <div class="column">
-          <label for="net_type"><b>Network Connection Type</b></label>
-          <select class="form-control" id="net_type">
-            <option value = "Dial-ip">Dial-up</option>
-            <option value = "DSL">DSL</option>
-            <option value = "Fiber-optic">Fiber-optic</option>
-            <option value = "Cable Internet">Cable Internet</option>
-            <option value = "Fixed Wireless">Fixed Wireless</option>
-            <option value = "Broadband">Broadband</option>
-          </select>
-        </div>
-
-        </br>
-        </br>
-
-        <div class>
-          <label for="server"><b>Test Server</b></label>
-          <select class="form-control" id="server">
-          </select>
-        </div>
-
-        </br>
-
-        <div class = "column">
-        <label for="lat"><b>GPS Latitude</b></label>
-        <input type = "text" id = "lat" class = "form-control email" placeholder="Latitude" required>
-        </div>
-        <div class = "column">
-        <label for="lon"><b>GPS Longitude</b></label>
-        <input type = "text" id = "lon" class = "form-control email" placeholder="Longitude" required>
-        </div>
-      </form>
-      </div>
+    <main class="container">
+      <!-- <h1>RFC-6349 Application</h1> -->
+      <div class="py-md-4">
+        
+        <form id="#mainForm" class="needs-validation" onsubmit="return false" novalidate>
+          <div class="card shadow mb-3">
+            <div class="card-body">
+              <div class="row">
+                <div class="form-group col">
+                  <label for="cir"><b>Internet Subscription Rate</b></label>
+                  <input type="text" id="cir" class="form-control email" placeholder="Enter Mbps" required>
+                  <div class="invalid-feedback">
+                    Please provide the internet subscription rate of the customer
+                  </div>
+                </div>
+                
+                <div class="form-group col">
+                  <label for="net_type"><b>Network Connection Type</b></label>
+                  <select class="form-control" id="net_type">
+                    <option value="" selected="selected" hidden="hidden">Select network type</option>
+                    <option value="Dial-ip">Dial-up</option>
+                    <option value="DSL">DSL</option>
+                    <option value="Fiber-optic">Fiber-optic</option>
+                    <option value="Cable Internet">Cable Internet</option>
+                    <option value="Fixed Wireless">Fixed Wireless</option>
+                    <option value="Broadband">Broadband</option>
+                  </select>
+                </div>
+              </div>
       
-      </br>
+              <div class="row">
+                <div class="form-group col">
+                  <label for="server"><b>Test Server</b></label>
+                  <select class="form-control" id="server">
+                  </select>
+                </div>
+              </div>
+      
+              <div class="row">
+                <div class="form-group col">
+                  <label for="lat"><b>GPS Latitude</b></label>
+                  <input type = "text" id = "lat" class = "form-control" placeholder="Latitude" required>
+                  <div class="invalid-feedback">
+                    Please provide the latitude coordinate of your current location
+                  </div>
+                </div>
+                <div class="form-group col">
+                  <label for="lon"><b>GPS Longitude</b></label>
+                  <input type="text" id="lon" class="form-control" placeholder="Longitude" required>
+                  <div class="invalid-feedback">
+                    Please provide the longitude coordinate of your current location
+                  </div>
+                </div>
+                <div class="form-group col-auto">
+                  <label>&nbsp;</label>
+                  <div class="input-group">
+                    <button type="button" class="btn btn-outline-primary">Get GPS</button>
+                    <button type="button" class="btn btn-link"><i class="fa fa-question-circle"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <div class="float-right">
+                <button id="btnUploadMode" class="btn btn-primary" role="button" type="submit" onclick="normal_mode()">Upload Mode</button>
+                <button id="btnDownloadMode" class="btn btn-primary" role="button" type="submit" onclick="reverse_mode()">Download Mode</button id="btnUploadMode">
+                <!--
+                <button class = "btn btn-primary" role ="button" onclick="bidirectional()">Bidirectional Mode</button>
+                -->
+                <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">Simultaneous Mode</button id="btnUploadMode">
+              </div>
+            </div>
+          </div>
+        </form>
 
-      <button class = "btn btn-primary" role ="button" onclick="normal_mode()">Upload Mode</button>
+        <div id="progress-status-info" class="card shadow mb-3">
+          <div class="card-header">
+            <span id="progress-status-title" class="h4"><b>Measuring <span id="mode"></span>...</b></span>
+            <span id="progress-finished-title" class="h4"><b>Finished</b></span>
+          </div>
+          <div class="card-body">
+            <div id="process-progress-bar" class="progress prog_bar border border-secondary">
+              <div id="dynamic" class="progress-bar bg-secondary progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                
+              </div>
+            </div>
+            <div>
+              <span id="progress">Initializing...</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <div class="float-right">
+              <button class="btn btn-outline-danger" role="button" id="cancel" onclick="cancel()" style="display:none;">Abort measuring</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="py-md-3" id="queue-status-info">
+            <hr/>
+            <span class="h5 text-info">Your test will start when <b><span id="queue_remaining">5</span></b> other tests have been done</span>
+            <div class="progress border border-info mb-3 mt-2">
+              <div id="queue_progress_bar" class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%"></div>
+            </div>
+            <div class="float-right">
+              <button class = "btn btn-outline-danger" role ="button">Cancel</button>
+            </div>
+            <p id="progress"></p>
+          </div>
+    
+          <div class="py-md-3" id="results-info">
+            <hr/>
+            <div class="column">
+              <h4>Local to Remote Result</h4>
+              <p id="local_result" cols="50"></p>
+              </br>
+              </br>
+              <h5>Window Scan Test Results</h5>
+              <table id="local_wnd_stats" width="20" class="table table-hover" border=1></table>
 
-      <button class = "btn btn-primary" role ="button" onclick="reverse_mode()">Download Mode</button>
-
-      <!--
-      <button class = "btn btn-primary" role ="button" onclick="bidirectional()">Bidirectional Mode</button>
-      -->
-
-      <button class = "btn btn-primary" role ="button" onclick="simultaneous()">Simultaneous Mode</button>
+              <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active" id="pills-tab0Content-tab" data-toggle="pill" href="#pills-tab0Content" role="tab" aria-controls="pills-tab0Content" aria-selected="true">Window Scan Test</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="pills-tab1Content-tab" data-toggle="pill" href="#pills-tab1Content" role="tab" aria-controls="pills-tab1Content" aria-selected="false">Throughput</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="pills-tab2Content-tab" data-toggle="pill" href="#pills-tab2Content" role="tab" aria-controls="pills-tab2Content" aria-selected="false">RTT</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="pills-tab3Content-tab" data-toggle="pill" href="#pills-tab3Content" role="tab" aria-controls="pills-tab3Content" aria-selected="false">Efficiency</a>
+                </li>
+              </ul>
+              <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade show active" id="pills-tab0Content" role="tabpanel" aria-labelledby="pills-tab0Content-tab">1...</div>
+                <div class="tab-pane fade" id="pills-tab1Content" role="tabpanel" aria-labelledby="pills-tab1Content-tab">2...</div>
+                <div class="tab-pane fade" id="pills-tab2Content" role="tabpanel" aria-labelledby="pills-tab2Content-tab">3...</div>
+                <div class="tab-pane fade" id="pills-tab3Content" role="tabpanel" aria-labelledby="pills-tab3Content-tab">4...</div>
+              </div>
+            </div>
+      
+            <div class="column">
+              <h4>Remote to Local Result</h4>
+              <p id="remote_result" cols="50"></p>
+              </br>
+              </br>
+              <h5>Window Scan Test Results</h5>
+              <table id="remote_wnd_stats" width="20" class="table table-hover" border=1> </table>
+      
+              <ul class="nav nav-pills mb-3" id="pills-rtab" role="tablist">
+                <li class="nav-item">
+                  <a class="nav-link active" id="pills-rtab0Content-tab" data-toggle="pill" href="#pills-rtab0Content" role="tab" aria-controls="pills-rtab0Content" aria-selected="true">Window Scan Test</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="pills-rtab1Content-tab" data-toggle="pill" href="#pills-rtab1Content" role="tab" aria-controls="pills-rtab1Content" aria-selected="false">Throughput</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="pills-rtab2Content-tab" data-toggle="pill" href="#pills-rtab2Content" role="tab" aria-controls="pills-rtab2Content" aria-selected="false">RTT</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" id="pills-rtab3Content-tab" data-toggle="pill" href="#pills-rtab3Content" role="tab" aria-controls="pills-rtab3Content" aria-selected="false">Efficiency</a>
+                </li>
+              </ul>
+              <div class="tab-content" id="pills-rtabContent">
+                <div class="tab-pane fade show active" id="pills-rtab0Content" role="tabpanel" aria-labelledby="pills-rtab0Content-tab">1...</div>
+                <div class="tab-pane fade" id="pills-rtab1Content" role="tabpanel" aria-labelledby="pills-rtab1Content-tab">2...</div>
+                <div class="tab-pane fade" id="pills-rtab2Content" role="tabpanel" aria-labelledby="pills-rtab2Content-tab">3...</div>
+                <div class="tab-pane fade" id="pills-rtab3Content" role="tabpanel" aria-labelledby="pills-rtab3Content-tab">4...</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-
-    </br>
-
-    <div class = "container">
-      <h4>Current Progress for </h4>
-      <h4 id = "mode"></h4>
-      <button class = "btn btn-primary" role ="button" id = "cancel" onclick="cancel()" style = "display:none;">Cancel</button>
-      <div class = "progress">
-        <div id="dynamic" class = "progress-bar progress-bar-striped progress-bar-animated" id = "prog_bar" role = "progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%"></div>
-      </div>
-      <p id = "progress"></p>
-
-    </div>
-
-    <div class = "container">
-      <div class = "column">
-        <h4>Local to Remote Result</h4>
-        <p id = "local_result" cols = "50"></p>
-        </br>
-        </br>
-        <h5>Window Scan Test Results</h5>
-        <table id = "local_wnd_stats" width = "20" class="table table-hover" border = 1> </table>
-
-        <div id = "tab0" onClick="JavaScript:selectTab(0);">Window Scan Test</div>
-        <div id = "tab1" onClick="JavaScript:selectTab(1);">Throughput</div>
-        <div id = "tab2" onClick="JavaScript:selectTab(2);">RTT</div>
-        <div id = "tab3" onClick="JavaScript:selectTab(3);">Efficiency</div>
-        </br>
-        </br>
-        <div id="tab0Content">
-          
-        </div>
-
-        <div id="tab1Content">
-          
-        </div>
-        <div id="tab2Content">
-          
-        </div>
-        <div id="tab3Content">
-          
-        </div>
-      </div>
-
-      <div class = "column">
-        <h4>Remote to Local Result</h4>
-        <p id = "remote_result" cols = "50"></p>
-        </br>
-        </br>
-        <h5>Window Scan Test Results</h5>
-        <table id = "remote_wnd_stats" width = "20" class="table table-hover" border = 1> </table>
-
-        <div id = "rtab0" onClick="JavaScript:rselectTab(0);">Window Scan Test</div>
-        <div id = "rtab1" onClick="JavaScript:rselectTab(1);">Throughput</div>
-        <div id = "rtab3" onClick="JavaScript:rselectTab(3);">RTT</div>
-        <div id = "rtab2" onClick="JavaScript:rselectTab(2);">Efficiency</div>
-
-        </br>
-        </br>
-
-        <div id="rtab0Content">
-          
-        </div>
-
-        <div id="rtab1Content">
-          
-        </div>
-        <div id="rtab2Content">
-          
-        </div>
-        <div id="rtab3Content">
-          
-        </div>
-      </div>
-    </div>    
+    </main>   
   </body>
 </html>

@@ -5,12 +5,36 @@ function alert_debug(message){
 
 eel.expose(progress_now);
 function progress_now(value){
+
+    if (value > 0) {
+        $('#dynamic').addClass('progress-bar-striped progress-bar-animated');
+
+        $('#process-progress-bar').removeClass('border-secondary');
+        $('#process-progress-bar').addClass('border-primary');
+        $('#dynamic').removeClass('bg-secondary');
+        $('#dynamic').addClass('bg-primary');
+        $('#progress-status-title').show();
+        $('#progress-finished-title').hide();
+    }
+
+    if (value == 100) {
+        $('#dynamic').removeClass('progress-bar-striped progress-bar-animated');
+        $('#cancel').hide();
+        $("#cir, #lat, #lon, #net_type, #server, #btnUploadMode, #btnDownloadMode, #btnSimultaneousMode").prop("disabled", false);
+        $('#progress-status-title').hide();
+        $('#progress-finished-title').show();
+    }
     //document.getElementById("prog_bar").attr('aria-valuenow', value).css("width", percent);
     $("#dynamic").css("width", value + "%").attr("aria-valuenow", value);
 }
 
 eel.expose(cancel);
 function cancel(){
+    $('#cancel').hide();
+    $('#progress-status-info').hide();
+    $("#cir, #lat, #lon, #net_type, #server, #btnUploadMode, #btnDownloadMode, #btnSimultaneousMode").prop("disabled", false);
+    $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
+
     eel.cancel_test();
 }
 
@@ -26,7 +50,8 @@ function add_server(server_name,ip_addr){
 
 eel.expose(hide_login);
 function hide_login(){
-    document.getElementById('login').style.display='none';
+    // document.getElementById('login').style.display='none';
+    window.location.replace("hello.html");
 }
 
 
@@ -37,7 +62,7 @@ function user_login(){
     eel.login(username,password); 
 }
 
-function normal_mode(){
+function normal_mode() {
     var lat = document.getElementById("lat").value;
     var lon = document.getElementById("lon").value;
     var cir = document.getElementById("cir").value;
@@ -47,20 +72,32 @@ function normal_mode(){
     document.getElementById("local_result").innerHTML = "";
     document.getElementById("remote_result").innerHTML = "";
 
-    document.getElementById("tab0Content").innerHTML = "";
-    document.getElementById("tab1Content").innerHTML = "";
-    document.getElementById("tab2Content").innerHTML = "";
-    document.getElementById("tab3Content").innerHTML = "";
+    document.getElementById("pills-tab0Content").innerHTML = "";
+    document.getElementById("pills-tab1Content").innerHTML = "";
+    document.getElementById("pills-tab2Content").innerHTML = "";
+    document.getElementById("pills-tab3Content").innerHTML = "";
 
-    document.getElementById("rtab0Content").innerHTML = "";
-    document.getElementById("rtab1Content").innerHTML = "";
-    document.getElementById("rtab2Content").innerHTML = "";
-    document.getElementById("rtab3Content").innerHTML = "";
+    document.getElementById("pills-rtab0Content").innerHTML = "";
+    document.getElementById("pills-rtab1Content").innerHTML = "";
+    document.getElementById("pills-rtab2Content").innerHTML = "";
+    document.getElementById("pills-rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
         eel.normal(lat, lon, cir, server_ip, net_type);
         var cancel = document.getElementById("cancel");
         cancel.style.display = "block";
+
+        $("#cir, #lat, #lon, #net_type, #server, #btnUploadMode, #btnDownloadMode, #btnSimultaneousMode").prop("disabled", true);
+        $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
+
+        // kung may iba pang nag-tetest, pakita muna 'ung progress ng queue
+        if (false) {
+            $('#queue-status-info').show();
+        }
+        else {
+            $('#queue-status-info').hide();
+            $('#progress-status-info').show();
+        }
     }
 
     else{
@@ -79,15 +116,15 @@ function reverse_mode(){
     document.getElementById("local_result").innerHTML = "";
     document.getElementById("remote_result").innerHTML = "";
 
-    document.getElementById("tab0Content").innerHTML = "";
-    document.getElementById("tab1Content").innerHTML = "";
-    document.getElementById("tab2Content").innerHTML = "";
-    document.getElementById("tab3Content").innerHTML = "";
+    document.getElementById("pills-tab0Content").innerHTML = "";
+    document.getElementById("pills-tab1Content").innerHTML = "";
+    document.getElementById("pills-tab2Content").innerHTML = "";
+    document.getElementById("pills-tab3Content").innerHTML = "";
 
-    document.getElementById("rtab0Content").innerHTML = "";
-    document.getElementById("rtab1Content").innerHTML = "";
-    document.getElementById("rtab2Content").innerHTML = "";
-    document.getElementById("rtab3Content").innerHTML = "";
+    document.getElementById("pills-rtab0Content").innerHTML = "";
+    document.getElementById("pills-rtab1Content").innerHTML = "";
+    document.getElementById("pills-rtab2Content").innerHTML = "";
+    document.getElementById("pills-rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
         eel.rev(lat, lon, cir, server_ip, net_type);
@@ -108,15 +145,15 @@ function simultaneous(){
     document.getElementById("local_result").innerHTML = "";
     document.getElementById("remote_result").innerHTML = "";
 
-    document.getElementById("tab0Content").innerHTML = "";
-    document.getElementById("tab1Content").innerHTML = "";
-    document.getElementById("tab2Content").innerHTML = "";
-    document.getElementById("tab3Content").innerHTML = "";
+    document.getElementById("pills-tab0Content").innerHTML = "";
+    document.getElementById("pills-tab1Content").innerHTML = "";
+    document.getElementById("pills-tab2Content").innerHTML = "";
+    document.getElementById("pills-tab3Content").innerHTML = "";
 
-    document.getElementById("rtab0Content").innerHTML = "";
-    document.getElementById("rtab1Content").innerHTML = "";
-    document.getElementById("rtab2Content").innerHTML = "";
-    document.getElementById("rtab3Content").innerHTML = "";
+    document.getElementById("pills-rtab0Content").innerHTML = "";
+    document.getElementById("pills-rtab1Content").innerHTML = "";
+    document.getElementById("pills-rtab2Content").innerHTML = "";
+    document.getElementById("pills-rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
         eel.sim(lat, lon, cir, server_ip, net_type);
@@ -227,7 +264,7 @@ function rgraph(predata){
 
         // append the svg object to the body of the page
         //var svg = d3.select("#remote_graph")
-        var svg = d3.select("#rtab1Content")
+        var svg = d3.select("#pills-rtab1Content")
           .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -441,7 +478,7 @@ function regraph(predata){
 
         // append the svg object to the body of the page
         //var svg = d3.select("#remote_efficiency_graph")
-        var svg = d3.select("#rtab2Content")
+        var svg = d3.select("#pills-rtab2Content")
           .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -512,7 +549,7 @@ function rbgraph(predata){
 
         // append the svg object to the body of the page
         //var svg = d3.select("#remote_buffer_graph")
-        var svg = d3.select("#rtab3Content")
+        var svg = d3.select("#pills-rtab3Content")
           .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -565,7 +602,7 @@ function wnd_scan_graph(predata){
         barPadding = .2,
         axisTicks = {qty: 5, outerSize: 0, dateFormat: '%m-%d'};
 
-    var svg = d3.select("#tab0Content")
+    var svg = d3.select("#pills-tab0Content")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -666,7 +703,7 @@ function rev_wnd_scan_graph(predata){
         barPadding = .2,
         axisTicks = {qty: 5, outerSize: 0, dateFormat: '%m-%d'};
 
-    var svg = d3.select("#rtab0Content")
+    var svg = d3.select("#pills-rtab0Content")
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -747,21 +784,28 @@ function rev_wnd_scan_graph(predata){
 }
 
 function selectTab(tabIndex){
-    document.getElementById('tab0Content').style.display="none";
-    document.getElementById('tab1Content').style.display="none";
-    document.getElementById('tab2Content').style.display="none";
-    document.getElementById('tab3Content').style.display="none";
+    document.getElementById('pills-tab0Content').style.display="none";
+    document.getElementById('pills-tab1Content').style.display="none";
+    document.getElementById('pills-tab2Content').style.display="none";
+    document.getElementById('pills-tab3Content').style.display="none";
 
-    document.getElementById('tab' + tabIndex +'Content').style.display="block";
+    document.getElementById('pills-tab' + tabIndex +'Content').style.display="block";
 }
 
 function rselectTab(tabIndex){
-    document.getElementById('rtab0Content').style.display="none";
-    document.getElementById('rtab1Content').style.display="none";
-    document.getElementById('rtab2Content').style.display="none";
-    document.getElementById('rtab3Content').style.display="none";
+    document.getElementById('pills-rtab0Content').style.display="none";
+    document.getElementById('pills-rtab1Content').style.display="none";
+    document.getElementById('pills-rtab2Content').style.display="none";
+    document.getElementById('pills-rtab3Content').style.display="none";
 
-    document.getElementById('rtab' + tabIndex +'Content').style.display="block";
+    document.getElementById('pills-rtab' + tabIndex +'Content').style.display="block";
+}
+
+eel.expose(printlocal);
+function printlocal(result){
+	console.log(result);
+	//document.getElementById("local_result").value += result + "\n";
+    document.getElementById("local_result").innerHTML += result + "<br>";
 }
 
 eel.expose(printnormal);
