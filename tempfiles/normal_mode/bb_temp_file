@@ -1,19 +1,19 @@
 Connecting to host 202.92.132.191, port 5201
-[  4] local 10.130.1.209 port 54482 connected to 202.92.132.191 port 5201
+[  4] local 192.168.1.9 port 45630 connected to 202.92.132.191 port 5201
 [ ID] Interval           Transfer     Bandwidth       Total Datagrams
-[  4]   0.00-1.00   sec  2.16 MBytes  18.1 Mbits/sec  277  
-[  4]   1.00-2.00   sec  2.37 MBytes  19.9 Mbits/sec  303  
-[  4]   2.00-3.00   sec  2.27 MBytes  19.0 Mbits/sec  290  
-[  4]   3.00-4.00   sec  1.78 MBytes  14.9 Mbits/sec  228  
-[  4]   4.00-5.00   sec  2.39 MBytes  20.1 Mbits/sec  306  
-[  4]   5.00-6.00   sec  2.34 MBytes  19.7 Mbits/sec  300  
-[  4]   6.00-7.00   sec  1.98 MBytes  16.6 Mbits/sec  254  
-[  4]   7.00-8.00   sec  2.34 MBytes  19.6 Mbits/sec  299  
-[  4]   8.00-9.00   sec  2.13 MBytes  17.9 Mbits/sec  273  
-[  4]   9.00-10.00  sec  2.08 MBytes  17.4 Mbits/sec  266  
+[  4]   0.00-1.00   sec  12.1 MBytes   102 Mbits/sec  1552  
+[  4]   1.00-2.00   sec  13.2 MBytes   110 Mbits/sec  1685  
+[  4]   2.00-3.00   sec  13.5 MBytes   113 Mbits/sec  1722  
+[  4]   3.00-4.00   sec  13.7 MBytes   115 Mbits/sec  1754  
+[  4]   4.00-5.00   sec  13.7 MBytes   115 Mbits/sec  1752  
+[  4]   5.00-6.00   sec  13.4 MBytes   112 Mbits/sec  1716  
+[  4]   6.00-7.00   sec  12.0 MBytes   101 Mbits/sec  1538  
+[  4]   7.00-8.00   sec  13.0 MBytes   109 Mbits/sec  1663  
+[  4]   8.00-9.00   sec  13.0 MBytes   109 Mbits/sec  1667  
+[  4]   9.00-10.00  sec  13.5 MBytes   114 Mbits/sec  1733  
 - - - - - - - - - - - - - - - - - - - - - - - - -
 [ ID] Interval           Transfer     Bandwidth       Jitter    Lost/Total Datagrams
-[  4]   0.00-10.00  sec  21.8 MBytes  18.3 Mbits/sec  5.727 ms  0/2795 (0%)  
-[  4] Sent 2795 datagrams
+[  4]   0.00-10.00  sec   131 MBytes   110 Mbits/sec  25485310.271 ms  12347/12476 (99%)  
+[  4] Sent 12476 datagrams
 
 iperf Done.

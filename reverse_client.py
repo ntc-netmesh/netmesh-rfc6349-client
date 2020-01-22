@@ -49,11 +49,9 @@ async def mtu_process(SERVER_IP, handler_port, udp_port, logger=FALLBACK_LOGGER)
                 pass
             return mtu
     except:
-        try:
-            logger.error(("connection error"))
-            plpmtu_process.kill()
-        except:
-            pass
+        logger.error(("connection error"))
+        plpmtu_process.kill()
+        raise
     return
 
 '''
@@ -85,11 +83,9 @@ async def rtt_process(SERVER_IP, handler_port, logger=FALLBACK_LOGGER):
                 pass
             return rtt
     except:
-        try:
-            logger.error(("connection error"))
-            rtt_process.kill()
-        except:
-            pass
+        logger.error(("connection error"))
+        rtt_process.kill()
+        raise
     return
 
 '''
@@ -130,11 +126,9 @@ async def bandwidth_process(SERVER_IP, handler_port, bandwidth_port, rtt, logger
                 pass
             return bb
     except:
-        try:
-            logger.error(("connection error"))
-            rtt_process.kill()
-        except:
-            pass
+        logger.error(("connection error"))
+        rtt_process.kill()
+        raise
     return
 
 '''
@@ -181,11 +175,9 @@ async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_wind
                 pass
             return thpt_results
     except:
-        try:
-            logger.error(("connection error"))
-            thpt_process.kill()
-        except:
-            pass
+        logger.error(("connection error"))
+        thpt_process.kill()
+        raise
     return
 
 '''
@@ -206,22 +198,25 @@ async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_wind
                                     process handler
 '''
 async def scan_process(**kwargs):
-    scan_results = {"WINDOW_SCAN":[]}
+    scan_results = {"WND_SIZES":[], "WND_AVG_TCP":[], "WND_IDEAL_TCP":[]}
     thpt_process = None
     try:
         for x in range(1,5):
-            rwnd = kwargs["recv_window"]*1000*x*0.25
+            rwnd = kwargs["recv_window"]*x*0.25
             modified_kwargs = {**kwargs}
             modified_kwargs["recv_window"] = rwnd
             thpt_results = await throughput_process(**modified_kwargs)
-            scan_results["WINDOW_SCAN"].append(thpt_results)
+            if x < 4:
+                scan_results["WND_SIZES"].append(rwnd)
+                scan_results["WND_AVG_TCP"].append(thpt_results["THPT_AVG"])
+                scan_results["WND_IDEAL_TCP"].append(thpt_results["THPT_IDEAL"])
+            else:
+                scan_results = {**scan_results, **thpt_results}
         return scan_results
     except:
-        try:
-            logger.error(("connection error"))
-            thpt_process.kill()
-        except:
-            pass
+        logger.error(("connection error"))
+        thpt_process.kill()
+        raise
     return
 
 

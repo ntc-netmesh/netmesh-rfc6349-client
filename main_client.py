@@ -270,7 +270,9 @@ def normal(lat, lon, cir, serv_ip, network_type):
     set_location(lat, lon)
 
     #####CALL NORMAL MODE HERE#####
-    #results = queue_process.join_queue(NORMAL_MODE, server_ip)
+    global dev_hash
+    results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash)
+    eel.printnormal(results[0][0])
     #CALL eel.printlocal(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR REVERSE MODE
@@ -293,6 +295,9 @@ def rev(lat, lon, cir, serv_ip, network_type):
 
     #####CALL REVERSE MODE HERE#####
     #results = queue_process.join_queue(REVERSE_MODE, server_ip)
+    global dev_hash
+    results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash)
+    eel.printreverse(results)
     #CALL eel.printremote(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR SIMULTANEOUS MODE

@@ -4,6 +4,7 @@ import json
 import random
 import sys
 from constants import *
+import traceback
 import normal_client, reverse_client
 
 '''
@@ -15,24 +16,39 @@ import normal_client, reverse_client
         server_ip       :   IPv4 address of the server
 '''
 async def queue_client(mode_function, server_ip, client_hash):
-    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-        await socket.send(str(client_hash))
-        #go signal
-        current_turn = None
-        while "CURRENT_TURN" not in current_turn: 
-            current_turn = await socket.recv()
-            queue_placement_filename = "tempfiles/queue/queue_place"
-            with open(queue_placement_filename, "w+") as f:
-                f.write(current_turn)
+    socket = None
+    try:
+        async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+            await socket.send(str(client_hash))
+            #go signal
+            current_turn = None
+            f = None
+            while not "CURRENT_TURN" == current_turn: 
+                current_turn = await socket.recv()
+                queue_placement_filename = "tempfiles/queue/queue_place"
+                with open(queue_placement_filename, "w+") as f:
+                    f.write(current_turn)
 
-            # send current_turn data to api endpoint
-        #await the function mode
-        results = mode_function(server_ip)
-        results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
-        await socket.send("done")
-        print_this = await socket.recv()
-        print(print_this)
-        return results
+                # send current_turn data to api endpoint
+            f.close()
+            #await the function mode
+            results = mode_function(server_ip)
+            results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
+            await socket.send("done")
+            print_this = await socket.recv()
+            print(print_this)
+            return results
+    except:
+        try:
+            filename = "tempfiles/queue/queue_log"
+            logf = open(filename,"a+")
+            traceback.print_exc(file=logf)
+            logf.close()
+            await socket.close()
+        except:
+            pass
+
+
 
 '''
     returns an awaitable async coroutine based on the mode value passed
@@ -50,7 +66,7 @@ def retrieve_function(mode):
     if mode == NORMAL_MODE:
         return normal_client.start_normal_client
     elif mode == REVERSE_MODE:
-        return reverse_mode.start_reverse_test
+        return reverse_client.start_reverse_test
     return
 
 '''
@@ -81,7 +97,7 @@ def join_queue(mode, server_ip, client_hash):
         return results
     except:
         try:
-            logf = open(filename,"w+")
+            logf = open(filename,"a+")
             traceback.print_exc(file=logf)
             logf.close()
         except:
@@ -93,10 +109,12 @@ def join_queue(mode, server_ip, client_hash):
     edit freely
 '''
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
-    #group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
-    all_groups = asyncio.gather(group)
-    results = loop.run_until_complete(all_groups)
-    loop.close()
+    #results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash")
+    results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
+    #loop = asyncio.get_event_loop()
+    #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
+    ##group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
+    #all_groups = asyncio.gather(group)
+    #results = loop.run_until_complete(all_groups)
+    #loop.close()
     print(results)
