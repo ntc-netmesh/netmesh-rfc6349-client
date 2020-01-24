@@ -27,6 +27,8 @@
         // $('#queue-status-info').hide();
         $('#progress-status-info').hide();
         $('#progress-finished-title').hide();
+
+        $('#btnGetGps .spinner-grow').hide();
         // $('#results-info').hide();
       });
 
@@ -142,8 +144,8 @@
                 <div class="form-group col-auto">
                   <label>&nbsp;</label>
                   <div id="btn-group-gps" class="input-group">
-                    <button id="btnGetGps" type="button" class="btn btn-outline-primary" onclick="get_gps_from_android()">
-                      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" hidden></span>
+                    <button id="btnGetGps" type="button" class="btn btn-outline-primary" style="width: 112px;" onclick="get_gps_from_android()">
+                      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                       Get GPS
                     </button>
                     <button type="button" class="btn btn-link"><i class="fa fa-question-circle"></i></button>
@@ -177,6 +179,14 @@
             </div>
             <div>
               <span id="progress">Initializing...</span>
+              <ul class="list-unstyled">
+                <li>
+                  <div>
+                    <span class="fa fa-check-circle text-success"></span>
+                    <span>PLPMTUD Performed</span>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
           <div class="card-footer">

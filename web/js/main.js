@@ -9,18 +9,23 @@ function get_gps_from_android() {
     // alert('gps');
 
     $('#btnGetGps').attr('disabled', true);
-    $('#btnGetGps.spinner-grow').show();
+    $('#btnGetGps .spinner-grow').show();
     eel.get_gps_from_android();
 }
 
 eel.expose(set_gps_from_android);
 function set_gps_from_android(lat, long) {
-    $('#lat').val(lat);
-    $('#lon').val(long);
-
 
     $('#btnGetGps').attr('disabled', false);
-    $('#btnGetGps.spinner-grow').hide();
+    $('#btnGetGps .spinner-grow').hide();
+
+    if (lat && long) {
+        $('#lat').val(lat);
+        $('#lon').val(long);
+    }
+    else {
+        alert("Cannot get GPS coordinates\n\nMake sure you:\n- connected an Android phone to this laptop using a USB port\n- enabled 'Location' on the connceted Android phone\n- enabled and allowed 'USB Debugging Mode' on the connected Android phone");
+    }
 }
 
 function confirmLeaveQueue() {

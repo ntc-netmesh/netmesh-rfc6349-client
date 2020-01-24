@@ -258,34 +258,34 @@ def set_location(x,y):
 def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
 
-    eel.printnormal({
-        'MTU': 1500,
-        'RTT': 9.534,
-        'BB': 94.5,
-        'BDP': 900963.0000000001,
-    })
+    # eel.printnormal({
+    #     'MTU': 1500,
+    #     'RTT': 9.534,
+    #     'BB': 94.5,
+    #     'BDP': 900963.0000000001,
+    # })
 
-    return
+    # return
 
-    # for i in range(1, 7):
-    #     if i == 1:
-    #         eel.printprogress("Performing PLPMTUD...")
-    #     elif i == 2:
-    #         eel.printprogress("Measuring Ping...")
-    #     elif i == 3:
-    #         eel.printprogress("Executing iPerf UDP...")
-    #     elif i == 4:
-    #         eel.printprogress("Executing iPerf TCP...")
-    #     elif i == 5:
-    #         eel.printprogress("Measuring TCP Efficiency...")
-    #     elif i == 6:
-    #         eel.printprogress("Measuring Buffer Delay...")
+    for i in range(1, 7):
+        if i == 1:
+            eel.printprogress("Performing PLPMTUD...")
+        elif i == 2:
+            eel.printprogress("Measuring Ping...")
+        elif i == 3:
+            eel.printprogress("Executing iPerf UDP...")
+        elif i == 4:
+            eel.printprogress("Executing iPerf TCP...")
+        elif i == 5:
+            eel.printprogress("Measuring TCP Efficiency...")
+        elif i == 6:
+            eel.printprogress("Measuring Buffer Delay...")
 
-    #     time.sleep(3)
-    #     eel.progress_now(100/6*i)
+        time.sleep(3)
+        eel.progress_now(100/6*i)
 
-    # eel.printprogress("Done")
-    # eel.progress_now(100)
+    eel.printprogress("Done")
+    eel.progress_now(100)
 
     ip = re.split(",", serv_ip)
     global server_uuid
@@ -421,9 +421,14 @@ def traceroute(server_ip):
 @eel.expose
 def get_gps_from_android():
     print("coordinates")
-    coordinates = ADB.getRawGpsCoordinates()
-    print(coordinates)
-    eel.set_gps_from_android(coordinates[0], coordinates[1])
+    try:
+        coordinates = ADB.getRawGpsCoordinates()
+        print(coordinates)
+        eel.set_gps_from_android(coordinates[0], coordinates[1])
+
+    except Exception as e:
+        print(e)
+        eel.set_gps_from_android(None, None)
 
 #CATCH CANCEL CALL FROM JS. NOT FULLY WORKING
 global flag
