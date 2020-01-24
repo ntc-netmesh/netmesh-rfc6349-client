@@ -1,3 +1,46 @@
+
+function disableMainForm(disabled) {
+    $('.main-form').find('input').prop('disabled', disabled);
+    $('.main-form').find('select').prop('disabled', disabled);
+    $('.main-form').find('button').prop('disabled', disabled);
+}
+
+function get_gps_from_android() {
+    // alert('gps');
+
+    $('#btnGetGps').attr('disabled', true);
+    $('#btnGetGps.spinner-grow').show();
+    eel.get_gps_from_android();
+}
+
+eel.expose(set_gps_from_android);
+function set_gps_from_android(lat, long) {
+    $('#lat').val(lat);
+    $('#lon').val(long);
+
+
+    $('#btnGetGps').attr('disabled', false);
+    $('#btnGetGps.spinner-grow').hide();
+}
+
+function confirmLeaveQueue() {
+
+    $('#modalLeaveQueueConfirmation').modal('show');
+    $('#modalQueue').prop('opacity', '50%');
+
+    $('#btnLaveQueueConfirm').on('click', function () {
+        $('#modalQueue').modal('hide');
+        disableMainForm(false);
+        // TODO: cancel queue
+    })
+    // var isLeaving = confirm("Are you sure you want to leave the queue?");
+    // if (isLeaving) {
+    //     $('#modalQueue').modal('hide');
+    //     disableMainForm(false);
+    //     // TODO: cancel queue
+    // }
+}
+
 eel.expose(alert_debug);
 function alert_debug(message){
     alert(message);
@@ -20,7 +63,7 @@ function progress_now(value){
     if (value == 100) {
         $('#dynamic').removeClass('progress-bar-striped progress-bar-animated');
         $('#cancel').hide();
-        $("#cir, #lat, #lon, #net_type, #server, #btnUploadMode, #btnDownloadMode, #btnSimultaneousMode").prop("disabled", false);
+        disableMainForm(false);
         $('#progress-status-title').hide();
         $('#progress-finished-title').show();
     }
@@ -32,7 +75,7 @@ eel.expose(cancel);
 function cancel(){
     $('#cancel').hide();
     $('#progress-status-info').hide();
-    $("#cir, #lat, #lon, #net_type, #server, #btnUploadMode, #btnDownloadMode, #btnSimultaneousMode").prop("disabled", false);
+    disableMainForm(false);
     $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
 
     eel.cancel_test();
@@ -62,7 +105,7 @@ function user_login(){
     eel.login(username,password); 
 }
 
-function normal_mode() {
+async function normal_mode() {
     var lat = document.getElementById("lat").value;
     var lon = document.getElementById("lon").value;
     var cir = document.getElementById("cir").value;
@@ -83,27 +126,57 @@ function normal_mode() {
     document.getElementById("pills-rtab3Content").innerHTML = "";
 
     if(lat != "" && lon != ""){
-        eel.normal(lat, lon, cir, server_ip, net_type);
-        var cancel = document.getElementById("cancel");
-        cancel.style.display = "block";
+        
+        await check_queue("normal");
 
-        $("#cir, #lat, #lon, #net_type, #server, #btnUploadMode, #btnDownloadMode, #btnSimultaneousMode").prop("disabled", true);
+        disableMainForm(true);
         $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
-
-        // kung may iba pang nag-tetest, pakita muna 'ung progress ng queue
-        if (false) {
-            $('#queue-status-info').show();
-        }
-        else {
-            $('#queue-status-info').hide();
-            $('#progress-status-info').show();
-        }
+        
+        eel.normal(lat, lon, cir, server_ip, net_type);
     }
-
-    else{
+    else {
         alert("Latitude and Longitude must be filled out");
     }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function check_queue(mode) {
+    var cancel = document.getElementById("cancel");
+    cancel.style.display = "block";
+
+    // kung may iba pang nag-tetest, pakita muna 'ung progress ng queue
+    var random = Math.random() ** 2;
+    var queue_number = parseInt(random * 10);
+
+    // alert(queue_number);
+
+    if (queue_number > 0) {
+        $('#modalQueue').modal('show');
+
+        for (i = 0; i < queue_number; i++) {
+            var current_queue = queue_number - i;
+
+            if (current_queue == 1) {
+                $('#queue-label-many').hide();
+                $('#queue-label-one').show();
+            } else {
+                $('#queue_remaining').text(current_queue);
     
+                $('#queue-label-many').show();
+                $('#queue-label-one').hide();
+            }
+            var queue_progress = (parseFloat(i + 1) / queue_number) * 100;
+            $("#queue-progress").css("width", queue_progress + "%").attr("aria-valuenow", queue_progress);
+
+            await sleep((Math.random() * 5 + 10) * 1000);
+        }
+    }
+    
+    $('#modalQueue').modal('hide');
+    $('#progress-status-info').show();
 }
 
 function reverse_mode(){
@@ -811,52 +884,70 @@ function printlocal(result){
 eel.expose(printnormal);
 function printnormal(result){
     console.log(result);
+    alert('aaaa');
     //document.getElementById("local_result").value += result + "\n";
+    localResultId = '#tblLocalResult tbody';
+    $(localResultId).empty();
 
     if ("MTU" in result){
-        document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
+        /// document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
+        $(localResultId).append(`<tr><td>${ 'MTU' }</td>${ result["MTU"] }${ ' Bytes' }<td></td></tr>`);
     }
     if ("RTT" in result){
-        document.getElementById("local_result").innerHTML += "RTT: " + result["RTT"] + "ms<br>";
+        // document.getElementById("local_result").innerHTML += "RTT: " + result["RTT"] + "ms<br>";
+        $(localResultId).append(`<tr><td>${ 'RTT' }</td>${ result["RTT"] }${ ' ms' }<td></td></tr>`);
     }
     if ("BB" in result){
-        document.getElementById("local_result").innerHTML += "BB: " + result["BB"] + "Mbps<br>";
+        // document.getElementById("local_result").innerHTML += "BB: " + result["BB"] + "Mbps<br>";
+        $(localResultId).append(`<tr><td>${ 'BB' }</td>${ result["BB"] }${ ' Mbps' }<td></td></tr>`);
     }
     if ("BDP" in result){
-        document.getElementById("local_result").innerHTML += "BDP: " + result["BDP"] + "<br>";
+        // document.getElementById("local_result").innerHTML += "BDP: " + result["BDP"] + "<br>";
+        $(localResultId).append(`<tr><td>${ 'BDP' }</td>${ result["BDP"] }${ '' }<td></td></tr>`);
     }
     if ("RWND" in result){
-        document.getElementById("local_result").innerHTML += "TCP RWND: " + result["RWND"] + "<br>";
+        // document.getElementById("local_result").innerHTML += "TCP RWND: " + result["RWND"] + "<br>";
+        $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td>${ result["RWND"] }${ '' }<td></td></tr>`);
     }
     if ("THPT_AVG" in result){
-        document.getElementById("local_result").innerHTML += "Average TCP Throughput: " + result["THPT_AVG"] + "Mbps<br>";
+        // document.getElementById("local_result").innerHTML += "Average TCP Throughput: " + result["THPT_AVG"] + "Mbps<br>";
+        $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td>${ result["THPT_AVG"] }${ ' Mbps' }<td></td></tr>`);
     }
     if ("THPT_IDEAL" in result){
-        document.getElementById("local_result").innerHTML += "Ideal TCP Throughput: " + result["THPT_IDEAL"] + "Mbps<br>";
+        // document.getElementById("local_result").innerHTML += "Ideal TCP Throughput: " + result["THPT_IDEAL"] + "Mbps<br>";
+        $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td>${ result["THPT_IDEAL"] }${ ' Mbps' }<td></td></tr>`);
     }
     if ("TRANSFER_AVG" in result){
-        document.getElementById("local_result").innerHTML += "Average Transfer Time: " + result["TRANSFER_AVG"] + "s<br>";
+        // document.getElementById("local_result").innerHTML += "Average Transfer Time: " + result["TRANSFER_AVG"] + "s<br>";
+        $(localResultId).append(`<tr><td>${ 'Average Transfer Time' }</td>${ result["TRANSFER_AVG"] }${ ' s' }<td></td></tr>`);
     }
     if ("TRANSFER_IDEAL" in result){
-        document.getElementById("local_result").innerHTML += "Ideal Transfer Time: " + result["TRANSFER_IDEAL"] + "s<br>";
+        // document.getElementById("local_result").innerHTML += "Ideal Transfer Time: " + result["TRANSFER_IDEAL"] + "s<br>";
+        $(localResultId).append(`<tr><td>${ 'Ideal Transfer Time' }</td>${ result["TRANSFER_IDEAL"] }${ ' s' }<td></td></tr>`);
     }
     if ("TCP_TTR" in result){
-        document.getElementById("local_result").innerHTML += "TCP TTR: " + result["TCP_TTR"] + "<br>";
+        // document.getElementById("local_result").innerHTML += "TCP TTR: " + result["TCP_TTR"] + "<br>";
+        $(localResultId).append(`<tr><td>${ 'TCP TTR' }</td>${ result["TCP_TTR"] }${ '' }<td></td></tr>`);
     }
     if ("TRANS_BYTES" in result){
-        document.getElementById("local_result").innerHTML += "Transmitted Bytes: " + result["TRANS_BYTES"] + "Bytes<br>";
+        // document.getElementById("local_result").innerHTML += "Transmitted Bytes: " + result["TRANS_BYTES"] + "Bytes<br>";
+        $(localResultId).append(`<tr><td>${ 'Transmitted Bytes' }</td>${ result["TRANS_BYTES"] }${ ' Bytes' }<td></td></tr>`);
     }
     if ("RETX_BYTES" in result){
-        document.getElementById("local_result").innerHTML += "Reransmitted Bytes: " + result["RETX_BYTES"] + "Bytes<br>";
+        // document.getElementById("local_result").innerHTML += "Reransmitted Bytes: " + result["RETX_BYTES"] + "Bytes<br>";
+        $(localResultId).append(`<tr><td>${ 'Reransmitted Bytes' }</td>${ result["RETX_BYTES"] }${ ' Bytes' }<td></td></tr>`);
     }
     if ("TCP_EFF" in result){
-        document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
+        // document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
+        $(localResultId).append(`<tr><td>${ 'TCP Efficiency' }</td>${ result["TCP_EFF"] }${ '' }<td></td></tr>`);
     }
     if ("AVE_RTT" in result){
-        document.getElementById("local_result").innerHTML += "Average RTT: " + result["AVE_RTT"] + "ms<br>";
+        // document.getElementById("local_result").innerHTML += "Average RTT: " + result["AVE_RTT"] + "ms<br>";
+        $(localResultId).append(`<tr><td>${ 'Average RTT' }</td>${ result["AVE_RTT"] }${ ' ms' }<td></td></tr>`);
     }
     if ("BUF_DELAY" in result){
-        document.getElementById("local_result").innerHTML += "Buffer Delay: " + result["BUF_DELAY"] + "%<br>";
+        // document.getElementById("local_result").innerHTML += "Buffer Delay: " + result["BUF_DELAY"] + "%<br>";
+        $(localResultId).append(`<tr><td>${ 'Buffer Delay' }</td>${ result["BUF_DELAY"] }${ '%' }<td></td></tr>`);
     }
 }
 

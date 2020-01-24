@@ -18,38 +18,41 @@
             }
         </style>
     </head>
-    <body>
-        <div class="container h-100">
-            <div class="row align-items-center h-100">
-                <form class="modal-content col-8 p-4" action="javascript:void(0);" onsubmit="user_login()">
-                    <div class="container">
-                        <div class="row justify-content-md-center m-4">
-                            <img src="/images/user_login.png" title="RFC-6349 Appllication" alt="Avatar" class="avatar">
-                        </div>
-                        <div class="row justify-content-md-center m-2">
-                            <span class="h2 text-center"><b>RFC-6349 Appllication</b></span>
-                        </div>
-                        <hr/>
-                        <div class="row">
-                            <div class="col">
-                                <div class="form-group">
-                                    <label class="form-control-static" for="uname"><b>Username</b></label>
-                                    <input class="form-control" type="text" placeholder="Enter Username" name="uname" id="uname" required="">
+    <body class="container">
+        <div class="h-100 row align-items-center justify-content-md-center">
+            <div class="card w-50 shadow">
+                <div class="card-body">
+                    <form action="javascript:void(0);" onsubmit="user_login()">
+                        <div class="container p-2">
+                            <div class="p-3">
+                                <div class="p-2 row justify-content-md-center">
+                                    <img src="/images/user_login.png" title="RFC-6349 Appllication" alt="Avatar" class="avatar">
                                 </div>
-                                <div class="form-group">
-                                    <label class="form-control-static" for="psw"><b>Password</b></label>
-                                    <input class="form-control" type="password" placeholder="Enter Password" name="psw" id="psw" required="">
+                                <div class="p-2 row justify-content-md-center">
+                                    <span class="h2 text-center"><b>RFC-6349 Appllication</b></span>
                                 </div>
-                                <div>
-                                    <label class="float-left">
-                                        <input type="checkbox" checked="checked" name="remember"> Remember me
-                                    </label>
+                            </div>
+                            <div class="row p-3">
+                                <div class="col">
+                                    <div class="form-group">
+                                        <label class="form-control-static" for="uname"><b>Username</b></label>
+                                        <input class="form-control" type="text" placeholder="Enter Username" name="uname" id="uname" required="">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-control-static" for="psw"><b>Password</b></label>
+                                        <input class="form-control" type="password" placeholder="Enter Password" name="psw" id="psw" required="">
+                                    </div>
+                                    <div>
+                                        <label class="float-left">
+                                            <input type="checkbox" checked="checked" name="remember"> Remember me
+                                        </label>
+                                    </div>
+                                    <button type="submit" class="btn btn-success float-right">Log in</button>
                                 </div>
-                                <button type="submit" class="btn btn-success float-right">Login</button>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </body>

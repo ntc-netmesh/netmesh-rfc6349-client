@@ -21,6 +21,8 @@ import pytz
 import queue_process
 from constants import NORMAL_MODE, REVERSE_MODE
 
+import ADB
+
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
@@ -256,6 +258,15 @@ def set_location(x,y):
 def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
 
+    eel.printnormal({
+        'MTU': 1500,
+        'RTT': 9.534,
+        'BB': 94.5,
+        'BDP': 900963.0000000001,
+    })
+
+    return
+
     # for i in range(1, 7):
     #     if i == 1:
     #         eel.printprogress("Performing PLPMTUD...")
@@ -406,6 +417,13 @@ def traceroute(server_ip):
     if r.status_code != 200:
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))    
         quit()
+
+@eel.expose
+def get_gps_from_android():
+    print("coordinates")
+    coordinates = ADB.getRawGpsCoordinates()
+    print(coordinates)
+    eel.set_gps_from_android(coordinates[0], coordinates[1])
 
 #CATCH CANCEL CALL FROM JS. NOT FULLY WORKING
 global flag

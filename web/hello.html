@@ -2,12 +2,8 @@
 <html>
   <head>
     <title>RFC-6349</title>
+
     <link rel="stylesheet" href="css/bootstrap.css">
-    <script src="js/jquery-3.4.1.slim.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.js"></script>
-    <script src="https://kit.fontawesome.com/dabe6c4264.js" crossorigin="anonymous"></script>
-    <!--Include eel.js - note this file doesn't exist in the 'web' directory -->
     <link rel = "stylesheet" href="css/main.css">
     <style>
       .nav-item .active {
@@ -16,13 +12,19 @@
       
     </style>
 
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <!--Include eel.js - note this file doesn't exist in the 'web' directory -->
     <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+    <script src="js/jquery-3.4.1.slim.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="https://kit.fontawesome.com/dabe6c4264.js" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+
     <script>
       $(function () {
-        $('#queue-status-info').hide();
+        // $('#queue-status-info').hide();
         $('#progress-status-info').hide();
         $('#progress-finished-title').hide();
         // $('#results-info').hide();
@@ -88,8 +90,8 @@
       <!-- <h1>RFC-6349 Application</h1> -->
       <div class="py-md-4">
         
-        <form id="#mainForm" class="needs-validation" onsubmit="return false" novalidate>
-          <div class="card shadow mb-3">
+        <form class="main-form needs-validation" onsubmit="return false" novalidate>
+          <div class="card shadow mb-4">
             <div class="card-body">
               <div class="row">
                 <div class="form-group col">
@@ -139,8 +141,11 @@
                 </div>
                 <div class="form-group col-auto">
                   <label>&nbsp;</label>
-                  <div class="input-group">
-                    <button type="button" class="btn btn-outline-primary">Get GPS</button>
+                  <div id="btn-group-gps" class="input-group">
+                    <button id="btnGetGps" type="button" class="btn btn-outline-primary" onclick="get_gps_from_android()">
+                      <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true" hidden></span>
+                      Get GPS
+                    </button>
                     <button type="button" class="btn btn-link"><i class="fa fa-question-circle"></i></button>
                   </div>
                 </div>
@@ -159,7 +164,7 @@
           </div>
         </form>
 
-        <div id="progress-status-info" class="card shadow mb-3">
+        <div id="progress-status-info" class="card shadow mb-5">
           <div class="card-header">
             <span id="progress-status-title" class="h4"><b>Measuring <span id="mode"></span>...</b></span>
             <span id="progress-finished-title" class="h4"><b>Finished</b></span>
@@ -180,83 +185,206 @@
             </div>
           </div>
         </div>
-        <div>
-          <div class="py-md-3" id="queue-status-info">
-            <hr/>
-            <span class="h5 text-info">Your test will start when <b><span id="queue_remaining">5</span></b> other tests have been done</span>
-            <div class="progress border border-info mb-3 mt-2">
-              <div id="queue_progress_bar" class="progress-bar bg-info progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%"></div>
+        
+        <!-- <div id="queue-status-info" class="card shadow mb-5">
+          <div class="card-header">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="sr-only">Loading...</span>
             </div>
-            <div class="float-right">
-              <button class = "btn btn-outline-danger" role ="button">Cancel</button>
-            </div>
-            <p id="progress"></p>
+            <span class="h4"><b>You're in queue...</b></span>
           </div>
-    
-          <div class="py-md-3" id="results-info">
-            <hr/>
-            <div class="column">
-              <h4>Local to Remote Result</h4>
-              <p id="local_result" cols="50"></p>
-              </br>
-              </br>
-              <h5>Window Scan Test Results</h5>
-              <table id="local_wnd_stats" width="20" class="table table-hover" border=1></table>
+          <div class="card-body">
+            <b><span id="queue_remaining" class="display-4">5</span></b>
+            <span class="h5 text-info">tests are still being performed</span>
+            
+          </div>
+          <div class="card-footer">
+            <div class="float-right">
+              <button class = "btn btn-outline-danger" role ="button">Leave queue</button>
+            </div>
+          </div>
+        </div> -->
 
-              <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-                <li class="nav-item">
-                  <a class="nav-link active" id="pills-tab0Content-tab" data-toggle="pill" href="#pills-tab0Content" role="tab" aria-controls="pills-tab0Content" aria-selected="true">Window Scan Test</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-tab1Content-tab" data-toggle="pill" href="#pills-tab1Content" role="tab" aria-controls="pills-tab1Content" aria-selected="false">Throughput</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-tab2Content-tab" data-toggle="pill" href="#pills-tab2Content" role="tab" aria-controls="pills-tab2Content" aria-selected="false">RTT</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-tab3Content-tab" data-toggle="pill" href="#pills-tab3Content" role="tab" aria-controls="pills-tab3Content" aria-selected="false">Efficiency</a>
-                </li>
-              </ul>
-              <div class="tab-content" id="nav-tabContent">
-                <div class="tab-pane fade show active" id="pills-tab0Content" role="tabpanel" aria-labelledby="pills-tab0Content-tab">1...</div>
-                <div class="tab-pane fade" id="pills-tab1Content" role="tabpanel" aria-labelledby="pills-tab1Content-tab">2...</div>
-                <div class="tab-pane fade" id="pills-tab2Content" role="tabpanel" aria-labelledby="pills-tab2Content-tab">3...</div>
-                <div class="tab-pane fade" id="pills-tab3Content" role="tabpanel" aria-labelledby="pills-tab3Content-tab">4...</div>
+        <div class="py-md-3" id="results-info">
+          <div class="card shadow">
+            <div class="card-header">
+              <span class="h4"><b>Test results</b></span>
+            </div>
+            <div>
+              <div class="card-group">
+                <div class="card">
+                  
+                  <div class="card-body">
+                    <p id="local_result" cols="50"></p>
+                    <!-- <textarea id="remote_result" readonly="true" class="form-control" rows="7"></textarea> -->
+                    <h5 class="card-title"><b>Local to Remote</b></h5>
+    
+                    <table id="tblLocalResult" class="table table-sm table-bordered table-hover">
+                      <tbody>
+                        <tr>
+                          <td>CIR</td>
+                          <td>5</td>
+                        </tr>
+                        <tr>
+                          <td>Path MTU</td>
+                          <td>1500</td>
+                        </tr>
+                        <tr>
+                          <td>Baseline RTT</td>
+                          <td>9.534 ms</td>
+                        </tr>
+                        <tr>
+                          <td>Bottleneck Bandwidth</td>
+                          <td>94.5 Mbits/s</td>
+                        </tr>
+                        <tr>
+                          <td>BDP</td>
+                          <td>900963.0000000001 bits</td>
+                        </tr>
+                      </tbody>
+                    </table >
+    
+                    <!-- <h5>Window Scan Test Results</h5> -->
+                    <table id="local_wnd_stats" width="20" class="table table-hover" border=1></table>
+    
+                    <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link active" id="pills-tab0Content-tab" data-toggle="pill" href="#pills-tab0Content" role="tab" aria-controls="pills-tab0Content" aria-selected="true">Window Scan Test</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="pills-tab1Content-tab" data-toggle="pill" href="#pills-tab1Content" role="tab" aria-controls="pills-tab1Content" aria-selected="false">Throughput</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="pills-tab2Content-tab" data-toggle="pill" href="#pills-tab2Content" role="tab" aria-controls="pills-tab2Content" aria-selected="false">RTT</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="pills-tab3Content-tab" data-toggle="pill" href="#pills-tab3Content" role="tab" aria-controls="pills-tab3Content" aria-selected="false">Efficiency</a>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="nav-tabContent">
+                      <div class="tab-pane fade show active" id="pills-tab0Content" role="tabpanel" aria-labelledby="pills-tab0Content-tab">1...</div>
+                      <div class="tab-pane fade" id="pills-tab1Content" role="tabpanel" aria-labelledby="pills-tab1Content-tab">2...</div>
+                      <div class="tab-pane fade" id="pills-tab2Content" role="tabpanel" aria-labelledby="pills-tab2Content-tab">3...</div>
+                      <div class="tab-pane fade" id="pills-tab3Content" role="tabpanel" aria-labelledby="pills-tab3Content-tab">4...</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <p id="remote_result" cols="50"></p>
+                    <h5 class="card-title"><b>Remote to Local</b></h5>
+    
+                    <table class="table table-sm table-bordered table-hover">
+                      <tbody>
+                        <tr>
+                          <td>CIR</td>
+                          <td>5</td>
+                        </tr>
+                        <tr>
+                          <td>Path MTU</td>
+                          <td>1500</td>
+                        </tr>
+                        <tr>
+                          <td>Baseline RTT</td>
+                          <td>9.534 ms</td>
+                        </tr>
+                        <tr>
+                          <td>Bottleneck Bandwidth</td>
+                          <td>94.5 Mbits/s</td>
+                        </tr>
+                        <tr>
+                          <td>BDP</td>
+                          <td>900963.0000000001 bits</td>
+                        </tr>
+                      </tbody>
+                    </table>
+    
+                    <!-- <h5>Window Scan Test Results</h5> -->
+                    <table id="remote_wnd_stats" width="20" class="table table-hover" border=1> </table>
+    
+                    <ul class="nav nav-pills mb-4" id="pills-rtab" role="tablist">
+                      <li class="nav-item">
+                        <a class="nav-link active" id="pills-rtab0Content-tab" data-toggle="pill" href="#pills-rtab0Content" role="tab" aria-controls="pills-rtab0Content" aria-selected="true">Window Scan Test</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="pills-rtab1Content-tab" data-toggle="pill" href="#pills-rtab1Content" role="tab" aria-controls="pills-rtab1Content" aria-selected="false">Throughput</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="pills-rtab2Content-tab" data-toggle="pill" href="#pills-rtab2Content" role="tab" aria-controls="pills-rtab2Content" aria-selected="false">RTT</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" id="pills-rtab3Content-tab" data-toggle="pill" href="#pills-rtab3Content" role="tab" aria-controls="pills-rtab3Content" aria-selected="false">Efficiency</a>
+                      </li>
+                    </ul>
+                    <div class="tab-content" id="pills-rtabContent">
+                      <div class="tab-pane fade show active" id="pills-rtab0Content" role="tabpanel" aria-labelledby="pills-rtab0Content-tab">1...</div>
+                      <div class="tab-pane fade" id="pills-rtab1Content" role="tabpanel" aria-labelledby="pills-rtab1Content-tab">2...</div>
+                      <div class="tab-pane fade" id="pills-rtab2Content" role="tabpanel" aria-labelledby="pills-rtab2Content-tab">3...</div>
+                      <div class="tab-pane fade" id="pills-rtab3Content" role="tabpanel" aria-labelledby="pills-rtab3Content-tab">4...</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-      
-            <div class="column">
-              <h4>Remote to Local Result</h4>
-              <p id="remote_result" cols="50"></p>
-              </br>
-              </br>
-              <h5>Window Scan Test Results</h5>
-              <table id="remote_wnd_stats" width="20" class="table table-hover" border=1> </table>
-      
-              <ul class="nav nav-pills mb-3" id="pills-rtab" role="tablist">
-                <li class="nav-item">
-                  <a class="nav-link active" id="pills-rtab0Content-tab" data-toggle="pill" href="#pills-rtab0Content" role="tab" aria-controls="pills-rtab0Content" aria-selected="true">Window Scan Test</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-rtab1Content-tab" data-toggle="pill" href="#pills-rtab1Content" role="tab" aria-controls="pills-rtab1Content" aria-selected="false">Throughput</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-rtab2Content-tab" data-toggle="pill" href="#pills-rtab2Content" role="tab" aria-controls="pills-rtab2Content" aria-selected="false">RTT</a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" id="pills-rtab3Content-tab" data-toggle="pill" href="#pills-rtab3Content" role="tab" aria-controls="pills-rtab3Content" aria-selected="false">Efficiency</a>
-                </li>
-              </ul>
-              <div class="tab-content" id="pills-rtabContent">
-                <div class="tab-pane fade show active" id="pills-rtab0Content" role="tabpanel" aria-labelledby="pills-rtab0Content-tab">1...</div>
-                <div class="tab-pane fade" id="pills-rtab1Content" role="tabpanel" aria-labelledby="pills-rtab1Content-tab">2...</div>
-                <div class="tab-pane fade" id="pills-rtab2Content" role="tabpanel" aria-labelledby="pills-rtab2Content-tab">3...</div>
-                <div class="tab-pane fade" id="pills-rtab3Content" role="tabpanel" aria-labelledby="pills-rtab3Content-tab">4...</div>
+            <div class="card-footer">
+              <div class="float-right">
+                <button class = "btn btn-primary" role ="button">Save as PDF</button>
               </div>
+            </div>
+          </div>
+          <hr/>
+        </div>
+      </div>
+      <!-- Modal -->
+      <div class="modal fade" id="modalQueue" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalQueueLabel" aria-hidden="true" style="z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title" id="modalQueueLabel">You're in queue</h4>
+            </div>
+            <div class="modal-body">
+              <div>
+                <div class="row justify-content-center">
+                  <label id="queue-label-many" class="h5 text-dark">
+                    <span><strong id="queue_remaining">5</strong></span>
+                    <span>tests still being performed somewhere...</span>
+                  </label>
+                  <label id="queue-label-one" class="h5 text-dark">
+                    <span><strong>You're next.</strong></span>
+                    <span>Please wait...</span>
+                  </label>
+                </div>
+                <!-- <div class="spinner-grow spinner-grow-sm text-info float-right" role="status">
+                  <span class="sr-only">Loading...</span>
+                </div> -->
+              </div>
+              <div class="progress border border-dark" style="height: 10px;">
+                <div id="queue-progress" class="progress-bar bg-dark progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                <!-- <div class="progress-bar bg-light progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div> -->
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button id="btnLeaveQueue" class="btn btn-outline-danger" type="button" onclick="confirmLeaveQueue()" disabled>Leave queue</button>
             </div>
           </div>
         </div>
       </div>
-    </main>   
+      <div class="modal fade" id="modalLeaveQueueConfirmation" tabindex="-1" role="dialog" aria-labelledby="modalLeaveQueueConfirmationLabel" aria-hidden="true" style="z-index: 1051;">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <!-- <div class="modal-header">
+              <h4 class="modal-title" id="modalLeaveQueueConfirmationLabel">Are you sure?</h4>
+            </div> -->
+            <div class="modal-body">
+              Are you sure you want to leave the queue?
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" role="button" data-dismiss="modal">Stay in queue</button>
+              <button id="btnLaveQueueConfirm" class="btn btn-outline-danger" role="button" data-dismiss="modal">Leave queue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </body>
 </html>
