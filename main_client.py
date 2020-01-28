@@ -322,6 +322,7 @@ def set_location(x,y):
 def check_queue(mode):
     global test_mode
     test_mode = mode
+    print("mode:")
     print(test_mode)
 
     f = open(queue_place_path, "r")
@@ -406,12 +407,13 @@ def normal(lat, lon, cir, serv_ip, network_type):
     eel.printprogress("Measuring...")
     eel.progress_now(99)
 
-    ip = re.split(",", serv_ip)
-    global server_uuid
-    server_uuid = ip[1]
+    # ip = re.split(",", serv_ip)
+    # if ip is not None:
+    #     global server_uuid
+    #     server_uuid = ip[1]
     
-    global server_ip
-    server_ip = ip[0]
+    #     global server_ip
+    #     server_ip = ip[0]
 
     global net_type
     net_type = network_type
@@ -424,7 +426,10 @@ def normal(lat, lon, cir, serv_ip, network_type):
     #####CALL NORMAL MODE HERE#####
     global dev_hash
     results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash)
-    eel.printnormal(results[0][0])
+    if results is not None:
+        eel.printnormal(results[0][0])
+    else:
+        eel.printnormal(None)
 
     eel.printprogress("Done")
     eel.progress_now(100)

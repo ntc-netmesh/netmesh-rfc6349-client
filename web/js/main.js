@@ -36,6 +36,8 @@ function check_queue(mode) {
 
 eel.expose(start_test)
 function start_test(mode) {
+    $('#progress-status-info').show();
+
     switch(mode) {
         case "normal":
             normal_mode();
@@ -928,6 +930,8 @@ function printnormal(result){
     localResultId = '#tblLocalResult tbody';
     $(localResultId).empty();
 
+    $('#results-info').show();
+
     if (result) {
         if ("MTU" in result){
             /// document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
@@ -990,7 +994,7 @@ function printnormal(result){
             $(localResultId).append(`<tr><td>${ 'Buffer Delay' }</td><td>${ result["BUF_DELAY"] }${ '%' }</td></tr>`);
         }
     } else {
-        alert('No measured results');
+        $(localResultId).append(`<tr><td><span class="text-muted">${ 'No measured results' }<span></td></tr>`);
     }
 }
 

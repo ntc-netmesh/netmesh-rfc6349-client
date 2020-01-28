@@ -25,11 +25,11 @@
     <script>
       $(function () {
         // $('#queue-status-info').hide();
-        // $('#progress-status-info').hide();
+        $('#progress-status-info').hide();
         $('#progress-finished-title').hide();
 
         $('#btnGetGps .spinner-grow').hide();
-        // $('#results-info').hide();
+        $('#results-info').hide();
       });
 
       // document.getElementById('login').style.display='block';
@@ -61,7 +61,7 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-    
+      
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item active">
@@ -85,6 +85,10 @@
             <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
           </li> -->
         </ul>
+      </div>
+      <div>
+        <span class="text-muted">username</span>
+        <button type="button" class="btn btn-link">Log out</button>
       </div>
     </nav>
 
@@ -129,7 +133,7 @@
               <div class="row">
                 <div class="form-group col">
                   <label for="lat"><b>GPS Latitude</b></label>
-                  <input type = "text" id = "lat" class = "form-control" placeholder="Latitude" required>
+                  <input type="text" id="lat" class="form-control" placeholder="Latitude" required>
                   <div class="invalid-feedback">
                     Please provide the latitude coordinate of your current location
                   </div>
@@ -148,7 +152,7 @@
                       <span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
                       Get GPS
                     </button>
-                    <button type="button" class="btn btn-link"><i class="fa fa-question-circle"></i></button>
+                    <!-- <button type="button" class="btn btn-link"><i class="fa fa-question-circle"></i></button> -->
                   </div>
                 </div>
               </div>
@@ -167,16 +171,16 @@
                   <i class="fa fa-long-arrow-alt-down"></i>
                   Download Mode
                 </button>
+                <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">
+                  <i class="fa fa-arrows-alt-v"></i>
+                  Simultaneous Mode
+                </button>
                 <button id="btnBidirectionalMode" class="btn btn-primary" role="button" type="submit" onclick="bidirectional()">
                   <span style="margin-left: 4px;">
                     <i class="fa fa-long-arrow-alt-up" style="margin-left: -4px;"></i>
                     <i class="fa fa-long-arrow-alt-down" style="margin-left: -4px;"></i>
                   </span>
-                  Bidirectional Mode
-                </button>
-                <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">
-                  <i class="fa fa-arrows-alt-v"></i>
-                  Simultaneous Mode
+                  Auto Mode
                 </button>
               </div>
             </div>
@@ -189,7 +193,7 @@
             <span id="progress-finished-title" class="h4"><b>Finished</b></span>
           </div>
           <div class="card-body">
-            <div class="px-3">
+            <div class="px-2">
               <span id="progress" class="text-primary">Initializing...</span>
               <!-- <ul class="list-unstyled">
                 <li>
@@ -232,7 +236,7 @@
           </div>
         </div> -->
 
-        <div class="py-md-3" id="results-info">
+        <div class="mb-5" id="results-info">
           <div class="card shadow">
             <div class="card-header">
               <span class="h4"><b>Test results</b></span>
@@ -299,7 +303,7 @@
                   <div class="card-body">
                     <p id="remote_result" cols="50"></p>
                     <h5 class="card-title"><b>Remote to Local</b></h5>
-    
+                    <span class="text-danger h6">WARNING: This is NOT A REAL RESULT. This is for UI purposes only. (Remove this message when real test measurement were implemented)</span>
                     <table class="table table-sm table-bordered table-hover">
                       <tbody>
                         <tr>
