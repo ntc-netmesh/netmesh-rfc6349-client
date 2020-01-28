@@ -25,7 +25,7 @@
     <script>
       $(function () {
         // $('#queue-status-info').hide();
-        $('#progress-status-info').hide();
+        // $('#progress-status-info').hide();
         $('#progress-finished-title').hide();
 
         $('#btnGetGps .spinner-grow').hide();
@@ -67,7 +67,7 @@
           <li class="nav-item active">
             <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
           </li>
-          <li class="nav-item">
+          <!-- <li class="nav-item">
             <a class="nav-link" href="#">Link</a>
           </li>
           <li class="nav-item dropdown">
@@ -83,7 +83,7 @@
           </li>
           <li class="nav-item">
             <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-          </li>
+          </li> -->
         </ul>
       </div>
     </nav>
@@ -155,12 +155,29 @@
             </div>
             <div class="card-footer">
               <div class="float-right">
-                <button id="btnUploadMode" class="btn btn-primary" role="button" type="submit" onclick="normal_mode()">Upload Mode</button>
-                <button id="btnDownloadMode" class="btn btn-primary" role="button" type="submit" onclick="reverse_mode()">Download Mode</button id="btnUploadMode">
-                <!--
-                <button class = "btn btn-primary" role ="button" onclick="bidirectional()">Bidirectional Mode</button>
-                -->
-                <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">Simultaneous Mode</button id="btnUploadMode">
+                <!-- <button id="btnUploadMode" class="btn btn-primary" role="button" type="submit" onclick="normal_mode()">
+                  <i class="fa fa-long-arrow-alt-up"></i>
+                  Upload Mode
+                </button> -->
+                <button id="btnUploadMode" class="btn btn-primary" role="button" type="submit" onclick="check_queue('normal')">
+                  <i class="fa fa-long-arrow-alt-up"></i>
+                  Upload Mode
+                </button>
+                <button id="btnDownloadMode" class="btn btn-primary" role="button" type="submit" onclick="reverse_mode()">
+                  <i class="fa fa-long-arrow-alt-down"></i>
+                  Download Mode
+                </button>
+                <button id="btnBidirectionalMode" class="btn btn-primary" role="button" type="submit" onclick="bidirectional()">
+                  <span style="margin-left: 4px;">
+                    <i class="fa fa-long-arrow-alt-up" style="margin-left: -4px;"></i>
+                    <i class="fa fa-long-arrow-alt-down" style="margin-left: -4px;"></i>
+                  </span>
+                  Bidirectional Mode
+                </button>
+                <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">
+                  <i class="fa fa-arrows-alt-v"></i>
+                  Simultaneous Mode
+                </button>
               </div>
             </div>
           </div>
@@ -172,21 +189,21 @@
             <span id="progress-finished-title" class="h4"><b>Finished</b></span>
           </div>
           <div class="card-body">
-            <div id="process-progress-bar" class="progress prog_bar border border-secondary">
-              <div id="dynamic" class="progress-bar bg-secondary progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                
-              </div>
-            </div>
-            <div>
-              <span id="progress">Initializing...</span>
-              <ul class="list-unstyled">
+            <div class="px-3">
+              <span id="progress" class="text-primary">Initializing...</span>
+              <!-- <ul class="list-unstyled">
                 <li>
                   <div>
                     <span class="fa fa-check-circle text-success"></span>
                     <span>PLPMTUD Performed</span>
                   </div>
                 </li>
-              </ul>
+              </ul> -->
+            </div>
+            <div id="process-progress-bar" class="progress prog_bar border border-secondary">
+              <div id="dynamic" class="progress-bar bg-secondary progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                
+              </div>
             </div>
           </div>
           <div class="card-footer">
@@ -222,8 +239,7 @@
             </div>
             <div>
               <div class="card-group">
-                <div class="card">
-                  
+                <div class="card rounded-0">
                   <div class="card-body">
                     <p id="local_result" cols="50"></p>
                     <!-- <textarea id="remote_result" readonly="true" class="form-control" rows="7"></textarea> -->
@@ -279,7 +295,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="card">
+                <div class="card rounded-0">
                   <div class="card-body">
                     <p id="remote_result" cols="50"></p>
                     <h5 class="card-title"><b>Remote to Local</b></h5>
@@ -342,7 +358,6 @@
               </div>
             </div>
           </div>
-          <hr/>
         </div>
       </div>
       <!-- Modal -->
@@ -369,12 +384,12 @@
                 </div> -->
               </div>
               <div class="progress border border-dark" style="height: 10px;">
-                <div id="queue-progress" class="progress-bar bg-dark progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+                <div id="queue-progress" class="progress-bar bg-dark progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                 <!-- <div class="progress-bar bg-light progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div> -->
               </div>
             </div>
             <div class="modal-footer">
-              <button id="btnLeaveQueue" class="btn btn-outline-danger" type="button" onclick="confirmLeaveQueue()" disabled>Leave queue</button>
+              <button id="btnLeaveQueue" class="btn btn-outline-danger" type="button" onclick="confirmLeaveQueue()">Leave queue</button>
             </div>
           </div>
         </div>
@@ -390,7 +405,7 @@
             </div>
             <div class="modal-footer">
               <button class="btn btn-primary" role="button" data-dismiss="modal">Stay in queue</button>
-              <button id="btnLaveQueueConfirm" class="btn btn-outline-danger" role="button" data-dismiss="modal">Leave queue</button>
+              <button class="btn btn-outline-danger" role="button" data-dismiss="modal" onclick="leaveQueue()">Leave queue</button>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+// var fs = require("fs");
 
 function disableMainForm(disabled) {
     $('.main-form').find('input').prop('disabled', disabled);
@@ -28,22 +29,29 @@ function set_gps_from_android(lat, long) {
     }
 }
 
-function confirmLeaveQueue() {
+eel.expose(check_queue)
+function check_queue(mode) {
+    eel.check_queue(mode);
+}
 
+eel.expose(start_test)
+function start_test(mode) {
+    switch(mode) {
+        case "normal":
+            normal_mode();
+    }
+}
+
+function confirmLeaveQueue() {
     $('#modalLeaveQueueConfirmation').modal('show');
     $('#modalQueue').prop('opacity', '50%');
+}
 
-    $('#btnLaveQueueConfirm').on('click', function () {
-        $('#modalQueue').modal('hide');
-        disableMainForm(false);
-        // TODO: cancel queue
-    })
-    // var isLeaving = confirm("Are you sure you want to leave the queue?");
-    // if (isLeaving) {
-    //     $('#modalQueue').modal('hide');
-    //     disableMainForm(false);
-    //     // TODO: cancel queue
-    // }
+function leaveQueue() {
+    eel.leave_queue();
+
+    $('#modalQueue').modal('hide');
+    disableMainForm(false);
 }
 
 eel.expose(alert_debug);
@@ -110,7 +118,7 @@ function user_login(){
     eel.login(username,password); 
 }
 
-async function normal_mode() {
+function normal_mode() {
     var lat = document.getElementById("lat").value;
     var lon = document.getElementById("lon").value;
     var cir = document.getElementById("cir").value;
@@ -132,7 +140,7 @@ async function normal_mode() {
 
     if(lat != "" && lon != ""){
         
-        await check_queue("normal");
+        // check_queue("normal");
 
         disableMainForm(true);
         $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
@@ -148,40 +156,66 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function check_queue(mode) {
-    var cancel = document.getElementById("cancel");
-    cancel.style.display = "block";
+// async function check_queue(mode) {
+//     var cancel = document.getElementById("cancel");
+//     cancel.style.display = "block";
 
-    // kung may iba pang nag-tetest, pakita muna 'ung progress ng queue
-    var random = Math.random() ** 2;
-    var queue_number = parseInt(random * 10);
+//     // kung may iba pang nag-tetest, pakita muna 'ung progress ng queue
+//     var random = Math.random() ** 2;
+//     var queue_number = parseInt(random * 10);
 
-    // alert(queue_number);
+//     // alert(queue_number);
 
-    if (queue_number > 0) {
-        $('#modalQueue').modal('show');
+//     if (queue_number > 0) {
+//         $('#modalQueue').modal('show');
 
-        for (i = 0; i < queue_number; i++) {
-            var current_queue = queue_number - i;
+//         for (i = 0; i < queue_number; i++) {
+//             var current_queue = queue_number - i;
 
-            if (current_queue == 1) {
-                $('#queue-label-many').hide();
-                $('#queue-label-one').show();
-            } else {
-                $('#queue_remaining').text(current_queue);
+//             if (current_queue == 1) {
+//                 $('#queue-label-many').hide();
+//                 $('#queue-label-one').show();
+//             } else {
+//                 $('#queue_remaining').text(current_queue);
     
-                $('#queue-label-many').show();
-                $('#queue-label-one').hide();
-            }
-            var queue_progress = (parseFloat(i + 1) / queue_number) * 100;
-            $("#queue-progress").css("width", queue_progress + "%").attr("aria-valuenow", queue_progress);
+//                 $('#queue-label-many').show();
+//                 $('#queue-label-one').hide();
+//             }
+//             var queue_progress = (parseFloat(i + 1) / queue_number) * 100;
+//             $("#queue-progress").css("width", queue_progress + "%").attr("aria-valuenow", queue_progress);
 
-            await sleep((Math.random() * 5 + 10) * 1000);
-        }
-    }
+//             await sleep((Math.random() * 5 + 10) * 1000);
+//         }
+//     }
     
+//     $('#modalQueue').modal('hide');
+//     $('#progress-status-info').show();
+// }
+
+eel.expose(open_queue_dialog);
+function open_queue_dialog() {
+    $('#modalQueue').modal('show');
+}
+
+eel.expose(close_queue_dialog);
+function close_queue_dialog() {
     $('#modalQueue').modal('hide');
-    $('#progress-status-info').show();
+}
+
+eel.expose(set_queue);
+function set_queue(queue_place) {
+    // var queue_progress = (parseFloat(i + 1) / queue_place) * 100;
+    // $("#queue-progress").css("width", queue_progress + "%").attr("aria-valuenow", queue_progress);
+
+    if (queue_place > 1) {
+        $('#queue_remaining').text(queue_place);
+
+        $('#queue-label-one').hide();
+        $('#queue-label-many').show();
+    } else {
+        $('#queue-label-many').hide();
+        $('#queue-label-one').show();
+    }
 }
 
 function reverse_mode(){
@@ -889,70 +923,74 @@ function printlocal(result){
 eel.expose(printnormal);
 function printnormal(result){
     console.log(result);
-    alert('aaaa');
+    alert('printnormal');
     //document.getElementById("local_result").value += result + "\n";
     localResultId = '#tblLocalResult tbody';
     $(localResultId).empty();
 
-    if ("MTU" in result){
-        /// document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
-        $(localResultId).append(`<tr><td>${ 'MTU' }</td>${ result["MTU"] }${ ' Bytes' }<td></td></tr>`);
-    }
-    if ("RTT" in result){
-        // document.getElementById("local_result").innerHTML += "RTT: " + result["RTT"] + "ms<br>";
-        $(localResultId).append(`<tr><td>${ 'RTT' }</td>${ result["RTT"] }${ ' ms' }<td></td></tr>`);
-    }
-    if ("BB" in result){
-        // document.getElementById("local_result").innerHTML += "BB: " + result["BB"] + "Mbps<br>";
-        $(localResultId).append(`<tr><td>${ 'BB' }</td>${ result["BB"] }${ ' Mbps' }<td></td></tr>`);
-    }
-    if ("BDP" in result){
-        // document.getElementById("local_result").innerHTML += "BDP: " + result["BDP"] + "<br>";
-        $(localResultId).append(`<tr><td>${ 'BDP' }</td>${ result["BDP"] }${ '' }<td></td></tr>`);
-    }
-    if ("RWND" in result){
-        // document.getElementById("local_result").innerHTML += "TCP RWND: " + result["RWND"] + "<br>";
-        $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td>${ result["RWND"] }${ '' }<td></td></tr>`);
-    }
-    if ("THPT_AVG" in result){
-        // document.getElementById("local_result").innerHTML += "Average TCP Throughput: " + result["THPT_AVG"] + "Mbps<br>";
-        $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td>${ result["THPT_AVG"] }${ ' Mbps' }<td></td></tr>`);
-    }
-    if ("THPT_IDEAL" in result){
-        // document.getElementById("local_result").innerHTML += "Ideal TCP Throughput: " + result["THPT_IDEAL"] + "Mbps<br>";
-        $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td>${ result["THPT_IDEAL"] }${ ' Mbps' }<td></td></tr>`);
-    }
-    if ("TRANSFER_AVG" in result){
-        // document.getElementById("local_result").innerHTML += "Average Transfer Time: " + result["TRANSFER_AVG"] + "s<br>";
-        $(localResultId).append(`<tr><td>${ 'Average Transfer Time' }</td>${ result["TRANSFER_AVG"] }${ ' s' }<td></td></tr>`);
-    }
-    if ("TRANSFER_IDEAL" in result){
-        // document.getElementById("local_result").innerHTML += "Ideal Transfer Time: " + result["TRANSFER_IDEAL"] + "s<br>";
-        $(localResultId).append(`<tr><td>${ 'Ideal Transfer Time' }</td>${ result["TRANSFER_IDEAL"] }${ ' s' }<td></td></tr>`);
-    }
-    if ("TCP_TTR" in result){
-        // document.getElementById("local_result").innerHTML += "TCP TTR: " + result["TCP_TTR"] + "<br>";
-        $(localResultId).append(`<tr><td>${ 'TCP TTR' }</td>${ result["TCP_TTR"] }${ '' }<td></td></tr>`);
-    }
-    if ("TRANS_BYTES" in result){
-        // document.getElementById("local_result").innerHTML += "Transmitted Bytes: " + result["TRANS_BYTES"] + "Bytes<br>";
-        $(localResultId).append(`<tr><td>${ 'Transmitted Bytes' }</td>${ result["TRANS_BYTES"] }${ ' Bytes' }<td></td></tr>`);
-    }
-    if ("RETX_BYTES" in result){
-        // document.getElementById("local_result").innerHTML += "Reransmitted Bytes: " + result["RETX_BYTES"] + "Bytes<br>";
-        $(localResultId).append(`<tr><td>${ 'Reransmitted Bytes' }</td>${ result["RETX_BYTES"] }${ ' Bytes' }<td></td></tr>`);
-    }
-    if ("TCP_EFF" in result){
-        // document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
-        $(localResultId).append(`<tr><td>${ 'TCP Efficiency' }</td>${ result["TCP_EFF"] }${ '' }<td></td></tr>`);
-    }
-    if ("AVE_RTT" in result){
-        // document.getElementById("local_result").innerHTML += "Average RTT: " + result["AVE_RTT"] + "ms<br>";
-        $(localResultId).append(`<tr><td>${ 'Average RTT' }</td>${ result["AVE_RTT"] }${ ' ms' }<td></td></tr>`);
-    }
-    if ("BUF_DELAY" in result){
-        // document.getElementById("local_result").innerHTML += "Buffer Delay: " + result["BUF_DELAY"] + "%<br>";
-        $(localResultId).append(`<tr><td>${ 'Buffer Delay' }</td>${ result["BUF_DELAY"] }${ '%' }<td></td></tr>`);
+    if (result) {
+        if ("MTU" in result){
+            /// document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
+            $(localResultId).append(`<tr><td>${ 'MTU' }</td><td>${ result["MTU"] }${ ' Bytes' }</td></tr>`);
+        }
+        if ("RTT" in result){
+            // document.getElementById("local_result").innerHTML += "RTT: " + result["RTT"] + "ms<br>";
+            $(localResultId).append(`<tr><td>${ 'RTT' }</td><td>${ result["RTT"] }${ ' ms' }</td></tr>`);
+        }
+        if ("BB" in result){
+            // document.getElementById("local_result").innerHTML += "BB: " + result["BB"] + "Mbps<br>";
+            $(localResultId).append(`<tr><td>${ 'BB' }</td><td>${ result["BB"] }${ ' Mbps' }</td></tr>`);
+        }
+        if ("BDP" in result){
+            // document.getElementById("local_result").innerHTML += "BDP: " + result["BDP"] + "<br>";
+            $(localResultId).append(`<tr><td>${ 'BDP' }</td><td>${ result["BDP"] }${ '' }</td></tr>`);
+        }
+        if ("RWND" in result){
+            // document.getElementById("local_result").innerHTML += "TCP RWND: " + result["RWND"] + "<br>";
+            $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td><td>${ result["RWND"] }${ '' }</td></tr>`);
+        }
+        if ("THPT_AVG" in result){
+            // document.getElementById("local_result").innerHTML += "Average TCP Throughput: " + result["THPT_AVG"] + "Mbps<br>";
+            $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td><td>${ result["THPT_AVG"] }${ ' Mbps' }</td></tr>`);
+        }
+        if ("THPT_IDEAL" in result){
+            // document.getElementById("local_result").innerHTML += "Ideal TCP Throughput: " + result["THPT_IDEAL"] + "Mbps<br>";
+            $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td><td>${ result["THPT_IDEAL"] }${ ' Mbps' }</td></tr>`);
+        }
+        if ("TRANSFER_AVG" in result){
+            // document.getElementById("local_result").innerHTML += "Average Transfer Time: " + result["TRANSFER_AVG"] + "s<br>";
+            $(localResultId).append(`<tr><td>${ 'Average Transfer Time' }</td><td>${ result["TRANSFER_AVG"] }${ ' s' }</td></tr>`);
+        }
+        if ("TRANSFER_IDEAL" in result){
+            // document.getElementById("local_result").innerHTML += "Ideal Transfer Time: " + result["TRANSFER_IDEAL"] + "s<br>";
+            $(localResultId).append(`<tr><td>${ 'Ideal Transfer Time' }</td><td>${ result["TRANSFER_IDEAL"] }${ ' s' }</td></tr>`);
+        }
+        if ("TCP_TTR" in result){
+            // document.getElementById("local_result").innerHTML += "TCP TTR: " + result["TCP_TTR"] + "<br>";
+            $(localResultId).append(`<tr><td>${ 'TCP TTR' }</td><td>${ result["TCP_TTR"] }${ '' }</td></tr>`);
+        }
+        if ("TRANS_BYTES" in result){
+            // document.getElementById("local_result").innerHTML += "Transmitted Bytes: " + result["TRANS_BYTES"] + "Bytes<br>";
+            $(localResultId).append(`<tr><td>${ 'Transmitted Bytes' }</td><td>${ result["TRANS_BYTES"] }${ ' Bytes' }</td></tr>`);
+        }
+        if ("RETX_BYTES" in result){
+            // document.getElementById("local_result").innerHTML += "Reransmitted Bytes: " + result["RETX_BYTES"] + "Bytes<br>";
+            $(localResultId).append(`<tr><td>${ 'Reransmitted Bytes' }</td><td>${ result["RETX_BYTES"] }${ ' Bytes' }</td></tr>`);
+        }
+        if ("TCP_EFF" in result){
+            // document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
+            $(localResultId).append(`<tr><td>${ 'TCP Efficiency' }</td><td>${ result["TCP_EFF"] }${ '' }</td></tr>`);
+        }
+        if ("AVE_RTT" in result){
+            // document.getElementById("local_result").innerHTML += "Average RTT: " + result["AVE_RTT"] + "ms<br>";
+            $(localResultId).append(`<tr><td>${ 'Average RTT' }</td><td>${ result["AVE_RTT"] }${ ' ms' }</td></tr>`);
+        }
+        if ("BUF_DELAY" in result){
+            // document.getElementById("local_result").innerHTML += "Buffer Delay: " + result["BUF_DELAY"] + "%<br>";
+            $(localResultId).append(`<tr><td>${ 'Buffer Delay' }</td><td>${ result["BUF_DELAY"] }${ '%' }</td></tr>`);
+        }
+    } else {
+        alert('No measured results');
     }
 }
 
@@ -1095,3 +1133,11 @@ function create_table_remote_window(tableData){
     document.getElementById('remote_wnd_stats').innerHTML = "";
     document.getElementById('remote_wnd_stats').appendChild(tableBody);
 }
+
+// Example when handled through fs.watch() listener
+// fs.watch('./tempfiles/queue/queue_place', { encoding: 'buffer' }, (eventType, filename) => {
+//     if (filename) {
+//       console.log(filename);
+//       // Prints: <Buffer ...>
+//     }
+// });

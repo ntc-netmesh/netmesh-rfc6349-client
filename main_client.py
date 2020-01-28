@@ -21,7 +21,70 @@ import pytz
 import queue_process
 from constants import NORMAL_MODE, REVERSE_MODE
 
+import time
 import ADB
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
+
+queue_place_path = './tempfiles/queue/queue_place'
+
+if __name__ == "__main__":
+    patterns = "*"
+    ignore_patterns = ""
+    ignore_directories = False
+    case_sensitive = True
+    queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+
+    path = "./tempfiles/queue"
+    go_recursively = False
+
+def on_created(event):
+    print(f"hey, {event.src_path} has been created!")
+
+def on_deleted(event):
+    print(f"what the f**k! Someone deleted {event.src_path}!")
+
+def on_modified(event):
+    print(f"hey buddy, {event.src_path} has been modified")
+
+    if event.src_path.split('/')[-1] == "queue_place":
+        f = open(event.src_path, "r")
+        f_content = f.read()
+        print("content:" + str(f_content))
+        global current_queue_place
+        current_queue_place = int(f_content)
+
+        if current_queue_place > 0:
+            eel.set_queue(current_queue_place)
+            print("set queue place to " + str(current_queue_place))
+        else:
+            eel.close_queue_dialog()
+            eel.start_test(test_mode)
+            print("queue dialog closed")
+
+            queue_place_observer.stop()
+            # queue_place_observer.join()
+
+def on_moved(event):
+    print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
+
+queue_place_event_handler.on_modified = on_modified
+global queue_place_observer
+queue_place_observer = None
+
+global current_queue_place
+current_queue_place = 0
+
+global test_mode
+test_mode = ""
+
+
+# try:
+#     while True:
+#         time.sleep(1)
+# except KeyboardInterrupt:
+#     queue_place_observer.stop()
+#     queue_place_observer.join()
 
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
@@ -38,6 +101,8 @@ def retrieve_servers():
         if (i["test_method"] == "2"):
             location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
             eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
+
+    eel.add_server('Local test server (THIS IS A TEST)', '192.168.90.130' + "," +  '192.168.90.130')
 
 ###results server credentials###
 global dev_hash
@@ -253,10 +318,62 @@ def set_location(x,y):
     global lon
     lon = y
 
+@eel.expose
+def check_queue(mode):
+    global test_mode
+    test_mode = mode
+    print(test_mode)
+
+    f = open(queue_place_path, "r")
+    f_content = f.read()
+    print("content:" + str(f_content))
+    global current_queue_place
+    current_queue_place = int(f_content)
+
+    if current_queue_place > 0:
+        eel.set_queue(current_queue_place)
+        eel.open_queue_dialog()
+        
+        global queue_place_observer
+        queue_place_observer = None
+        queue_place_observer = Observer()
+        queue_place_observer.schedule(queue_place_event_handler, path, recursive=go_recursively)
+        queue_place_observer.start()
+        # queue_place_observer.join()
+        
+        print("queue_place_observer started")
+    else:
+        eel.start_test(test_mode)
+        print("walang queue")
+
 #CATCH JS CALL FOR NORMAL MODE
 @eel.expose 
 def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
+
+    # f = open(queue_place_path, "r")
+    # f_content = f.read()
+    # global current_queue_place
+    # current_queue_place = int(f_content)
+
+    # if current_queue_place > 0:
+    #     eel.set_queue(current_queue_place)
+    #     eel.open_queue_dialog()
+    #     queue_place_observer.start()
+    #     print("queue_place_observer started")
+
+    #     while current_queue_place > 0:
+    #         pass
+
+    #     # queue_place_observer.stop()
+    #     # queue_place_observer.join()
+
+    #     if current_queue_place == -1:
+    #         return
+
+    # else:
+    #     print("walang queue")
+
 
     # eel.printnormal({
     #     'MTU': 1500,
@@ -265,27 +382,29 @@ def normal(lat, lon, cir, serv_ip, network_type):
     #     'BDP': 900963.0000000001,
     # })
 
-    # return
+    # # return
 
-    for i in range(1, 7):
-        if i == 1:
-            eel.printprogress("Performing PLPMTUD...")
-        elif i == 2:
-            eel.printprogress("Measuring Ping...")
-        elif i == 3:
-            eel.printprogress("Executing iPerf UDP...")
-        elif i == 4:
-            eel.printprogress("Executing iPerf TCP...")
-        elif i == 5:
-            eel.printprogress("Measuring TCP Efficiency...")
-        elif i == 6:
-            eel.printprogress("Measuring Buffer Delay...")
+    # for i in range(1, 7):
+    #     if i == 1:
+    #         eel.printprogress("Performing PLPMTUD...")
+    #     elif i == 2:
+    #         eel.printprogress("Measuring Ping...")
+    #     elif i == 3:
+    #         eel.printprogress("Executing iPerf UDP...")
+    #     elif i == 4:
+    #         eel.printprogress("Executing iPerf TCP...")
+    #     elif i == 5:
+    #         eel.printprogress("Measuring TCP Efficiency...")
+    #     elif i == 6:
+    #         eel.printprogress("Measuring Buffer Delay...")
 
-        time.sleep(3)
-        eel.progress_now(100/6*i)
+    #     time.sleep(3)
+    #     eel.progress_now(100/6*i)
 
-    eel.printprogress("Done")
-    eel.progress_now(100)
+    # eel.printprogress("Done")
+    # eel.progress_now(100)
+    eel.printprogress("Measuring...")
+    eel.progress_now(99)
 
     ip = re.split(",", serv_ip)
     global server_uuid
@@ -306,6 +425,9 @@ def normal(lat, lon, cir, serv_ip, network_type):
     global dev_hash
     results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash)
     eel.printnormal(results[0][0])
+
+    eel.printprogress("Done")
+    eel.progress_now(100)
     #CALL eel.printlocal(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR REVERSE MODE
@@ -424,11 +546,16 @@ def get_gps_from_android():
     try:
         coordinates = ADB.getRawGpsCoordinates()
         print(coordinates)
+        if coordinates is None:
+            eel.set_gps_from_android(None, None)
+            return
+
         eel.set_gps_from_android(coordinates[0], coordinates[1])
 
     except Exception as e:
         print(e)
         eel.set_gps_from_android(None, None)
+
 
 #CATCH CANCEL CALL FROM JS. NOT FULLY WORKING
 global flag
@@ -438,5 +565,14 @@ def cancel_test():
     print("in")
     global flag
     flag = 1
+
+@eel.expose
+def leave_queue():
+    print('left queue')
+    global current_queue_place
+    current_queue_place = -1
+
+    queue_place_observer.stop()
+    # queue_place_observer.join()
 
 eel.start('login.html', size=(1024,768), port=8080)             # Start (this blocks and enters loop)
