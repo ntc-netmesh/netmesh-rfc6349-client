@@ -17,27 +17,38 @@ import normal_client, reverse_client
 '''
 async def queue_client(mode_function, server_ip, client_hash):
     socket = None
+    results = None
+    
     try:
+        print("server IP: " + server_ip)
         async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+            print("Sending client hash...")
             await socket.send(str(client_hash))
             #go signal
             current_turn = None
             f = None
-            while not "CURRENT_TURN" == current_turn: 
+            # while not "CURRENT_TURN" == current_turn: 
+            while current_turn != str(0):
+                print("BEFORE current_turn")
+                print(current_turn)
                 current_turn = await socket.recv()
+                print("AFTER current_turn")
+                print(current_turn)
                 queue_placement_filename = "tempfiles/queue/queue_place"
                 with open(queue_placement_filename, "w+") as f:
                     f.write(current_turn)
 
                 # send current_turn data to api endpoint
+            
             f.close()
+            
             #await the function mode
             results = mode_function(server_ip)
             results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
+            
             await socket.send("done")
             print_this = await socket.recv()
             print(print_this)
-            return results
     except:
         try:
             filename = "tempfiles/queue/queue_log"
@@ -47,6 +58,8 @@ async def queue_client(mode_function, server_ip, client_hash):
             await socket.close()
         except:
             pass
+    
+    return results
 
 
 
@@ -63,6 +76,7 @@ async def queue_client(mode_function, server_ip, client_hash):
         reverse         :   coroutine for reverse mode
 '''
 def retrieve_function(mode):
+    print("retrieve_function: " + str(mode))
     if mode == NORMAL_MODE:
         return normal_client.start_normal_client
     elif mode == REVERSE_MODE:
@@ -86,6 +100,7 @@ def retrieve_function(mode):
                                 modules for more details.
 '''
 def join_queue(mode, server_ip, client_hash):
+    print("join_queue")
     filename = "tempfiles/queue/queue_log"
     try:
         mode_function = retrieve_function(mode)
@@ -93,6 +108,7 @@ def join_queue(mode, server_ip, client_hash):
         group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
         all_groups = asyncio.gather(group)
         results = loop.run_until_complete(all_groups)
+        print("YEAH YEAH YEAH")
         loop.close()
         return results
     except:
@@ -109,12 +125,14 @@ def join_queue(mode, server_ip, client_hash):
     edit freely
 '''
 if __name__ == "__main__":
-    #results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash")
-    results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
-    #loop = asyncio.get_event_loop()
-    #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
-    ##group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
-    #all_groups = asyncio.gather(group)
-    #results = loop.run_until_complete(all_groups)
-    #loop.close()
+    print("Joining queue...")
+    # results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash")
+    # results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
+    loop = asyncio.get_event_loop()
+    # group = asyncio.gather(queue_client(normal_client.start_normal_client, DEFAULT_SERVER, "random_hash"))
+    group = asyncio.gather(queue_client(reverse_client.start_reverse_test, DEFAULT_SERVER, "random_hash"))
+    all_groups = asyncio.gather(group)
+    results = loop.run_until_complete(all_groups)
+    loop.close()
+    print("RESULTS: ")
     print(results)

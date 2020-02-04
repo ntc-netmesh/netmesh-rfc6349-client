@@ -102,7 +102,7 @@ def retrieve_servers():
             location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
             eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
 
-    eel.add_server('Local test server (THIS IS A TEST)', '192.168.90.130' + "," +  '192.168.90.130')
+    eel.add_server('Local test server (THIS IS A TEST)', '35.240.204.14' + "," +  'uuid.35.240.204.14')
 
 ###results server credentials###
 global dev_hash
@@ -329,7 +329,8 @@ def check_queue(mode):
     f_content = f.read()
     print("content:" + str(f_content))
     global current_queue_place
-    current_queue_place = int(f_content)
+    if (f_content.isdigit()):
+        current_queue_place = int(f_content)
 
     if current_queue_place > 0:
         eel.set_queue(current_queue_place)
@@ -351,6 +352,11 @@ def check_queue(mode):
 @eel.expose 
 def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
+    print(lat)
+    print(lon)
+    print(cir)
+    print(serv_ip)
+    print(network_type)
 
     # f = open(queue_place_path, "r")
     # f_content = f.read()
@@ -405,15 +411,15 @@ def normal(lat, lon, cir, serv_ip, network_type):
     # eel.printprogress("Done")
     # eel.progress_now(100)
     eel.printprogress("Measuring...")
-    eel.progress_now(99)
+   # eel.progress_now(99)
 
-    # ip = re.split(",", serv_ip)
-    # if ip is not None:
-    #     global server_uuid
-    #     server_uuid = ip[1]
+    ip = re.split(",", serv_ip)
+    if ip is not None:
+        global server_uuid
+        server_uuid = ip[1]
     
-    #     global server_ip
-    #     server_ip = ip[0]
+        global server_ip
+        server_ip = ip[0]
 
     global net_type
     net_type = network_type
@@ -580,4 +586,7 @@ def leave_queue():
     queue_place_observer.stop()
     # queue_place_observer.join()
 
-eel.start('login.html', size=(1024,768), port=8080)             # Start (this blocks and enters loop)
+def close():
+    print("babay")
+
+eel.start('login.html', size=(1024,768), port=8080, close_callback=close)             # Start (this blocks and enters loop)
