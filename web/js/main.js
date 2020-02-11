@@ -1,46 +1,4 @@
 // var fs = require("fs");
-function demoFromHTML() {
-    var pdf = new jsPDF('p', 'pt', 'letter');
-    // source can be HTML-formatted string, or a reference
-    // to an actual DOM element from which the text will be scraped.
-    source = $('#results-info')[0];
-
-    // we support special element handlers. Register them with jQuery-style 
-    // ID selector for either ID or node name. ("#iAmID", "div", "span" etc.)
-    // There is no support for any other type of selectors 
-    // (class, of compound) at this time.
-    specialElementHandlers = {
-        // element with id of "bypass" - jQuery style selector
-        '#bypassme': function (element, renderer) {
-            // true = "handled elsewhere, bypass text extraction"
-            return true
-        }
-    };
-    margins = {
-        top: 80,
-        bottom: 60,
-        left: 40,
-        width: 522
-    };
-    // all coords and widths are in jsPDF instance's declared units
-    // 'inches' in this case
-    pdf.fromHTML(
-        source, // HTML string or DOM elem ref.
-        margins.left, // x coord
-        margins.top, { // y coord
-            'width': margins.width, // max width of content on PDF
-            'elementHandlers': specialElementHandlers
-        },
-
-        function (dispose) {
-            // dispose: object with X, Y of the last line add to the PDF 
-            //          this allow the insertion of new lines after html
-
-            var mode = $('#btnSaveAsPdf').data('test-mode');
-            pdf.save(`Test results (${ mode } mode) - ${ moment().format('YYYY-MM-DD-HHmm') }.pdf`);
-    }, margins);
-}
-
 function disableMainForm(disabled) {
     $('.main-form').find('input').prop('disabled', disabled);
     $('.main-form').find('select').prop('disabled', disabled);
@@ -167,6 +125,10 @@ function add_server(server_name,ip_addr){
     option.text = server_name;
     option.value = ip_addr;
     server_list.add(option, 0);
+
+    if (server_name.startsWith("Local")) {
+        $('#server').val($('#server option:first').val());
+    }
 }
 
 
@@ -1009,6 +971,7 @@ function printlocal(result){
 eel.expose(printnormal);
 function printnormal(result){
     console.log(result);
+
     // alert('printnormal');
     //document.getElementById("local_result").value += result + "\n";
     localResultId = '#tblLocalResult tbody';
@@ -1017,7 +980,8 @@ function printnormal(result){
     $('#results-info').show();
 
     if (result) {
-        $(localResultId).append(`<tr><td>${ 'CIR' }</td><td>${ $('#cir').val() }${ ' Mbps' }</td></tr>`);
+        result["CIR"] = $('#cir').val();
+        $(localResultId).append(`<tr><td>${ 'CIR' }</td><td>${ result["CIR"] }${ ' Mbps' }</td></tr>`);
 
         if ("MTU" in result){
             /// document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
@@ -1065,7 +1029,7 @@ function printnormal(result){
         }
         if ("RETX_BYTES" in result){
             // document.getElementById("local_result").innerHTML += "Reransmitted Bytes: " + result["RETX_BYTES"] + "Bytes<br>";
-            $(localResultId).append(`<tr><td>${ 'Reransmitted Bytes' }</td><td>${ result["RETX_BYTES"] }${ ' Bytes' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Retransmitted Bytes' }</td><td>${ result["RETX_BYTES"] }${ ' Bytes' }</td></tr>`);
         }
         if ("TCP_EFF" in result){
             // document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
@@ -1082,6 +1046,8 @@ function printnormal(result){
     } else {
         $(localResultId).append(`<tr><td><span class="text-muted">${ 'No measured results' }<span></td></tr>`);
     }
+
+    normalTestResults = result;
 }
 
 eel.expose(printreverse);

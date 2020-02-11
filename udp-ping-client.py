@@ -13,12 +13,12 @@ from datetime import datetime
 import re
 
 # ip_addr = '202.92.132.191'
-ip_addr = '192.168.90.130'
+ip_addr = DEFAULT_SERVER
 port = 5005
 
 def normal_ping():
     # p = subprocess.Popen(["ping", "202.92.132.191", "-c", "10"], stdout = subprocess.PIPE)
-    p = subprocess.Popen(["ping", "192.168.90.130", "-c", "10"], stdout = subprocess.PIPE)
+    p = subprocess.Popen(["ping", ip_addr, "-c", "10"], stdout = subprocess.PIPE)
     for line in p.stdout:
         temp = line.decode("utf-8")
         print(temp)
