@@ -16,15 +16,17 @@ GLOBAL_LOGGER = getStreamLogger()
         @PARAMS:
             server_ip   : the ipv4 address of the server
                           whose RTT would be measured from
+            mtu         : Maximum transmission unit
             o_file      : output file for the RTT value
+            o_file      : output pcap file for the RTT value
         @RETURN:
             rtt_process : the rtt subprocess object
 '''
-def start_baseline_measure(server_ip, o_file, pcap_name):
+def start_baseline_measure(server_ip, mtu, o_file, pcap_name):
     rtt_process = None
     try:
         rtt_process = subprocess.Popen(["./rtt_executor.sh",
-                                         server_ip, RTT_HANDER_PORT, pcap_name
+                                         server_ip, str(RTT_HANDER_PORT), pcap_name, str(mtu)
                                         ], stdout = o_file)
         GLOBAL_LOGGER.debug("BASELINE RTT started")
     except:
@@ -58,16 +60,17 @@ def end_baseline_measure(o_file):
         into one method
         @PARAMS:
             server_ip         : IPv4 address of the server 
+            mtu               : Maximum Transmission Unit
         @RETURN:
             rtt               : the baseline RTT value
 '''
-def measure_rtt(server_ip):
+def measure_rtt(server_ip, mtu):
     try:
         pcap_name = "tempfiles/normal_mode/rtt_pcap.pcapng"
         fname = "tempfiles/normal_mode/rtt_temp_file"
         client_utils.file_setter(fname)
         output_file = open(fname,"w+")
-        rtt_proc = start_baseline_measure(server_ip, output_file, pcap_name)
+        rtt_proc = start_baseline_measure(server_ip, mtu, output_file, pcap_name)
         rtt_proc.wait()
         output_file.close()
         rtt = end_baseline_measure(fname)

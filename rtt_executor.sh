@@ -21,7 +21,7 @@ sharkpid=$!
 sleep 10;
 
 # run 
-./clienttcp $1 $2 &
+./clienttcp $1 $2 $4 &
 clientpid=$!
 
 sleep 60;

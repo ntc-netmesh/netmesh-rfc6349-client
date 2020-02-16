@@ -10,11 +10,6 @@
 #include <netinet/in.h> 
 #include <netinet/tcp.h> 
 
-#define PORT	 8080 
-#define PREVMAXLINE 1372
-#define MAXLINE 1360
-#define MAXLINEDUO 1360
-
 // global var holding socket file descriptor
 int* the_client_socket;
 
@@ -26,7 +21,10 @@ void sighandler(int signum) {
 }
 
 // Driver code 
-int main() { 
+int main(int argc, char** argv) { 
+	char* serverip = argv[1]
+	int PORT = atoi(argv[2]);
+	int MAXLINE = atoi(argv[3]);
 	int sockfd, n; 
 	char buffer[MAXLINE]; 
 	char* hello = malloc(MAXLINE * sizeof(char));
@@ -49,13 +47,14 @@ int main() {
 	//servaddr.sin_addr.s_addr = INADDR_ANY; 
 	//inet_aton("192.168.85.251", &servaddr.sin_addr );
 	//inet_aton("202.92.132.191", &servaddr.sin_addr );
-	inet_aton("192.168.85.251", &servaddr.sin_addr );
+	inet_aton(serverip, &servaddr.sin_addr );
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_port = htons(PORT); 
 	
 	// SOCKET OPTIONS FOR SPECIAL NMP
-	int maxseg = MAXLINE+66;
-	int maxbuf = 1500*2;
+	//int maxseg = MAXLINE+66;
+	int maxseg = MAXLINE;
+	//int maxbuf = 1500*2;
 	int one = 1;
     //if (setsockopt(sockfd, SOL_SOCKET,  SO_SNDBUF,    &maxbuf, sizeof(maxbuf)) < 0) 
     //    perror("ERROR setting SO_SNDBUF");

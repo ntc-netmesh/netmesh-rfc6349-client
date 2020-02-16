@@ -68,7 +68,7 @@ async def normal_client(logger, SERVER_IP):
                 traceback.print_exc(file=logf)
 
             try:
-                rtt = rtt_process.measure_rtt(SERVER_IP)
+                rtt = rtt_process.measure_rtt(SERVER_IP, mtu)
                 results["RTT"] = rtt
             except:
                 traceback.print_exc(file=logf)
