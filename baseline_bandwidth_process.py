@@ -6,82 +6,61 @@ from log_settings import getStreamLogger
 from datetime import datetime
 from constants import *
 from utilities import client_utils
+from math import floor, ceil
 
 GLOBAL_LOGGER = getStreamLogger()
 
 '''
-        Starts a "iperf3 -c" subproc instance
-        and returns the subproc object
-        @PARAMS
-            server_ip   : IPv4 address of the server
-            o_file      : output file of the bb process
-        @RETURNS
-            bb_process  : the subprocess object of the 
-                            baseline bandwidhth measurer
-'''
-def start_bandwidth_measure(server_ip, o_file):
-    bb_process = None
-    try:
-        bb_process = subprocess.Popen(["iperf3",
-                                          "--client", server_ip,
-                                          "--udp",
-                                          "--time", "10",
-                                          "--format", "m",
-                                          "--bandwidth", "1000M"
-                                         ], stdout = o_file)
-        GLOBAL_LOGGER.debug("BB started")
-    except:
-        GLOBAL_LOGGER.error("FAILED TO START BB")
-        try:
-            bb_process.kill()
-        except:
-            pass
-        raise
-    return bb_process
-
-'''
-    Parses the output of the passed subprocess object by inspecting
-        the file contents of where the output was piped into
+        Calculates the parameters to be used for the
+        throughput testing. These values are derived
+        via formulas.
         @PARAMS:
-            baseline_rtt : baseline rtt value
-            o_file       : output filename of bandwidth measurer process
+            bdp          : Bandwidth Delay Product
+            mtu          : Maximum Transmission Unit
         @RETURN:
-            bb_result    : the baseline bandwidth value
-            bdp_result   : bandwidth delay product
-            rwnd         : receiver window size
+            mss          : Maximum segment size
+            rwnd         : receive window size
+            connections  : number of parallel connections
 '''
-def end_bandwidth_measure(baseline_rtt, o_file):
-    rwnd = None
-    bb_result = None
-    bdp_result = None
+def find_throughput_params(bdp, mtu):
     try:
-        bb_result, bdp_result, rwnd = client_utils.parse_iperf3(o_file, baseline_rtt)
-        GLOBAL_LOGGER.debug("bb done")
+        mss = mtu - 40
+        x = 1
+        rwnd = x*mss
+        while(rwnd < bdp):
+            x += 1
+            rwnd = x*mss
+
+        connections = ceil( rwnd / (64*1024)  )
+        return mss, rwnd, connections
     except:
-        GLOBAL_LOGGER.error("bb parsing error")
+        GLOBAL_LOGGER.error("RWND calculation error")
         raise
-    return bb_result, bdp_result, rwnd
+    return
+
+
 
 '''
         Wraps the entire Baseline Bandwidth
         attainment process into one method
         @PARAMS:
             server_ip : IPv4 Address of the server
+            cir       : user input CIR value
             rtt       : baseline RTT value
+            mtu       : Maximum Transmission Unit
         @RETURN:
                       : the Baseline bandwidth,
                          Bandwidth Delay Product,
-                         and Receive window values
+                         Receive window, MSS and
+                         connections which are used
+                         as parameters for the throughput
+                         test.
 '''
-def bandwidth_measure(server_ip, rtt):
+def bandwidth_measure(server_ip, cir, rtt, mtu):
     try:
-        fname = "tempfiles/normal_mode/bb_temp_file"
-        client_utils.file_setter(fname)
-        output_file = open(fname,"r+")
-        bb_proc = start_bandwidth_measure(server_ip, output_file)
-        bb_proc.wait()
-        output_file.close()
-        return end_bandwidth_measure(rtt, fname)
+        bb_result = cir*(CIR_OVERSHOOT_MULTIPLIER)
+        bdp_result = floor( ((bb_result*(10**6))/8) * (bb_result/(10**3)) )
+        return bb_result, bdp_result, find_throughput_params(bdp_result, mtu)
     except:
         GLOBAL_LOGGER.error("baseline bandwidth failed")
         raise

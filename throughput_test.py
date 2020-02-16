@@ -19,13 +19,15 @@ GLOBAL_LOGGER = getStreamLogger()
             filename             : filename for network tracefile (pcapng)
             o_file               : output file for the process output
             server_ip            : IPv4 address of the server
+            mss                  : maximum segment size
+            connections          : number of parallel connections
             recv_window          : receiver window value
 
         @RETURNS:
             shark_proc           : shark process object
             throughput_proc      : throughput measurer process object
 '''
-def start_throughput_measure(filename, server_ip, recv_window, o_file):
+def start_throughput_measure(filename, server_ip, recv_window, mss, connections, o_file):
     shark_proc = None
     throughput_proc = None
     try:
@@ -33,8 +35,10 @@ def start_throughput_measure(filename, server_ip, recv_window, o_file):
         shark_proc = subprocess.Popen(["tshark", "-w", filename],stdout = subprocess.PIPE)
         throughput_proc = subprocess.Popen(["iperf3",
                                             "--client", server_ip,
-                                            "--time", "5",
+                                            "--time", "10",
                                             "--window", str(recv_window)+"K",
+                                            "--parallel", str(connections),
+                                            "--set-mss", str(mss),
                                             "--format", "m",
                                             "--bandwidth", "100M"],
                                             stdout = o_file)
@@ -93,16 +97,18 @@ def end_throughput_measure(rtt, recv_window, o_file):
             server_ip           : IPv4 address of the server
             recv_wnd            : Receiver window value
             rtt                 : baseline round trip time value 
+            mss                  : maximum segment size
+            connections          : number of parallel connections
         @RETURNS:
                                 : output metrics of the TCP throughput process
 '''
-def measure_throughput(filename, server_ip, recv_wnd, rtt):
+def measure_throughput(filename, server_ip, recv_wnd, rtt, mss, connections):
     try:
         fname = "tempfiles/normal_mode/thpt_temp_file"
         client_utils.file_setter(fname)
         output_file = open(fname,"r+")
         shark_proc, thpt_proc = \
-                start_throughput_measure(filename, server_ip, recv_wnd, output_file)
+                start_throughput_measure(filename, server_ip, recv_wnd, mss, connections, output_file)
         thpt_proc.wait()
         shark_proc.kill()
         return end_throughput_measure(rtt, recv_wnd, fname)

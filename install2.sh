@@ -21,6 +21,7 @@ sudo apt --yes --force-yes install traceroute
 sudo apt --yes --force-yes install net-tools
 sudo apt --yes --force-yes install tshark
 sudo apt --yes --force-yes install wireshark
+sudo apt install ethtool
 #echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 #sudo DEBIAN_FRONTEND=noninteractive apt-get -y install wireshark
 sudo dpkg-reconfigure wireshark-common

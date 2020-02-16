@@ -20,12 +20,11 @@ GLOBAL_LOGGER = getStreamLogger()
         @RETURN:
             rtt_process : the rtt subprocess object
 '''
-def start_baseline_measure(server_ip, o_file):
+def start_baseline_measure(server_ip, o_file, pcap_name):
     rtt_process = None
     try:
-        rtt_process = subprocess.Popen(["ping",
-                                         server_ip,
-                                         "-c","10" # packet count
+        rtt_process = subprocess.Popen(["./rtt_executor.sh",
+                                         server_ip, RTT_HANDER_PORT, pcap_name
                                         ], stdout = o_file)
         GLOBAL_LOGGER.debug("BASELINE RTT started")
     except:
@@ -64,10 +63,11 @@ def end_baseline_measure(o_file):
 '''
 def measure_rtt(server_ip):
     try:
+        pcap_name = "tempfiles/normal_mode/rtt_pcap.pcapng"
         fname = "tempfiles/normal_mode/rtt_temp_file"
         client_utils.file_setter(fname)
-        output_file = open(fname,"r+")
-        rtt_proc = start_baseline_measure(server_ip, output_file)
+        output_file = open(fname,"w+")
+        rtt_proc = start_baseline_measure(server_ip, output_file, pcap_name)
         rtt_proc.wait()
         output_file.close()
         rtt = end_baseline_measure(fname)

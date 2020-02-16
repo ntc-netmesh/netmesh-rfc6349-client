@@ -64,16 +64,14 @@ def iperf_parser(stdout_data, rtt, recv_window):
             thpt_process : the throughput measuring subprocess
                             object
 '''
-def start_window_throughput(server_ip, recv_window, mss, connections, o_file):
+def start_window_throughput(server_ip, recv_window, o_file):
     thpt_process = None
     try:
         thpt_process = subprocess.Popen([ "iperf3",
                                           "--client", server_ip,
-                                          "--time","10",
+                                          "--time","5",
                                           "--window", str(recv_window)+"K",
                                           "--format","m",
-                                          "--set-mss", str(mss),
-                                          "--parallel", str(connections),
                                           "--bandwidth","100M"
                                          ], stdout = o_file)
         GLOBAL_LOGGER.debug("WINDOW SCAN THROUGHPUT CLIENT started")
@@ -157,10 +155,8 @@ def end_window_shark(shark_proc):
                             the process
             recv_window :   receiver window size during the process
             rtt         :   round trip time value
-            mss         :   maximum segment size
-            connections :   number of parallel connections
 '''
-def window_scan(filename, client_ip, server_ip, recv_window, rtt, mss, connections):
+def window_scan(filename, client_ip, server_ip, recv_window, rtt):
     average_thpt = None
     ideal_thpt = None
     window_efficiency = None
@@ -173,7 +169,7 @@ def window_scan(filename, client_ip, server_ip, recv_window, rtt, mss, connectio
         fname = "tempfiles/normal_mode/"+filename+".temp"
         client_utils.file_setter(fname)
         output_file = open(fname,"r+")
-        thpt_proc   = start_window_throughput(server_ip, recv_window, mss, connections, output_file)
+        thpt_proc   = start_window_throughput(server_ip, recv_window, output_file)
         thpt_proc.wait()
         output_file.close()
         average_thpt, ideal_thpt = end_window_throughput\
