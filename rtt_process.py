@@ -26,7 +26,7 @@ def start_baseline_measure(server_ip, mtu, o_file, pcap_name):
     rtt_process = None
     try:
         rtt_process = subprocess.Popen(["./rtt_executor.sh",
-                                         server_ip, str(RTT_HANDER_PORT), pcap_name, str(mtu)
+                                         server_ip, str(RTT_MEASURE_PORT), pcap_name, str(mtu)
                                         ], stdout = o_file)
         GLOBAL_LOGGER.debug("BASELINE RTT started")
     except:
