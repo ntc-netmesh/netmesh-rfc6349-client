@@ -32,6 +32,7 @@ def start_throughput_measure(filename, server_ip, recv_window, mss, connections,
     throughput_proc = None
     try:
         client_utils.file_setter(filename)
+        shark_proc = subprocess.Popen(["./segmentation_toggler.sh"],stdout = subprocess.PIPE)
         shark_proc = subprocess.Popen(["tshark", "-w", filename],stdout = subprocess.PIPE)
         throughput_proc = subprocess.Popen(["iperf3",
                                             "--client", server_ip,
@@ -106,7 +107,7 @@ def measure_throughput(filename, server_ip, recv_wnd, rtt, mss, connections):
     try:
         fname = "tempfiles/normal_mode/thpt_temp_file"
         client_utils.file_setter(fname)
-        output_file = open(fname,"r+")
+        output_file = open(fname,"w+")
         shark_proc, thpt_proc = \
                 start_throughput_measure(filename, server_ip, recv_wnd, mss, connections, output_file)
         thpt_proc.wait()

@@ -22,7 +22,7 @@ void sighandler(int signum) {
 
 // Driver code 
 int main(int argc, char** argv) { 
-	char* serverip = argv[1]
+	char* serverip = argv[1];
 	int PORT = atoi(argv[2]);
 	int MAXLINE = atoi(argv[3]);
 	int sockfd, n; 

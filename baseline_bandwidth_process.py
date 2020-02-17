@@ -58,9 +58,10 @@ def find_throughput_params(bdp, mtu):
 '''
 def bandwidth_measure(server_ip, cir, rtt, mtu):
     try:
-        bb_result = cir*(CIR_OVERSHOOT_MULTIPLIER)
+        bb_result = int(cir)*(CIR_OVERSHOOT_MULTIPLIER)
         bdp_result = floor( ((bb_result*(10**6))/8) * (bb_result/(10**3)) )
-        return bb_result, bdp_result, find_throughput_params(bdp_result, mtu)
+        mss ,rwnd, conn = find_throughput_params(bdp_result, int(mtu))
+        return bb_result, bdp_result, mss, rwnd, conn
     except:
         GLOBAL_LOGGER.error("baseline bandwidth failed")
         raise

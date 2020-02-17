@@ -56,8 +56,8 @@ def parse_ping(stdout_data):
         for line in f:
             temp = line
             if "avg" in temp:
-                rtt = re.split(" ", temp)[3]
-                ave_rtt = re.split("/", rtt)[2]
+                ave_rtt = re.split(" ", temp)[2]
+                #ave_rtt = re.split("/", rtt)[2]
     return ave_rtt
 
 '''

@@ -16,18 +16,24 @@ GLOBAL_LOGGER = getStreamLogger()
         @PARAMS:
             server_ip   : the ipv4 address of the server
                           whose RTT would be measured from
+            client_ip   : the ipv4 address of the client
             mtu         : Maximum transmission unit
             o_file      : output file for the RTT value
             o_file      : output pcap file for the RTT value
         @RETURN:
             rtt_process : the rtt subprocess object
 '''
-def start_baseline_measure(server_ip, mtu, o_file, pcap_name):
+def start_baseline_measure(server_ip, client_ip, mtu, o_file, pcap_name):
     rtt_process = None
     try:
         rtt_process = subprocess.Popen(["./rtt_executor.sh",
-                                         server_ip, str(RTT_MEASURE_PORT), pcap_name, str(mtu)
-                                        ], stdout = o_file)
+                                         server_ip,
+                                         client_ip,
+                                         str(RTT_MEASURE_PORT), 
+                                         str(int(mtu)-40), # MSS is MTU - 40
+                                         o_file, 
+                                         pcap_name
+                                        ], stdout = subprocess.PIPE)
         GLOBAL_LOGGER.debug("BASELINE RTT started")
     except:
         GLOBAL_LOGGER.error("FAILED TO START BASELINE RTT")
@@ -60,19 +66,19 @@ def end_baseline_measure(o_file):
         into one method
         @PARAMS:
             server_ip         : IPv4 address of the server 
+            client_ip         : IPv4 address of the client 
             mtu               : Maximum Transmission Unit
         @RETURN:
             rtt               : the baseline RTT value
 '''
-def measure_rtt(server_ip, mtu):
+def measure_rtt(server_ip, client_ip, mtu):
     try:
         pcap_name = "tempfiles/normal_mode/rtt_pcap.pcapng"
-        fname = "tempfiles/normal_mode/rtt_temp_file"
+        fname     = "tempfiles/normal_mode/rtt_temp_file"
         client_utils.file_setter(fname)
-        output_file = open(fname,"w+")
-        rtt_proc = start_baseline_measure(server_ip, mtu, output_file, pcap_name)
+        open(fname,"w+").close()
+        rtt_proc = start_baseline_measure(server_ip, client_ip, mtu, fname, pcap_name)
         rtt_proc.wait()
-        output_file.close()
         rtt = end_baseline_measure(fname)
         return rtt
     except:

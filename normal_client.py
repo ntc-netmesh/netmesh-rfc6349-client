@@ -68,13 +68,13 @@ async def normal_client(logger, SERVER_IP):
                 traceback.print_exc(file=logf)
 
             try:
-                rtt = rtt_process.measure_rtt(SERVER_IP, mtu)
+                rtt = rtt_process.measure_rtt(SERVER_IP, client_ip, mtu)
                 results["RTT"] = rtt
             except:
                 traceback.print_exc(file=logf)
 
             try:
-                bb, bdp, mss, rwnd, conn = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, rtt)
+                bb, bdp, mss, rwnd, conn = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, 10, rtt, mtu)
                 results["BB"]                    = bb
                 results["BDP"]                   = bdp
                 results["MSS"]                   = mss
@@ -140,7 +140,7 @@ async def normal_client(logger, SERVER_IP):
             await websocket.close()
             return results
     except:
-        logger.error(("connection error"))
+        logger.error("connection error")
         pass
 
 
