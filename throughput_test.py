@@ -33,16 +33,17 @@ def start_throughput_measure(filename, server_ip, recv_window, mss, connections,
     try:
         client_utils.file_setter(filename)
         shark_proc = subprocess.Popen(["./segmentation_toggler.sh"],stdout = subprocess.PIPE)
-        shark_proc = subprocess.Popen(["tshark", "-w", filename],stdout = subprocess.PIPE)
+        shark_proc = subprocess.Popen(["tshark", "-w", filename, "-a", "duration:30"],stdout = subprocess.PIPE)
         throughput_proc = subprocess.Popen(["iperf3",
                                             "--client", server_ip,
                                             "--time", "10",
-                                            "--window", str(recv_window)+"K",
+                                            "--port", str(THPT_NORMAL_PORT),
+                                            "--window", str(recv_window),
                                             "--parallel", str(connections),
                                             "--set-mss", str(mss),
                                             "--format", "m",
-                                            "--bandwidth", "100M"],
-                                            stdout = o_file)
+                                            "--bandwidth", "100M"
+                                            ], stdout = o_file, stderr = o_file)
         GLOBAL_LOGGER.debug("Throughput test started")
     except:
         GLOBAL_LOGGER.error("FAILED TO START THROUGHPUT TEST")

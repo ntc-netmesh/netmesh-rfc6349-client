@@ -1,2 +1,19 @@
-Connecting to host 202.92.132.191, port 5201
-iperf3: error - 
+Connecting to host 202.92.132.191, port 3008
+[  4] local 192.168.1.34 port 32886 connected to 202.92.132.191 port 3008
+[ ID] Interval           Transfer     Bandwidth       Retr  Cwnd
+[  4]   0.00-1.00   sec   661 KBytes  5.42 Mbits/sec    0   17.9 KBytes       
+[  4]   1.00-2.00   sec   642 KBytes  5.26 Mbits/sec    0   17.9 KBytes       
+[  4]   2.00-3.00   sec   518 KBytes  4.25 Mbits/sec    1   17.9 KBytes       
+[  4]   3.00-4.00   sec   676 KBytes  5.54 Mbits/sec    0   17.9 KBytes       
+[  4]   4.00-5.00   sec   676 KBytes  5.54 Mbits/sec    0   17.9 KBytes       
+[  4]   5.00-6.00   sec   634 KBytes  5.19 Mbits/sec    0   17.9 KBytes       
+[  4]   6.00-7.00   sec   693 KBytes  5.68 Mbits/sec    0   17.9 KBytes       
+[  4]   7.00-8.00   sec   377 KBytes  3.09 Mbits/sec    0   17.9 KBytes       
+[  4]   8.00-9.00   sec   649 KBytes  5.32 Mbits/sec    0   17.9 KBytes       
+[  4]   9.00-10.00  sec   676 KBytes  5.54 Mbits/sec    0   17.9 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bandwidth       Retr
+[  4]   0.00-10.00  sec  6.06 MBytes  5.08 Mbits/sec    1             sender
+[  4]   0.00-10.00  sec  6.03 MBytes  5.06 Mbits/sec                  receiver
+
+iperf Done.
