@@ -69,11 +69,12 @@ def start_window_throughput(server_ip, recv_window, mss, connections, o_file):
     try:
         thpt_process = subprocess.Popen([ "iperf3",
                                           "--client", server_ip,
+                                          "--port", str(THPT_NORMAL_PORT),
                                           "--time","10",
-                                          "--window", str(recv_window)+"K",
-                                          "--format","m",
+                                          "--window", str(recv_window),
                                           "--set-mss", str(mss),
                                           "--parallel", str(connections),
+                                          "--format","m",
                                           "--bandwidth","100M"
                                          ], stdout = o_file)
         GLOBAL_LOGGER.debug("WINDOW SCAN THROUGHPUT CLIENT started")
@@ -172,7 +173,7 @@ def window_scan(filename, client_ip, server_ip, recv_window, rtt, mss, connectio
         tshark_proc = start_window_shark(filename)
         fname = "tempfiles/normal_mode/"+filename+".temp"
         client_utils.file_setter(fname)
-        output_file = open(fname,"r+")
+        output_file = open(fname,"w+")
         thpt_proc   = start_window_throughput(server_ip, recv_window, mss, connections, output_file)
         thpt_proc.wait()
         output_file.close()
@@ -230,11 +231,11 @@ def main_window_scan(**kwargs):
     nbuffer_plot = []
     window_size = []
     try:
-        kwargs["recv_window"] *= 1000.0
+        #kwargs["recv_window"] *= 1000.0
         base_window = kwargs["recv_window"]
         for wnd_size_percent in range(1,5):
             x = wnd_size_percent
-            kwargs["filename"] = "wnd_"+str(x)+"_percent.pcapng"
+            kwargs["filename"] = "wnd_"+str(x*0.25)+".pcapng"
             kwargs["recv_window"] = 0.25*x*base_window
             ave, ide, eff, buf = window_scan(**kwargs)
             window_size.append(kwargs["recv_window"])

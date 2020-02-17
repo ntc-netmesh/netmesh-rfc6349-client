@@ -83,22 +83,22 @@ async def normal_client(logger, SERVER_IP):
             except:
                 traceback.print_exc(file=logf)
 
-            #try:
-            #    param_list = { "client_ip"   : client_ip,
-            #                   "server_ip"   : SERVER_IP,
-            #                   "rtt"         : rtt,
-            #                   "mss"         : mss,
-            #                   "connections" : conn,
-            #                   "recv_window" : rwnd       }
-            #    window_size, average_tcp, ideal_tcp, neff_plot, nbuffer_plot \
-            #            = windows_scan.main_window_scan(**param_list)
-            #    results["WND_SIZES"]     = window_size
-            #    results["WND_AVG_TCP"]   = average_tcp
-            #    results["WND_IDEAL_TCP"] = ideal_tcp
-            #    results["EFF_PLOT"]      = neff_plot
-            #    results["BUF_PLOT"]      = nbuffer_plot
-            #except:
-            #    traceback.print_exc(file=logf)
+            try:
+                param_list = { "client_ip"   : client_ip,
+                               "server_ip"   : SERVER_IP,
+                               "rtt"         : rtt,
+                               "mss"         : mss,
+                               "connections" : conn,
+                               "recv_window" : rwnd       }
+                window_size, average_tcp, ideal_tcp, neff_plot, nbuffer_plot \
+                        = windows_scan.main_window_scan(**param_list)
+                results["WND_SIZES"]     = window_size
+                results["WND_AVG_TCP"]   = average_tcp
+                results["WND_IDEAL_TCP"] = ideal_tcp
+                results["EFF_PLOT"]      = neff_plot
+                results["BUF_PLOT"]      = nbuffer_plot
+            except:
+                traceback.print_exc(file=logf)
 
             try:
                 filename = "tempfiles/normal_mode/testresults.pcapng"
