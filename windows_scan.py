@@ -41,10 +41,13 @@ def iperf_parser(stdout_data, rtt, recv_window):
                 entries = re.findall(r'\S+',temp)
 
                 #check if test ran in 5s
-                timecheck = float(re.split("-",entries[2])[1])
-                if timecheck < 5:
-                    GLOBAL_LOGGER.error("Windows scan Iperf TCP incomplete")
-                    return
+                try:
+                    timecheck = float(re.split("-",entries[2])[1])
+                    if timecheck < 5:
+                        GLOBAL_LOGGER.error("Windows scan Iperf TCP incomplete")
+                        return
+                except:
+                    pass
                 average_thpt = entries[6]
                 average_tcp.append(entries[6] + "Mbits/s")
                 ideal_thput = (recv_window * 8 / (float(rtt)/1000))/1000

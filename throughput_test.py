@@ -41,6 +41,9 @@ def start_throughput_measure(filename, server_ip, recv_window, mss, connections,
                                             "--window", str(recv_window),
                                             "--parallel", str(connections),
                                             "--set-mss", str(mss),
+                                            #"--window", "59K",
+                                            #"--parallel", "10",
+                                            #"--set-mss", "1460",
                                             "--format", "m",
                                             "--bandwidth", "100M"
                                             ], stdout = o_file, stderr = o_file)

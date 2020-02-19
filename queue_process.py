@@ -93,7 +93,7 @@ def join_queue(mode, server_ip, client_hash):
         group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
         all_groups = asyncio.gather(group)
         results = loop.run_until_complete(all_groups)
-        loop.close()
+        #loop.close()
         return results
     except:
         try:

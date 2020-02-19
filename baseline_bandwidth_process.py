@@ -59,7 +59,7 @@ def find_throughput_params(bdp, mtu):
 def bandwidth_measure(server_ip, cir, rtt, mtu):
     try:
         bb_result = int(cir)*(CIR_OVERSHOOT_MULTIPLIER)
-        bdp_result = floor( ((bb_result*(10**6))/8) * (bb_result/(10**3)) )
+        bdp_result = floor( ((bb_result*(10**6))/8) * (float(rtt)/(10**3)) )
         mss ,rwnd, conn = find_throughput_params(bdp_result, int(mtu))
         return bb_result, bdp_result, mss, rwnd, conn
     except:

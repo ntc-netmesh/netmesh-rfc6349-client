@@ -126,27 +126,36 @@ def parse_shark(stdout_data, recv_window, rtt):
             if "sender" in temp:
                 entries = re.findall(r'\S+',temp)
                 #check if test ran in 5s
-                timecheck = float(re.split("-",entries[2])[1])
-                if timecheck < 5:
-                    print("iPerf TCP incomplete")
-                    return
-                ave_tcp = float(entries[6])
-                ideal_throughput = (recv_window * 8 / (float(rtt)/1000))/1000
-                ide_tcp = ideal_throughput
-                #max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
-                temp2 = re.split("-",entries[2])
-                actual = float(temp2[1])
-                ave_tt = actual
-                ideal = float(entries[4]) * 8 / ideal_throughput
-                ide_tt = ideal
-                ttr = actual / ideal
-                tcp_ttr = ttr
+                try:
+                    timecheck = float(re.split("-",entries[2])[1])
+                    if timecheck < 5:
+                        print("iPerf TCP incomplete")
+                        return
+                except:
+                    pass
+                try:
+                    ave_tcp = float(entries[6])
+                    ideal_throughput = (recv_window * 8 / (float(rtt)/1000))/1000
+                    ide_tcp = ideal_throughput
+                    #max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
+                    temp2 = re.split("-",entries[2])
+                    actual = float(temp2[1])
+                    ave_tt = actual
+                    ideal = float(entries[4]) * 8 / ideal_throughput
+                    ide_tt = ideal
+                    ttr = actual / ideal
+                    tcp_ttr = ttr
+                except:
+                    pass
 
             elif "KBytes" in temp:
-                entries = re.findall(r'\S+',temp)
-                x_axis = re.split("-",entries[2])
-                x_axis = int(float(x_axis[1]))
-                speed_plot.append([x_axis,float(entries[6])])
+                try:
+                    entries = re.findall(r'\S+',temp)
+                    x_axis = re.split("-",entries[2])
+                    x_axis = int(float(x_axis[1]))
+                    speed_plot.append([x_axis,float(entries[6])])
+                except:
+                    pass
     return ave_tcp, ide_tcp, ave_tt, ide_tt, tcp_ttr, speed_plot
 
 #def efficiency_process(filename, client_ip):

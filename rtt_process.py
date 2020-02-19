@@ -76,6 +76,7 @@ def measure_rtt(server_ip, client_ip, mtu):
         pcap_name = "tempfiles/normal_mode/rtt_pcap.pcapng"
         fname     = "tempfiles/normal_mode/rtt_temp_file"
         client_utils.file_setter(fname)
+        client_utils.file_setter(pcap_name)
         open(fname,"w+").close()
         rtt_proc = start_baseline_measure(server_ip, client_ip, mtu, fname, pcap_name)
         rtt_proc.wait()
