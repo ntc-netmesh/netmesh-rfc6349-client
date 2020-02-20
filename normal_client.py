@@ -100,7 +100,7 @@ async def normal_client(logger, SERVER_IP):
                 results["WND_IDEAL_TCP"] = ideal_tcp
                 results["EFF_PLOT"]      = neff_plot
                 results["BUF_PLOT"]      = nbuffer_plot
-                results["ACTUAL_IDEAL"]  = actual_ideal
+                results["WND_ACTUAL_IDEAL"]  = actual_ideal
             except:
                 traceback.print_exc(file=logf)
 
