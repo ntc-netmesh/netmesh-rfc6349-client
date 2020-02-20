@@ -47,6 +47,7 @@ async def normal_client(logger, SERVER_IP):
     logf = None
     mss = None
     conn = None
+    actual_rwnd = None
     try:
         logf = open(LOGFILE,"w+")
         client_ip = client_utils.get_client_ip()
@@ -74,12 +75,13 @@ async def normal_client(logger, SERVER_IP):
                 traceback.print_exc(file=logf)
 
             try:
-                bb, bdp, mss, rwnd, conn = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, 10, rtt, mtu)
+                bb, bdp, mss, rwnd, conn, actual_rwnd = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, 10, rtt, mtu)
                 results["BB"]                    = bb
                 results["BDP"]                   = bdp
                 results["MSS"]                   = mss
                 results["RWND"]                  = rwnd
                 results["PARALLEL_CONNECTIONS"]  = conn
+                results["ACTUAL_RWND"]           = actual_rwnd
             except:
                 traceback.print_exc(file=logf)
 
@@ -89,24 +91,27 @@ async def normal_client(logger, SERVER_IP):
                                "rtt"         : rtt,
                                "mss"         : mss,
                                "connections" : conn,
+                               "actual_rwnd" : actual_rwnd,
                                "recv_window" : rwnd       }
-                window_size, average_tcp, ideal_tcp, neff_plot, nbuffer_plot \
+                window_size, average_tcp, ideal_tcp, neff_plot, nbuffer_plot, actual_ideal \
                         = windows_scan.main_window_scan(**param_list)
                 results["WND_SIZES"]     = window_size
                 results["WND_AVG_TCP"]   = average_tcp
                 results["WND_IDEAL_TCP"] = ideal_tcp
                 results["EFF_PLOT"]      = neff_plot
                 results["BUF_PLOT"]      = nbuffer_plot
+                results["ACTUAL_IDEAL"]  = actual_ideal
             except:
                 traceback.print_exc(file=logf)
 
             try:
                 filename = "tempfiles/normal_mode/testresults.pcapng"
                 throughput_average, throughput_ideal, transfer_time_average, \
-                        transfer_time_ideal, tcp_ttr, speed_plot = \
-                        throughput_test.measure_throughput(filename, SERVER_IP, rwnd, rtt, mss, conn)
+                        transfer_time_ideal, tcp_ttr, speed_plot, actual_ideal = \
+                        throughput_test.measure_throughput(filename, SERVER_IP, rwnd, rtt, mss, conn, actual_rwnd)
                 results["THPT_AVG"]       = throughput_average
                 results["THPT_IDEAL"]     = throughput_ideal
+                results["ACTUAL_IDEAL"]   = actual_ideal
                 results["TRANSFER_AVG"]   = transfer_time_average
                 results["TRANSFER_IDEAL"] = transfer_time_ideal
                 results["TCP_TTR"]        = tcp_ttr

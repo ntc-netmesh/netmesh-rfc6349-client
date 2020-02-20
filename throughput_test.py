@@ -66,6 +66,8 @@ def start_throughput_measure(filename, server_ip, recv_window, mss, connections,
             recv_window            : Receiver window value
             o_file                 : filename containing the output of 
                                         throughput_proc
+            actual_rwnd            : the unmultiplied receive window
+                                        calculations
 
         @RETURNS:
             speed_plot             : a list of plot points for plotting
@@ -76,14 +78,16 @@ def start_throughput_measure(filename, server_ip, recv_window, mss, connections,
             transfer_time_ideal    : calculated ideal transfer time
             tcp_ttr                : ratio between actual and ideal transfer time
 '''
-def end_throughput_measure(rtt, recv_window, o_file):
+def end_throughput_measure(rtt, recv_window, o_file, actual_rwnd):
     speed_plot = None
     throughput_average = None
     throughput_ideal = None
     transfer_time_average = None
     transfer_time_ideal = None
     tcp_ttr = None
+    actual_ideal = None
     try:
+        actual_ideal = (actual_rwnd * 8 / (float(rtt)/1000))/(10**6)
         throughput_average, throughput_ideal, transfer_time_average, \
                 transfer_time_ideal, tcp_ttr, speed_plot = \
                 client_utils.parse_shark(o_file, recv_window, rtt)
@@ -92,7 +96,7 @@ def end_throughput_measure(rtt, recv_window, o_file):
         GLOBAL_LOGGER.error("throughput parsing error")
         raise
     return throughput_average, throughput_ideal, transfer_time_average, \
-            transfer_time_ideal, tcp_ttr, speed_plot
+            transfer_time_ideal, tcp_ttr, speed_plot, actual_ideal
 
 '''
         Wraps the entire throughput
@@ -107,7 +111,7 @@ def end_throughput_measure(rtt, recv_window, o_file):
         @RETURNS:
                                 : output metrics of the TCP throughput process
 '''
-def measure_throughput(filename, server_ip, recv_wnd, rtt, mss, connections):
+def measure_throughput(filename, server_ip, recv_wnd, rtt, mss, connections, actual_rwnd):
     try:
         fname = "tempfiles/normal_mode/thpt_temp_file"
         client_utils.file_setter(fname)
@@ -116,7 +120,7 @@ def measure_throughput(filename, server_ip, recv_wnd, rtt, mss, connections):
                 start_throughput_measure(filename, server_ip, recv_wnd, mss, connections, output_file)
         thpt_proc.wait()
         shark_proc.kill()
-        return end_throughput_measure(rtt, recv_wnd, fname)
+        return end_throughput_measure(rtt, recv_wnd, fname, actual_rwnd)
     except:
         GLOBAL_LOGGER.error("throughput test failed")
         raise
