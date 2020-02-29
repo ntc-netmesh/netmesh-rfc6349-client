@@ -36,7 +36,7 @@ LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
         <done>                              < OUTPUT_PRINTING >                  <done>
                                            < CONNECTION_TEARDOWN >
 '''
-async def normal_client(logger, SERVER_IP):
+async def normal_client(logger, SERVER_IP, cir):
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -75,7 +75,7 @@ async def normal_client(logger, SERVER_IP):
                 traceback.print_exc(file=logf)
 
             try:
-                bb, bdp, mss, rwnd, conn, actual_rwnd = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, 10, rtt, mtu)
+                bb, bdp, mss, rwnd, conn, actual_rwnd = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, cir, rtt, mtu)
                 results["BB"]                    = bb
                 results["BDP"]                   = bdp
                 results["MSS"]                   = mss
@@ -158,7 +158,7 @@ async def normal_client(logger, SERVER_IP):
     @RETURN:
         ret_val     :   an async task object that is meant to be awaited
 '''
-def start_normal_client(server_url=DEFAULT_SERVER):
+def start_normal_client(server_url=DEFAULT_SERVER, cir=10):
     logger = getStreamLogger()
     try:
         client_utils.file_setter(LOGFILE)
@@ -166,7 +166,7 @@ def start_normal_client(server_url=DEFAULT_SERVER):
     except:
         pass
 
-    ret_val = asyncio.get_event_loop().create_task(normal_client(logger, server_url))
+    ret_val = asyncio.get_event_loop().create_task(normal_client(logger, server_url, cir))
     return ret_val
 
 

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     average_tcp = 0
     total = 0
     for x in range(0,n):
-        results = queue_process.join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash")[0][0]
+        results = queue_process.join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash", int(sys.argv[2]))[0][0]
         try:
             average_rtt += float(results['RTT'])
             average_tcp += float(results['THPT_AVG'])
