@@ -90,7 +90,7 @@ def end_throughput_measure(rtt, recv_window, o_file, actual_rwnd):
         actual_ideal = (actual_rwnd * 8 / (float(rtt)/1000))/(10**6)
         throughput_average, throughput_ideal, transfer_time_average, \
                 transfer_time_ideal, tcp_ttr, speed_plot = \
-                client_utils.parse_shark(o_file, recv_window, rtt)
+                client_utils.parse_shark(o_file, recv_window, rtt, "sender")
         GLOBAL_LOGGER.debug("throughput test done")
     except:
         GLOBAL_LOGGER.error("throughput parsing error")

@@ -111,7 +111,8 @@ def parse_ping(stdout_data):
                                 average and ideal
         speed_plot      :    N/A
 '''
-def parse_shark(stdout_data, recv_window, rtt, res_filter):
+def parse_shark(stdout_data, recv_window, rtt):
+    # param = results[0], mtu_param = results[1]
     speed_plot = []
     ave_tcp = None
     ave_tt = None
@@ -124,12 +125,15 @@ def parse_shark(stdout_data, recv_window, rtt, res_filter):
     with open(stdout_data,"r") as f:
         for line in f:
             temp = line
-            if res_filter in temp:
+            if "sender" in temp:
                 entries = re.findall(r'\S+',temp)
                 if "SUM" in temp:
                     offset = 1
                 try:
                     ave_tcp = float(entries[6-offset])
+                    #ideal_throughput = (recv_window * 8 / (float(rtt)/1000))/(10**6)
+                    #ide_tcp = ideal_throughput
+                    #max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
 
                     # average transfer time
                     temp2 = re.split("-",entries[2-offset])
@@ -143,5 +147,13 @@ def parse_shark(stdout_data, recv_window, rtt, res_filter):
                 except:
                     pass
 
+            #elif "KBytes" in temp:
+            #    try:
+            #        entries = re.findall(r'\S+',temp)
+            #        x_axis = re.split("-",entries[2])
+            #        x_axis = int(float(x_axis[1]))
+            #        speed_plot.append([x_axis,float(entries[6])])
+            #    except:
+            #        pass
     return ave_tcp, ide_tcp, ave_tt, ide_tt, tcp_ttr, speed_plot
 
