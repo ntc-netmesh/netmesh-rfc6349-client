@@ -58,8 +58,9 @@ async def throughput_process(tempfile, SERVER_IP, handler_port, throughput_port,
             thpt_results = json.loads(thpt_results)
             o_file.close()
             # parse file
-            file_results = client_utils.parse_shark(tempfile)
+            file_results = client_utils.parse_shark(tempfile, float(recv_window), float(rtt), "receiver")
 
+            thpt_results["THPT_IDEAL"] = (recv_window * 8 / (float(rtt)/1000))/(10**6)
             #thpt_results["IDEAL_COMPUTED"] = recv_window * 8 / (float(rtt))/1000/1000
             try:
                 thpt_process.kill()

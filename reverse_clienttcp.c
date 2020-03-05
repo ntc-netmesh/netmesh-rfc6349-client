@@ -71,12 +71,13 @@ int main(int argc, char** argv) {
 	while(cont > -1){
 		setsockopt(sockfd, IPPROTO_TCP, TCP_QUICKACK, &one, sizeof(one));
 		n = read(sockfd,buffer,MAXLINE);
-		if (n < 0) 
-		if(strstr(buffer, hello) != NULL) {
+		if (n < 0) { 
 			printf("Here is the message length: %lu\n",sizeof(buffer));
-		} else {
-			printf("no string");
 		}
+		//if(strstr(buffer, hello) != NULL) {
+		//} else {
+		//	printf("no string");
+		//}
 		cont++;
 	}
 	close(sockfd); 

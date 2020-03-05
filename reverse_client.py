@@ -36,7 +36,7 @@ FALLBACK_LOGGER = getStreamLogger()
         <done>                    < OUTPUT_PRINTING >                <done>
                                 < CONNECTION_TEARDOWN >
 '''
-async def reverse_client(logger, SERVER_IP):
+async def reverse_client(logger, SERVER_IP, cir):
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -56,26 +56,28 @@ async def reverse_client(logger, SERVER_IP):
             pass
         return
 
-    try:
-        mtu_return = await reverse_mtu_process.mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger)
-        results = {**results, **json.loads(mtu_return)}
-    except:
-        try:
-            logger.error("mtu error")
-            traceback.print_exc(file=logf)
-        except:
-            pass
+    #try:
+    #    mtu_return = await reverse_mtu_process.mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger)
+    #    results = {**results, **json.loads(mtu_return)}
+    #except:
+    #    logger.error("mtu error")
+    #    try:
+    #        traceback.print_exc(file=logf)
+    #    except:
+    #        pass
+    results["MTU"] = '1500'
+    results["RTT"] = '4.0394038'
 
-    try:
-        mss = int(results["MTU"]) - 40
-        rtt_return = await reverse_rtt_process.rtt_process(SERVER_IP, RTT_HANDLER_PORT, str(mss), logger)
-        results = {**results, **json.loads(rtt_return)}
-    except:
-        try:
-            logger.error("rtt error")
-            traceback.print_exc(file=logf)
-        except:
-            pass
+    #try:
+    #    mss = int(results["MTU"]) - 40
+    #    rtt_return = await reverse_rtt_process.rtt_process(SERVER_IP, RTT_HANDLER_PORT, str(mss), logger)
+    #    results = {**results, **json.loads(rtt_return)}
+    #except:
+    #    logger.error("rtt error")
+    #    try:
+    #        traceback.print_exc(file=logf)
+    #    except:
+    #        pass
 
     try:
         mtu = results["MTU"]
@@ -89,15 +91,14 @@ async def reverse_client(logger, SERVER_IP):
         results["PARALLEL_CONNECTIONS"]  = conn
         results["ACTUAL_RWND"]           = actual_rwnd
     except:
+        logger.error("bb error")
         try:
-            logger.error("bb error")
             traceback.print_exc(file=logf)
         except:
             pass
 
     try:
         kwargs = {
-                "tempfile"       :SERVER_IP,
                 "SERVER_IP"      :SERVER_IP,
                 "handler_port"   :THROUGHPUT_HANDLER_PORT,
                 "throughput_port":THROUGHPUT_SERVICE_PORT,
@@ -108,7 +109,7 @@ async def reverse_client(logger, SERVER_IP):
                 "mss"            :results["MSS"],
                 "logger"         :logger
                 }
-        scan_return = await scan_process(**kwargs)
+        scan_return = await reverse_windows_scan.scan_process(**kwargs)
         results = {**results, **scan_return}
     except:
         try:
@@ -128,7 +129,7 @@ async def reverse_client(logger, SERVER_IP):
     @RETURN:
         ret_val     :   an async task object that is meant to be awaited
 '''
-def start_reverse_test(server_ip):
+def start_reverse_test(server_ip=DEFAULT_SERVER, cir=10):
     logger = getStreamLogger()
     try:
         client_utils.file_setter(LOGFILE)
@@ -136,9 +137,9 @@ def start_reverse_test(server_ip):
     except:
         pass
 
-    ret_val = asyncio.get_event_loop().create_task(reverse_client(logger, server_ip))
+    ret_val = asyncio.get_event_loop().create_task(reverse_client(logger, server_ip, cir))
     return ret_val
 
 if __name__ == "__main__":
-    ret_val = start_reverse_test()
+    ret_val = start_reverse_test(DEFAULT_SERVER)
     print(ret_val)

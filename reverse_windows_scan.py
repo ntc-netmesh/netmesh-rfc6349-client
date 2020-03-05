@@ -52,7 +52,7 @@ async def scan_process(**kwargs):
                 scan_results = {**scan_results, **thpt_results}
         return scan_results
     except:
-        logger.error(("connection error"))
+        kwargs["logger"].logger.error(("connection error"))
         thpt_process.kill()
         raise
     return

@@ -32,14 +32,14 @@ async def rtt_process(SERVER_IP, handler_port, mss, logger=FALLBACK_LOGGER):
     rtt_process = None
     try:
         websocket_url = "ws://"+SERVER_IP+":"+str(handler_port)
-        async with websockets.connect(websocket_url) as websocket:
+        async with websockets.connect(websocket_url, ping_timeout=150) as websocket:
             await websocket.send(json.dumps({"MSS":str(mss)}))
             go_signal = await websocket.recv()
             subprocess.run(["gcc","-o","reverse_rtt_client","reverse_clienttcp.c"])
             rtt_process = subprocess.Popen(["./reverse_rtt_client",
                                             SERVER_IP,
-                                            RTT_MEASURE_PORT,
-                                            mss
+                                            str(RTT_MEASURE_PORT),
+                                            str(mss)
                                             ], stdout = subprocess.PIPE,
                                                stderr = subprocess.PIPE)
             rtt = await websocket.recv()
