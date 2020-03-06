@@ -1,15 +1,3 @@
-PING 202.92.132.191 (202.92.132.191) 56(84) bytes of data.
-64 bytes from 202.92.132.191: icmp_seq=1 ttl=55 time=6.96 ms
-64 bytes from 202.92.132.191: icmp_seq=2 ttl=55 time=7.73 ms
-64 bytes from 202.92.132.191: icmp_seq=3 ttl=55 time=7.72 ms
-64 bytes from 202.92.132.191: icmp_seq=4 ttl=55 time=6.88 ms
-64 bytes from 202.92.132.191: icmp_seq=5 ttl=55 time=7.56 ms
-64 bytes from 202.92.132.191: icmp_seq=6 ttl=55 time=7.82 ms
-64 bytes from 202.92.132.191: icmp_seq=7 ttl=55 time=8.17 ms
-64 bytes from 202.92.132.191: icmp_seq=8 ttl=55 time=8.13 ms
-64 bytes from 202.92.132.191: icmp_seq=9 ttl=55 time=7.34 ms
-64 bytes from 202.92.132.191: icmp_seq=10 ttl=55 time=8.31 ms
-
---- 202.92.132.191 ping statistics ---
-10 packets transmitted, 10 received, 0% packet loss, time 9013ms
-rtt min/avg/max/mdev = 6.887/7.667/8.316/0.465 ms
+min : 50.720458984375
+max : 52.317626953125
+avg : 51.16639

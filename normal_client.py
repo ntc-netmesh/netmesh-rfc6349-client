@@ -36,7 +36,7 @@ LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
         <done>                              < OUTPUT_PRINTING >                  <done>
                                            < CONNECTION_TEARDOWN >
 '''
-async def normal_client(logger, SERVER_IP):
+async def normal_client(logger, SERVER_IP, cir):
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -45,6 +45,9 @@ async def normal_client(logger, SERVER_IP):
     bb = None
     rwnd = None
     logf = None
+    mss = None
+    conn = None
+    actual_rwnd = None
     try:
         logf = open(LOGFILE,"w+")
         client_ip = client_utils.get_client_ip()
@@ -66,16 +69,19 @@ async def normal_client(logger, SERVER_IP):
                 traceback.print_exc(file=logf)
 
             try:
-                rtt = rtt_process.measure_rtt(SERVER_IP)
+                rtt = rtt_process.measure_rtt(SERVER_IP, client_ip, mtu)
                 results["RTT"] = rtt
             except:
                 traceback.print_exc(file=logf)
 
             try:
-                bb, bdp, rwnd = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, rtt)
-                results["BB"]   = bb
-                results["BDP"]  = bdp
-                results["RWND"] = rwnd
+                bb, bdp, mss, rwnd, conn, actual_rwnd = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, cir, rtt, mtu)
+                results["BB"]                    = bb
+                results["BDP"]                   = bdp
+                results["MSS"]                   = mss
+                results["RWND"]                  = rwnd
+                results["PARALLEL_CONNECTIONS"]  = conn
+                results["ACTUAL_RWND"]           = actual_rwnd
             except:
                 traceback.print_exc(file=logf)
 
@@ -83,24 +89,29 @@ async def normal_client(logger, SERVER_IP):
                 param_list = { "client_ip"   : client_ip,
                                "server_ip"   : SERVER_IP,
                                "rtt"         : rtt,
+                               "mss"         : mss,
+                               "connections" : conn,
+                               "actual_rwnd" : actual_rwnd,
                                "recv_window" : rwnd       }
-                window_size, average_tcp, ideal_tcp, neff_plot, nbuffer_plot \
+                window_size, average_tcp, ideal_tcp, neff_plot, nbuffer_plot, actual_ideal \
                         = windows_scan.main_window_scan(**param_list)
                 results["WND_SIZES"]     = window_size
                 results["WND_AVG_TCP"]   = average_tcp
                 results["WND_IDEAL_TCP"] = ideal_tcp
                 results["EFF_PLOT"]      = neff_plot
                 results["BUF_PLOT"]      = nbuffer_plot
+                results["WND_ACTUAL_IDEAL"]  = actual_ideal
             except:
                 traceback.print_exc(file=logf)
 
             try:
                 filename = "tempfiles/normal_mode/testresults.pcapng"
                 throughput_average, throughput_ideal, transfer_time_average, \
-                        transfer_time_ideal, tcp_ttr, speed_plot = \
-                        throughput_test.measure_throughput(filename, SERVER_IP, rwnd, rtt)
+                        transfer_time_ideal, tcp_ttr, speed_plot, actual_ideal = \
+                        throughput_test.measure_throughput(filename, SERVER_IP, rwnd, rtt, mss, conn, actual_rwnd)
                 results["THPT_AVG"]       = throughput_average
                 results["THPT_IDEAL"]     = throughput_ideal
+                results["ACTUAL_IDEAL"]   = actual_ideal
                 results["TRANSFER_AVG"]   = transfer_time_average
                 results["TRANSFER_IDEAL"] = transfer_time_ideal
                 results["TCP_TTR"]        = tcp_ttr
@@ -134,7 +145,7 @@ async def normal_client(logger, SERVER_IP):
             await websocket.close()
             return results
     except:
-        logger.error(("connection error"))
+        logger.error("connection error")
         pass
 
 
@@ -147,7 +158,7 @@ async def normal_client(logger, SERVER_IP):
     @RETURN:
         ret_val     :   an async task object that is meant to be awaited
 '''
-def start_normal_client(server_url=DEFAULT_SERVER):
+def start_normal_client(server_url=DEFAULT_SERVER, cir=10):
     logger = getStreamLogger()
     try:
         client_utils.file_setter(LOGFILE)
@@ -155,7 +166,7 @@ def start_normal_client(server_url=DEFAULT_SERVER):
     except:
         pass
 
-    ret_val = asyncio.get_event_loop().create_task(normal_client(logger, server_url))
+    ret_val = asyncio.get_event_loop().create_task(normal_client(logger, server_url, cir))
     return ret_val
 
 
