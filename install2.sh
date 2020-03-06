@@ -21,10 +21,12 @@ sudo apt --yes --force-yes install traceroute
 sudo apt --yes --force-yes install net-tools
 sudo apt --yes --force-yes install tshark
 sudo apt --yes --force-yes install wireshark
+sudo apt install ethtool
 #echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 #sudo DEBIAN_FRONTEND=noninteractive apt-get -y install wireshark
 sudo dpkg-reconfigure wireshark-common
 sudo usermod -a -G wireshark $1
 sudo chmod 4711 `sudo which dumpcap`
 sudo chmod 777 $2/*
+sudo python3 $2/version_updater.py $2
 echo "$1 ALL=(ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers

@@ -27,11 +27,18 @@ def get_average_rtt(filename, client_ip, server_ip, baseline_rtt):
     client_packets = {}
     server_packets = {}
     rtt            = []
+    divider_flag = False
+    multiplier = 1000
 
     for packet in packets:
         try:
             if IP in packet:
                 if TCP in packet:
+                    if not divider_flag:
+                        # means packet.time is in ms
+                        if packet.time - time.time() > 10000:
+                            multiplier = 1
+                            divider_flag = True
                     if (packet[IP].src == client_ip):
                         tcp_datalen     = len(packet[TCP].payload)
                         expected_seqnum = packet[TCP].seq + tcp_datalen
@@ -51,7 +58,8 @@ def get_average_rtt(filename, client_ip, server_ip, baseline_rtt):
     try:
         average_rtt  = sum(rtt)/len(rtt)*1.0
         buffer_delay = (average_rtt - float(baseline_rtt)) / float(baseline_rtt)  
-        return round(average_rtt*1000,5), buffer_delay
+        #return round(average_rtt*1000,5), buffer_delay
+        return average_rtt*multiplier, buffer_delay
     except:
         raise
     return
