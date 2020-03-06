@@ -110,8 +110,8 @@ def join_queue(mode, server_ip, client_hash, cir):
     edit freely
 '''
 if __name__ == "__main__":
-    #results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash",10)
-    results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash",10)
+    results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash",10)
+    #results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash",10)
     #loop = asyncio.get_event_loop()
     #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
     ##group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))

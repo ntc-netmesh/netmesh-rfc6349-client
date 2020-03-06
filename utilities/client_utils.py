@@ -117,7 +117,7 @@ def parse_shark(stdout_data, recv_window, rtt, res_filter):
     ave_tt = None
     ide_tt = None
     tcp_ttr = None
-    ide_tcp = (recv_window * 8 / (float(rtt)/1000))/(10**6)
+    ide_tcp = (float(recv_window) * 8 / (float(rtt)/1000))/(10**6)
     offset = 0
     multiplier = 1
 

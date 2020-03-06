@@ -66,18 +66,17 @@ async def reverse_client(logger, SERVER_IP, cir):
     #    except:
     #        pass
     results["MTU"] = '1500'
-    results["RTT"] = '4.0394038'
 
-    #try:
-    #    mss = int(results["MTU"]) - 40
-    #    rtt_return = await reverse_rtt_process.rtt_process(SERVER_IP, RTT_HANDLER_PORT, str(mss), logger)
-    #    results = {**results, **json.loads(rtt_return)}
-    #except:
-    #    logger.error("rtt error")
-    #    try:
-    #        traceback.print_exc(file=logf)
-    #    except:
-    #        pass
+    try:
+        mss = int(results["MTU"]) - 40
+        rtt_return = await reverse_rtt_process.rtt_process(SERVER_IP, RTT_HANDLER_PORT, str(mss), logger)
+        results = {**results, **json.loads(rtt_return)}
+    except:
+        logger.error("rtt error")
+        try:
+            traceback.print_exc(file=logf)
+        except:
+            pass
 
     try:
         mtu = results["MTU"]
@@ -89,6 +88,7 @@ async def reverse_client(logger, SERVER_IP, cir):
         results["MSS"]                   = mss
         results["RWND"]                  = rwnd
         results["PARALLEL_CONNECTIONS"]  = conn
+        results["PARALLEL_CONNECTIONS"]  = 2
         results["ACTUAL_RWND"]           = actual_rwnd
     except:
         logger.error("bb error")

@@ -213,3 +213,47 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
     raise OSError(err, 'Connect call failed %s' % (address,))
 ConnectionRefusedError: [Errno 111] Connect call failed ('202.92.132.191', 10015)
+Traceback (most recent call last):
+  File "/home/netmesh/shitty_netmesh/netmesh-rfc6349-client/queue_process.py", line 96, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/netmesh/shitty_netmesh/netmesh-rfc6349-client/queue_process.py", line 96, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1451, in _run_once
+    handle._run()
+  File "/usr/lib/python3.6/asyncio/events.py", line 145, in _run
+    self._callback(*self._args)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
+    message = await self.read_message()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
+    frame = await self.read_data_frame(max_size=self.max_size)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
+    frame = await self.read_frame(max_size)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1020, in read_frame
+    logger.debug("%s < %r", self.side, frame)
+  File "/usr/lib/python3.6/logging/__init__.py", line 1296, in debug
+    self._log(DEBUG, msg, args, **kwargs)
+  File "/usr/lib/python3.6/logging/__init__.py", line 1444, in _log
+    self.handle(record)
+  File "/usr/lib/python3.6/logging/__init__.py", line 1454, in handle
+    self.callHandlers(record)
+  File "/usr/lib/python3.6/logging/__init__.py", line 1516, in callHandlers
+    hdlr.handle(record)
+  File "/usr/lib/python3.6/logging/__init__.py", line 865, in handle
+    self.emit(record)
+  File "/usr/lib/python3.6/logging/__init__.py", line 996, in emit
+    stream.write(msg)
+KeyboardInterrupt
