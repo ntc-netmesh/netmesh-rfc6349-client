@@ -102,7 +102,8 @@ def retrieve_servers():
             location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
             eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
 
-    eel.add_server('Local test server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
+    #eel.add_server('Local test server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
+    eel.add_server('Local test server (THIS IS A TEST)', '202.90.158.168' + "," +  'uuid.202.90.158.168')
 
 ###results server credentials###
 global dev_hash

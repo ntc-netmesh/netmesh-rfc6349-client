@@ -11,14 +11,14 @@ import subprocess
 import sys
 from datetime import datetime
 import re
-
+from constants import *
 # ip_addr = '202.92.132.191'
 ip_addr = '192.168.90.130'
 port = 5005
 
 def normal_ping():
     # p = subprocess.Popen(["ping", "202.92.132.191", "-c", "10"], stdout = subprocess.PIPE)
-    p = subprocess.Popen(["ping", "192.168.90.130", "-c", "10"], stdout = subprocess.PIPE)
+    p = subprocess.Popen(["ping", DEFAULT_SERVER, "-c", "10"], stdout = subprocess.PIPE)
     for line in p.stdout:
         temp = line.decode("utf-8")
         print(temp)
@@ -73,7 +73,7 @@ if __name__ == "__main__":
 
     #Reverse Mode
     if sys.argv[1] == '-r':
-        client.sendto(b'1', (ip_addr,port))
+        client.sendto(b'1', (sys.argv[2],port))
         reverse_ping(client)
 
     #Normal Mode

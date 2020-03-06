@@ -110,7 +110,6 @@ def join_queue(mode, server_ip, client_hash):
         results = loop.run_until_complete(all_groups)
         print("YEAH YEAH YEAH")
         loop.close()
-        return results
     except:
         try:
             logf = open(filename,"a+")
@@ -127,12 +126,6 @@ def join_queue(mode, server_ip, client_hash):
 if __name__ == "__main__":
     print("Joining queue...")
     # results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash")
-    # results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
-    loop = asyncio.get_event_loop()
-    # group = asyncio.gather(queue_client(normal_client.start_normal_client, DEFAULT_SERVER, "random_hash"))
-    group = asyncio.gather(queue_client(reverse_client.start_reverse_test, DEFAULT_SERVER, "random_hash"))
-    all_groups = asyncio.gather(group)
-    results = loop.run_until_complete(all_groups)
-    loop.close()
+    results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
     print("RESULTS: ")
     print(results)
