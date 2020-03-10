@@ -15,7 +15,7 @@ import normal_client, reverse_client
                             start_reverse_client for reverse mode
         server_ip       :   IPv4 address of the server
 '''
-async def queue_client(mode_function, server_ip, client_hash):
+async def queue_client(mode_function, server_ip, client_hash, cir):
     socket = None
     results = None
     
@@ -43,7 +43,7 @@ async def queue_client(mode_function, server_ip, client_hash):
             f.close()
             
             #await the function mode
-            results = mode_function(server_ip)
+            results = mode_function(server_ip, cir)
             results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
             
             await socket.send("done")
@@ -94,22 +94,22 @@ def retrieve_function(mode):
                                 REVERSE_MODE for reverse mode
         server_ip       :   IPv4 address of the server
         client_hash     :   the provided hash value of the client host
+        cir             :   
     @RETURN:
         results         :   results of either the normal or reverse mode
                                 process. Check the normal_client/reverse_client
                                 modules for more details.
 '''
-def join_queue(mode, server_ip, client_hash):
+def join_queue(mode, server_ip, client_hash, cir):
     print("join_queue")
     filename = "tempfiles/queue/queue_log"
     try:
         mode_function = retrieve_function(mode)
         loop = asyncio.get_event_loop()
-        group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+        group = asyncio.gather(queue_client(mode_function, server_ip, client_hash, cir))
         all_groups = asyncio.gather(group)
         results = loop.run_until_complete(all_groups)
-        print("YEAH YEAH YEAH")
-        loop.close()
+        #loop.close()
         return results
     except:
         try:
@@ -125,14 +125,12 @@ def join_queue(mode, server_ip, client_hash):
     edit freely
 '''
 if __name__ == "__main__":
-    print("Joining queue...")
-    # results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash")
-    # results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
-    loop = asyncio.get_event_loop()
-    # group = asyncio.gather(queue_client(normal_client.start_normal_client, DEFAULT_SERVER, "random_hash"))
-    group = asyncio.gather(queue_client(reverse_client.start_reverse_test, DEFAULT_SERVER, "random_hash"))
-    all_groups = asyncio.gather(group)
-    results = loop.run_until_complete(all_groups)
-    loop.close()
-    print("RESULTS: ")
+    results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash", 10)
+    #results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
+    #loop = asyncio.get_event_loop()
+    #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))
+    ##group = asyncio.gather(queue_client(reverse_client.start_reverse_test, sys.argv[1]))
+    #all_groups = asyncio.gather(group)
+    #results = loop.run_until_complete(all_groups)
+    #loop.close()
     print(results)

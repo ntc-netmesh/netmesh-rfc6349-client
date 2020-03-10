@@ -56,44 +56,44 @@ def parse_ping(stdout_data):
         for line in f:
             temp = line
             if "avg" in temp:
-                rtt = re.split(" ", temp)[3]
-                ave_rtt = re.split("/", rtt)[2]
+                ave_rtt = re.split(" ", temp)[2]
+                #ave_rtt = re.split("/", rtt)[2]
     return ave_rtt
 
-'''
-   Parses the throughput metrics out of throughput process output file
-   @PARAMS:
-        stdout_data     :    filename of the output file
-        rtt             :    Round Trip Time
-
-   @RETURN:
-        bb              :    baseline bandwidth
-        bdp             :    bandwidth delay product
-        rwnd            :    receive window size
-'''
-def parse_iperf3(stdout_data, rtt):
-    return_results = []
-    break_flag = False
-    bb = None
-    bdp = None
-    rwnd = None
-    with open(stdout_data,"r") as f:
-        for line in f:
-            temp = line
-            if "Jitter" in temp:
-                break_flag = True
-                continue
-            if break_flag:
-                entries = re.findall(r'\S+',temp)
-                timecheck = float(re.split("-",entries[2])[1])
-                if timecheck < 10:
-                    print("iPerf UDP incomplete")
-                    break
-                bb = entries[6]
-                bdp = (float(rtt) /1000) * (float(bb)* 1000000)
-                rwnd = bdp/8 / 1000
-                break
-    return bb, bdp, rwnd
+#'''
+#   Parses the throughput metrics out of throughput process output file
+#   @PARAMS:
+#        stdout_data     :    filename of the output file
+#        rtt             :    Round Trip Time
+#
+#   @RETURN:
+#        bb              :    baseline bandwidth
+#        bdp             :    bandwidth delay product
+#        rwnd            :    receive window size
+#'''
+#def parse_iperf3(stdout_data, rtt):
+#    return_results = []
+#    break_flag = False
+#    bb = None
+#    bdp = None
+#    rwnd = None
+#    with open(stdout_data,"r") as f:
+#        for line in f:
+#            temp = line
+#            if "Jitter" in temp:
+#                break_flag = True
+#                continue
+#            if break_flag:
+#                entries = re.findall(r'\S+',temp)
+#                timecheck = float(re.split("-",entries[2])[1])
+#                if timecheck < 10:
+#                    print("iPerf UDP incomplete")
+#                    break
+#                bb = entries[6]
+#                bdp = (float(rtt) /1000) * (float(bb)* 1000000)
+#                rwnd = bdp/8 / 1000
+#                break
+#    return bb, bdp, rwnd
 
 '''
    Parses the throughput metrics out of a throughput process output file
@@ -116,108 +116,44 @@ def parse_shark(stdout_data, recv_window, rtt):
     speed_plot = []
     ave_tcp = None
     ave_tt = None
-    ide_tcp = None
     ide_tt = None
     tcp_ttr = None
+    ide_tcp = (recv_window * 8 / (float(rtt)/1000))/(10**6)
+    offset = 0
+    multiplier = 1
 
     with open(stdout_data,"r") as f:
         for line in f:
             temp = line
             if "sender" in temp:
                 entries = re.findall(r'\S+',temp)
-                #check if test ran in 5s
-                timecheck = float(re.split("-",entries[2])[1])
-                if timecheck < 5:
-                    print("iPerf TCP incomplete")
-                    return
-                ave_tcp = float(entries[6])
-                ideal_throughput = (recv_window * 8 / (float(rtt)/1000))/1000
-                ide_tcp = ideal_throughput
-                #max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
-                temp2 = re.split("-",entries[2])
-                actual = float(temp2[1])
-                ave_tt = actual
-                ideal = float(entries[4]) * 8 / ideal_throughput
-                ide_tt = ideal
-                ttr = actual / ideal
-                tcp_ttr = ttr
+                if "SUM" in temp:
+                    offset = 1
+                try:
+                    ave_tcp = float(entries[6-offset])
+                    #ideal_throughput = (recv_window * 8 / (float(rtt)/1000))/(10**6)
+                    #ide_tcp = ideal_throughput
+                    #max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
 
-            elif "KBytes" in temp:
-                entries = re.findall(r'\S+',temp)
-                x_axis = re.split("-",entries[2])
-                x_axis = int(float(x_axis[1]))
-                speed_plot.append([x_axis,float(entries[6])])
+                    # average transfer time
+                    temp2 = re.split("-",entries[2-offset])
+                    ave_tt = float(temp2[1])
+
+                    if "KBytes" in entries[5-offset]:
+                        multiplier = 1000
+
+                    ide_tt = ( float(entries[4-offset]) * 8 * multiplier ) / ( ide_tcp )
+                    tcp_ttr = ide_tt / ave_tt
+                except:
+                    pass
+
+            #elif "KBytes" in temp:
+            #    try:
+            #        entries = re.findall(r'\S+',temp)
+            #        x_axis = re.split("-",entries[2])
+            #        x_axis = int(float(x_axis[1]))
+            #        speed_plot.append([x_axis,float(entries[6])])
+            #    except:
+            #        pass
     return ave_tcp, ide_tcp, ave_tt, ide_tt, tcp_ttr, speed_plot
 
-#def efficiency_process(filename, client_ip):
-#    scapy_process = subprocess.Popen(["python3",
-#                          "scapy-tcp-eff-expt2.py",
-#                          filename,
-#                          client_ip],
-#                         stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-#    neff_plot = []
-#    results = []
-#    scapy_process.wait()
-#    for line in scapy_process.stdout:
-#        temp = line.decode("utf-8")
-#
-#        if "plot" in temp:
-#            temp = re.split(":", temp)[1]
-#            temp = temp[1:-2]
-#
-#            for i in re.split("], ", temp):
-#                temp_list = re.split(", ", i[1:-1])
-#                temp_list[0] = int(temp_list[0])
-#                temp_list[1] = float(temp_list[1])
-#
-#                neff_plot.append(temp_list)
-#        else:
-#            results.append(temp)
-#    trans_bytes = results[0]
-#    retrans_bytes = results[1]
-#    eff = results[2]
-#    return trans_bytes, retrans_bytes, eff, neff_plot
-#
-#def buffer_delay_process(filename, client_ip, server_ip, mtu):
-#    ave_rtt = None
-#    buffer_delay = None
-#    buffer_delay_process = subprocess.Popen(["python3",
-#                                             "buffer-delay.py",
-#                                             filename,
-#                                             client_ip,
-#                                             server_ip,
-#                                             #re.split(" ", mtu_param)[2]],
-#                                             str(mtu)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-#    results = []
-#    nbuffer_plot = []
-#    for line in buffer_delay_process.stdout:
-#        temp = line.decode("utf-8")
-#        if "plot" in temp:
-#            temp = re.split(":", temp)[1]
-#            temp = temp[1:-2]
-#            print(temp)
-#
-#            for i in re.split("], ", temp):
-#                temp_list = re.split(", ", i[1:-1])
-#                temp_list[0] = int(temp_list[0])
-#                temp_list[1] = float(temp_list[1])
-#
-#                nbuffer_plot.append(temp_list)
-#        else:
-#            results.append(temp)
-#    ave_rtt = results[0]
-#    buffer_delay = results[1]
-#    #return results, nbuffer_plot
-#    return ave_rtt, buffer_delay, nbuffer_plot
-
-
-# REVERSE TEST UTILS
-
-#def list_speed_plot(speed_plot):
-#    speed_plot_list = []
-#    for i in re.split("], ", speed_plot):
-#        temp_list = re.split(", ", i[1:-1])
-#        temp_list[0] = int(temp_list[0])
-#        temp_list[1] = float(temp_list[1])
-#        speed_plot_list.append(temp_list)
-#    return speed_plot_list

@@ -432,7 +432,7 @@ def normal(lat, lon, cir, serv_ip, network_type):
 
     #####CALL NORMAL MODE HERE#####
     global dev_hash
-    results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash)
+    results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
     if results is not None:
         eel.printnormal(results[0][0])
     else:
