@@ -440,29 +440,6 @@ Traceback (most recent call last):
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
 Traceback (most recent call last):
-<<<<<<< HEAD
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 21, in queue_client
-    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
-    return await self
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
-    transport, protocol = await self._create_connection()
-  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
-    raise exceptions[0]
-  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
-    yield from self.sock_connect(sock, address)
-  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
-    return (yield from fut)
-  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
-    raise OSError(err, 'Connect call failed %s' % (address,))
-TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
-Traceback (most recent call last):
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 21, in queue_client
-    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
-    return await self
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
-=======
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 102, in read_http_response
     status_code, reason, headers = await read_response(self.reader)
   File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 139, in read_response
@@ -499,7 +476,6 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 519, in __aenter__
     return await self
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 537, in __await_impl__
->>>>>>> 1a9e1d79de21bdf15fafd178db9f47b84789272a
     transport, protocol = await self._create_connection()
   File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
     raise exceptions[0]
@@ -509,15 +485,6 @@ Traceback (most recent call last):
     return (yield from fut)
   File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
     raise OSError(err, 'Connect call failed %s' % (address,))
-<<<<<<< HEAD
-TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
-Traceback (most recent call last):
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 21, in queue_client
-    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
-    return await self
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
-=======
 ConnectionRefusedError: [Errno 111] Connect call failed ('202.92.132.191', 10015)
 Traceback (most recent call last):
   File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
@@ -683,7 +650,6 @@ Traceback (most recent call last):
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 519, in __aenter__
     return await self
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 537, in __await_impl__
->>>>>>> 1a9e1d79de21bdf15fafd178db9f47b84789272a
     transport, protocol = await self._create_connection()
   File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
     raise exceptions[0]
@@ -693,11 +659,6 @@ Traceback (most recent call last):
     return (yield from fut)
   File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
     raise OSError(err, 'Connect call failed %s' % (address,))
-<<<<<<< HEAD
-TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
-Traceback (most recent call last):
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 93, in join_queue
-=======
 OSError: [Errno 113] Connect call failed ('202.92.132.191', 10015)
 Traceback (most recent call last):
   File "/home/netmesh/shitty_netmesh/netmesh-rfc6349-client/queue_process.py", line 93, in join_queue
@@ -713,7 +674,6 @@ Traceback (most recent call last):
 RuntimeError: Event loop is closed
 Traceback (most recent call last):
   File "/home/netmesh/shitty_netmesh/netmesh-rfc6349-client/queue_process.py", line 93, in join_queue
->>>>>>> 1a9e1d79de21bdf15fafd178db9f47b84789272a
     group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
   File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
     fut = ensure_future(arg, loop=loop)
@@ -724,8 +684,6 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
     raise RuntimeError('Event loop is closed')
 RuntimeError: Event loop is closed
-<<<<<<< HEAD
-=======
 Traceback (most recent call last):
   File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
     message = await self.read_message()
@@ -1110,7 +1068,6 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/selectors.py", line 445, in select
     fd_event_list = self._epoll.poll(timeout, max_ev)
 KeyboardInterrupt
->>>>>>> 1a9e1d79de21bdf15fafd178db9f47b84789272a
 Traceback (most recent call last):
   File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
@@ -1649,7 +1606,149 @@ Traceback (most recent call last):
     raise OSError(err, 'Connect call failed %s' % (address,))
 ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.159.48', 10015)
 Traceback (most recent call last):
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 93, in join_queue
+    group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
+    fut = ensure_future(arg, loop=loop)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 519, in ensure_future
+    task = loop.create_task(coro_or_future)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 302, in create_task
+    self._check_closed()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+TimeoutError: [Errno 110] Connect call failed ('35.240.204.14', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 108, in join_queue
+    group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
+    fut = ensure_future(arg, loop=loop)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 519, in ensure_future
+    task = loop.create_task(coro_or_future)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 302, in create_task
+    self._check_closed()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 108, in join_queue
+    group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
+    fut = ensure_future(arg, loop=loop)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 519, in ensure_future
+    task = loop.create_task(coro_or_future)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 302, in create_task
+    self._check_closed()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 49, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 108, in join_queue
+    group = asyncio.gather(queue_client(mode_function, server_ip, client_hash))
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 602, in gather
+    fut = ensure_future(arg, loop=loop)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 519, in ensure_future
+    task = loop.create_task(coro_or_future)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 302, in create_task
+    self._check_closed()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 377, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 101, in read_http_response
+    status_code, reason, headers = await read_response(self.reader)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 139, in read_response
+    status_line = await read_line(stream)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 213, in read_line
+    line = await stream.readline()
+  File "/usr/lib/python3.6/asyncio/streams.py", line 488, in readline
+    line = yield from self.readuntil(sep)
+  File "/usr/lib/python3.6/asyncio/streams.py", line 581, in readuntil
+    yield from self._wait_for_data('readuntil')
+  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
+    yield from self._waiter
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 714, in _read_ready
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 547, in __await_impl__
+    extra_headers=protocol.extra_headers,
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 290, in handshake
+    status_code, response_headers = await self.read_http_response()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 103, in read_http_response
+    raise InvalidMessage("did not receive a valid HTTP response") from exc
+websockets.exceptions.InvalidMessage: did not receive a valid HTTP response
+Traceback (most recent call last):
+  File "queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('35.185.183.104', 10015)
+Traceback (most recent call last):
+  File "queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('35.185.183.104', 10015)
+Traceback (most recent call last):
+  File "queue_process.py", line 24, in queue_client
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
     return await self
@@ -1672,15 +1771,30 @@ concurrent.futures._base.CancelledError
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 34, in queue_client
-    current_turn = await socket.recv()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 509, in recv
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 49, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
     await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
 Traceback (most recent call last):
-  File "/home/albert/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 49, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
   File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
     return await self
@@ -1694,4 +1808,4 @@ Traceback (most recent call last):
     return (yield from fut)
   File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
     raise OSError(err, 'Connect call failed %s' % (address,))
-TimeoutError: [Errno 110] Connect call failed ('202.92.132.191', 10015)
+TimeoutError: [Errno 110] Connect call failed ('202.90.158.168', 10015)

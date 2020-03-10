@@ -1,19 +1,2 @@
-Connecting to host 202.92.132.191, port 5201
-[  4] local 192.168.1.9 port 45630 connected to 202.92.132.191 port 5201
-[ ID] Interval           Transfer     Bandwidth       Total Datagrams
-[  4]   0.00-1.00   sec  12.1 MBytes   102 Mbits/sec  1552  
-[  4]   1.00-2.00   sec  13.2 MBytes   110 Mbits/sec  1685  
-[  4]   2.00-3.00   sec  13.5 MBytes   113 Mbits/sec  1722  
-[  4]   3.00-4.00   sec  13.7 MBytes   115 Mbits/sec  1754  
-[  4]   4.00-5.00   sec  13.7 MBytes   115 Mbits/sec  1752  
-[  4]   5.00-6.00   sec  13.4 MBytes   112 Mbits/sec  1716  
-[  4]   6.00-7.00   sec  12.0 MBytes   101 Mbits/sec  1538  
-[  4]   7.00-8.00   sec  13.0 MBytes   109 Mbits/sec  1663  
-[  4]   8.00-9.00   sec  13.0 MBytes   109 Mbits/sec  1667  
-[  4]   9.00-10.00  sec  13.5 MBytes   114 Mbits/sec  1733  
-- - - - - - - - - - - - - - - - - - - - - - - - -
-[ ID] Interval           Transfer     Bandwidth       Jitter    Lost/Total Datagrams
-[  4]   0.00-10.00  sec   131 MBytes   110 Mbits/sec  25485310.271 ms  12347/12476 (99%)  
-[  4] Sent 12476 datagrams
-
-iperf Done.
+Connecting to host 35.185.183.104, port 5201
+iperf3: error - unable to read from stream socket: Resource temporarily unavailable

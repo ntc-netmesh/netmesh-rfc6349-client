@@ -8,10 +8,12 @@ import subprocess
 '''
 def get_client_ip():
     client_ip = ""
+    print("getting Client ip")
     p = subprocess.Popen(["hostname", "-I"], stdout = subprocess.PIPE)
     for line in p.stdout:
         client_ip = re.split(" ", line.decode("utf-8"))[0]
         break
+    print("Client IP is : {}".format(client_ip))
     return client_ip
 
 

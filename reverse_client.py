@@ -30,6 +30,7 @@ FALLBACK_LOGGER = getStreamLogger()
 '''
 async def mtu_process(SERVER_IP, handler_port, udp_port, logger=FALLBACK_LOGGER):
     plpmtu_process = None
+    return 1460;
     try:
         websocket_url = "ws://"+SERVER_IP+":"+str(handler_port)
         async with websockets.connect(websocket_url) as websocket:
@@ -104,6 +105,7 @@ async def rtt_process(SERVER_IP, handler_port, logger=FALLBACK_LOGGER):
 '''
 async def bandwidth_process(SERVER_IP, handler_port, bandwidth_port, rtt, logger=FALLBACK_LOGGER):
     bb_process = None
+    print("BB Test Started!")
     try:
         websocket_url = "ws://"+SERVER_IP+":"+str(handler_port)
         async with websockets.connect(websocket_url) as websocket:
@@ -113,7 +115,7 @@ async def bandwidth_process(SERVER_IP, handler_port, bandwidth_port, rtt, logger
                                            "--client", SERVER_IP,
                                            "--udp",
                                            "--reverse",
-                                           "--bandwidth", "100M",
+                                           "--bandwidth", "1M",
                                            "--time", "10",
                                            "--port", str(bandwidth_port),
                                            "--format", "m"], stdout = subprocess.PIPE)
@@ -157,7 +159,7 @@ async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_wind
             thpt_process = subprocess.Popen(["iperf3",
                                            "--client", SERVER_IP, 
                                            "--time", "5",
-                                           "--bandwidth", "100M",
+                                           "--bandwidth", "1M",
                                            "--window", str(recv_window)+"K",
                                            "--reverse",
                                            "--port", str(throughput_port),
@@ -197,7 +199,7 @@ async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_wind
                             :   list of return values from the throughput
                                     process handler
 '''
-async def scan_process(**kwargs):
+async def scan_process(**kwargs): #Metrics Calculations
     scan_results = {"WND_SIZES":[], "WND_AVG_TCP":[], "WND_IDEAL_TCP":[]}
     thpt_process = None
     try:
@@ -247,6 +249,7 @@ async def reverse_client(logger, SERVER_IP):
     bb = None
     rwnd = None
     logf = None
+    print("starting reverse client")
     try:
         logf = open(LOGFILE,"w+")
         client_ip = client_utils.get_client_ip()
@@ -259,7 +262,8 @@ async def reverse_client(logger, SERVER_IP):
         return
 
     try:
-        mtu_return = await mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger)
+        print("Starting MTU Test")
+        mtu_return = await mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger) #PROBLEM
         results = {**results, **json.loads(mtu_return)}
     except:
         try:
@@ -333,5 +337,10 @@ def start_reverse_test(server_ip):
     return ret_val
 
 if __name__ == "__main__":
-    ret_val = start_reverse_test()
-    print(ret_val)
+    loop = asyncio.get_event_loop()
+    group = asyncio.gather(start_reverse_test(DEFAULT_SERVER))
+    all_groups = asyncio.gather(group)
+    results = loop.run_until_complete(all_groups)
+    loop.close()
+    print(results)
+
