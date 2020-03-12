@@ -87,8 +87,7 @@ async def reverse_client(logger, SERVER_IP, cir):
         results["BDP"]                   = bdp
         results["MSS"]                   = mss
         results["RWND"]                  = rwnd
-        results["PARALLEL_CONNECTIONS"]  = conn
-        results["PARALLEL_CONNECTIONS"]  = 2
+        results["PARALLEL_CONNECTIONS"]  = str(int(conn)+1)
         results["ACTUAL_RWND"]           = actual_rwnd
     except:
         logger.error("bb error")
