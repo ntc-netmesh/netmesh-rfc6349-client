@@ -56,16 +56,16 @@ async def reverse_client(logger, SERVER_IP, cir):
             pass
         return
 
-    #try:
-    #    mtu_return = await reverse_mtu_process.mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger)
-    #    results = {**results, **json.loads(mtu_return)}
-    #except:
-    #    logger.error("mtu error")
-    #    try:
-    #        traceback.print_exc(file=logf)
-    #    except:
-    #        pass
-    results["MTU"] = '1500'
+    try:
+        mtu_return = await reverse_mtu_process.mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger)
+        results = {**results, **json.loads(mtu_return)}
+    except:
+        logger.error("mtu error")
+        try:
+            traceback.print_exc(file=logf)
+        except:
+            pass
+    #results["MTU"] = '1500'
 
     try:
         mss = int(results["MTU"]) - 40
