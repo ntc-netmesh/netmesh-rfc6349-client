@@ -257,3 +257,33 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/logging/__init__.py", line 996, in emit
     stream.write(msg)
 KeyboardInterrupt
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 806, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "queue_process.py", line 27, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 484, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 806, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "queue_process.py", line 27, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 484, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
