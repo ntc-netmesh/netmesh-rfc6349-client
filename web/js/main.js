@@ -39,7 +39,12 @@ function check_queue(mode) {
 
 eel.expose(start_test)
 function start_test(mode) {
+    disableMainForm(true);
+
+    $('#progress-finished-title').hide();
     $('#progress-status-info').show();
+    $('#results-info').hide();
+    
     $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
     printprogress('Initializing...')
 
@@ -47,6 +52,7 @@ function start_test(mode) {
 
     switch(mode) {
         case "normal":
+            testFinishedAt = null;
             var data = getMainFormData();
 
             $('#localResultCard').show();
@@ -56,6 +62,7 @@ function start_test(mode) {
 
             break;
         case "reverse":
+            testFinishedAt = null;
             var data = getMainFormData();
 
             $('#localResultCard').hide();
@@ -64,6 +71,21 @@ function start_test(mode) {
             eel.rev(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
             break;
     }
+    
+    start_measurement_timer();
+}
+
+function start_measurement_timer() {
+    testStartedAt = moment().format('YYYY-MM-DD HH:mm:ss');
+    
+    measurementTimer = setInterval(function () {
+        var testDurationSeconds = parseInt(moment().diff(testStartedAt, 'seconds', true));
+        var minute = Math.floor(testDurationSeconds / 60);
+        var second = testDurationSeconds % 60;
+
+        var currentDuration = `${ numeral(minute).format('0') }:${ numeral(second).format('00') }`;
+        $('#measurement-timer').text(currentDuration);
+    }, 100);
 }
 
 function confirmLeaveQueue() {
@@ -84,8 +106,7 @@ function alert_debug(message){
 }
 
 eel.expose(progress_now);
-function progress_now(value){
-
+function progress_now(value, completed = false){
     if (value > 0) {
         $('#dynamic').addClass('progress-bar-striped progress-bar-animated');
 
@@ -97,14 +118,14 @@ function progress_now(value){
         $('#progress-finished-title').hide();
     }
 
-    // if (value == 100) {
-    //     $('#dynamic').removeClass('progress-bar-striped progress-bar-animated');
-    //     $('#cancel').hide();
-    //     disableMainForm(false);
-    //     $('#progress-status-title').hide();
-    //     $('#progress-finished-title').show();
-    // }
-    //document.getElementById("prog_bar").attr('aria-valuenow', value).css("width", percent);
+    if (completed && value == 100) {
+        $('#dynamic').removeClass('progress-bar-striped progress-bar-animated');
+        $('#cancel').hide();
+        disableMainForm(false);
+        $('#progress-status-title').hide();
+        $('#progress-finished-title').show();
+    }
+    
     $("#dynamic").css("width", value + "%").attr("aria-valuenow", value);
 }
 
@@ -146,6 +167,10 @@ function user_login(){
     eel.login(username,password); 
 }
 
+function user_logout() {
+
+}
+
 function getMainFormData() {
     var lat = document.getElementById("lat").value;
     var lon = document.getElementById("lon").value;
@@ -166,39 +191,37 @@ function getMainFormData() {
     }
 }
 
-function normal_mode() {
-    var lat = document.getElementById("lat").value;
-    var lon = document.getElementById("lon").value;
-    var cir = document.getElementById("cir").value;
-    var server_ip = document.getElementById("server").value;
-    var net_type = document.getElementById("net_type").value;
+// function normal_mode() {
+//     var lat = document.getElementById("lat").value;
+//     var lon = document.getElementById("lon").value;
+//     var cir = document.getElementById("cir").value;
+//     var server_ip = document.getElementById("server").value;
+//     var net_type = document.getElementById("net_type").value;
 
-    document.getElementById("local_result").innerHTML = "";
-    document.getElementById("remote_result").innerHTML = "";
+//     document.getElementById("local_result").innerHTML = "";
+//     document.getElementById("remote_result").innerHTML = "";
 
-    document.getElementById("pills-tab0Content").innerHTML = "";
-    document.getElementById("pills-tab1Content").innerHTML = "";
-    document.getElementById("pills-tab2Content").innerHTML = "";
-    document.getElementById("pills-tab3Content").innerHTML = "";
+//     document.getElementById("pills-tab0Content").innerHTML = "";
+//     document.getElementById("pills-tab1Content").innerHTML = "";
+//     document.getElementById("pills-tab2Content").innerHTML = "";
+//     document.getElementById("pills-tab3Content").innerHTML = "";
 
-    document.getElementById("pills-rtab0Content").innerHTML = "";
-    document.getElementById("pills-rtab1Content").innerHTML = "";
-    document.getElementById("pills-rtab2Content").innerHTML = "";
-    document.getElementById("pills-rtab3Content").innerHTML = "";
+//     document.getElementById("pills-rtab0Content").innerHTML = "";
+//     document.getElementById("pills-rtab1Content").innerHTML = "";
+//     document.getElementById("pills-rtab2Content").innerHTML = "";
+//     document.getElementById("pills-rtab3Content").innerHTML = "";
 
-    eel.normal(lat, lon, cir, server_ip, net_type);
+//     // eel.normal(lat, lon, cir, server_ip, net_type);
 
-    // if(lat != "" && lon != ""){
-    //     disableMainForm(true);
-    //     $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
+//     if(lat != "" && lon != ""){
+//         $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
         
-    //     eel.normal(lat, lon, cir, server_ip, net_type);
-    // }
-    // else {
-    //     alert("Latitude and Longitude must be filled out");
-        
-    // }
-}
+//         eel.normal(lat, lon, cir, server_ip, net_type);
+//     }
+//     else {
+//         alert("Latitude and Longitude must be filled out");   
+//     }
+// }
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -266,34 +289,34 @@ function set_queue(queue_place) {
     }
 }
 
-function reverse_mode(){
-    var lat = document.getElementById("lat").value;
-    var lon = document.getElementById("lon").value;
-    var cir = document.getElementById("cir").value;
-    var server_ip = document.getElementById("server").value;
-    var net_type = document.getElementById("net_type").value;
+// function reverse_mode(){
+//     var lat = document.getElementById("lat").value;
+//     var lon = document.getElementById("lon").value;
+//     var cir = document.getElementById("cir").value;
+//     var server_ip = document.getElementById("server").value;
+//     var net_type = document.getElementById("net_type").value;
 
-    document.getElementById("local_result").innerHTML = "";
-    document.getElementById("remote_result").innerHTML = "";
+//     document.getElementById("local_result").innerHTML = "";
+//     document.getElementById("remote_result").innerHTML = "";
 
-    document.getElementById("pills-tab0Content").innerHTML = "";
-    document.getElementById("pills-tab1Content").innerHTML = "";
-    document.getElementById("pills-tab2Content").innerHTML = "";
-    document.getElementById("pills-tab3Content").innerHTML = "";
+//     document.getElementById("pills-tab0Content").innerHTML = "";
+//     document.getElementById("pills-tab1Content").innerHTML = "";
+//     document.getElementById("pills-tab2Content").innerHTML = "";
+//     document.getElementById("pills-tab3Content").innerHTML = "";
 
-    document.getElementById("pills-rtab0Content").innerHTML = "";
-    document.getElementById("pills-rtab1Content").innerHTML = "";
-    document.getElementById("pills-rtab2Content").innerHTML = "";
-    document.getElementById("pills-rtab3Content").innerHTML = "";
+//     document.getElementById("pills-rtab0Content").innerHTML = "";
+//     document.getElementById("pills-rtab1Content").innerHTML = "";
+//     document.getElementById("pills-rtab2Content").innerHTML = "";
+//     document.getElementById("pills-rtab3Content").innerHTML = "";
 
-    if(lat != "" && lon != ""){
-        eel.rev(lat, lon, cir, server_ip, net_type);
-    }
+//     if(lat != "" && lon != ""){
+//         eel.rev(lat, lon, cir, server_ip, net_type);
+//     }
 
-    else{
-        alert("Latitude and Longitude must be filled out");
-    }
-}
+//     else{
+//         alert("Latitude and Longitude must be filled out");
+//     }
+// }
 
 function simultaneous(){
     var lat = document.getElementById("lat").value;
@@ -970,7 +993,10 @@ function printlocal(result){
 
 eel.expose(printnormal);
 function printnormal(result){
-    console.log(result);
+    disableMainForm(false);
+
+    testFinishedAt = moment().format('YYYY-MM-DD HH:mm:ss');
+    clearInterval(measurementTimer);
 
     // alert('printnormal');
     //document.getElementById("local_result").value += result + "\n";
@@ -984,64 +1010,43 @@ function printnormal(result){
         $(localResultId).append(`<tr><td>${ 'CIR' }</td><td>${ result["CIR"] }${ ' Mbps' }</td></tr>`);
 
         if ("MTU" in result){
-            /// document.getElementById("local_result").innerHTML += "MTU: " + result["MTU"] + "Bytes <br>";
             $(localResultId).append(`<tr><td>${ 'MTU' }</td><td>${ result["MTU"] }${ ' Bytes' }</td></tr>`);
         }
         if ("RTT" in result){
-            // document.getElementById("local_result").innerHTML += "RTT: " + result["RTT"] + "ms<br>";
-            $(localResultId).append(`<tr><td>${ 'RTT' }</td><td>${ result["RTT"] }${ ' ms' }</td></tr>`);
-        }
-        if ("BB" in result){
-            // document.getElementById("local_result").innerHTML += "BB: " + result["BB"] + "Mbps<br>";
-            $(localResultId).append(`<tr><td>${ 'BB' }</td><td>${ result["BB"] }${ ' Mbps' }</td></tr>`);
-        }
-        if ("BDP" in result){
-            // document.getElementById("local_result").innerHTML += "BDP: " + result["BDP"] + "<br>";
-            $(localResultId).append(`<tr><td>${ 'BDP' }</td><td>${ result["BDP"] }${ '' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'RTT' }</td><td>${ numeral(result["RTT"]).format('0,0.000') }${ ' ms' }</td></tr>`);
         }
         if ("RWND" in result){
-            // document.getElementById("local_result").innerHTML += "TCP RWND: " + result["RWND"] + "<br>";
-            $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td><td>${ result["RWND"] }${ '' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td><td>${ result["ACTUAL_RWND"] }${ ' Bytes' }</td></tr>`);
         }
         if ("THPT_AVG" in result){
-            // document.getElementById("local_result").innerHTML += "Average TCP Throughput: " + result["THPT_AVG"] + "Mbps<br>";
-            $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td><td>${ result["THPT_AVG"] }${ ' Mbps' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td><td>${ numeral(result["THPT_AVG"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
         }
         if ("THPT_IDEAL" in result){
-            // document.getElementById("local_result").innerHTML += "Ideal TCP Throughput: " + result["THPT_IDEAL"] + "Mbps<br>";
-            $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td><td>${ result["THPT_IDEAL"] }${ ' Mbps' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td><td>${ numeral(result["ACTUAL_IDEAL"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
         }
         if ("TRANSFER_AVG" in result){
-            // document.getElementById("local_result").innerHTML += "Average Transfer Time: " + result["TRANSFER_AVG"] + "s<br>";
-            $(localResultId).append(`<tr><td>${ 'Average Transfer Time' }</td><td>${ result["TRANSFER_AVG"] }${ ' s' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Average Transfer Time' }</td><td>${ numeral(result["TRANSFER_AVG"]).format('0,0.000') }${ ' s' }</td></tr>`);
         }
         if ("TRANSFER_IDEAL" in result){
-            // document.getElementById("local_result").innerHTML += "Ideal Transfer Time: " + result["TRANSFER_IDEAL"] + "s<br>";
-            $(localResultId).append(`<tr><td>${ 'Ideal Transfer Time' }</td><td>${ result["TRANSFER_IDEAL"] }${ ' s' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Ideal Transfer Time' }</td><td>${ numeral(result["TRANSFER_IDEAL"]).format('0,0.000') }${ ' s' }</td></tr>`);
         }
         if ("TCP_TTR" in result){
-            // document.getElementById("local_result").innerHTML += "TCP TTR: " + result["TCP_TTR"] + "<br>";
-            $(localResultId).append(`<tr><td>${ 'TCP TTR' }</td><td>${ result["TCP_TTR"] }${ '' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'TCP TTR' }</td><td>${ numeral(result["TCP_TTR"]).format('0.000%') }${ '' }</td></tr>`);
         }
         if ("TRANS_BYTES" in result){
-            // document.getElementById("local_result").innerHTML += "Transmitted Bytes: " + result["TRANS_BYTES"] + "Bytes<br>";
             $(localResultId).append(`<tr><td>${ 'Transmitted Bytes' }</td><td>${ result["TRANS_BYTES"] }${ ' Bytes' }</td></tr>`);
         }
         if ("RETX_BYTES" in result){
-            // document.getElementById("local_result").innerHTML += "Reransmitted Bytes: " + result["RETX_BYTES"] + "Bytes<br>";
             $(localResultId).append(`<tr><td>${ 'Retransmitted Bytes' }</td><td>${ result["RETX_BYTES"] }${ ' Bytes' }</td></tr>`);
         }
         if ("TCP_EFF" in result){
-            // document.getElementById("local_result").innerHTML += "TCP Efficiency: " + result["TCP_EFF"] + "<br>";
-            $(localResultId).append(`<tr><td>${ 'TCP Efficiency' }</td><td>${ result["TCP_EFF"] }${ '' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'TCP Efficiency' }</td><td>${ numeral(result["TCP_EFF"]).format('0.000%') }${ '' }</td></tr>`);
         }
         if ("AVE_RTT" in result){
-            // document.getElementById("local_result").innerHTML += "Average RTT: " + result["AVE_RTT"] + "ms<br>";
-            $(localResultId).append(`<tr><td>${ 'Average RTT' }</td><td>${ result["AVE_RTT"] }${ ' ms' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Average RTT' }</td><td>${ numeral(result["AVE_RTT"]).format('0.000') }${ ' ms' }</td></tr>`);
         }
         if ("BUF_DELAY" in result){
-            // document.getElementById("local_result").innerHTML += "Buffer Delay: " + result["BUF_DELAY"] + "%<br>";
-            $(localResultId).append(`<tr><td>${ 'Buffer Delay' }</td><td>${ result["BUF_DELAY"] }${ '%' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Buffer Delay' }</td><td>${ numeral(result["BUF_DELAY"]).format('0.000%') }${ '' }</td></tr>`);
         }
     } else {
         $(localResultId).append(`<tr><td><span class="text-muted">${ 'No measured results' }<span></td></tr>`);
@@ -1052,7 +1057,11 @@ function printnormal(result){
 
 eel.expose(printreverse);
 function printreverse(result){
-    console.log(result);
+    disableMainForm(false);
+    
+    testFinishedAt = moment().format('YYYY-MM-DD HH:mm:ss');
+    clearInterval(measurementTimer);
+
     //document.getElementById("local_result").value += result + "\n";
 
     localResultId = '#tblRemoteResult tbody';
@@ -1067,20 +1076,20 @@ function printreverse(result){
         if ("RTT" in result){
             $(localResultId).append(`<tr><td>${ 'RTT' }</td><td>${ result["RTT"] }${ ' ms' }</td></tr>`);
         }
-        if ("BB" in result){
-            $(localResultId).append(`<tr><td>${ 'BB' }</td><td>${ result["BB"] }${ ' Mbps' }</td></tr>`);
-        }
-        if ("BDP" in result){
-            $(localResultId).append(`<tr><td>${ 'BDP' }</td><td>${ result["BDP"] }${ '' }</td></tr>`);
-        }
+        // if ("BB" in result){
+        //     $(localResultId).append(`<tr><td>${ 'BB' }</td><td>${ result["BB"] }${ ' Mbps' }</td></tr>`);
+        // }
+        // if ("BDP" in result){
+        //     $(localResultId).append(`<tr><td>${ 'BDP' }</td><td>${ result["BDP"] }${ '' }</td></tr>`);
+        // }
         if ("RWND" in result){
-            $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td><td>${ result["RWND"] }${ '' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'TCP RWND' }</td><td>${ result["ACTUAL_RWND"] }${ ' Bytes' }</td></tr>`);
         }
         if ("THPT_AVG" in result){
             $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td><td>${ result["THPT_AVG"] }${ ' Mbps' }</td></tr>`);
         }
         if ("THPT_IDEAL" in result){
-            $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td><td>${ result["THPT_IDEAL"] }${ ' Mbps' }</td></tr>`);
+            $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td><td>${ result["ACTUAL_IDEAL"] }${ ' Mbps' }</td></tr>`);
         }
         if ("TRANSFER_AVG" in result){
             $(localResultId).append(`<tr><td>${ 'Average Transfer Time' }</td><td>${ result["TRANSFER_AVG"] }${ ' s' }</td></tr>`);
@@ -1164,7 +1173,7 @@ function printreverse(result){
 
 eel.expose(printprogress);
 function printprogress(state){
-    document.getElementById("progress").innerHTML = state;
+    $('#progress').text(state);
 }
 
 eel.expose(mode);

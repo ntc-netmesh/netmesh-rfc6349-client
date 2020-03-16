@@ -39,8 +39,11 @@ eel.init('web', allowed_extensions=['.js', '.html'])
                                            < CONNECTION_TEARDOWN >
 '''
 async def normal_client(logger, SERVER_IP, cir):
+    eel.mode('upload speed')
+
     print("server_ip")
     print(SERVER_IP)
+
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -57,7 +60,6 @@ async def normal_client(logger, SERVER_IP, cir):
     actual_rwnd = None
     try:
         eel.printprogress("Initializing...")
-        eel.mode('upload speed')
         print("Getting client IP address...")
         try:
             logf = open(LOGFILE,"w+")
@@ -120,7 +122,7 @@ async def normal_client(logger, SERVER_IP, cir):
 
             try:
                 # progress 4
-                eel.printprogress("Performing windows scan...")
+                eel.printprogress("Performing window scan...")
                 eel.progress_now(4 / progress_count * 100)
                 print("Performing windows scan...")
 
@@ -196,6 +198,7 @@ async def normal_client(logger, SERVER_IP, cir):
             logger.debug(str(results))
             await websocket.send("normal test done")
             await websocket.close()
+
             return results
     except:
         logger.error("connection error")

@@ -14,16 +14,18 @@
     <!--Include eel.js - note this file doesn't exist in the 'web' directory -->
     <script type="text/javascript" src="/eel.js"></script>
 
-    <script src="js/jquery-3.4.1.slim.min.js"></script>
+    <script src="js/utilities/jquery-3.4.1.slim.min.js"></script>
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="js/popper.min.js"></script>
-    <script src="js/bootstrap.js"></script>
+    <script src="js/utilities/popper.min.js"></script>
+    <script src="js/utilities/bootstrap.js"></script>
     <script src="https://kit.fontawesome.com/dabe6c4264.js" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="js/jspdf.debug.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.62/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.62/vfs_fonts.js"></script>
-    <script src="js/moment-with-locales.min.js" crossorigin="anonymous"></script>
+
+    <script src="js/utilities/pdfmake.min.js" crossorigin="anonymous"></script>
+    <script src="js/utilities/vfs_fonts.js"></script>
+
+    <script src="js/utilities/moment-with-locales.min.js" crossorigin="anonymous"></script>
+    <script src="js/utilities/numeral.js" crossorigin="anonymous"></script>
 
     <script type="text/javascript" src="js/global.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
@@ -36,7 +38,7 @@
 
         $('#btnGetGps .spinner-grow').hide();
         
-        // $('#results-info').hide();
+        $('#results-info').hide();
       });
 
       // document.getElementById('login').style.display='block';
@@ -95,7 +97,7 @@
       </div>
       <div>
         <span class="text-muted">username</span>
-        <button type="button" class="btn btn-link">Log out</button>
+        <!-- <button type="button" class="btn btn-link" onclick="logout()">Log out</button> -->
       </div>
     </nav>
 
@@ -174,7 +176,7 @@
                   <i class="fa fa-long-arrow-alt-down"></i>
                   Download Mode
                 </button>
-                <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">
+                <!-- <button id="btnSimultaneousMode" class="btn btn-primary" role="button" type="submit" onclick="simultaneous()">
                   <i class="fa fa-arrows-alt-v"></i>
                   Simultaneous Mode
                 </button>
@@ -184,7 +186,7 @@
                     <i class="fa fa-long-arrow-alt-down" style="margin-left: -4px;"></i>
                   </span>
                   Auto Mode
-                </button>
+                </button> -->
               </div>
             </div>
           </div>
@@ -198,6 +200,7 @@
           <div class="card-body">
             <div class="px-2">
               <span id="progress" class="text-primary">Initializing...</span>
+              <span id="measurement-timer" class="text-secondary float-right">0:00</span>
               <!-- <ul class="list-unstyled">
                 <li>
                   <div>
@@ -263,7 +266,6 @@
                       </table>
                     </div>
                     <div class="col-lg-7">
-                      <!-- <h5>Window Scan Test Results</h5> -->
                       <table id="local_wnd_stats" width="20" class="table table-hover" border=1></table>
 
                       <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">

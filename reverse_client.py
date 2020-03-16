@@ -241,6 +241,8 @@ async def scan_process(**kwargs): #Metrics Calculations
                                 < CONNECTION_TEARDOWN >
 '''
 async def reverse_client(logger, SERVER_IP):
+    eel.mode('download speed')
+
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -249,8 +251,11 @@ async def reverse_client(logger, SERVER_IP):
     bb = None
     rwnd = None
     logf = None
+    progress_count = 4
     print("starting reverse client")
     try:
+        eel.printprogress("Initializing...")
+
         logf = open(LOGFILE,"w+")
         client_ip = client_utils.get_client_ip()
     except:
@@ -262,6 +267,11 @@ async def reverse_client(logger, SERVER_IP):
         return
 
     try:
+        # progress 1
+        eel.printprogress("Processing maximum transmission unit...")
+        eel.progress_now(1 / progress_count * 100)
+        print("Processing maximum transmission unit...")
+
         print("Starting MTU Test")
         mtu_return = await mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger) #PROBLEM
         results = {**results, **json.loads(mtu_return)}
@@ -273,6 +283,10 @@ async def reverse_client(logger, SERVER_IP):
             pass
 
     try:
+        # progress 2
+        eel.printprogress("Measuring round-trip delay time...")
+        eel.progress_now(2 / progress_count * 100)
+
         rtt_return = await rtt_process(SERVER_IP, RTT_HANDLER_PORT, logger)
         results = {**results, **json.loads(rtt_return)}
     except:
@@ -283,6 +297,11 @@ async def reverse_client(logger, SERVER_IP):
             pass
 
     try:
+        # progress 3
+        eel.printprogress("Measuring baseline bandwidth...")
+        eel.progress_now(3 / progress_count * 100)
+
+        print("Measuring baseline bandwidth...")
         rtt = results["RTT"]
         bb_return = await bandwidth_process(SERVER_IP, BANDWIDTH_HANDLER_PORT, BANDWIDTH_SERVICE_PORT , rtt, logger)
         results = {**results, **json.loads(bb_return)}
@@ -294,6 +313,12 @@ async def reverse_client(logger, SERVER_IP):
             pass
 
     try:
+        # progress 4
+        eel.printprogress("Performing window scan...")
+        eel.progress_now(4 / progress_count * 100)
+        print("Performing windows scan...")
+
+        
         mtu = results["MTU"]
         rwnd = results["RWND"]
         kwargs = {

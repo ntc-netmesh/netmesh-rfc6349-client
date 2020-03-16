@@ -28,7 +28,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             current_turn = None
             f = None
             # while not "CURRENT_TURN" == current_turn: 
-            while current_turn != str(0):
+            while current_turn != "CURRENT_TURN" and current_turn != "0":
                 print("BEFORE current_turn")
                 print(current_turn)
                 current_turn = await socket.recv()
@@ -58,7 +58,6 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             await socket.close()
         except:
             pass
-    
     return results
 
 
@@ -125,7 +124,7 @@ def join_queue(mode, server_ip, client_hash, cir):
     edit freely
 '''
 if __name__ == "__main__":
-    results = join_queue(NORMAL_MODE, DEFAULT_SERVER, "random_hash", 10)
+    results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash", 10)
     #results = join_queue(REVERSE_MODE, DEFAULT_SERVER, "random_hash")
     #loop = asyncio.get_event_loop()
     #group = asyncio.gather(queue_client(normal_client.start_normal_client, sys.argv[1]))

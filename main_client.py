@@ -35,7 +35,7 @@ if __name__ == "__main__":
     case_sensitive = True
     queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
-    path = "./tempfiles/queue"
+    path = "./tempfiles/queue_place"
     go_recursively = False
 
 def on_created(event):
@@ -46,8 +46,10 @@ def on_deleted(event):
 
 def on_modified(event):
     print(f"hey buddy, {event.src_path} has been modified")
+    print(event.name)
 
     if event.src_path.split('/')[-1] == "queue_place":
+        print("aa")
         f = open(event.src_path, "r")
         f_content = f.read()
         print("content:" + str(f_content))
@@ -102,7 +104,7 @@ def retrieve_servers():
             location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
             eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
 
-    #eel.add_server('Local test server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
+    eel.add_server('Google Cloud Server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
     eel.add_server('Local test server (THIS IS A TEST)', '202.90.158.168' + "," +  'uuid.202.90.158.168')
 
 ###results server credentials###
@@ -411,7 +413,7 @@ def normal(lat, lon, cir, serv_ip, network_type):
 
     # eel.printprogress("Done")
     # eel.progress_now(100)
-    eel.printprogress("Measuring...")
+   # eel.printprogress("Initializing...")
    # eel.progress_now(99)
 
     ip = re.split(",", serv_ip)
@@ -438,8 +440,8 @@ def normal(lat, lon, cir, serv_ip, network_type):
     else:
         eel.printnormal(None)
 
+    eel.progress_now(100, "true")
     eel.printprogress("Done")
-    eel.progress_now(100)
     #CALL eel.printlocal(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR REVERSE MODE
@@ -463,8 +465,11 @@ def rev(lat, lon, cir, serv_ip, network_type):
     #####CALL REVERSE MODE HERE#####
     #results = queue_process.join_queue(REVERSE_MODE, server_ip)
     global dev_hash
-    results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash)
+    results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash, cir)
     eel.printreverse(results)
+    
+    eel.printprogress("Done")
+    eel.progress_now(100, "true")
     #CALL eel.printremote(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR SIMULTANEOUS MODE
