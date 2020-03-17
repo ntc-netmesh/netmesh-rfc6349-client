@@ -21,6 +21,7 @@
     <script src="https://kit.fontawesome.com/dabe6c4264.js" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" crossorigin="anonymous"></script>
     <script src="js/utilities/pdfmake.min.js" crossorigin="anonymous"></script>
     <script src="js/utilities/vfs_fonts.js"></script>
 
@@ -39,6 +40,19 @@
         $('#btnGetGps .spinner-grow').hide();
         
         $('#results-info').hide();
+
+        // var dummyResults = {};
+        // dummyResults["WND_SIZES"] = [20, 40, 60, 80];
+        // dummyResults["WND_AVG_TCP"] = [15, 30, 45, 60];
+        // dummyResults["WND_ACTUAL_IDEAL"] = [18, 36, 54, 72];
+        // dummyResults["CIR"] = 80;
+        // dummyResults["ACTUAL_IDEAL"] = 60;
+        // renderLocalWindowScanGraph(dummyResults);
+
+        // dummyResults["EFF_PLOT"] = [0.9, 0.92, 0.97, 0.985];
+        // renderLocalThroughputEfficiencyGraph(dummyResults);
+
+        // $('#results-info').show();
       });
 
       // document.getElementById('login').style.display='block';
@@ -194,7 +208,7 @@
 
         <div id="progress-status-info" class="card shadow mb-5">
           <div class="card-header">
-            <span id="progress-status-title" class="h4"><b>Measuring <span id="mode"></span>...</b></span>
+            <span id="progress-status-title" class="h4"><b id="mode"></b></span>
             <span id="progress-finished-title" class="h4"><b>Finished</b></span>
           </div>
           <div class="card-body">
@@ -229,133 +243,141 @@
               <span class="h4"><b>Test results</b></span>
             </div>
             <div>
-              <!-- <div class="card-group">
-              </div> -->
-
-              <div id="localResultCard" class="card rounded-0">
+              <div id="localResultCard" class="card border-light rounded-0">
                 <div class="card-body">
-                  <p id="local_result" cols="50"></p>
-                  <!-- <textarea id="remote_result" readonly="true" class="form-control" rows="7"></textarea> -->
-                  <h5 class="card-title"><b>Local to Remote</b></h5>
-
-                  <div class="row">
-                    <div class="col-lg-5">
-                      <table id="tblLocalResult" class="table table-sm table-bordered table-hover">
-                        <tbody>
-                          <tr>
-                            <td>CIR</td>
-                            <td>5</td>
-                          </tr>
-                          <tr>
-                            <td>Path MTU</td>
-                            <td>1500</td>
-                          </tr>
-                          <tr>
-                            <td>Baseline RTT</td>
-                            <td>9.534 ms</td>
-                          </tr>
-                          <tr>
-                            <td>Bottleneck Bandwidth</td>
-                            <td>94.5 Mbits/s</td>
-                          </tr>
-                          <tr>
-                            <td>BDP</td>
-                            <td>900963.0000000001 bits</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <div class="col-lg-7">
-                      <table id="local_wnd_stats" width="20" class="table table-hover" border=1></table>
-
-                      <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
-                        <li class="nav-item">
-                          <a class="nav-link active" id="pills-tab0Content-tab" data-toggle="pill" href="#pills-tab0Content" role="tab" aria-controls="pills-tab0Content" aria-selected="true">Window Scan Test</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-tab1Content-tab" data-toggle="pill" href="#pills-tab1Content" role="tab" aria-controls="pills-tab1Content" aria-selected="false">Throughput</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-tab2Content-tab" data-toggle="pill" href="#pills-tab2Content" role="tab" aria-controls="pills-tab2Content" aria-selected="false">RTT</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-tab3Content-tab" data-toggle="pill" href="#pills-tab3Content" role="tab" aria-controls="pills-tab3Content" aria-selected="false">Efficiency</a>
-                        </li>
-                      </ul>
-                      <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="pills-tab0Content" role="tabpanel" aria-labelledby="pills-tab0Content-tab">1...</div>
-                        <div class="tab-pane fade" id="pills-tab1Content" role="tabpanel" aria-labelledby="pills-tab1Content-tab">2...</div>
-                        <div class="tab-pane fade" id="pills-tab2Content" role="tabpanel" aria-labelledby="pills-tab2Content-tab">3...</div>
-                        <div class="tab-pane fade" id="pills-tab3Content" role="tabpanel" aria-labelledby="pills-tab3Content-tab">4...</div>
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title text-primary"><b class="">Local to Remote</b></h5>
+                      <h6 class="card-title font-weight-bold">Throughput Test</h6>
+                      <div class="row">
+                        <div class="col-lg-6">
+                          <table id="tblLocalResult" class="table table-sm table-bordered table-hover" style="width: 100%;"> 
+                            <tbody>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="col-lg-6">
+                          <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                              <a class="nav-link active" id="pills-throughputEfficiency-tab" data-toggle="pill" href="#pills-throughputEfficiency" role="tab" aria-controls="pills-throughputEfficiency" aria-selected="true">Efficiency</a>
+                            </li>
+                            <!-- <li class="nav-item">
+                              <a class="nav-link" id="pills-throughtputRTT-tab" data-toggle="pill" href="#pills-throughtputRTT" role="tab" aria-controls="pills-throughtputRTT" aria-selected="false">RTT</a>
+                            </li> -->
+                          </ul>
+                          <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="pills-throughputEfficiency" role="tabpanel" aria-labelledby="pills-throughputEfficiency-tab">
+                              <div id="throughputEfficiencyChart" style="margin: -12px 0px 0px 0px;"></div>
+                            </div>
+                            <!-- <div class="tab-pane fade" id="pills-throughtputRTT" role="tabpanel" aria-labelledby="pills-throughtputRTT-tab">
+                              <div id="throughputRTTChart" style="margin: -24px 0px 0px 0px;"></div>
+                            </div> -->
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              <div id="remoteResultCard" class="card rounded-0">
-                <div class="card-body">
-                  <p id="remote_result" cols="50"></p>
-                  <h5 class="card-title"><b>Remote to Local</b></h5>
-                  <!-- <span class="text-danger h6">WARNING: This is NOT A REAL RESULT. This is for UI purposes only. (Remove this message when real test measurement were implemented)</span> -->
-
-                  <div class="row">
-                    <div class="col-lg-5">
-                      <table id="tblRemoteResult" class="table table-sm table-bordered table-hover">
-                        <!-- <thead style="margin: 0px;">
-                          <tr>
-                            <td style="width: 20%; min-width: 180px;"></td>
-                            <td></td>
-                          </tr>
-                        </thead> -->
-                        <tbody>
-                          <tr>
-                            <td>CIR</td>
-                            <td>5</td>
-                          </tr>
-                          <tr>
-                            <td>Path MTU</td>
-                            <td>1500</td>
-                          </tr>
-                          <tr>
-                            <td>Baseline RTT</td>
-                            <td>9.534 ms</td>
-                          </tr>
-                          <tr>
-                            <td>Bottleneck Bandwidth</td>
-                            <td>94.5 Mbits/s</td>
-                          </tr>
-                          <tr>
-                            <td>BDP</td>
-                            <td>900963.0000000001 bits</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <div class="col-lg-7">
-                      <!-- <h5>Window Scan Test Results</h5> -->
-                      <table id="remote_wnd_stats" width="20" class="table table-hover" border=1> </table>
-
-                      <ul class="nav nav-pills mb-4" id="pills-rtab" role="tablist">
-                        <li class="nav-item">
-                          <a class="nav-link active" id="pills-rtab0Content-tab" data-toggle="pill" href="#pills-rtab0Content" role="tab" aria-controls="pills-rtab0Content" aria-selected="true">Window Scan Test</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-rtab1Content-tab" data-toggle="pill" href="#pills-rtab1Content" role="tab" aria-controls="pills-rtab1Content" aria-selected="false">Throughput</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-rtab2Content-tab" data-toggle="pill" href="#pills-rtab2Content" role="tab" aria-controls="pills-rtab2Content" aria-selected="false">RTT</a>
-                        </li>
-                        <li class="nav-item">
-                          <a class="nav-link" id="pills-rtab3Content-tab" data-toggle="pill" href="#pills-rtab3Content" role="tab" aria-controls="pills-rtab3Content" aria-selected="false">Efficiency</a>
-                        </li>
-                      </ul>
-                      <div class="tab-content" id="pills-rtabContent">
-                        <div class="tab-pane fade show active" id="pills-rtab0Content" role="tabpanel" aria-labelledby="pills-rtab0Content-tab">1...</div>
-                        <div class="tab-pane fade" id="pills-rtab1Content" role="tabpanel" aria-labelledby="pills-rtab1Content-tab">2...</div>
-                        <div class="tab-pane fade" id="pills-rtab2Content" role="tabpanel" aria-labelledby="pills-rtab2Content-tab">3...</div>
-                        <div class="tab-pane fade" id="pills-rtab3Content" role="tabpanel" aria-labelledby="pills-rtab3Content-tab">4...</div>
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title text-primary"><b class="">Local to Remote</b></h5>
+                      <h6 class="card-title font-weight-bold">Window Scan Test</h6>
+                      <div class="row">
+                        <div class="col-lg-6">
+                          <table id="tblLocalWindowStats" class="table table-sm table-bordered table-hover" style="width: 100%;">
+                            <tbody>
+                              <tr>
+                                <td class="text-secondary"></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="col-lg-6">
+                          <div id="windowScanChart" style="margin: -24px 0px 0px 0px;">
+                        </div>
                       </div>
                     </div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+              <div id="remoteResultCard" class="card border-light rounded-0">
+                <div class="card-body">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title"><b class="text-info">Remote to Local</b></h5>
+                      <h6 class="card-title font-weight-bold">Throughput Test</h6>
+                      <div class="row">
+                        <div class="col-lg-6">
+                          <table id="tblRemoteResult" class="table table-sm table-bordered table-hover" style="width: 100%;"> 
+                            <tbody>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="col-lg-6">
+                          <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                              <a class="nav-link active" id="pills-remoteThroughputEfficiency-tab" data-toggle="pill" href="#pills-remoteThroughputEfficiency" role="tab" aria-controls="pills-remoteThroughputEfficiency" aria-selected="true">Efficiency</a>
+                            </li>
+                            <!-- <li class="nav-item">
+                              <a class="nav-link" id="pills-remoteThroughtputRTT-tab" data-toggle="pill" href="#pills-remoteThroughtputRTT" role="tab" aria-controls="pills-remoteThroughtputRTT" aria-selected="false">RTT</a>
+                            </li> -->
+                          </ul>
+                          <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="pills-remoteThroughputEfficiency" role="tabpanel" aria-labelledby="pills-remoteThroughputEfficiency-tab">
+                              <div id="remoteThroughputEfficiencyChart" style="margin: -12px 0px 0px 0px;"></div>
+                            </div>
+                            <!-- <div class="tab-pane fade" id="pills-remoteThroughtputRTT" role="tabpanel" aria-labelledby="pills-remoteThroughtputRTT-tab">
+                              <div id="remoteThroughputRTTChart" style="margin: -24px 0px 0px 0px;"></div>
+                            </div> -->
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title"><b class="text-info">Remote to Local</b></h5>
+                      <h6 class="card-title font-weight-bold">Window Scan Test</h6>
+                      <div class="row">
+                        <div class="col-lg-6">
+                          <table id="tblRemoteWindowStats" class="table table-sm table-bordered table-hover" style="width: 100%;">
+                            <tbody>
+                              <tr>
+                                <td class="text-secondary"><b>Steps</b></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"><b>Window Size</b></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"><b>Average TCP THPT</b></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"><b>Ideal TCP THPT</b></td>
+                              </tr>
+                              <tr>
+                                <td class="text-secondary"><b>TCP Efficiency</b></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                        <div class="col-lg-6">
+                          <div id="windowScanChart" style="margin: -24px 0px 0px 0px;">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   </div>
                 </div>
               </div>

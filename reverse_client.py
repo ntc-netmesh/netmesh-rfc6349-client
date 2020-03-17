@@ -241,7 +241,7 @@ async def scan_process(**kwargs): #Metrics Calculations
                                 < CONNECTION_TEARDOWN >
 '''
 async def reverse_client(logger, SERVER_IP):
-    eel.mode('download speed')
+    eel.mode('Measuring download speed...')
 
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"

@@ -3,6 +3,10 @@
 	width:50%
 }
 
+body {
+	min-width: 480px;
+}
+
 /* .card {
 
 } */

@@ -37,10 +37,9 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
                 queue_placement_filename = "tempfiles/queue/queue_place"
                 with open(queue_placement_filename, "w+") as f:
                     f.write(current_turn)
+                    f.close()
 
-                # send current_turn data to api endpoint
-            
-            f.close()
+            # send current_turn data to api endpoint
             
             #await the function mode
             results = mode_function(server_ip, cir)
