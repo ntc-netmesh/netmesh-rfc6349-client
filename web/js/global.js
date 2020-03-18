@@ -6,9 +6,11 @@ var loggedUsername = "username";
 var normalTestResults = {};
 var reverseTestResults = {};
 
-var windowsScanGraphLocalToRemoteChart = null;
-var windowsScanGraphRemoteToLocalChart = null;
-var throughputGraphLocalToRemoteChart = null;
-var throughputGraphRemoteToLocalChart = null;
+var emptyImageURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==';
+var chartPromises = [];
+var windowsScanLocalToRemoteChart = null;
+var windowsScanRemoteToLocalChart = null;
+var throughputEfficiencyLocalToRemoteChart = null;
+var throughputEfficiencyRemoteToLocalChart = null;
 
 var measurementTimer;

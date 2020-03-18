@@ -40,6 +40,7 @@ function check_queue(mode) {
 eel.expose(start_test)
 function start_test(mode) {
     disableMainForm(true);
+    chartPromises = [];
 
     $('#progress-finished-title').hide();
     $('#progress-status-info').show();
@@ -222,10 +223,6 @@ function getMainFormData() {
 //         alert("Latitude and Longitude must be filled out");   
 //     }
 // }
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 // async function check_queue(mode) {
 //     var cancel = document.getElementById("cancel");
@@ -994,6 +991,7 @@ function printlocal(result){
 eel.expose(printnormal);
 function printnormal(result){
     disableMainForm(false);
+    $('#btnSaveAsPdf').attr('disabled', false);
 
     testFinishedAt = moment().format('YYYY-MM-DD HH:mm:ss');
     clearInterval(measurementTimer);
@@ -1021,7 +1019,7 @@ function printnormal(result){
         if ("THPT_AVG" in result){
             $(localResultId).append(`<tr><td class="text-secondary"><b>${ 'Average TCP Throughput' }</b></td><td>${ numeral(result["THPT_AVG"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
         }
-        if ("THPT_IDEAL" in result){
+        if ("ACTUAL_IDEAL" in result){
             $(localResultId).append(`<tr><td class="text-secondary"><b>${ 'Ideal TCP Throughput' }</b></td><td>${ numeral(result["ACTUAL_IDEAL"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
         }
         if ("TRANSFER_AVG" in result){
@@ -1064,8 +1062,8 @@ function printnormal(result){
     $(localWindowScanId).find('tr').eq(3).find('td').eq(0).html(`<b>Ideal TCP Throughput</b>`);
     $(localWindowScanId).find('tr').eq(4).find('td').eq(0).html(`<b>TCP Efficiency</b>`);
     if (windowSizes && windowSizes.length > 0) {
-        for (var i = 0; i < windowSizes.length; i++) {
-            $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ i + 1 == windowSizes.length ? 'THPT' : i + 1 }</td>`);
+        for (var i = 0; i < windowSizes.length - 1; i++) {
+            $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ i + 1 }</td>`);
             $(localWindowScanId).find('tr').eq(1).find('td').eq(i).after(`<td>${ windowSizes[i] } Bytes</td>`);
             $(localWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ windowAverageThroughputs.length > i ? numeral(windowAverageThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ windowIdealThroughputs.length > i ? numeral( windowIdealThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
@@ -1073,15 +1071,25 @@ function printnormal(result){
             // $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowAverageRtt.length > i ? numeral(windowAverageRtt[i]).format('0.000') : "---" } ms</td>`);
         }
     }
-    else {
-        $(localWindowScanId).append(`<tr><td><span class="text-muted">${ 'No measured window scan' }<span></td></tr>`);
-    }
+    // else {
+    //     $(localWindowScanId).append(`<tr><td><span class="text-muted">${ 'No measured window scan' }<span></td></tr>`);
+    // }
+
+    $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ 'THPT' }</td>`);
+    $(localWindowScanId).find('tr').eq(1).find('td').eq(i).after(`<td>${ result["ACTUAL_RWND"] == null ? "---" : numeral(result["ACTUAL_RWND"]).format('0') } Bytes</td>`);
+    $(localWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ result["THPT_AVG"] == null ? "---" : numeral(result["THPT_AVG"]).format('0.000') } Mbps</td>`);
+    $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ result["ACTUAL_IDEAL"] == null ? "---" : numeral(result["ACTUAL_IDEAL"]).format('0.000') } Mbps</td>`);
+    $(localWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ result["TCP_EFF"] == null ? "---" : numeral(result["TCP_EFF"]).format('0.[000]%') } </td>`);
+
+    normalTestResults = result;
     
     renderLocalWindowScanGraph(result);
     renderLocalThroughputEfficiencyGraph(result);
-    // renderLocalThroughputRTTGraph(result);
 
-    normalTestResults = result;
+    Promise.all(chartPromises).then(() => {
+        $('#btnSaveAsPdf').attr('disabled', false);
+    })
+    // renderLocalThroughputRTTGraph(result);
 }
 
 
@@ -1097,11 +1105,11 @@ function renderLocalWindowScanGraph(result) {
         idealThroughputs.push(result['WND_ACTUAL_IDEAL'][i]);
     }
 
-    for (var i = 0; i < 2; i++) {
-        steps.push('');
-        averageThroughputs.push(0);
-        idealThroughputs.push(0);
-    }
+    // for (var i = 0; i < 2; i++) {
+    //     steps.push('');
+    //     averageThroughputs.push(0);
+    //     idealThroughputs.push(0);
+    // }
 
     console.log(steps);
     console.log(averageThroughputs);
@@ -1205,7 +1213,16 @@ function renderLocalWindowScanGraph(result) {
     }
 
     var chart = new ApexCharts(document.querySelector('#windowScanChart'), options);
-    chart.render();
+    chartPromises.push(new Promise(function(resolve, reject) {
+        chart.render().then(() => {
+            setTimeout(function () {
+                chart.dataURI().then(({ imgURI, blob }) => {
+                    windowsScanLocalToRemoteChart = imgURI;
+                });
+            }, 3000);
+            resolve("done");
+        });
+    }));
 }
 
 function renderLocalThroughputEfficiencyGraph(result) {
@@ -1294,7 +1311,16 @@ function renderLocalThroughputEfficiencyGraph(result) {
     }
 
     var chart = new ApexCharts(document.querySelector('#throughputEfficiencyChart'), options);
-    chart.render();
+    chartPromises.push(new Promise(function(resolve, reject) {
+        chart.render().then(() => {
+            setTimeout(function () {
+                chart.dataURI().then(({ imgURI, blob }) => {
+                    throughputEfficiencyLocalToRemoteChart = imgURI;
+                });
+                resolve("done");
+            }, 3000);
+        });
+    }));
 }
 
 
@@ -1437,7 +1463,7 @@ function printreverse(result){
         if ("THPT_AVG" in result){
             $(localResultId).append(`<tr><td>${ 'Average TCP Throughput' }</td><td>${ result["THPT_AVG"] }${ ' Mbps' }</td></tr>`);
         }
-        if ("THPT_IDEAL" in result){
+        if ("ACTUAL_IDEAL" in result){
             $(localResultId).append(`<tr><td>${ 'Ideal TCP Throughput' }</td><td>${ result["ACTUAL_IDEAL"] }${ ' Mbps' }</td></tr>`);
         }
         if ("TRANSFER_AVG" in result){

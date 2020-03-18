@@ -122,7 +122,7 @@ function windowScanTestPage(content, fromLocal = true) {
     });
 
     content.push({
-        text: `Single Direction Upload: ${ fromLocal ? 'Local > Remote' : 'Remote > Local' }`,
+        text: `${ fromLocal ? 'Local to Remote' : 'Remote to Local' }`,
         fontSize: 12,
         alignment: 'center',
         margin: [0, 0, 0, 10],
@@ -146,6 +146,58 @@ function windowScanTestPage(content, fromLocal = true) {
             windowSize3 = testResults["WND_SIZES"][2];
         }
     }
+    
+    var averageThroughput1 = null;
+    var averageThroughput2 = null;
+    var averageThroughput3 = null;
+    var averageThroughputLength = 0;
+    if (testResults["WND_AVG_TCP"] != null) {
+        averageThroughputLength = testResults["WND_AVG_TCP"].length;
+        if (averageThroughputLength = 1) {
+            averageThroughput1 = testResults["WND_AVG_TCP"][0];
+        }
+        if (averageThroughputLength = 2) {
+            averageThroughput2 = testResults["WND_AVG_TCP"][1];
+        }
+        if (averageThroughputLength = 3) {
+            averageThroughput3 = testResults["WND_AVG_TCP"][2];
+        }
+    }
+
+    var idealThroughput1 = null;
+    var idealThroughput2 = null;
+    var idealThroughput3 = null;
+    var idealThroughputLength = 0;
+    if (testResults["WND_ACTUAL_IDEAL"] != null) {
+        idealThroughputLength = testResults["WND_ACTUAL_IDEAL"].length;
+        if (idealThroughputLength = 1) {
+            idealThroughput1 = testResults["WND_ACTUAL_IDEAL"][0];
+        }
+        if (idealThroughputLength = 2) {
+            idealThroughput2 = testResults["WND_ACTUAL_IDEAL"][1];
+        }
+        if (idealThroughputLength = 3) {
+            idealThroughput3 = testResults["WND_ACTUAL_IDEAL"][2];
+        }
+    }
+
+    var throughputEfficiency1 = null;
+    var throughputEfficiency2 = null;
+    var throughputEfficiency3 = null;
+    var throughputEfficiencyLength = 0;
+    if (testResults["EFF_PLOT"] != null) {
+        throughputEfficiencyLength = testResults["EFF_PLOT"].length;
+        if (throughputEfficiencyLength = 1) {
+            throughputEfficiency1 = testResults["EFF_PLOT"][0];
+        }
+        if (ThroughputLength = 2) {
+            throughputEfficiency2 = testResults["EFF_PLOT"][1];
+        }
+        if (ThroughputLength = 3) {
+            throughputEfficiency3 = testResults["EFF_PLOT"][2];
+        }
+    }
+
     content.push({
         table: {
             body: [
@@ -159,7 +211,27 @@ function windowScanTestPage(content, fromLocal = true) {
                     `${ windowSize3 == null ? "---" : numeral(windowSize3).format('0') } Bytes`,
                     `${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`
                 ],
-                // ['Connections', 1, 1, 1, 1],
+                [
+                    'Average TCP Throughput',
+                    `${ averageThroughput1 == null ? "---" : numeral(averageThroughput1).format('0.000') } Mbps`,
+                    `${ averageThroughput2 == null ? "---" : numeral(averageThroughput2).format('0.000') } Mbps`,
+                    `${ averageThroughput3 == null ? "---" : numeral(averageThroughput3).format('0.000') } Mbps`,
+                    `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`
+                ],
+                [
+                    'Ideal TCP Throughput',
+                    `${ idealThroughput1 == null ? "---" : numeral(idealThroughput1).format('0.000') } Mbps`,
+                    `${ idealThroughput2 == null ? "---" : numeral(idealThroughput2).format('0.000') } Mbps`,
+                    `${ idealThroughput3 == null ? "---" : numeral(idealThroughput3).format('0.000') } Mbps`,
+                    `${ testResults["ACTUAL_IDEAL"] == null ? "---" : numeral(testResults["ACTUAL_IDEAL"] ).format('0.000')} Mbps`
+                ],
+                [
+                    'TCP Efficiency',
+                    `${ throughputEfficiency1 == null ? "---" : numeral(throughputEfficiency1).format('0.000%') }`,
+                    `${ throughputEfficiency2 == null ? "---" : numeral(throughputEfficiency2).format('0.000%') }`,
+                    `${ throughputEfficiency3 == null ? "---" : numeral(throughputEfficiency3).format('0.000%') }`,
+                    `${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`
+                ],
                 ['BDP', { text: `${ testResults["BDP"] == null ? "---" : testResults["BDP"] } bits`, colSpan: 4 }, {}, {}, {}],
                 ['Path MTU', { text: `${ testResults["MTU"] == null ? "---" : testResults["MTU"] } Bytes`, colSpan: 4 }, {}, {}, {}],
                 ['Baseline RTT', { text: `${ testResults["RTT"] == null ? "---" : testResults["RTT"] } ms`, colSpan: 4 }, {}, {}, {}],
@@ -167,7 +239,7 @@ function windowScanTestPage(content, fromLocal = true) {
 
                 [{ text: 'TCP Thoughput', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
                 ['Average', { text: `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`, colSpan: 4 }, {}, {}, {}],
-                ['Ideal', { text: `${ testResults["THPT_IDEAL"] == null ? "---" :  numeral(testResults["THPT_IDEAL"]).format('0.000') } Mbps`, colSpan: 4 }, {}, {}, {}],
+                ['Ideal', { text: `${ testResults["ACTUAL_IDEAL"] == null ? "---" :  numeral(testResults["ACTUAL_IDEAL"]).format('0.000') } Mbps`, colSpan: 4 }, {}, {}, {}],
 
                 [{ text: 'Data Transfer', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
                 ['TCP Efficiency', { text: testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.[000]%'), colSpan: 4 }, {}, {}, {}],
@@ -181,88 +253,20 @@ function windowScanTestPage(content, fromLocal = true) {
         margin: [0, 0, 0, 20],
     });
 
-    // content.push({
-    //     text: 'Window Scan Graph: Local > Remote',
-    //     fontSize: 11,
-    //     bold: true,
-    //     alignment: 'center',
-    //     margin: [0, 0, 0, 20],
-    // });
+    content.push({
+        text: `Window Scan Graph: ${ fromLocal ? 'Local to Remote' : 'Remote to Local' }`,
+        fontSize: 11,
+        bold: true,
+        alignment: 'center',
+        margin: [0, 0, 0, 20],
+    });
     
-    // content.push({
-    //     image: windowsScanGraphLocalToRemoteChart ? windowsScanGraphLocalToRemoteChart.toBase64Image() : [],
-    //     height: 240,
-    //     width: 320,
-    //     alignment: "center"
-    // });
+    content.push({
+        image: (fromLocal ? windowsScanLocalToRemoteChart : windowsScanRemoteToLocalChart) ?? emptyImageURI,
+        width: 300,
+        alignment: "center"
+    });
 }
-
-// function page3(content) {
-//     content.push({
-//         text: 'WINDOW SCAN TEST',
-//         fontSize: 12,
-//         bold: true,
-//         alignment: 'center',
-//         margin: [0, 0, 0, 20],
-//     });
-
-//     content.push({
-//         text: 'Single Direction Upload: Remote > Local',
-//         fontSize: 12,
-//         alignment: 'center',
-//         margin: [0, 0, 0, 10],
-//     });
-
-//     content.push({
-//         table: {
-//             body: [
-//                 [{ text: 'Test Conditions', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-//                 ['Mode', { text: testMeasurementMode, colSpan: 4 }, {}, {}, {}],
-//                 ['Steps', '1', '2', '3', 'THPT'],
-//                 [
-//                     'Window Size',
-//                     `${ numeral(reverseTestResults["RWND"] / 4).format('0.000') } KBytes`,
-//                     `${ numeral(reverseTestResults["RWND"] * 2 / 4).format('0.000') } KBytes`,
-//                     `${ numeral(reverseTestResults["RWND"] * 3 / 4).format('0.000') } KBytes`,
-//                     `${ numeral(reverseTestResults["RWND"]).format('0.000') } KBytes`
-//                 ],
-//                 ['Connections', 1, 1, 1, 1],
-//                 ['BDP', { text: `${ reverseTestResults["BDP"] } bits`, colSpan: 4 }, {}, {}, {}],
-//                 ['Path MTU', { text: `${ reverseTestResults["MTU"] }`, colSpan: 4 }, {}, {}, {}],
-//                 ['Baseline RTT', { text: `${ numeral(reverseTestResults["RTT"]).format('0.000') } ms`, colSpan: 4 }, {}, {}, {}],
-//                 ['CIR', { text: `${$('#cir').val()} Mbps`, colSpan: 4 }, {}, {}, {}],
-
-//                 [{ text: 'TCP Thoughput', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-//                 ['Average', { text: `${ numeral(reverseTestResults["THPT_AVG"]).format('0.000') } Mbits/s`, colSpan: 4 }, {}, {}, {}],
-//                 ['Ideal', { text: `${ numeral(reverseTestResults["THPT_IDEAL"]).format('0.000') }`, colSpan: 4 }, {}, {}, {}],
-                
-//                 [{ text: 'Data Transfer', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-//                 ['TCP Efficiency', { text: numeral(reverseTestResults["TCP_EFF"]).format('0.000'), colSpan: 4 }, {}, {}, {}],
-
-//                 [{ text: 'RTT', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-//                 ['Average', { text: numeral(reverseTestResults["RTT"]).format('0.000') , colSpan: 4 }, {}, {}, {}],
-//             ],
-//             widths: ['*', '*', '*', '*', '*'],
-//         },
-//         fontSize: 10,
-//         margin: [0, 0, 0, 20],
-//     });
-
-//     content.push({
-//         text: 'Window Scan Graph: Local > Remote',
-//         fontSize: 11,
-//         bold: true,
-//         alignment: 'center',
-//         margin: [0, 0, 0, 20],
-//     });
-
-//     // content.push({
-//     //     image: windowsScanGraphLocalToRemoteChart ? windowsScanGraphLocalToRemoteChart.toBase64Image() : [],
-//     //     height: 240,
-//     //     width: 320,
-//     //     alignment: "center"
-//     // });
-// }
 
 function throughputTestPage(content) {
     var cir = $('#cir').val();
@@ -294,8 +298,8 @@ function throughputTestPage(content) {
 
                         [{ text: 'TCP Throughput', colSpan: 2, fillColor: '#cccccc' }, {}],
                         ['Average', `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`],
-                        ['Ideal', `${ testResults["THPT_IDEAL"] == null ? "---" : numeral(testResults["THPT_IDEAL"]).format('0.000') } Mbps`],
-                        ['Threshold', `${ testResults["THPT_AVG"] == null || testResults["THPT_IDEAL"] == null ? "---" : numeral(testResults["THPT_AVG"] / testResults["THPT_IDEAL"]).format('0.[000]%') } of Ideal`],
+                        ['Ideal', `${ testResults["ACTUAL_IDEAL"] == null ? "---" : numeral(testResults["ACTUAL_IDEAL"]).format('0.000') } Mbps`],
+                        ['Threshold', `${ testResults["THPT_AVG"] == null || testResults["ACTUAL_IDEAL"] == null ? "---" : numeral(testResults["THPT_AVG"] / testResults["ACTUAL_IDEAL"]).format('0.[000]%') } of Ideal`],
 
                         [{ text: 'Transfer Time', colSpan: 2, fillColor: '#cccccc' }, {}],
                         ['Average', `${ testResults["TRANSFER_AVG"] == null ? "---" : numeral(testResults["TRANSFER_AVG"]).format('0.000') } s`],
@@ -365,7 +369,7 @@ function throughputTestPage(content) {
 
 function throughputGraphPage(content, fromLocal = true) {
     content.push({
-        text: `Single Direction: ${ fromLocal ? 'Local > Remote' : 'Remote > Local' }`,
+        text: `Throughput and TCP Efficiency Chart\n${ fromLocal ? 'Local to Remote' : 'Remote to Local' }`,
         fontSize: 12,
         bold: true,
         alignment: 'center',
@@ -373,12 +377,11 @@ function throughputGraphPage(content, fromLocal = true) {
     });
 
     // WINDOW SCAN TEST (L > R),,,,,
-    // content.push({
-    //     image: throughputGraphLocalToRemoteChart ? throughputGraphLocalToRemoteChart.toBase64Image() : [],
-    //     height: 180,
-    //     width: 240,
-    //     alignment: "center"
-    // });
+    content.push({
+        image: (fromLocal ? throughputEfficiencyLocalToRemoteChart : throughputEfficiencyRemoteToLocalChart) ?? emptyImageURI,
+        width: 360,
+        alignment: "center"
+    });
 }
 
 // function page6(content) {
@@ -412,41 +415,7 @@ async function generateTestResultsPdfReport() {
     var params = ["CIR", "MTU", "RTT", "BB", "BDP", "RWND",
         "THPT_AVG", "THPT_IDEAL", "TRANSFER_AVG", "TRANSFER_IDEAL",
         "TCP_TTR", "TRANS_BYTES", "RETX_BYTES", "TCP_EFF", "AVE_RTT", "BUF_DELAY",
-        "ACTUAL_RWND", "WND_SIZES", "PARALLEL_CONNECTIONS"];
-
-    // normalTestResults["CIR"] = 25;
-    // normalTestResults["MTU"] = 1488;
-    // normalTestResults["RTT"] = 9.165;
-    // normalTestResults["BB"] = 94.5;
-    // normalTestResults["BDP"] = 866092.5;
-    // normalTestResults["RWND"] = 108.2615625;
-    // normalTestResults["THPT_AVG"] = 48.0;
-    // normalTestResults["THPT_IDEAL"] = 94.5;
-    // normalTestResults["TRANSFER_AVG"] = 5.0;
-    // normalTestResults["TRANSFER_IDEAL"] = 2.42116402116040213;
-    // normalTestResults["TCP_TTR"] = 2.0651223776223775;
-    // normalTestResults["TRANS_BYTES"] = 31323575;
-    // normalTestResults["RETX_BYTES"] = 1494;
-    // normalTestResults["TCP_EFF"] = 100.00;
-    // normalTestResults["AVE_RTT"] = 14743.35;
-    // normalTestResults["BUF_DELAY"] = 60.865791911760645;
-
-    // reverseTestResults["CIR"] = 25;
-    // reverseTestResults["MTU"] = 1480;
-    // reverseTestResults["RTT"] = 7.792400000000001;
-    // reverseTestResults["BB"] = 94.9;
-    // reverseTestResults["BDP"] = 739498.76;
-    // reverseTestResults["RWND"] = 92.43734500000001;
-    // reverseTestResults["THPT_AVG"] = 7.29;
-    // reverseTestResults["THPT_IDEAL"] = 94.9;
-    // reverseTestResults["TRANSFER_AVG"] = 5.04;
-    // reverseTestResults["TRANSFER_IDEAL"] = 0.3692307692307692;
-    // reverseTestResults["TCP_TTR"] = 13.65000000000002;
-    // reverseTestResults["TRANS_BYTES"] = 4951825;
-    // reverseTestResults["RETX_BYTES"] = 140436;
-    // reverseTestResults["TCP_EFF"] = 97.16;
-    // reverseTestResults["AVE_RTT"] = 3.96;
-    // reverseTestResults["BUF_DELAY"] = -49.175935971701875;
+        "ACTUAL_RWND", "WND_SIZES", "PARALLEL_CONNECTIONS", "ACTUAL_IDEAL"];
 
     if (normalTestResults == null) {
         normalTestResults = {};
@@ -473,7 +442,7 @@ async function generateTestResultsPdfReport() {
 
     $('#btnSaveAsPdf').attr('disabled', true);
 
-    var testModeProperName = "Upload speed";
+    var testModeProperName = "";
     switch (mode) {
         case "normal":
             testMeasurementMode = "Upload";
@@ -560,8 +529,8 @@ async function generateTestResultsPdfReport() {
     });
 
     testSummaryPage(dd.content);
-    pageBreak(dd.content);
 
+    pageBreak(dd.content);
     switch (testMeasurementMode) {
         case "Upload":
             windowScanTestPage(dd.content, true);
@@ -570,19 +539,19 @@ async function generateTestResultsPdfReport() {
             windowScanTestPage(dd.content, false);
             break;
     }
+
     pageBreak(dd.content);
-
     throughputTestPage(dd.content);
-    // pageBreak(dd.content);
 
-    // switch (testMeasurementMode) {
-    //     case "Upload":
-    //         throughputGraphPage(dd.content, true);
-    //         break;
-    //     case "Download":
-    //         throughputGraphPage(dd.content, false);
-    //         break;
-    // }
+    pageBreak(dd.content);
+    switch (testMeasurementMode) {
+        case "Upload":
+            throughputGraphPage(dd.content, true);
+            break;
+        case "Download":
+            throughputGraphPage(dd.content, false);
+            break;
+    }
 
     dd.styles = {
         header: {
@@ -690,7 +659,7 @@ async function generateTestResultsPdfReport() {
     //     ],
     // }
 
-    const pdfDocGenerator = pdfMake.createPdf(dd);
+    // const pdfDocGenerator = pdfMake.createPdf(dd);
     // pdfDocGenerator.getDataUrl((dataUrl) => {
     //     const targetElement = document.querySelector('#pdfViewer');
     //     const iframe = document.createElement('iframe');
@@ -737,163 +706,5 @@ $(function () {
     // $('#lat').val(14.647132);
     // $('#lon').val(121.072027);
 
-    $('.nav-pills a[href="#pills-tab0Content"]').tab('show');
-    var ctx = document.getElementById('tab0Content').getContext('2d');
-    windowsScanGraphLocalToRemoteChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: 'Windows Scan Graph (Local to Remote)',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    $('.nav-pills a[href="#pills-tab1Content"]').tab('show');
-    var ctx1 = document.getElementById('tab1Content').getContext('2d');
-    windowsScanGraphRemoteToLocalChart = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: 'Windows Scan Graph (Remote to Local)',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    $('.nav-pills a[href="#pills-tab2Content"]').tab('show');
-    var ctx2 = document.getElementById('tab2Content').getContext('2d');
-    throughputGraphLocalToRemoteChart = new Chart(ctx2, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: 'Throughput (Local to Remote)',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    $('.nav-pills a[href="#pills-tab3Content"]').tab('show');
-    var ctx3 = document.getElementById('tab3Content').getContext('2d');
-    throughputGraphRemoteToLocalChart = new Chart(ctx3, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: 'Throughput (Remote to Local)',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    $('.nav-pills a[href="#pills-tab0Content"]').tab('show');
-
-    generateTestResultsPdfReport();
+    // generateTestResultsPdfReport();
 });
