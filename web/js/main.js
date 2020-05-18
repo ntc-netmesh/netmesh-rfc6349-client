@@ -1056,6 +1056,11 @@ function printnormal(result){
     var windowIdealThroughputs = result["WND_ACTUAL_IDEAL"];
     var windowTcpEfficiencies = result["EFF_PLOT"];
     // var windowAverageRtt = result["BUF_PLOT"];
+    $(localWindowScanId).empty();
+    for (i = 0; i < 5; i++) {
+        $(`${localWindowScanId}`).append('<tr><td class="text-secondary"></td></tr>');
+    }
+
     $(localWindowScanId).find('tr').eq(0).find('td').eq(0).html(`<b>Steps</b>`);
     $(localWindowScanId).find('tr').eq(1).find('td').eq(0).html(`<b>Window Size</b>`);
     $(localWindowScanId).find('tr').eq(2).find('td').eq(0).html(`<b>Average TCP Throughput</b>`);
