@@ -25,8 +25,13 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             print("Sending client hash...")
             await socket.send(str(client_hash))
             #go signal
-            current_turn = None
+            current_turn = await socket.recv()
             f = None
+
+            if current_turn != "CURRENT_TURN" and current_turn != "0":
+                eel.set_queue(current_queue_place)
+                eel.open_queue_dialog()
+
             # while not "CURRENT_TURN" == current_turn: 
             while current_turn != "CURRENT_TURN" and current_turn != "0":
                 print("BEFORE current_turn")

@@ -35,7 +35,7 @@ if __name__ == "__main__":
     case_sensitive = True
     queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
-    path = "./tempfiles/queue_place"
+    path = "./tempfiles/queue"
     go_recursively = False
 
 def on_created(event):
@@ -46,26 +46,28 @@ def on_deleted(event):
 
 def on_modified(event):
     print(f"hey buddy, {event.src_path} has been modified")
-    print(event.name)
 
-    if event.src_path.split('/')[-1] == "queue_place":
-        print("aa")
-        f = open(event.src_path, "r")
-        f_content = f.read()
-        print("content:" + str(f_content))
-        global current_queue_place
-        current_queue_place = int(f_content)
+    if (event.src_path.split('/')[-1].startswith('.goutputstream')):
+        return
 
-        if current_queue_place > 0:
-            eel.set_queue(current_queue_place)
-            print("set queue place to " + str(current_queue_place))
-        else:
-            eel.close_queue_dialog()
-            eel.start_test(test_mode)
-            print("queue dialog closed")
+    print("aa")
+    f = open(event.src_path + "/queue_place", "r")
+    f_content = f.read()
+    print("content:" + str(f_content))
+    global current_queue_place
+    current_queue_place = int(f_content)
 
-            queue_place_observer.stop()
-            # queue_place_observer.join()
+    if current_queue_place > 0:
+        eel.set_queue(current_queue_place)
+        print("set queue place to " + str(current_queue_place))
+    else:
+        eel.close_queue_dialog()
+        eel.start_test(test_mode)
+        print("queue dialog closed")
+
+        queue_place_observer.stop()
+        # queue_place_observer.join()
+        
 
 def on_moved(event):
     print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
@@ -95,17 +97,17 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 
 @eel.expose
 def retrieve_servers():
-    response = requests.get("https://sago-gulaman.xyz/api/servers/")
-    server_list = response.json()
-    index=0
-    for i in server_list:
-        print(i["nickname"])
-        if (i["test_method"] == "2"):
-            location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
-            eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
-
     eel.add_server('Google Cloud Server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
     eel.add_server('Local test server (THIS IS A TEST)', '202.90.158.168' + "," +  'uuid.202.90.158.168')
+
+    # response = requests.get("https://sago-gulaman.xyz/api/servers/")
+    # server_list = response.json()
+    # index=0
+    # for i in server_list:
+    #     print(i["nickname"])
+    #     if (i["test_method"] == "2"):
+    #         location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
+    #         eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
 
 ###results server credentials###
 global dev_hash
@@ -332,7 +334,9 @@ def check_queue(mode):
     f_content = f.read()
     print("content:" + str(f_content))
     global current_queue_place
-    if (f_content.isdigit()):
+    if (str(f_content).isdigit()):
+        current_queue_place = int(f_content)
+    else:
         current_queue_place = int(f_content)
 
     if current_queue_place > 0:
@@ -349,7 +353,7 @@ def check_queue(mode):
         print("queue_place_observer started")
     else:
         eel.start_test(test_mode)
-        print("walang queue")
+        print("no queue")
 
 #CATCH JS CALL FOR NORMAL MODE
 @eel.expose 
@@ -360,61 +364,6 @@ def normal(lat, lon, cir, serv_ip, network_type):
     print(cir)
     print(serv_ip)
     print(network_type)
-
-    # f = open(queue_place_path, "r")
-    # f_content = f.read()
-    # global current_queue_place
-    # current_queue_place = int(f_content)
-
-    # if current_queue_place > 0:
-    #     eel.set_queue(current_queue_place)
-    #     eel.open_queue_dialog()
-    #     queue_place_observer.start()
-    #     print("queue_place_observer started")
-
-    #     while current_queue_place > 0:
-    #         pass
-
-    #     # queue_place_observer.stop()
-    #     # queue_place_observer.join()
-
-    #     if current_queue_place == -1:
-    #         return
-
-    # else:
-    #     print("walang queue")
-
-
-    # eel.printnormal({
-    #     'MTU': 1500,
-    #     'RTT': 9.534,
-    #     'BB': 94.5,
-    #     'BDP': 900963.0000000001,
-    # })
-
-    # # return
-
-    # for i in range(1, 7):
-    #     if i == 1:
-    #         eel.printprogress("Performing PLPMTUD...")
-    #     elif i == 2:
-    #         eel.printprogress("Measuring Ping...")
-    #     elif i == 3:
-    #         eel.printprogress("Executing iPerf UDP...")
-    #     elif i == 4:
-    #         eel.printprogress("Executing iPerf TCP...")
-    #     elif i == 5:
-    #         eel.printprogress("Measuring TCP Efficiency...")
-    #     elif i == 6:
-    #         eel.printprogress("Measuring Buffer Delay...")
-
-    #     time.sleep(3)
-    #     eel.progress_now(100/6*i)
-
-    # eel.printprogress("Done")
-    # eel.progress_now(100)
-   # eel.printprogress("Initializing...")
-   # eel.progress_now(99)
 
     ip = re.split(",", serv_ip)
     if ip is not None:
@@ -593,6 +542,7 @@ def leave_queue():
     # queue_place_observer.join()
 
 def close():
-    print("babay")
+    # print("babay")
+    pass
 
 eel.start('login.html', size=(1024,768), port=8080, close_callback=close)             # Start (this blocks and enters loop)
