@@ -40,6 +40,11 @@ function check_queue(mode) {
 eel.expose(start_test)
 function start_test(mode) {
     disableMainForm(true);
+
+    if (chartPromises && chartPromises.length > 0) {
+        ApexCharts.exec('windowsScanLocalToRemoteChart', 'destroy', []);
+        ApexCharts.exec('throughputEfficiencyLocalToRemoteChart', 'destroy', []);
+    }
     chartPromises = [];
 
     $('#progress-finished-title').hide();
@@ -1086,6 +1091,7 @@ function printnormal(result){
     $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ result["ACTUAL_IDEAL"] == null ? "---" : numeral(result["ACTUAL_IDEAL"]).format('0.000') } Mbps</td>`);
     $(localWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ result["TCP_EFF"] == null ? "---" : numeral(result["TCP_EFF"]).format('0.[000]%') } </td>`);
 
+    normalTestResults = [];
     normalTestResults = result;
     
     renderLocalWindowScanGraph(result);
@@ -1106,7 +1112,12 @@ function renderLocalWindowScanGraph(result) {
     var windowSizes = result['WND_SIZES'];
     for (var i = 0; i < windowSizes.length; i++) {
         steps.push(i + 1 == windowSizes.length ? 'THPT' : `Step ${ i + 1 }`);
-        averageThroughputs.push(result['WND_AVG_TCP'][i]);
+        if (i + 1 == windowSizes.length) {
+            averageThroughputs.push(result['THPT_AVG']);
+        }
+        else {
+            averageThroughputs.push(result['WND_AVG_TCP'][i]);
+        }
         idealThroughputs.push(result['WND_ACTUAL_IDEAL'][i]);
     }
 
@@ -1122,6 +1133,7 @@ function renderLocalWindowScanGraph(result) {
 
     var options = {
         chart: {
+            id: 'windowsScanLocalToRemoteChart',
             type: 'bar',
             width: '100%',
             height: 360,
@@ -1238,7 +1250,12 @@ function renderLocalThroughputEfficiencyGraph(result) {
     var windowSizes = result['WND_SIZES'];
     for (var i = 0; i < windowSizes.length; i++) {
         steps.push(i + 1 == windowSizes.length ? 'THPT' : `Step ${ i + 1 }`);
-        averageThroughputs.push(result['WND_AVG_TCP'][i]);
+        if (i + 1 == windowSizes.length) {
+            averageThroughputs.push(result['THPT_AVG']);
+        }
+        else {
+            averageThroughputs.push(result['WND_AVG_TCP'][i]);
+        }
         efficiencies.push(result['EFF_PLOT'][i]);
     }
 
@@ -1248,6 +1265,7 @@ function renderLocalThroughputEfficiencyGraph(result) {
 
     var options = {
         chart: {
+            id: 'throughputEfficiencyLocalToRemoteChart',
             type: 'line',
             width: '100%',
             height: 360,
