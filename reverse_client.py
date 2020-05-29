@@ -30,7 +30,6 @@ FALLBACK_LOGGER = getStreamLogger()
 '''
 async def mtu_process(SERVER_IP, handler_port, udp_port, logger=FALLBACK_LOGGER):
     plpmtu_process = None
-    return 1460;
     try:
         websocket_url = "ws://"+SERVER_IP+":"+str(handler_port)
         async with websockets.connect(websocket_url) as websocket:
@@ -48,6 +47,7 @@ async def mtu_process(SERVER_IP, handler_port, udp_port, logger=FALLBACK_LOGGER)
                 plpmtu_process.kill()
             except:
                 pass
+            print("MTU value: {}".format(mtu))
             return mtu
     except:
         logger.error(("connection error"))
@@ -148,6 +148,7 @@ async def bandwidth_process(SERVER_IP, handler_port, bandwidth_port, rtt, logger
         @RETURN:
             thpt_results    :   throughput process metrics in json string format
 '''
+
 async def throughput_process(SERVER_IP, handler_port, throughput_port, recv_window, mtu, rtt, logger=FALLBACK_LOGGER):
     thpt_process = None
     try:
@@ -241,7 +242,7 @@ async def scan_process(**kwargs): #Metrics Calculations
                                 < CONNECTION_TEARDOWN >
 '''
 async def reverse_client(logger, SERVER_IP):
-    eel.mode('Measuring download speed...')
+    #eel.mode('Measuring download speed...')
 
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
@@ -254,7 +255,7 @@ async def reverse_client(logger, SERVER_IP):
     progress_count = 4
     print("starting reverse client")
     try:
-        eel.printprogress("Initializing...")
+        #eel.printprogress("Initializing...")
 
         logf = open(LOGFILE,"w+")
         client_ip = client_utils.get_client_ip()
@@ -268,13 +269,14 @@ async def reverse_client(logger, SERVER_IP):
 
     try:
         # progress 1
-        eel.printprogress("Processing maximum transmission unit...")
-        eel.progress_now(1 / progress_count * 100)
+        #eel.printprogress("Processing maximum transmission unit...")
+        #eel.progress_now(1 / progress_count * 100)
         print("Processing maximum transmission unit...")
 
         print("Starting MTU Test")
-        mtu_return = await mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger) #PROBLEM
-        results = {**results, **json.loads(mtu_return)}
+        mtu_return = await mtu_process(SERVER_IP, MTU_HANDLER_PORT, UDP_PORT, logger) #SOLVED!
+        print("mtu_return: {}".format(mtu_return))
+        results.update(json.loads(mtu_return))
     except:
         try:
             logger.error("mtu error")
@@ -284,11 +286,11 @@ async def reverse_client(logger, SERVER_IP):
 
     try:
         # progress 2
-        eel.printprogress("Measuring round-trip delay time...")
-        eel.progress_now(2 / progress_count * 100)
+        #eel.printprogress("Measuring round-trip delay time...")
+        #eel.progress_now(2 / progress_count * 100)
 
         rtt_return = await rtt_process(SERVER_IP, RTT_HANDLER_PORT, logger)
-        results = {**results, **json.loads(rtt_return)}
+        results.update(json.loads(rtt_return))
     except:
         try:
             logger.error("rtt error")
@@ -298,13 +300,13 @@ async def reverse_client(logger, SERVER_IP):
 
     try:
         # progress 3
-        eel.printprogress("Measuring baseline bandwidth...")
-        eel.progress_now(3 / progress_count * 100)
+        #eel.printprogress("Measuring baseline bandwidth...")
+        #eel.progress_now(3 / progress_count * 100)
 
         print("Measuring baseline bandwidth...")
         rtt = results["RTT"]
         bb_return = await bandwidth_process(SERVER_IP, BANDWIDTH_HANDLER_PORT, BANDWIDTH_SERVICE_PORT , rtt, logger)
-        results = {**results, **json.loads(bb_return)}
+        results.update(json.loads(bb_return))
     except:
         try:
             logger.error("bb error")
@@ -314,8 +316,8 @@ async def reverse_client(logger, SERVER_IP):
 
     try:
         # progress 4
-        eel.printprogress("Performing window scan...")
-        eel.progress_now(4 / progress_count * 100)
+        #eel.printprogress("Performing window scan...")
+        #eel.progress_now(4 / progress_count * 100)
         print("Performing windows scan...")
 
         
@@ -331,7 +333,7 @@ async def reverse_client(logger, SERVER_IP):
                 "logger":logger
                 }
         scan_return = await scan_process(**kwargs)
-        results = {**results, **scan_return}
+        results.update(json.loads(scan_return))
     except:
         try:
             logger.error("thpt error")
