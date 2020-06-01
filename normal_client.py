@@ -40,6 +40,7 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 '''
 async def normal_client(logger, SERVER_IP, cir):
     eel.mode('Measuring upload speed...')
+    eel.start_measurement_timer()
 
     print("server_ip")
     print(SERVER_IP)

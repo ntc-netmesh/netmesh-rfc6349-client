@@ -30,6 +30,9 @@
 
     <script type="text/javascript" src="js/global.js"></script>
     <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="js/normal.js"></script>
+    <script type="text/javascript" src="js/reverse.js"></script>
+    <script type="text/javascript" src="js/queue.js"></script>
     <script type="text/javascript" src="js/pdf-export.js"></script>
 
     <script>
@@ -442,6 +445,28 @@
             <div class="modal-footer">
               <button class="btn btn-primary" role="button" data-dismiss="modal">Stay in queue</button>
               <button class="btn btn-outline-danger" role="button" data-dismiss="modal" onclick="leaveQueue()">Leave queue</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="modalGpsProblem" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalGpsProblemLabel" aria-hidden="true" style="z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title" id="modalQueueLabel">Cannot get GPS coordinates</h4>
+            </div>
+            <div class="modal-body">
+              <p>Make sure you...</p>
+              <ul>
+                <li>connected an Android phone to this laptop using a USB port</li>
+                <li>enabled 'Location' on the connceted Android phone</li>
+                <li>enabled and allowed 'USB Debugging Mode' on the connected Android phone</li>
+              </ul>
+              <p>Wait for a few minutes, and try again.</p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-outline-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
           </div>
         </div>

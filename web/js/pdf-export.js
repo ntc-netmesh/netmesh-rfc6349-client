@@ -1,5 +1,5 @@
 
-function testSummaryPage(content) {
+function testSummaryPage(content, generatedAt) {
 
     var cir = $('#cir').val();
     var latitude = $('#lat').val();
@@ -17,6 +17,7 @@ function testSummaryPage(content) {
         table: {
             body: [
                 [{ text: 'Test mode', bold: true, fillColor: '#cccccc' }, testMeasurementMode],
+                [{ text: 'Generated at', bold: true, fillColor: '#cccccc' }, `${ generatedAt }`],
             ],
             widths: [80, 120],
             alignment: 'center'
@@ -462,9 +463,9 @@ async function generateTestResultsPdfReport() {
             break;
     }
 
-    var timestampCondensed = moment().format('YYYYMMDD-HHmmss');
-    var timestampKebab = moment().format('YYYY-MM-DD-HHmmss');
-    var timestampProper = moment().format('YYYY-MM-DD HH:mm:ss');
+    var timestampCondensed = moment(testStartedAt).format('YYYYMMDD-HHmmss');
+    var timestampKebab = moment(testStartedAt).format('YYYY-MM-DD-HHmmss');
+    var generatedTimestamp = moment().format('YYYY-MM-DD HH:mm:ss');
 
     var fileName = `netmesh-test-results-${testMeasurementMode.toLowerCase()}-${"agent1"}-${timestampCondensed}`;
     var documentName = `NTC NetMesh Test Measurement Results (${testModeProperName}) - ${"agent1"} - ${timestampKebab}`;
@@ -488,7 +489,7 @@ async function generateTestResultsPdfReport() {
                     width: 'auto'
                 },
                 {
-                    text: `${timestampProper}`,
+                    text: `Generated at ${generatedTimestamp}`,
                     margin: 15,
                     fontSize: 7,
                     alignment: 'right',
@@ -528,7 +529,7 @@ async function generateTestResultsPdfReport() {
         columnGap: 10
     });
 
-    testSummaryPage(dd.content);
+    testSummaryPage(dd.content, generatedTimestamp);
 
     pageBreak(dd.content);
     switch (testMeasurementMode) {
