@@ -230,7 +230,7 @@ def main_window_scan(**kwargs):
         #kwargs["recv_window"] *= 1000.0
         base_window = kwargs["recv_window"]
         base_actual = kwargs["actual_rwnd"]
-        for wnd_size_percent in range(1,5):
+        for wnd_size_percent in range(1,4):
             x = wnd_size_percent
             kwargs["filename"] = "wnd_"+str(x*0.25)+".pcapng"
             kwargs["recv_window"] = 0.25*x*base_window

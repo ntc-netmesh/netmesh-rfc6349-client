@@ -8,12 +8,10 @@ import subprocess
 '''
 def get_client_ip():
     client_ip = ""
-    print("getting Client ip")
     p = subprocess.Popen(["hostname", "-I"], stdout = subprocess.PIPE)
     for line in p.stdout:
         client_ip = re.split(" ", line.decode("utf-8"))[0]
         break
-    print("Client IP is : {}".format(client_ip))
     return client_ip
 
 
@@ -113,25 +111,29 @@ def parse_ping(stdout_data):
                                 average and ideal
         speed_plot      :    N/A
 '''
-def parse_shark(stdout_data, recv_window, rtt, res_filter):
+def parse_shark(stdout_data, recv_window, rtt):
+    # param = results[0], mtu_param = results[1]
     speed_plot = []
     ave_tcp = None
     ave_tt = None
     ide_tt = None
     tcp_ttr = None
-    ide_tcp = (float(recv_window) * 8 / (float(rtt)/1000))/(10**6)
+    ide_tcp = (recv_window * 8 / (float(rtt)/1000))/(10**6)
     offset = 0
     multiplier = 1
 
     with open(stdout_data,"r") as f:
         for line in f:
             temp = line
-            if res_filter in temp:
+            if "sender" in temp:
                 entries = re.findall(r'\S+',temp)
                 if "SUM" in temp:
                     offset = 1
                 try:
                     ave_tcp = float(entries[6-offset])
+                    #ideal_throughput = (recv_window * 8 / (float(rtt)/1000))/(10**6)
+                    #ide_tcp = ideal_throughput
+                    #max_throughput = (mtu-40) * 8 * 81274 /1000000 #1500 MTU 8127 FPS based on connection type
 
                     # average transfer time
                     temp2 = re.split("-",entries[2-offset])
@@ -141,9 +143,17 @@ def parse_shark(stdout_data, recv_window, rtt, res_filter):
                         multiplier = 1000
 
                     ide_tt = ( float(entries[4-offset]) * 8 * multiplier ) / ( ide_tcp )
-                    tcp_ttr = ave_tt / ide_tt
+                    tcp_ttr = ide_tt / ave_tt
                 except:
                     pass
 
+            #elif "KBytes" in temp:
+            #    try:
+            #        entries = re.findall(r'\S+',temp)
+            #        x_axis = re.split("-",entries[2])
+            #        x_axis = int(float(x_axis[1]))
+            #        speed_plot.append([x_axis,float(entries[6])])
+            #    except:
+            #        pass
     return ave_tcp, ide_tcp, ave_tt, ide_tt, tcp_ttr, speed_plot
 
