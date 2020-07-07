@@ -43,6 +43,7 @@
         $('#btnGetGps .spinner-grow').hide();
         
         $('#results-info').hide();
+        $('#error-info').hide();
 
         // var dummyResults = {};
         // dummyResults["WND_SIZES"] = [20, 40, 60, 80];
@@ -113,7 +114,7 @@
         </ul>
       </div>
       <div>
-        <span class="text-muted">username</span>
+        <span id="loggedUsername" class="text-muted"></span>
         <!-- <button type="button" class="btn btn-link" onclick="logout()">Log out</button> -->
       </div>
     </nav>
@@ -137,13 +138,16 @@
                 <div class="form-group col">
                   <label for="net_type"><b>Network Connection Type</b></label>
                   <select class="form-control" id="net_type">
-                    <option value="" selected="selected" hidden="hidden">Select network type</option>
+                    <option value="" selected="selected" hidden="hidden">Select network type...</option>
+                    <option value="Broadband">Broadband</option>
+                    <option value="Cable Internet">Cable Internet</option>
                     <option value="Dial-ip">Dial-up</option>
                     <option value="DSL">DSL</option>
+                    <option value="Ethernet Cable">Ethernet Cable</option>
                     <option value="Fiber-optic">Fiber-optic</option>
-                    <option value="Cable Internet">Cable Internet</option>
                     <option value="Fixed Wireless">Fixed Wireless</option>
-                    <option value="Broadband">Broadband</option>
+                    <option value="Wi-fi">Wi-fi</option>
+                    <option value="Others">Others</option>
                   </select>
                 </div>
               </div>
@@ -185,7 +189,7 @@
             </div>
             <div class="card-footer">
               <div class="float-right">
-                <button id="btnUploadMode" class="btn btn-primary" role="button" type="submit" onclick="check_queue('normal')">
+                <button id="btnUploadMode" class="btn btn-primary mx-1" role="button" type="submit" onclick="check_queue('normal')">
                   <i class="fa fa-long-arrow-alt-up"></i>
                   Upload Mode
                 </button>
@@ -396,6 +400,19 @@
           </div>
         </div>
 
+        <div class="mb-5" id="error-info" >
+          <div class="card shadow">
+            <div class="card-header">
+              <span class="h4 text-danger"><b>Test Unsuccessful</b></span>
+            </div>
+            <div class="card-body">
+              <div id="test-error-message">
+
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div id="pdfViewer" class="mb-1">
         </div>
       </div>
@@ -411,20 +428,20 @@
                 <div class="row justify-content-center">
                   <label id="queue-label-many" class="h5 text-dark">
                     <span><strong id="queue_remaining">5</strong></span>
-                    <span>tests still being performed somewhere...</span>
+                    <span>tests still waiting to be performed...</span>
                   </label>
                   <label id="queue-label-one" class="h5 text-dark">
                     <span><strong>You're next.</strong></span>
                     <span>Please wait...</span>
                   </label>
                 </div>
-                <!-- <div class="spinner-grow spinner-grow-sm text-info float-right" role="status">
-                  <span class="sr-only">Loading...</span>
-                </div> -->
               </div>
               <div class="progress border border-dark" style="height: 10px;">
                 <div id="queue-progress" class="progress-bar bg-dark progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                 <!-- <div class="progress-bar bg-light progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div> -->
+              </div>
+              <div class="text-center text-muted m-1">
+                <i id="selected-server"></i>
               </div>
             </div>
             <div class="modal-footer">
@@ -462,8 +479,9 @@
                 <li>connected an Android phone to this laptop using a USB port</li>
                 <li>enabled 'Location' on the connceted Android phone</li>
                 <li>enabled and allowed 'USB Debugging Mode' on the connected Android phone</li>
+                <li>opened and closed a location app on your phone to activate the GPS</li>
               </ul>
-              <p>Wait for a few minutes, and try again.</p>
+              <p>Then, close this dialog, and try again.</p>
             </div>
             <div class="modal-footer">
               <button class="btn btn-outline-secondary" type="button" data-dismiss="modal">Close</button>

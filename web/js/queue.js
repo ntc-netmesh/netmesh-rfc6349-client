@@ -11,6 +11,8 @@ function set_queue(queue_place) {
     // var queue_progress = (parseFloat(i + 1) / queue_place) * 100;
     // $("#queue-progress").css("width", queue_progress + "%").attr("aria-valuenow", queue_progress);
 
+    $("#selected-server").text($('#server option:selected').text());
+
     if (queue_place > 1) {
         $('#queue_remaining').text(queue_place);
 

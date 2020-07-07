@@ -12,6 +12,7 @@ function printnormal(result){
     $(localResultId).empty();
 
     $('#results-info').show();
+    $('#error-info').hide();
 
     if (result) {
         result["CIR"] = $('#cir').val();

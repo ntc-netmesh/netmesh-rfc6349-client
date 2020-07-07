@@ -1,7 +1,7 @@
 var testMeasurementMode = "";
 var testStartedAt = null;
 var testFinishedAt = null;
-var loggedUsername = "username";
+var loggedUsername = "";
 
 var normalTestResults = {};
 var reverseTestResults = {};

@@ -412,6 +412,7 @@ function pageBreak(content) {
 
 async function generateTestResultsPdfReport() {
 
+    var username = $('#loggedUsername').text();
     var mode = $('#btnSaveAsPdf').data('test-mode');
     var params = ["CIR", "MTU", "RTT", "BB", "BDP", "RWND",
         "THPT_AVG", "THPT_IDEAL", "TRANSFER_AVG", "TRANSFER_IDEAL",
@@ -476,7 +477,7 @@ async function generateTestResultsPdfReport() {
         return {
             columns: [
                 {
-                    text: loggedUsername,
+                    text: username,
                     margin: 15,
                     fontSize: 7,
                     alignment: 'left',
@@ -500,7 +501,7 @@ async function generateTestResultsPdfReport() {
     dd.info = {
         fileName: fileName,
         title: documentName,
-        author: loggedUsername, // TODO: MAKE THIS AN ACTUAL USER
+        author: username, // TODO: MAKE THIS AN ACTUAL USER
         subject: 'Test measurement results',
     };
     dd.content = [];
@@ -695,14 +696,3 @@ async function getBase64ImageFromURLAsync(url) {
     });
 }
 
-
-$(function () {
-    $('#net_type').val("Fixed Wireless");
-    $('#cir').val(10);
-    $('#lat').val(14.811390);
-    $('#lon').val(120.521248);
-    // $('#lat').val(14.647132);
-    // $('#lon').val(121.072027);
-
-    // generateTestResultsPdfReport();
-});

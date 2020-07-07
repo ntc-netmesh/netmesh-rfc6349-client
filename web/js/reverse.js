@@ -11,6 +11,7 @@ function printreverse(result){
     $(localResultId).empty();
 
     $('#results-info').show();
+    $('#error-info').hide();
 
     if (result) {
         if ("MTU" in result){
