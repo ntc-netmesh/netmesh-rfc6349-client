@@ -348,7 +348,8 @@ async def reverse_client(logger, SERVER_IP, cir):
                 }
         #scan_return = await scan_process(**kwargs)
         scan_return = await reverse_windows_scan.scan_process(**kwargs)
-        results.update(json.loads(scan_return))
+        #results.update(json.loads(scan_return))
+        results.update(scan_return)
         #results = {**results, **scan_return}
     except:
         try:

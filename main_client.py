@@ -40,7 +40,7 @@ if __name__ == "__main__":
     go_recursively = False
 
 def on_created(event):
-    print(f"hey, {event.src_path} has been created!")
+    print("hey, {} has been created!".format(event.src_path))
 
 def on_deleted(event):
     print(f"what the f**k! Someone deleted {event.src_path}!")
