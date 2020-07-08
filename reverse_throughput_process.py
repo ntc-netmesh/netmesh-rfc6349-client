@@ -36,7 +36,8 @@ async def throughput_process(tempfile, SERVER_IP, handler_port, throughput_port,
     try:
         client_params = {"MTU":mtu, "RTT":rtt, "SERVER_IP":SERVER_IP}
         websocket_url = "ws://"+SERVER_IP+":"+str(handler_port)
-        async with websockets.connect(websocket_url) as websocket:
+        #async with websockets.connect(websocket_url) as websocket:
+        async with websockets.connect(websocket_url, ping_timeout=100) as websocket:
             o_file = open(tempfile, "w+")
             await websocket.send(json.dumps(client_params))
             go_signal = await websocket.recv()
@@ -48,12 +49,13 @@ async def throughput_process(tempfile, SERVER_IP, handler_port, throughput_port,
                                            "--parallel", str(connections),
                                            "--set-mss", str(mss),
                                            "--reverse",
-                                           "--bandwidth", "100M",
+                                           "--bandwidth", "10M",
                                            "--format", "m"
                                            ], stdout = o_file, stderr = o_file) 
             thpt_process.wait()
             await websocket.send("stop")
-            thpt_results = await websocket.recv()
+            #thpt_results = await websocket.recv()
+            thpt_results = await asyncio.wait_for(websocket.recv(), timeout=300)
             logger.debug(str(thpt_results))
             thpt_results = json.loads(thpt_results)
             o_file.close()
@@ -71,8 +73,11 @@ async def throughput_process(tempfile, SERVER_IP, handler_port, throughput_port,
                 pass
             return thpt_results
     except:
-        logger.error(("connection error"))
-        thpt_process.kill()
+        try:
+            logger.error(("connection error"))
+            thpt_process.kill()
+        except:
+            pass
         raise
     return
 

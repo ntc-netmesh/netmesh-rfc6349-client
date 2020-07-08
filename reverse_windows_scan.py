@@ -37,7 +37,7 @@ async def scan_process(**kwargs):
     scan_results = {"WND_SIZES":[], "WND_AVG_TCP":[], "WND_IDEAL_TCP":[]}
     thpt_process = None
     try:
-        for x in range(4,5):
+        for x in range(1,5):
             tempfile = "tempfiles/reverse_mode/"+str(x*0.25)+"_thpt"
             rwnd = kwargs["recv_window"]*x*0.25
             modified_kwargs = {**kwargs}
@@ -52,8 +52,10 @@ async def scan_process(**kwargs):
                 scan_results = {**scan_results, **thpt_results}
         return scan_results
     except:
-        kwargs["logger"].logger.error(("connection error"))
-        thpt_process.kill()
+        #kwargs["logger"].logger.error(("connection error"))
+        #thpt_process.kill()
         raise
+        #pass
+    #return scan_results
     return
 

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     go_recursively = False
 
 def on_created(event):
-    print(f"hey, {event.src_path} has been created!")
+    print("hey, {} has been created!".format(event.src_path))
 
 def on_deleted(event):
     print(f"what the f**k! Someone deleted {event.src_path}!")
@@ -98,8 +98,8 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 @eel.expose
 def retrieve_servers():
     eel.add_server('Google Cloud Server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
-    eel.add_server('Region 1 Server (THIS IS A TEST)', '35.198.221.235' + "," +  'uuid.35.198.221.235')
-    eel.add_server('Local test server (THIS IS A TEST)', '202.90.158.168' + "," +  'uuid.202.90.158.168')
+    eel.add_server('Region 1', '35.198.221.235' + "," +  'uuid.35.198.221.235')
+    eel.add_server('ASTI', '202.90.158.168' + "," +  'uuid.202.90.158.168')
 
     # response = requests.get("https://sago-gulaman.xyz/api/servers/")
     # server_list = response.json()
