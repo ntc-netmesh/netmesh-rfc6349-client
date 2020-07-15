@@ -2,6 +2,7 @@
 function testSummaryPage(content, generatedAt) {
 
     var cir = $('#cir').val();
+    var networkType = $('#net_type').val();
     var latitude = $('#lat').val();
     var longitude = $('#lon').val();
 
@@ -45,11 +46,15 @@ function testSummaryPage(content, generatedAt) {
         margin: [0, 10, 0, 0]
     });
 
+    var networkAndGps = [];
+    if (networkType) {
+        networkAndGps.push([{ text: 'Network connection type', bold: true, fillColor: '#cccccc' }, networkType]);
+    }
+    networkAndGps.push([{ text: 'GPS coordinates', bold: true, fillColor: '#cccccc' }, `${ latitude }, ${ longitude }`]);
+
     content.push({
         table: {
-            body: [
-                [{ text: 'GPS coordinates', bold: true, fillColor: '#cccccc' }, `${ latitude }, ${ longitude }`],
-            ],
+            body: networkAndGps,
             widths: [80, 120],
         },
         fontSize: 10,
@@ -67,6 +72,8 @@ function testSummaryPage(content, generatedAt) {
         case "Upload":
         case "Download":
             var testResults = testMeasurementMode == "Upload" ? normalTestResults : reverseTestResults;
+            console.log("testResults");
+            console.log(testResults);
             content.push({
                 table: {
                     body: [
@@ -87,27 +94,27 @@ function testSummaryPage(content, generatedAt) {
             });
             
             break;
-        case "Simultaneous":
-            content.push({
-                table: {
-                    body: [
-                        [
-                            { text: 'Network Parameter', bold: true, fillColor: '#cccccc' },
-                            { text: 'Source', bold: true, fillColor: '#cccccc' },
-                            { text: 'Local to Remote', bold: true, fillColor: '#cccccc' },
-                            { text: 'Remote to Local', bold: true, fillColor: '#cccccc' }
-                        ],
-                        ['CIR', 'User input', `${ cir } Mbps`, `${ cir } Mbps`],
-                        ['Baseline RTT', 'Measured', `${ normalTestResults["RTT"] == null ? "---" : numeral(normalTestResults["RTT"]).format('0.000') } ms`, `${ reverseTestResults["RTT"] == null ? "---" : numeral(reverseTestResults["RTT"]).format('0.000') } ms`],
-                        ['BDP', 'Calculated', `${ normalTestResults["BDP"] == null ? "---" : normalTestResults["BDP"] } bits`, `${ reverseTestResults["BDP"] == null ? "---" : reverseTestResults["BDP"] } bits`],
-                        ['MTU', 'Measured', `${ normalTestResults["MTU"] == null ? "---" : normalTestResults["MTU"] } Bytes`, `${ reverseTestResults["MTU"] == null ? "---" : reverseTestResults["MTU"] } Bytes`],
-                    ],
-                    widths: [90, 70, '*', '*'],
-                },
-                fontSize: 10,
-                margin: [0, 10, 0, 0]
-            });
-            break;
+        // case "Simultaneous":
+        //     content.push({
+        //         table: {
+        //             body: [
+        //                 [
+        //                     { text: 'Network Parameter', bold: true, fillColor: '#cccccc' },
+        //                     { text: 'Source', bold: true, fillColor: '#cccccc' },
+        //                     { text: 'Local to Remote', bold: true, fillColor: '#cccccc' },
+        //                     { text: 'Remote to Local', bold: true, fillColor: '#cccccc' }
+        //                 ],
+        //                 ['CIR', 'User input', `${ cir } Mbps`, `${ cir } Mbps`],
+        //                 ['Baseline RTT', 'Measured', `${ normalTestResults["RTT"] == null ? "---" : numeral(normalTestResults["RTT"]).format('0.000') } ms`, `${ reverseTestResults["RTT"] == null ? "---" : numeral(reverseTestResults["RTT"]).format('0.000') } ms`],
+        //                 ['BDP', 'Calculated', `${ normalTestResults["BDP"] == null ? "---" : normalTestResults["BDP"] } bits`, `${ reverseTestResults["BDP"] == null ? "---" : reverseTestResults["BDP"] } bits`],
+        //                 ['MTU', 'Measured', `${ normalTestResults["MTU"] == null ? "---" : normalTestResults["MTU"] } Bytes`, `${ reverseTestResults["MTU"] == null ? "---" : reverseTestResults["MTU"] } Bytes`],
+        //             ],
+        //             widths: [90, 70, '*', '*'],
+        //         },
+        //         fontSize: 10,
+        //         margin: [0, 10, 0, 0]
+        //     });
+        //     break;
     }
 }
 
@@ -122,10 +129,12 @@ function throughputTestPage(content, fromLocal = true) {
         margin: [0, 0, 0, 10],
     });
 
+    var isNormal = testMeasurementMode == "Upload";
+
     switch (testMeasurementMode) {
         case "Upload":
         case "Download":
-            var testResults = testMeasurementMode == "Upload" ? normalTestResults :  reverseTestResults;
+            var testResults = isNormal ? normalTestResults :  reverseTestResults;
             content.push({
                 table: {
                     body: [
@@ -141,8 +150,8 @@ function throughputTestPage(content, fromLocal = true) {
 
                         [{ text: 'TCP Throughput', colSpan: 2, fillColor: '#cccccc' }, {}],
                         ['Average', `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`],
-                        ['Ideal', `${ testResults["ACTUAL_IDEAL"] == null ? "---" : numeral(testResults["ACTUAL_IDEAL"]).format('0.000') } Mbps`],
-                        ['Threshold', `${ testResults["THPT_AVG"] == null || testResults["ACTUAL_IDEAL"] == null ? "---" : numeral(testResults["THPT_AVG"] / testResults["ACTUAL_IDEAL"]).format('0.[000]%') } of Ideal`],
+                        ['Ideal', `${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"]).format('0.000') } Mbps`],
+                        ['Threshold', `${ testResults["THPT_AVG"] == null || testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults["THPT_AVG"] / testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"]).format('0.[000]%') } of Ideal`],
 
                         [{ text: 'Transfer Time', colSpan: 2, fillColor: '#cccccc' }, {}],
                         ['Average', `${ testResults["TRANSFER_AVG"] == null ? "---" : numeral(testResults["TRANSFER_AVG"]).format('0.000') } s`],
@@ -221,13 +230,13 @@ function throughputTestPage(content, fromLocal = true) {
     // WINDOW SCAN TEST (L > R),,,,,
     content.push({
         image: (fromLocal ? throughputEfficiencyLocalToRemoteChart : throughputEfficiencyRemoteToLocalChart) ?? emptyImageURI,
-        width: 300,
+        width: 240,
         alignment: "center"
     });
 }
 
 
-function windowScanTestPage(content, fromLocal = true) {
+function windowScanTestPage(content, isNormal = true) {
     var cir = $('#cir').val();
 
     content.push({
@@ -239,139 +248,88 @@ function windowScanTestPage(content, fromLocal = true) {
     });
 
     content.push({
-        text: `${ fromLocal ? 'Local to Remote' : 'Remote to Local' }`,
+        text: `${ isNormal ? 'Local to Remote' : 'Remote to Local' }`,
         fontSize: 12,
         alignment: 'center',
         margin: [0, 0, 0, 10],
     });
 
-    var testResults = fromLocal ? normalTestResults : reverseTestResults;
+    var testResults = isNormal ? normalTestResults : reverseTestResults;
+    console.log("testResults");
+    console.log(testResults);
 
-    var windowSize1 = null;
-    var windowSize2 = null;
-    var windowSize3 = null;
-    var windowSizeLength = 0;
-    if (testResults["WND_SIZES"] != null) {
-        windowSizeLength = testResults["WND_SIZES"].length;
-        if (windowSizeLength = 1) {
-            windowSize1 = testResults["WND_SIZES"][0];
-        }
-        if (windowSizeLength = 2) {
-            windowSize2 = testResults["WND_SIZES"][1];
-        }
-        if (windowSizeLength = 3) {
-            windowSize3 = testResults["WND_SIZES"][2];
-        }
-    }
-    
-    var averageThroughput1 = null;
-    var averageThroughput2 = null;
-    var averageThroughput3 = null;
-    var averageThroughputLength = 0;
-    if (testResults["WND_AVG_TCP"] != null) {
-        averageThroughputLength = testResults["WND_AVG_TCP"].length;
-        if (averageThroughputLength = 1) {
-            averageThroughput1 = testResults["WND_AVG_TCP"][0];
-        }
-        if (averageThroughputLength = 2) {
-            averageThroughput2 = testResults["WND_AVG_TCP"][1];
-        }
-        if (averageThroughputLength = 3) {
-            averageThroughput3 = testResults["WND_AVG_TCP"][2];
-        }
-    }
+    var pageBody = [];
+    var pageBodyWidths = ['*'];
 
-    var idealThroughput1 = null;
-    var idealThroughput2 = null;
-    var idealThroughput3 = null;
-    var idealThroughputLength = 0;
-    if (testResults["WND_ACTUAL_IDEAL"] != null) {
-        idealThroughputLength = testResults["WND_ACTUAL_IDEAL"].length;
-        if (idealThroughputLength = 1) {
-            idealThroughput1 = testResults["WND_ACTUAL_IDEAL"][0];
+    var steps = ['Steps'];
+    var windowSizes = ['Window Size'];
+    var averageTcpThroughputs = ['Average TCP Throughput'];
+    var idealTcpThroughputs = ['Ideal TCP Throughput'];
+    var tcpEfficiencies = ['TCP Efficiency'];
+
+    if (testResults["WND_SIZES"]) {
+        var windowSizeLength = testResults["WND_SIZES"].length;
+        for (var i = 0; i < windowSizeLength; i++) {
+            steps.push(i + 1);
+
+            var windowSize = testResults["WND_SIZES"][i];
+            windowSizes.push(`${ windowSize == null ? "---" : numeral(windowSize).format('0') } Bytes`);
+
+            var averageThroughput = testResults["WND_AVG_TCP"][i];
+            averageTcpThroughputs.push(`${ averageThroughput == null ? "---" : numeral(averageThroughput).format('0.000') } Mbps`);
+
+            var idealThroughput = testResults[isNormal ? "WND_ACTUAL_IDEAL" : "WND_IDEAL_TCP"][i];
+            idealTcpThroughputs.push(`${ idealThroughput == null ? "---" : numeral(idealThroughput).format('0.000') } Mbps`);
+
+            var throughputEfficiency = testResults[isNormal ? "EFF_PLOT" : "SPEED_PLOT"][i];
+            tcpEfficiencies.push(`${ throughputEfficiency == null ? "---" : numeral(throughputEfficiency).format('0.000%')}`);
+
+            pageBodyWidths.push('*');
         }
-        if (idealThroughputLength = 2) {
-            idealThroughput2 = testResults["WND_ACTUAL_IDEAL"][1];
-        }
-        if (idealThroughputLength = 3) {
-            idealThroughput3 = testResults["WND_ACTUAL_IDEAL"][2];
-        }
+        steps.push('THPT');
+        windowSizes.push(`${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`);
+        averageTcpThroughputs.push(`${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`);
+        idealTcpThroughputs.push(`${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] ).format('0.000')} Mbps`);
+        tcpEfficiencies.push(`${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`);
+        pageBodyWidths.push('*');
     }
 
-    var throughputEfficiency1 = null;
-    var throughputEfficiency2 = null;
-    var throughputEfficiency3 = null;
-    var throughputEfficiencyLength = 0;
-    if (testResults["EFF_PLOT"] != null) {
-        throughputEfficiencyLength = testResults["EFF_PLOT"].length;
-        if (throughputEfficiencyLength = 1) {
-            throughputEfficiency1 = testResults["EFF_PLOT"][0];
-        }
-        if (ThroughputLength = 2) {
-            throughputEfficiency2 = testResults["EFF_PLOT"][1];
-        }
-        if (ThroughputLength = 3) {
-            throughputEfficiency3 = testResults["EFF_PLOT"][2];
-        }
-    }
+    var width = pageBodyWidths.length - 1;
+
+    pageBody.push([{ text: 'Test Conditions', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
+    pageBody.push(['Mode', { text: testMeasurementMode, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+
+    pageBody.push(steps);
+    pageBody.push(windowSizes);
+    pageBody.push(averageTcpThroughputs);
+    pageBody.push(idealTcpThroughputs);
+    pageBody.push(tcpEfficiencies);
+
+    pageBody.push(['BDP', { text: `${ testResults["BDP"] == null ? "---" : testResults["BDP"] } bits`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['Path MTU', { text: `${ testResults["MTU"] == null ? "---" : testResults["MTU"] } Bytes`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['Baseline RTT', { text: `${ testResults["RTT"] == null ? "---" : testResults["RTT"] } ms`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['CIR', { text: `${ cir } Mbps`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+
+    pageBody.push([{ text: 'TCP Thoughput', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
+    pageBody.push(['Average', { text: `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['Ideal', { text: `${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" :  numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"]).format('0.000') } Mbps`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+
+    pageBody.push([{ text: 'Data Transfer', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
+    pageBody.push(['TCP Efficiency', { text: testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.[000]%'), colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push([{ text: 'RTT', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
+    pageBody.push(['Average', { text: testResults["RTT"] == null ? "---" :  `${ numeral(testResults["RTT"]).format('0.000') } ms`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
 
     content.push({
         table: {
-            body: [
-                [{ text: 'Test Conditions', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-                ['Mode', { text: testMeasurementMode, colSpan: 4 }, {}, {}, {}],
-                ['Steps', '1', '2', '3', 'THPT'],
-                [
-                    'Window Size',
-                    `${ windowSize1 == null ? "---" : numeral(windowSize1).format('0') } Bytes`,
-                    `${ windowSize2 == null ? "---" : numeral(windowSize2).format('0') } Bytes`,
-                    `${ windowSize3 == null ? "---" : numeral(windowSize3).format('0') } Bytes`,
-                    `${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`
-                ],
-                [
-                    'Average TCP Throughput',
-                    `${ averageThroughput1 == null ? "---" : numeral(averageThroughput1).format('0.000') } Mbps`,
-                    `${ averageThroughput2 == null ? "---" : numeral(averageThroughput2).format('0.000') } Mbps`,
-                    `${ averageThroughput3 == null ? "---" : numeral(averageThroughput3).format('0.000') } Mbps`,
-                    `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`
-                ],
-                [
-                    'Ideal TCP Throughput',
-                    `${ idealThroughput1 == null ? "---" : numeral(idealThroughput1).format('0.000') } Mbps`,
-                    `${ idealThroughput2 == null ? "---" : numeral(idealThroughput2).format('0.000') } Mbps`,
-                    `${ idealThroughput3 == null ? "---" : numeral(idealThroughput3).format('0.000') } Mbps`,
-                    `${ testResults["ACTUAL_IDEAL"] == null ? "---" : numeral(testResults["ACTUAL_IDEAL"] ).format('0.000')} Mbps`
-                ],
-                [
-                    'TCP Efficiency',
-                    `${ throughputEfficiency1 == null ? "---" : numeral(throughputEfficiency1).format('0.000%') }`,
-                    `${ throughputEfficiency2 == null ? "---" : numeral(throughputEfficiency2).format('0.000%') }`,
-                    `${ throughputEfficiency3 == null ? "---" : numeral(throughputEfficiency3).format('0.000%') }`,
-                    `${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`
-                ],
-                ['BDP', { text: `${ testResults["BDP"] == null ? "---" : testResults["BDP"] } bits`, colSpan: 4 }, {}, {}, {}],
-                ['Path MTU', { text: `${ testResults["MTU"] == null ? "---" : testResults["MTU"] } Bytes`, colSpan: 4 }, {}, {}, {}],
-                ['Baseline RTT', { text: `${ testResults["RTT"] == null ? "---" : testResults["RTT"] } ms`, colSpan: 4 }, {}, {}, {}],
-                ['CIR', { text: `${ cir } Mbps`, colSpan: 4 }, {}, {}, {}],
-
-                [{ text: 'TCP Thoughput', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-                ['Average', { text: `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`, colSpan: 4 }, {}, {}, {}],
-                ['Ideal', { text: `${ testResults["ACTUAL_IDEAL"] == null ? "---" :  numeral(testResults["ACTUAL_IDEAL"]).format('0.000') } Mbps`, colSpan: 4 }, {}, {}, {}],
-
-                [{ text: 'Data Transfer', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-                ['TCP Efficiency', { text: testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.[000]%'), colSpan: 4 }, {}, {}, {}],
-
-                [{ text: 'RTT', colSpan: 5, fillColor: '#cccccc' }, {}, {}, {}, {}],
-                ['Average', { text: testResults["RTT"] == null ? "---" :  `${ numeral(testResults["RTT"]).format('0.000') } ms`, colSpan: 4 }, {}, {}, {}],
-            ],
-            widths: ['*', '*', '*', '*', '*'],
+            body: pageBody,
+            widths: pageBodyWidths,
         },
         fontSize: 10,
         margin: [0, 0, 0, 20],
     });
 
     content.push({
-        text: `Window Scan Graph: ${ fromLocal ? 'Local to Remote' : 'Remote to Local' }`,
+        text: `Window Scan Graph: ${ isNormal ? 'Local to Remote' : 'Remote to Local' }`,
         fontSize: 11,
         bold: true,
         alignment: 'center',
@@ -379,8 +337,8 @@ function windowScanTestPage(content, fromLocal = true) {
     });
     
     content.push({
-        image: (fromLocal ? windowsScanLocalToRemoteChart : windowsScanRemoteToLocalChart) ?? emptyImageURI,
-        width: 300,
+        image: (isNormal ? windowsScanLocalToRemoteChart : windowsScanRemoteToLocalChart) ?? emptyImageURI,
+        width: 240,
         alignment: "center"
     });
 }
@@ -412,7 +370,9 @@ function pageBreak(content) {
 
 async function generateTestResultsPdfReport() {
 
+    var username = $('#loggedUsername').text();
     var mode = $('#btnSaveAsPdf').data('test-mode');
+    var isNormal = mode == "normal";
     var params = ["CIR", "MTU", "RTT", "BB", "BDP", "RWND",
         "THPT_AVG", "THPT_IDEAL", "TRANSFER_AVG", "TRANSFER_IDEAL",
         "TCP_TTR", "TRANS_BYTES", "RETX_BYTES", "TCP_EFF", "AVE_RTT", "BUF_DELAY",
@@ -440,6 +400,9 @@ async function generateTestResultsPdfReport() {
             }
         }
     }
+
+    console.log("reverseTestResults");
+    console.log(reverseTestResults);
 
     $('#btnSaveAsPdf').attr('disabled', true);
 
@@ -476,7 +439,7 @@ async function generateTestResultsPdfReport() {
         return {
             columns: [
                 {
-                    text: loggedUsername,
+                    text: username,
                     margin: 15,
                     fontSize: 7,
                     alignment: 'left',
@@ -500,7 +463,7 @@ async function generateTestResultsPdfReport() {
     dd.info = {
         fileName: fileName,
         title: documentName,
-        author: loggedUsername, // TODO: MAKE THIS AN ACTUAL USER
+        author: username, // TODO: MAKE THIS AN ACTUAL USER
         subject: 'Test measurement results',
     };
     dd.content = [];
@@ -571,92 +534,8 @@ async function generateTestResultsPdfReport() {
             color: '#6c757d'
         }
     };
-    // pdfMake.fonts = {
-    //     Helvetica: {
-    //         normal: 'Helvetica',
-    //         bold: 'Helvetica-Bold',
-    //         italics: 'Helvetica-Oblique',
-    //         bolditalics: 'Helvetica-BoldOblique'
-    //       },
-    // };
 
-    // var dd = {
-    //     // header: {
-
-    //     // }
-    //     content: [
-            
-    //         // {
-    //         //     text: 'DOCUMENT INFORMATION',
-    //         //     fontSize: 12,
-    //         //     bold: true,
-    //         //     alignment: 'center',
-    //         //     margin: [0, 20, 0, 0],
-    //         // },
-    //         // {
-    //         //     table: {
-    //         //         body: [
-    //         //             [{ text: 'Report Name', bold: true, fillColor: '#cccccc' }, 'RFC-6349 Test'],
-    //         //             [{ text: 'File Name', bold: true, fillColor: '#cccccc' }, fileName],
-    //         //         ],
-    //         //         widths: [80, 320],
-    //         //         alignment: 'center'
-    //         //     },
-    //         //     fontSize: 10,
-    //         //     margin: [0, 10, 0, 0]
-    //         // },
-    //         // {
-    //         //     text: '',
-    //         //     pageBreak: 'after'
-    //         // },
-
-    //         // {
-    //         //     columns: [
-    //         //         {
-    //         //             text: 'Committed information rate:',
-    //         //             width: 'auto',
-    //         //             margin: [0, 0, 5, 0],
-    //         //         },
-    //         //         {
-    //         //             text: `${reverseTestResults["CIR"]} Mbps`,
-    //         //             bold: true,
-    //         //             width: 'auto'
-    //         //         }
-    //         //     ],
-    //         //     margin: [0, 20, 0, 0],
-    //         // },
-    //         // {
-    //         //     text: testModeProperName.toUpperCase(),
-    //         //     fontSize: 11,
-    //         //     margin: [0, 10, 0, 0],
-    //         // },
-    //         // {
-    //         //     table: {
-    //         //         body: [
-    //         //             ['MTU', reverseTestResults["MTU"]],
-    //         //             ['RTT', reverseTestResults["RTT"]],
-    //         //             ['BB', reverseTestResults["BB"]],
-    //         //             ['BDP', reverseTestResults["BDP"]],
-    //         //             ['TCP RWND', reverseTestResults["RWND"]],
-    //         //             ['Average TCP Throughput', reverseTestResults["THPT_AVG"]],
-    //         //             ['Ideal TCP Throughput', reverseTestResults["THPT_IDEAL"]],
-    //         //             ['Average Transfer Time', reverseTestResults["TRANSFER_AVG"]],
-    //         //             ['Ideal Transfer Time', reverseTestResults["TRANSFER_IDEAL"]],
-    //         //             ['TCP TTR', reverseTestResults["TCP_TTR"]],
-    //         //             ['Transmitted Bytes', reverseTestResults["TRANS_BYTES"]],
-    //         //             ['Retransmitted Bytes', reverseTestResults["RETX_BYTES"]],
-    //         //             ['TCP Efficiency', reverseTestResults["TCP_EFF"]],
-    //         //             ['Average RTT', reverseTestResults["AVE_RTT"]],
-    //         //             ['Buffer Delay', reverseTestResults["BUF_DELAY"]],
-    //         //         ]
-    //         //     },
-    //         //     layout: 'lightHorizontalLines',
-    //         //     margin: [0, 5, 0, 15],
-    //         //     fontSize: 11
-    //         // },
-    //     ],
-    // }
-
+    // SHOW PDF PREVIEW
     // const pdfDocGenerator = pdfMake.createPdf(dd);
     // pdfDocGenerator.getDataUrl((dataUrl) => {
     //     const targetElement = document.querySelector('#pdfViewer');
@@ -695,14 +574,3 @@ async function getBase64ImageFromURLAsync(url) {
     });
 }
 
-
-$(function () {
-    $('#net_type').val("Fixed Wireless");
-    $('#cir').val(10);
-    $('#lat').val(14.811390);
-    $('#lon').val(120.521248);
-    // $('#lat').val(14.647132);
-    // $('#lon').val(121.072027);
-
-    // generateTestResultsPdfReport();
-});

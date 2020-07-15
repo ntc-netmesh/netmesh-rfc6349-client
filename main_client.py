@@ -27,6 +27,7 @@ from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
 queue_place_path = './tempfiles/queue/queue_place'
+current_username = ""
 
 if __name__ == "__main__":
     patterns = "*"
@@ -97,10 +98,6 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 
 @eel.expose
 def retrieve_servers():
-    eel.add_server('Google Cloud Server (THIS IS A TEST)', '35.185.183.104' + "," +  'uuid.35.185.183.104')
-    eel.add_server('Region 1', '35.198.221.235' + "," +  'uuid.35.198.221.235')
-    eel.add_server('ASTI', '202.90.158.168' + "," +  'uuid.202.90.158.168')
-
     # response = requests.get("https://sago-gulaman.xyz/api/servers/")
     # server_list = response.json()
     # index=0
@@ -109,6 +106,8 @@ def retrieve_servers():
     #     if (i["test_method"] == "2"):
     #         location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
     #         eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
+    server_list = []
+    eel.add_servers(server_list)
 
 ###results server credentials###
 global dev_hash
@@ -127,7 +126,9 @@ server_uuid = ""
 
 #Verify test agent user login
 @eel.expose
-def login(username,password):
+def login(username, password):
+    global current_username
+    current_username = username
     # global dev_hash
     # read_hash()
     # hash_data = {
@@ -385,12 +386,23 @@ def normal(lat, lon, cir, serv_ip, network_type):
     #####CALL NORMAL MODE HERE#####
     global dev_hash
     print("hash: {}\n".format(dev_hash))
+<<<<<<< HEAD
     results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
     print("RESULTS UPLOAD: {}".format(results[0][0]))
     if results is not None:
         eel.printnormal(results[0][0])
     else:
         eel.printnormal(None)
+=======
+    try:
+        results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
+        if results is not None and results[0][0] is not None:
+            eel.printnormal(results[0][0])
+        else:
+            eel.print_test_error("An unexpected error occurred. Please try again.")
+    except error as Exception:
+        eel.print_test_error(error)
+>>>>>>> cedf88939567b6bf47621e5af28c7ac4093caa1c
 
     eel.progress_now(100, "true")
     eel.printprogress("Done")
@@ -549,5 +561,6 @@ def leave_queue():
 def close():
     # print("babay")
     pass
+
 
 eel.start('login.html', size=(1024,768), port=8080, close_callback=close)             # Start (this blocks and enters loop)

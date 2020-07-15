@@ -42,10 +42,14 @@ function start_test(mode) {
     $('#progress-finished-title').hide();
     $('#progress-status-info').show();
     $('#results-info').hide();
+    $('#error-info').hide();
     
+    $('#measurement-timer').text("0:00");
     $("#dynamic").css("width", 0 + "%").attr("aria-valuenow", 0);
     progress_now(0);
     printprogress('Initializing...')
+
+    $('#test-error-message').text('');
 
     $('#btnSaveAsPdf').data('test-mode', mode);
 
@@ -58,6 +62,11 @@ function start_test(mode) {
             $('#localResultCard').show();
             $('#remoteResultCard').hide();
 
+            $('#mode-icon').removeClass("fa-download");
+            $('#mode-icon').removeClass("text-info");
+            $('#mode-icon').addClass("fa-upload");
+            $('#mode-icon').addClass("text-primary");
+
             eel.normal(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
 
             break;
@@ -68,6 +77,11 @@ function start_test(mode) {
 
             $('#localResultCard').hide();
             $('#remoteResultCard').show();
+
+            $('#mode-icon').removeClass("fa-upload");
+            $('#mode-icon').removeClass("text-primary");
+            $('#mode-icon').addClass("fa-download");
+            $('#mode-icon').addClass("text-info");
             
             eel.rev(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
             break;
@@ -127,17 +141,47 @@ function cancel(){
     eel.cancel_test();
 }
 
-eel.expose(add_server);
-function add_server(server_name,ip_addr){
-    var server_list = document.getElementById("server");
-    var option = document.createElement("option");
-    option.text = server_name;
-    option.value = ip_addr;
-    server_list.add(option, 0);
+eel.expose(add_servers);
+function add_servers(servers) {
+    var serverSelect = $('#server');
 
-    if (server_name.startsWith("Local")) {
-        $('#server').val($('#server option:first').val());
+    serverSelect.append(`
+        <option value="" selected="selected" hidden="hidden"> 
+            Select test server...
+        </option>
+    `); 
+
+    serverSelect.append(`
+        <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
+            ${ 'Google Cloud Server (THIS IS A TEST)' }
+        </option>`
+    );
+    serverSelect.append(`
+        <option value="${ '35.198.221.235,uuid.35.198.221.235' }"> 
+            ${ 'Region 1 Server (THIS IS A TEST)' }
+        </option>`
+    );
+    serverSelect.append(`
+        <option value="${ '202.90.158.168,uuid.202.90.158.168' }"> 
+            ${ 'Local test server (THIS IS A TEST)' }
+        </option>`
+    );
+
+    for (var server of servers) {
+        serverSelect.append(`
+            <option value="${server.ip_address}"> 
+                ${server.nickname} 
+            </option>
+        `); 
     }
+}
+
+eel.expose(print_test_error);
+function print_test_error(message) {
+    $('#error-info').show();
+    $('#results-info').hide();
+
+    $('#test-error-message').text(message);
 }
 
 function getMainFormData() {
@@ -159,7 +203,6 @@ function getMainFormData() {
         return null;
     }
 }
-
 // function normal_mode() {
 //     var lat = document.getElementById("lat").value;
 //     var lon = document.getElementById("lon").value;
@@ -1125,6 +1168,25 @@ function create_table_remote_window(tableData){
     document.getElementById('remote_wnd_stats').appendChild(tableBody);
 }
 
+// eel.expose(set_user)
+// function set_user(username) {
+//     $('#loggedUsername').text(username);
+// }
+
+$(function () {
+
+    // $('#net_type').val("Fixed Wireless");
+    // $('#cir').val(10);
+    // $('#lat').val(14.811390);
+    // $('#lon').val(120.521248);
+    // $('#lat').val(14.647132);
+    // $('#lon').val(121.072027);
+    // alert(eel.getLoggedUsername());
+
+    // $('#loggedUsername').text(eel.getLoggedUsername());
+
+    // generateTestResultsPdfReport();
+});
 
 // Example when handled through fs.watch() listener
 // fs.watch('./tempfiles/queue/queue_place', { encoding: 'buffer' }, (eventType, filename) => {

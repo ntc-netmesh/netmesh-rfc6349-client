@@ -49,6 +49,9 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             #await the function mode
             results = mode_function(server_ip, cir)
             results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
+
+            print("results")
+            print(results)
             
             await socket.send("done")
             print_this = await socket.recv()
@@ -59,6 +62,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             logf = open(filename,"a+")
             traceback.print_exc(file=logf)
             logf.close()
+
             await socket.close()
         except:
             pass
