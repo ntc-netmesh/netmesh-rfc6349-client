@@ -215,7 +215,7 @@
 
         <div id="progress-status-info" class="card shadow mb-5">
           <div class="card-header">
-            <span id="progress-status-title" class="h4"><b id="mode"></b></span>
+            <span id="progress-status-title" class="h4"><i id="mode-icon" class="fa"></i>  <b id="mode"></b></span>
             <span id="progress-finished-title" class="h4"><b>Finished</b></span>
           </div>
           <div class="card-body">
@@ -323,7 +323,7 @@
                 <div class="card-body">
                   <div class="card">
                     <div class="card-body">
-                      <h5 class="card-title"><b class="text-info">Remote to Local</b></h5>
+                      <h5 class="card-title text-info"><b class="">Remote to Local</b></h5>
                       <h6 class="card-title font-weight-bold">Throughput Test</h6>
                       <div class="row">
                         <div class="col-lg-6">
@@ -335,18 +335,18 @@
                         <div class="col-lg-6">
                           <ul class="nav nav-pills mb-4" id="pills-tab" role="tablist">
                             <li class="nav-item">
-                              <a class="nav-link active" id="pills-remoteThroughputEfficiency-tab" data-toggle="pill" href="#pills-remoteThroughputEfficiency" role="tab" aria-controls="pills-remoteThroughputEfficiency" aria-selected="true">Efficiency</a>
+                              <a class="nav-link active" id="pills-throughputEfficiencyReverse-tab" data-toggle="pill" href="#pills-throughputEfficiencyReverse" role="tab" aria-controls="pills-throughputEfficiencyReverse" aria-selected="true">Efficiency</a>
                             </li>
                             <!-- <li class="nav-item">
-                              <a class="nav-link" id="pills-remoteThroughtputRTT-tab" data-toggle="pill" href="#pills-remoteThroughtputRTT" role="tab" aria-controls="pills-remoteThroughtputRTT" aria-selected="false">RTT</a>
+                              <a class="nav-link" id="pills-throughtputRTT-tab" data-toggle="pill" href="#pills-throughtputRTT" role="tab" aria-controls="pills-throughtputRTT" aria-selected="false">RTT</a>
                             </li> -->
                           </ul>
                           <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade show active" id="pills-remoteThroughputEfficiency" role="tabpanel" aria-labelledby="pills-remoteThroughputEfficiency-tab">
-                              <div id="remoteThroughputEfficiencyChart" style="margin: -12px 0px 0px 0px;"></div>
+                            <div class="tab-pane fade show active" id="pills-throughputEfficiencyReverse" role="tabpanel" aria-labelledby="pills-throughputEfficiencyReverse-tab">
+                              <div id="throughputEfficiencyReverseChart" style="margin: -12px 0px 0px 0px;"></div>
                             </div>
-                            <!-- <div class="tab-pane fade" id="pills-remoteThroughtputRTT" role="tabpanel" aria-labelledby="pills-remoteThroughtputRTT-tab">
-                              <div id="remoteThroughputRTTChart" style="margin: -24px 0px 0px 0px;"></div>
+                            <!-- <div class="tab-pane fade" id="pills-throughtputRTT" role="tabpanel" aria-labelledby="pills-throughtputRTT-tab">
+                              <div id="throughputRTTChart" style="margin: -24px 0px 0px 0px;"></div>
                             </div> -->
                           </div>
                         </div>
@@ -355,32 +355,32 @@
                   </div>
                   <div class="card">
                     <div class="card-body">
-                      <h5 class="card-title"><b class="text-info">Remote to Local</b></h5>
+                      <h5 class="card-title text-info"><b class="">Remote to Local</b></h5>
                       <h6 class="card-title font-weight-bold">Window Scan Test</h6>
                       <div class="row">
                         <div class="col-lg-6">
                           <table id="tblRemoteWindowStats" class="table table-sm table-bordered table-hover" style="width: 100%;">
                             <tbody>
-                              <tr>
-                                <td class="text-secondary"><b>Steps</b></td>
+                              <!-- <tr>
+                                <td class="text-secondary"></td>
                               </tr>
                               <tr>
-                                <td class="text-secondary"><b>Window Size</b></td>
+                                <td class="text-secondary"></td>
                               </tr>
                               <tr>
-                                <td class="text-secondary"><b>Average TCP THPT</b></td>
+                                <td class="text-secondary"></td>
                               </tr>
                               <tr>
-                                <td class="text-secondary"><b>Ideal TCP THPT</b></td>
+                                <td class="text-secondary"></td>
                               </tr>
                               <tr>
-                                <td class="text-secondary"><b>TCP Efficiency</b></td>
-                              </tr>
+                                <td class="text-secondary"></td>
+                              </tr> -->
                             </tbody>
                           </table>
                         </div>
                         <div class="col-lg-6">
-                          <div id="windowScanChart" style="margin: -24px 0px 0px 0px;">
+                          <div id="windowScanReverseChart" style="margin: -24px 0px 0px 0px;">
                         </div>
                       </div>
                     </div>

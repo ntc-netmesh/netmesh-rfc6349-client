@@ -66,9 +66,9 @@ function printnormal(result){
     var windowAverageThroughputs = result["WND_AVG_TCP"];
     var windowIdealThroughputs = result["WND_ACTUAL_IDEAL"];
     var windowTcpEfficiencies = result["EFF_PLOT"];
-    // var windowAverageRtt = result["BUF_PLOT"];
+    var windowBufferDelays = result["BUF_PLOT"];
     $(localWindowScanId).empty();
-    for (i = 0; i < 5; i++) {
+    for (i = 0; i < 6; i++) {
         $(`${localWindowScanId}`).append('<tr><td class="text-secondary"></td></tr>');
     }
 
@@ -77,25 +77,23 @@ function printnormal(result){
     $(localWindowScanId).find('tr').eq(2).find('td').eq(0).html(`<b>Average TCP Throughput</b>`);
     $(localWindowScanId).find('tr').eq(3).find('td').eq(0).html(`<b>Ideal TCP Throughput</b>`);
     $(localWindowScanId).find('tr').eq(4).find('td').eq(0).html(`<b>TCP Efficiency</b>`);
+    $(localWindowScanId).find('tr').eq(5).find('td').eq(0).html(`<b>Buffer Delay</b>`);
     if (windowSizes && windowSizes.length > 0) {
-        for (var i = 0; i < windowSizes.length - 1; i++) {
+        for (var i = 0; i < windowSizes.length; i++) {
             $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ i + 1 }</td>`);
             $(localWindowScanId).find('tr').eq(1).find('td').eq(i).after(`<td>${ windowSizes[i] } Bytes</td>`);
             $(localWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ windowAverageThroughputs.length > i ? numeral(windowAverageThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ windowIdealThroughputs.length > i ? numeral( windowIdealThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(localWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ windowTcpEfficiencies.length > i ? numeral(windowTcpEfficiencies[i]).format('0.[000]%') : "---" } </td>`);
-            // $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowAverageRtt.length > i ? numeral(windowAverageRtt[i]).format('0.000') : "---" } ms</td>`);
+            $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowBufferDelays.length > i ? numeral(windowBufferDelays[i]).format('0.000') : "---" } ms</td>`);
         }
     }
-    // else {
-    //     $(localWindowScanId).append(`<tr><td><span class="text-muted">${ 'No measured window scan' }<span></td></tr>`);
-    // }
-
     $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ 'THPT' }</td>`);
     $(localWindowScanId).find('tr').eq(1).find('td').eq(i).after(`<td>${ result["ACTUAL_RWND"] == null ? "---" : numeral(result["ACTUAL_RWND"]).format('0') } Bytes</td>`);
     $(localWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ result["THPT_AVG"] == null ? "---" : numeral(result["THPT_AVG"]).format('0.000') } Mbps</td>`);
     $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ result["ACTUAL_IDEAL"] == null ? "---" : numeral(result["ACTUAL_IDEAL"]).format('0.000') } Mbps</td>`);
     $(localWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ result["TCP_EFF"] == null ? "---" : numeral(result["TCP_EFF"]).format('0.[000]%') } </td>`);
+    $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ result["BUF_DELAY"] == null ? "---" : numeral(result["BUF_DELAY"]).format('0.[000]%') } </td>`);
 
     normalTestResults = [];
     normalTestResults = result;
@@ -117,25 +115,17 @@ function renderLocalWindowScanGraph(result) {
     
     var windowSizes = result['WND_SIZES'];
     for (var i = 0; i < windowSizes.length; i++) {
-        steps.push(i + 1 == windowSizes.length ? 'THPT' : `Step ${ i + 1 }`);
-        if (i + 1 == windowSizes.length) {
-            averageThroughputs.push(result['THPT_AVG']);
-        }
-        else {
-            averageThroughputs.push(result['WND_AVG_TCP'][i]);
-        }
+        steps.push(`Step ${ i + 1 }`);
+        averageThroughputs.push(result['WND_AVG_TCP'][i]);
         idealThroughputs.push(result['WND_ACTUAL_IDEAL'][i]);
     }
+    steps.push('THPT');
+    averageThroughputs.push(result['THPT_AVG']);
+    idealThroughputs.push(result['ACTUAL_IDEAL']);
 
-    // for (var i = 0; i < 2; i++) {
-    //     steps.push('');
-    //     averageThroughputs.push(0);
-    //     idealThroughputs.push(0);
-    // }
-
-    console.log(steps);
-    console.log(averageThroughputs);
-    console.log(idealThroughputs);
+    // console.log(steps);
+    // console.log(averageThroughputs);
+    // console.log(idealThroughputs);
 
     var options = {
         chart: {
@@ -255,19 +245,17 @@ function renderLocalThroughputEfficiencyGraph(result) {
     
     var windowSizes = result['WND_SIZES'];
     for (var i = 0; i < windowSizes.length; i++) {
-        steps.push(i + 1 == windowSizes.length ? 'THPT' : `Step ${ i + 1 }`);
-        if (i + 1 == windowSizes.length) {
-            averageThroughputs.push(result['THPT_AVG']);
-        }
-        else {
-            averageThroughputs.push(result['WND_AVG_TCP'][i]);
-        }
+        steps.push(`Step ${ i + 1 }`);
+        averageThroughputs.push(result['WND_AVG_TCP'][i]);
         efficiencies.push(result['EFF_PLOT'][i]);
     }
+    steps.push('THPT');
+    averageThroughputs.push(result['THPT_AVG']);
+    efficiencies.push(result['TCP_EFF']);
 
-    console.log(steps);
-    console.log(averageThroughputs);
-    console.log(efficiencies);
+    // console.log(steps);
+    // console.log(averageThroughputs);
+    // console.log(efficiencies);
 
     var options = {
         chart: {

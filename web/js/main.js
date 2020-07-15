@@ -62,6 +62,11 @@ function start_test(mode) {
             $('#localResultCard').show();
             $('#remoteResultCard').hide();
 
+            $('#mode-icon').removeClass("fa-download");
+            $('#mode-icon').removeClass("text-info");
+            $('#mode-icon').addClass("fa-upload");
+            $('#mode-icon').addClass("text-primary");
+
             eel.normal(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
 
             break;
@@ -72,6 +77,11 @@ function start_test(mode) {
 
             $('#localResultCard').hide();
             $('#remoteResultCard').show();
+
+            $('#mode-icon').removeClass("fa-upload");
+            $('#mode-icon').removeClass("text-primary");
+            $('#mode-icon').addClass("fa-download");
+            $('#mode-icon').addClass("text-info");
             
             eel.rev(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
             break;

@@ -1,3 +1,4 @@
+import eel
 import asyncio
 import websockets
 import subprocess
@@ -16,6 +17,8 @@ import reverse_rtt_process
 import reverse_windows_scan
 
 LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
+eel.init('web', allowed_extensions=['.js', '.html'])
+
 FALLBACK_LOGGER = getStreamLogger()
 
 '''
@@ -245,6 +248,9 @@ async def scan_process(**kwargs): #Metrics Calculations
                                 < CONNECTION_TEARDOWN >
 '''
 async def reverse_client(logger, SERVER_IP, cir):
+    eel.mode('Measuring download speed...')
+    eel.start_measurement_timer()
+
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -253,10 +259,12 @@ async def reverse_client(logger, SERVER_IP, cir):
     bb = None
     rwnd = None
     logf = None
+
     progress_count = 4
+
     print("starting reverse client")
     try:
-        #eel.printprogress("Initializing...")
+        eel.printprogress("Initializing...")
 
         logf = open(LOGFILE,"w+")
         client_ip = client_utils.get_client_ip()
@@ -270,8 +278,8 @@ async def reverse_client(logger, SERVER_IP, cir):
 
     try:
         # progress 1
-        #eel.printprogress("Processing maximum transmission unit...")
-        #eel.progress_now(1 / progress_count * 100)
+        eel.printprogress("Processing maximum transmission unit...")
+        eel.progress_now(1 / progress_count * 100)
         print("Processing maximum transmission unit...")
 
         print("Starting MTU Test")
@@ -289,8 +297,8 @@ async def reverse_client(logger, SERVER_IP, cir):
 
     try:
         # progress 2
-        #eel.printprogress("Measuring round-trip delay time...")
-        #eel.progress_now(2 / progress_count * 100)
+        eel.printprogress("Measuring round-trip delay time...")
+        eel.progress_now(2 / progress_count * 100)
 
         mss = int(results["MTU"]) - 40
         #rtt_return = await rtt_process(SERVER_IP, RTT_HANDLER_PORT, logger)
@@ -305,8 +313,8 @@ async def reverse_client(logger, SERVER_IP, cir):
 
     try:
         # progress 3
-        #eel.printprogress("Measuring baseline bandwidth...")
-        #eel.progress_now(3 / progress_count * 100)
+        eel.printprogress("Measuring baseline bandwidth...")
+        eel.progress_now(3 / progress_count * 100)
 
         print("Measuring baseline bandwidth...")
         #bb_return = await bandwidth_process(SERVER_IP, BANDWIDTH_HANDLER_PORT, BANDWIDTH_SERVICE_PORT , rtt, logger)
@@ -330,8 +338,8 @@ async def reverse_client(logger, SERVER_IP, cir):
 
     try:
         # progress 4
-        #eel.printprogress("Performing window scan...")
-        #eel.progress_now(4 / progress_count * 100)
+        eel.printprogress("Performing window scan...")
+        eel.progress_now(4 / progress_count * 100)
         print("Performing windows scan...")
         mtu = results["MTU"]
         rwnd = results["RWND"]
