@@ -386,14 +386,6 @@ def normal(lat, lon, cir, serv_ip, network_type):
     #####CALL NORMAL MODE HERE#####
     global dev_hash
     print("hash: {}\n".format(dev_hash))
-<<<<<<< HEAD
-    results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
-    print("RESULTS UPLOAD: {}".format(results[0][0]))
-    if results is not None:
-        eel.printnormal(results[0][0])
-    else:
-        eel.printnormal(None)
-=======
     try:
         results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
         if results is not None and results[0][0] is not None:
@@ -402,7 +394,6 @@ def normal(lat, lon, cir, serv_ip, network_type):
             eel.print_test_error("An unexpected error occurred. Please try again.")
     except error as Exception:
         eel.print_test_error(error)
->>>>>>> cedf88939567b6bf47621e5af28c7ac4093caa1c
 
     eel.progress_now(100, "true")
     eel.printprogress("Done")
