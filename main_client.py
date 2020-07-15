@@ -386,6 +386,7 @@ def normal(lat, lon, cir, serv_ip, network_type):
     global dev_hash
     print("hash: {}\n".format(dev_hash))
     results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
+    print("RESULTS UPLOAD: {}".format(results[0][0]))
     if results is not None:
         eel.printnormal(results[0][0])
     else:
@@ -418,7 +419,8 @@ def rev(lat, lon, cir, serv_ip, network_type):
     global dev_hash
     print("hash: {}\n".format(dev_hash))
     results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash, cir)
-    eel.printreverse(results)
+    print("RESULTS DOWNLOAD: {}".format(results[0][0]))
+    eel.printreverse(results[0][0])
     
     eel.printprogress("Done")
     eel.progress_now(100, "true")
