@@ -16,9 +16,10 @@ function printreverse(result){
     $('#error-info').hide();
 
     if (result) {
-        var reverseResult = result[0][0];
+        // console.log(result);
+        var reverseResult = result;
         reverseResult["CIR"] = $('#cir').val();
-        console.log(reverseResult);
+        // console.log(reverseResult);
         $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'CIR' }</b></td><td>${ reverseResult["CIR"] }${ ' Mbps' }</td></tr>`);
 
         if ("MTU" in reverseResult){
@@ -64,23 +65,82 @@ function printreverse(result){
         $(remoteResultId).append(`<tr><td><span class="text-muted">${ 'No measured results' }<span></td></tr>`);
     }
 
-    remoteWindowScanId = "#tblRemoteWindowStats tbody";
+    var remoteWindowScanId = "#tblRemoteWindowStats tbody";
+    
     var windowSizes = reverseResult["WND_SIZES"];
     var windowAverageThroughputs = reverseResult["WND_AVG_TCP"];
     var windowIdealThroughputs = reverseResult["WND_IDEAL_TCP"];
-    var windowTcpEfficiencies = [null, null, null] // SPEED PLOT???
-    // var windowAverageRtt = reverseResult["BUF_PLOT"];
-    // var windowAverageRtt = reverseResult["BUF_PLOT"];
+    var windowTcpEfficiencies = reverseResult["WND_TCP_EFF"];
+    var windowBufferDelays = reverseResult["WND_BUF_DEL"];
+
+    // var stepsCount = windowSizes.length;
+    // var windowScanRows = {
+    //     'Steps': {
+    //         'value': [...Array(stepsCount).keys()],
+    //         'format': '0',
+    //         'unit': null
+    //     },
+    //     'Window Size': {
+    //         'value': windowSizes.concat(reverseResult["ACTUAL_RWND"]),
+    //         'format': '0',
+    //         'unit': 'Bytes'
+    //     },
+    //     'Average TCP Throughput': {
+    //         'value': windowAverageThroughputs.concat(reverseResult["THPT_AVG"]),
+    //         'format': '0.000',
+    //         'unit': 'Mbps'
+    //     },
+    //     'Ideal TCP Throughput': {
+    //         'value': windowIdealThroughputs.concat(reverseResult["THPT_IDEAL"]),
+    //         'format': '0.000',
+    //         'unit': 'Mbps'
+    //     },
+    //     'TCP Efficiency': {
+    //         'value': windowTcpEfficiencies.concat(reverseResult["TCP_EFF"]),
+    //         'format': '0.[000]%',
+    //         'unit': null
+    //     },
+    //     'Buffer Delay': {
+    //         'value': windowBufferDelays.concat(reverseResult["BUF_DELAY"]),
+    //         'format': '0.[000]%',
+    //         'unit': null
+    //     },
+    // };
+
+    // var rowParams = Object.keys(windowScanRows);
+
     $(remoteWindowScanId).empty();
-    for (i = 0; i < 5; i++) {
+    for (var i = 0; i < 6; i++) {
         $(`${remoteWindowScanId}`).append('<tr><td class="text-secondary"></td></tr>');
     }
+
+    // for (var r = 0; r < rowParams.length; r++) {
+    //     var param = rowParams[r];
+    //     $(remoteWindowScanId).find('tr').eq(r).find('td').eq(0).html(`<b>${ param }</b>`);
+
+    //     var values = windowScanRows[param].values;
+    //     var format = windowScanRows[param].format;
+    //     var unit = windowScanRows[param].unit;
+
+
+    //     if (values) {
+    //         for (var c = 0; c < stepsCount; c++) {
+    //             var displayValue = [(values.length > c && values[c] ? numeral(values[c]).format(format) : '---'), unit].join(' ');
+    //             if (param == 'Steps' && c + 1 == stepsCount) {
+    //                 displayValue = 'THPT';
+    //             }
+    //             console.log(`r: ${r}\nc: ${c}\n`);
+    //             $(remoteWindowScanId).find('tr').eq(r).find('td').eq(c).after(`<td>${ displayValue }</td>`);
+    //         }
+    //     }
+    // }
 
     $(remoteWindowScanId).find('tr').eq(0).find('td').eq(0).html(`<b>Steps</b>`);
     $(remoteWindowScanId).find('tr').eq(1).find('td').eq(0).html(`<b>Window Size</b>`);
     $(remoteWindowScanId).find('tr').eq(2).find('td').eq(0).html(`<b>Average TCP Throughput</b>`);
     $(remoteWindowScanId).find('tr').eq(3).find('td').eq(0).html(`<b>Ideal TCP Throughput</b>`);
     $(remoteWindowScanId).find('tr').eq(4).find('td').eq(0).html(`<b>TCP Efficiency</b>`);
+    $(remoteWindowScanId).find('tr').eq(5).find('td').eq(0).html(`<b>Buffer Delay</b>`);
     if (windowSizes && windowSizes.length > 0) {
         for (var i = 0; i < windowSizes.length; i++) {
             $(remoteWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ i + 1 }</td>`);
@@ -88,6 +148,7 @@ function printreverse(result){
             $(remoteWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ windowAverageThroughputs.length > i && windowAverageThroughputs[i] ? numeral(windowAverageThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(remoteWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ windowIdealThroughputs.length > i && windowIdealThroughputs[i] ? numeral(windowIdealThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(remoteWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ windowTcpEfficiencies.length > i && windowTcpEfficiencies[i] ? numeral(windowTcpEfficiencies[i]).format('0.[000]%') : "---" } </td>`);
+            $(remoteWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowBufferDelays.length > i && windowBufferDelays[i] ? numeral(windowBufferDelays[i]).format('0.[000]%') : "---" } </td>`);
             // $(remoteWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowAverageRtt.length > i ? numeral(windowAverageRtt[i]).format('0.000') : "---" } ms</td>`);
         }
     }
@@ -100,6 +161,7 @@ function printreverse(result){
     $(remoteWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ reverseResult["THPT_AVG"] == null ? "---" : numeral(reverseResult["THPT_AVG"]).format('0.000') } Mbps</td>`);
     $(remoteWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ reverseResult["THPT_IDEAL"] == null ? "---" : numeral(reverseResult["THPT_IDEAL"]).format('0.000') } Mbps</td>`);
     $(remoteWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ reverseResult["TCP_EFF"] == null ? "---" : numeral(reverseResult["TCP_EFF"]).format('0.[000]%') } </td>`);
+    $(remoteWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ reverseResult["BUF_DELAY"] == null ? "---" : numeral(reverseResult["BUF_DELAY"]).format('0.[000]%') } </td>`);
 
     reverseTestResults = [];
     reverseTestResults = reverseResult;
@@ -137,9 +199,9 @@ function renderRemoteWindowScanGraph(result) {
     //     idealThroughputs.push(0);
     // }
 
-    console.log(steps);
-    console.log(averageThroughputs);
-    console.log(idealThroughputs);
+    // console.log(steps);
+    // console.log(averageThroughputs);
+    // console.log(idealThroughputs);
 
     var options = {
         chart: {
@@ -269,9 +331,9 @@ function renderRemoteThroughputEfficiencyGraph(result) {
         efficiencies.push(result['TCP_EFF']);
     }
 
-    console.log(steps);
-    console.log(averageThroughputs);
-    console.log(efficiencies);
+    // console.log(steps);
+    // console.log(averageThroughputs);
+    // console.log(efficiencies);
 
     var options = {
         chart: {

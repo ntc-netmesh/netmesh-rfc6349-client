@@ -72,8 +72,8 @@ function testSummaryPage(content, generatedAt) {
         case "Upload":
         case "Download":
             var testResults = testMeasurementMode == "Upload" ? normalTestResults : reverseTestResults;
-            console.log("testResults");
-            console.log(testResults);
+            // console.log("testResults");
+            // console.log(testResults);
             content.push({
                 table: {
                     body: [
@@ -255,8 +255,8 @@ function windowScanTestPage(content, isNormal = true) {
     });
 
     var testResults = isNormal ? normalTestResults : reverseTestResults;
-    console.log("testResults");
-    console.log(testResults);
+    // console.log("testResults");
+    // console.log(testResults);
 
     var pageBody = [];
     var pageBodyWidths = ['*'];
@@ -266,6 +266,7 @@ function windowScanTestPage(content, isNormal = true) {
     var averageTcpThroughputs = ['Average TCP Throughput'];
     var idealTcpThroughputs = ['Ideal TCP Throughput'];
     var tcpEfficiencies = ['TCP Efficiency'];
+    var bufferDelays = ['Buffer Delay'];
 
     if (testResults["WND_SIZES"]) {
         var windowSizeLength = testResults["WND_SIZES"].length;
@@ -281,8 +282,11 @@ function windowScanTestPage(content, isNormal = true) {
             var idealThroughput = testResults[isNormal ? "WND_ACTUAL_IDEAL" : "WND_IDEAL_TCP"][i];
             idealTcpThroughputs.push(`${ idealThroughput == null ? "---" : numeral(idealThroughput).format('0.000') } Mbps`);
 
-            var throughputEfficiency = testResults[isNormal ? "EFF_PLOT" : "SPEED_PLOT"][i];
+            var throughputEfficiency = testResults[isNormal ? "EFF_PLOT" : "WND_TCP_EFF"][i];
             tcpEfficiencies.push(`${ throughputEfficiency == null ? "---" : numeral(throughputEfficiency).format('0.000%')}`);
+
+            var bufferDelay = testResults[isNormal ? "BUF_PLOT" : "WND_BUF_DEL"][i];
+            bufferDelays.push(`${ bufferDelay == null ? "---" : numeral(bufferDelay).format('0.000%')}`);
 
             pageBodyWidths.push('*');
         }
@@ -291,6 +295,7 @@ function windowScanTestPage(content, isNormal = true) {
         averageTcpThroughputs.push(`${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`);
         idealTcpThroughputs.push(`${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] ).format('0.000')} Mbps`);
         tcpEfficiencies.push(`${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`);
+        bufferDelays.push(`${ testResults["BUF_DELAY"] == null ? "---" : numeral(testResults["BUF_DELAY"]).format('0.000%')}`);
         pageBodyWidths.push('*');
     }
 
@@ -401,8 +406,8 @@ async function generateTestResultsPdfReport() {
         }
     }
 
-    console.log("reverseTestResults");
-    console.log(reverseTestResults);
+    // console.log("reverseTestResults");
+    // console.log(reverseTestResults);
 
     $('#btnSaveAsPdf').attr('disabled', true);
 
