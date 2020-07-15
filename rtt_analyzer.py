@@ -43,7 +43,7 @@ def get_average_rtt(filename, client_ip, server_ip, dataoffset):
                             divider = 1000.0
                             divider_flag = True
                     if (not packet[TCP].flags & SYN):
-                        if (packet[IP].src == client_ip) and (not len(packet[TCP].payload) < int(dataoffset) - 300):
+                        if (packet[IP].src == client_ip):# and (not len(packet[TCP].payload) < int(dataoffset) - 300):
                             print(len(packet[TCP].payload))
                             expected_seqnum = packet[TCP].seq + int(dataoffset)
                             client_packets[expected_seqnum] = packet.time

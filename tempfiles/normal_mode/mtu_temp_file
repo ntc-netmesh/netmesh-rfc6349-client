@@ -10,9 +10,9 @@ Testing MTU size 1472 bytes...valid
 Testing MTU size 1536 bytes...packet too big for local interface
 Testing MTU size 1504 bytes...packet too big for local interface
 Testing MTU size 1488 bytes...valid
-Testing MTU size 1496 bytes...valid
-Testing MTU size 1500 bytes...valid
-Testing MTU size 1502 bytes...packet too big for local interface
-Testing MTU size 1501 bytes...packet too big for local interface
+Testing MTU size 1496 bytes...packet too big for local interface
+packet too big for local interface
+packet too big for local interface
+packet too big for local interface
 
-PLPMTUD to 202.90.158.168: 1500 bytes (20 IPv4 header + 8 UDP header + 1472 data).
+PLPMTUD to 202.90.158.168: 1488 bytes (20 IPv4 header + 8 UDP header + 1460 data).

@@ -49,7 +49,7 @@ async def throughput_process(tempfile, SERVER_IP, handler_port, throughput_port,
                                            "--parallel", str(connections),
                                            "--set-mss", str(mss),
                                            "--reverse",
-                                           "--bandwidth", "10M",
+                                           "--bandwidth", "100M",
                                            "--format", "m"
                                            ], stdout = o_file, stderr = o_file) 
             thpt_process.wait()
