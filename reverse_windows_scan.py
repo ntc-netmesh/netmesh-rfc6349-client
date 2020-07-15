@@ -34,7 +34,7 @@ FALLBACK_LOGGER = getStreamLogger()
                                     process handler
 '''
 async def scan_process(**kwargs):
-    scan_results = {"WND_SIZES":[], "WND_AVG_TCP":[], "WND_IDEAL_TCP":[]}
+    scan_results = {"WND_SIZES":[], "WND_AVG_TCP":[], "WND_IDEAL_TCP":[], "WND_TCP_EFF":[], "WND_BUF_DEL":[]}
     thpt_process = None
     try:
         for x in range(1,5):
@@ -48,6 +48,8 @@ async def scan_process(**kwargs):
                 scan_results["WND_SIZES"].append(rwnd)
                 scan_results["WND_AVG_TCP"].append(thpt_results["THPT_AVG"])
                 scan_results["WND_IDEAL_TCP"].append(thpt_results["THPT_IDEAL"])
+                scan_results["WND_TCP_EFF"].append(thpt_results["TCP_EFF"])
+                scan_results["WND_BUF_DEL"].append(thpt_results["BUF_DELAY"])
             else:
                 scan_results = {**scan_results, **thpt_results}
         return scan_results
