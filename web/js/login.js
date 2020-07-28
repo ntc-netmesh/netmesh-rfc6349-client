@@ -11,6 +11,7 @@ function user_login(){
     eel.login(username,password); 
 }
 
-function user_logout() {
-
+eel.expose(alert_debug);
+function alert_debug(message){
+    alert(message);
 }

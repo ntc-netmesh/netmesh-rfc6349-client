@@ -26,8 +26,11 @@ import ADB
 from watchdog.observers import Observer
 from watchdog.events import PatternMatchingEventHandler
 
+# Set web files folder and optionally specify which file types to check for eel.expose()
+#   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
+eel.init('web', allowed_extensions=['.js', '.html'])
+
 queue_place_path = './tempfiles/queue/queue_place'
-current_username = ""
 
 if __name__ == "__main__":
     patterns = "*"
@@ -83,30 +86,17 @@ current_queue_place = 0
 global test_mode
 test_mode = ""
 
-
-# try:
-#     while True:
-#         time.sleep(1)
-# except KeyboardInterrupt:
-#     queue_place_observer.stop()
-#     queue_place_observer.join()
-
-
-# Set web files folder and optionally specify which file types to check for eel.expose()
-#   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
-eel.init('web', allowed_extensions=['.js', '.html'])
-
 @eel.expose
 def retrieve_servers():
-    # response = requests.get("https://sago-gulaman.xyz/api/servers/")
-    # server_list = response.json()
+    # server_list = []
+    response = requests.get("https://sago-gulaman.xyz/api/servers/")
+    server_list = response.json()
     # index=0
     # for i in server_list:
     #     print(i["nickname"])
     #     if (i["test_method"] == "2"):
     #         location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
     #         eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
-    server_list = []
     eel.add_servers(server_list)
 
 ###results server credentials###
@@ -120,9 +110,11 @@ global token
 token = ""
 global net_type
 net_type = ""
-url = "https://www.sago-gulaman.xyz"
+url = "https://sago-gulaman.xyz"
 global server_uuid
 server_uuid = ""
+global current_username
+current_username = ""
 
 #Verify test agent user login
 @eel.expose
@@ -157,6 +149,7 @@ def login(username, password):
     # global token
     # token = ast.literal_eval(r.text)['Token']
     # print(token)
+
     eel.hide_login()
 
 #Verify if laptop is registered.
@@ -553,5 +546,10 @@ def close():
     # print("babay")
     pass
 
+@eel.expose
+def set_current_username():
+    global current_username
+    global region
+    eel.set_current_username(current_username, region)
 
 eel.start('login.html', size=(1024,768), port=8080, close_callback=close)             # Start (this blocks and enters loop)

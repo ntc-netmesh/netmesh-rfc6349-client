@@ -35,6 +35,7 @@ function printreverse(result){
             $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average TCP Throughput' }</b></td><td>${ numeral(reverseResult["THPT_AVG"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
         }
         if ("THPT_IDEAL" in reverseResult){
+            reverseResult["THPT_IDEAL"] /= 1.2;
             $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Ideal TCP Throughput' }</b></td><td>${ numeral(reverseResult["THPT_IDEAL"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
         }
         if ("TRANSFER_AVG" in reverseResult){
@@ -71,7 +72,7 @@ function printreverse(result){
     var windowAverageThroughputs = reverseResult["WND_AVG_TCP"];
     var windowIdealThroughputs = reverseResult["WND_IDEAL_TCP"];
     var windowTcpEfficiencies = reverseResult["WND_TCP_EFF"];
-    var windowBufferDelays = reverseResult["WND_BUF_DEL"];
+    // var windowBufferDelays = reverseResult["WND_BUF_DEL"];
 
     // var stepsCount = windowSizes.length;
     // var windowScanRows = {
@@ -110,7 +111,7 @@ function printreverse(result){
     // var rowParams = Object.keys(windowScanRows);
 
     $(remoteWindowScanId).empty();
-    for (var i = 0; i < 6; i++) {
+    for (var i = 0; i < 5; i++) {
         $(`${remoteWindowScanId}`).append('<tr><td class="text-secondary"></td></tr>');
     }
 
@@ -140,7 +141,7 @@ function printreverse(result){
     $(remoteWindowScanId).find('tr').eq(2).find('td').eq(0).html(`<b>Average TCP Throughput</b>`);
     $(remoteWindowScanId).find('tr').eq(3).find('td').eq(0).html(`<b>Ideal TCP Throughput</b>`);
     $(remoteWindowScanId).find('tr').eq(4).find('td').eq(0).html(`<b>TCP Efficiency</b>`);
-    $(remoteWindowScanId).find('tr').eq(5).find('td').eq(0).html(`<b>Buffer Delay</b>`);
+    // $(remoteWindowScanId).find('tr').eq(5).find('td').eq(0).html(`<b>Buffer Delay</b>`);
     if (windowSizes && windowSizes.length > 0) {
         for (var i = 0; i < windowSizes.length; i++) {
             $(remoteWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ i + 1 }</td>`);
@@ -148,8 +149,7 @@ function printreverse(result){
             $(remoteWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ windowAverageThroughputs.length > i && windowAverageThroughputs[i] ? numeral(windowAverageThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(remoteWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ windowIdealThroughputs.length > i && windowIdealThroughputs[i] ? numeral(windowIdealThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(remoteWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ windowTcpEfficiencies.length > i && windowTcpEfficiencies[i] ? numeral(windowTcpEfficiencies[i]).format('0.[000]%') : "---" } </td>`);
-            $(remoteWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowBufferDelays.length > i && windowBufferDelays[i] ? numeral(windowBufferDelays[i]).format('0.[000]%') : "---" } </td>`);
-            // $(remoteWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowAverageRtt.length > i ? numeral(windowAverageRtt[i]).format('0.000') : "---" } ms</td>`);
+            // $(remoteWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowBufferDelays.length > i && windowBufferDelays[i] ? numeral(windowBufferDelays[i]).format('0.[000]%') : "---" } </td>`);
         }
     }
     // else {
@@ -211,6 +211,9 @@ function renderRemoteWindowScanGraph(result) {
             height: 360,
             toolbar: {
                 show: false
+            },
+            zoom: {
+                enabled: false,
             },
             fontFamily: 'Arial, sans-serif',
         },
@@ -324,7 +327,7 @@ function renderRemoteThroughputEfficiencyGraph(result) {
         for (var i = 0; i < windowSizes.length; i++) {
             steps.push(`Step ${ i + 1 }`);
             averageThroughputs.push(result['WND_AVG_TCP'][i]);
-            efficiencies.push(null); // should be EFF_PLOT
+            efficiencies.push(result['WND_TCP_EFF'][i]); // should be EFF_PLOT
         }
         steps.push('THPT');
         averageThroughputs.push(result['THPT_AVG']);
@@ -343,6 +346,9 @@ function renderRemoteThroughputEfficiencyGraph(result) {
             height: 360,
             toolbar: {
                 show: false
+            },
+            zoom: {
+                enabled: false,
             },
             fontFamily: 'Arial, sans-serif',
         },

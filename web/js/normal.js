@@ -66,9 +66,9 @@ function printnormal(result){
     var windowAverageThroughputs = result["WND_AVG_TCP"];
     var windowIdealThroughputs = result["WND_ACTUAL_IDEAL"];
     var windowTcpEfficiencies = result["EFF_PLOT"];
-    var windowBufferDelays = result["BUF_PLOT"];
+    // var windowBufferDelays = result["BUF_PLOT"];
     $(localWindowScanId).empty();
-    for (i = 0; i < 6; i++) {
+    for (i = 0; i < 5; i++) {
         $(`${localWindowScanId}`).append('<tr><td class="text-secondary"></td></tr>');
     }
 
@@ -77,7 +77,7 @@ function printnormal(result){
     $(localWindowScanId).find('tr').eq(2).find('td').eq(0).html(`<b>Average TCP Throughput</b>`);
     $(localWindowScanId).find('tr').eq(3).find('td').eq(0).html(`<b>Ideal TCP Throughput</b>`);
     $(localWindowScanId).find('tr').eq(4).find('td').eq(0).html(`<b>TCP Efficiency</b>`);
-    $(localWindowScanId).find('tr').eq(5).find('td').eq(0).html(`<b>Buffer Delay</b>`);
+    // $(localWindowScanId).find('tr').eq(5).find('td').eq(0).html(`<b>Buffer Delay</b>`);
     if (windowSizes && windowSizes.length > 0) {
         for (var i = 0; i < windowSizes.length; i++) {
             $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ i + 1 }</td>`);
@@ -85,7 +85,7 @@ function printnormal(result){
             $(localWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ windowAverageThroughputs.length > i ? numeral(windowAverageThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ windowIdealThroughputs.length > i ? numeral( windowIdealThroughputs[i]).format('0.000') : "---" } Mbps</td>`);
             $(localWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ windowTcpEfficiencies.length > i ? numeral(windowTcpEfficiencies[i]).format('0.[000]%') : "---" } </td>`);
-            $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowBufferDelays.length > i ? numeral(windowBufferDelays[i]).format('0.000') : "---" } ms</td>`);
+            // $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ windowBufferDelays.length > i ? numeral(windowBufferDelays[i]).format('0.000') : "---" } ms</td>`);
         }
     }
     $(localWindowScanId).find('tr').eq(0).find('td').eq(i).after(`<td>${ 'THPT' }</td>`);
@@ -93,7 +93,7 @@ function printnormal(result){
     $(localWindowScanId).find('tr').eq(2).find('td').eq(i).after(`<td>${ result["THPT_AVG"] == null ? "---" : numeral(result["THPT_AVG"]).format('0.000') } Mbps</td>`);
     $(localWindowScanId).find('tr').eq(3).find('td').eq(i).after(`<td>${ result["ACTUAL_IDEAL"] == null ? "---" : numeral(result["ACTUAL_IDEAL"]).format('0.000') } Mbps</td>`);
     $(localWindowScanId).find('tr').eq(4).find('td').eq(i).after(`<td>${ result["TCP_EFF"] == null ? "---" : numeral(result["TCP_EFF"]).format('0.[000]%') } </td>`);
-    $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ result["BUF_DELAY"] == null ? "---" : numeral(result["BUF_DELAY"]).format('0.[000]%') } </td>`);
+    // $(localWindowScanId).find('tr').eq(5).find('td').eq(i).after(`<td>${ result["BUF_DELAY"] == null ? "---" : numeral(result["BUF_DELAY"]).format('0.[000]%') } </td>`);
 
     normalTestResults = [];
     normalTestResults = result;
@@ -135,6 +135,9 @@ function renderLocalWindowScanGraph(result) {
             height: 360,
             toolbar: {
                 show: false
+            },
+            zoom: {
+                enabled: false,
             },
             fontFamily: 'Arial, sans-serif',
         },
@@ -265,6 +268,9 @@ function renderLocalThroughputEfficiencyGraph(result) {
             height: 360,
             toolbar: {
                 show: false
+            },
+            zoom: {
+                enabled: false,
             },
             fontFamily: 'Arial, sans-serif',
         },

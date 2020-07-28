@@ -36,6 +36,8 @@ function start_test(mode) {
     if (chartPromises && chartPromises.length > 0) {
         ApexCharts.exec('windowsScanLocalToRemoteChart', 'destroy', []);
         ApexCharts.exec('throughputEfficiencyLocalToRemoteChart', 'destroy', []);
+        ApexCharts.exec('windowsScanRemoteToLocalChart', 'destroy', []);
+        ApexCharts.exec('throughputEfficiencyRemoteToLocalChart', 'destroy', []);
     }
     chartPromises = [];
 
@@ -100,11 +102,6 @@ function start_measurement_timer() {
         var currentDuration = `${ numeral(minute).format('0') }:${ numeral(second).format('00') }`;
         $('#measurement-timer').text(currentDuration);
     }, 100);
-}
-
-eel.expose(alert_debug);
-function alert_debug(message){
-    alert(message);
 }
 
 eel.expose(progress_now);
@@ -191,7 +188,7 @@ function getMainFormData() {
     var server_ip = document.getElementById("server").value;
     var net_type = document.getElementById("net_type").value;
 
-    if (cir && net_type && server_ip && lat && lon) {
+    if (cir && server_ip && lat && lon) {
         return {
             cir: cir,
             net_type: net_type,
@@ -1168,6 +1165,17 @@ function create_table_remote_window(tableData){
     document.getElementById('remote_wnd_stats').appendChild(tableBody);
 }
 
+eel.expose(set_current_username);
+function set_current_username(username, region) {
+    $('#loggedUsername').text(username);
+    $('#region-name').text(region);
+}
+
+
+function logout() {
+    window.location.replace("login.html");
+}
+
 // eel.expose(set_user)
 // function set_user(username) {
 //     $('#loggedUsername').text(username);
@@ -1183,7 +1191,7 @@ $(function () {
     // $('#lon').val(121.072027);
     // alert(eel.getLoggedUsername());
 
-    // $('#loggedUsername').text(eel.getLoggedUsername());
+    eel.set_current_username()
 
     // generateTestResultsPdfReport();
 });
