@@ -89,7 +89,7 @@ test_mode = ""
 @eel.expose
 def retrieve_servers():
     # server_list = []
-    response = requests.get("https://sago-gulaman.xyz/api/servers/")
+    response = requests.get("https://netmesh.pregi.net/api/servers/")
     server_list = response.json()
     # index=0
     # for i in server_list:
@@ -110,7 +110,7 @@ global token
 token = ""
 global net_type
 net_type = ""
-url = "https://sago-gulaman.xyz"
+url = "https://netmesh.pregi.net"
 global server_uuid
 server_uuid = ""
 global current_username

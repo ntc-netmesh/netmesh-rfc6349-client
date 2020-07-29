@@ -20,7 +20,7 @@ import time
 username = "agent1"
 password = "6ff98bf9d"
 uuid = "6817ca74-4e23-4e16-a004-feae757a45c0"
-url = "https://www.sago-gulaman.xyz"
+url = "https://netmesh.pregi.net"
 server1 = "334b293b-1ebe-4195-a3ec-eaa3f8f37b23"
 server2 = "a83250c2-4125-4a58-a183-6c90bcf16e43"
 server3 = "334b293b-1ebe-4195-a3ec-eaa3f8f37b23"

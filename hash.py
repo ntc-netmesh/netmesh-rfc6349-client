@@ -49,7 +49,7 @@ def process_submit(user, password, serial, region):
         eel.alert_debug("Device already registered!")
 
     else:
-        url = "https://www.sago-gulaman.xyz"
+        url = "https://netmesh.pregi.net"
         sha_signature = encrypt_string(serial)
 
         data = {

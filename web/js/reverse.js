@@ -20,47 +20,85 @@ function printreverse(result){
         var reverseResult = result;
         reverseResult["CIR"] = $('#cir').val();
         // console.log(reverseResult);
-        $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'CIR' }</b></td><td>${ reverseResult["CIR"] }${ ' Mbps' }</td></tr>`);
+        $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'CIR' }</b></td><td>${ reverseResult["CIR"] }${ ' Mbps' }</td></tr>`);
 
-        if ("MTU" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'MTU' }</b></td><td>${ reverseResult["MTU"] }${ ' Bytes' }</td></tr>`);
+        if ("MTU" in reverseResult && (reverseResult["MTU"] || reverseResult["MTU"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'MTU' }</b></td><td>${ reverseResult["MTU"] }${ ' Bytes' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'MTU' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("RTT" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'RTT' }</b></td><td>${ numeral(reverseResult["RTT"]).format('0,0.000') }${ ' ms' }</td></tr>`);
+
+        if ("RTT" in reverseResult && (reverseResult["RTT"] || reverseResult["RTT"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'RTT' }</b></td><td>${ numeral(reverseResult["RTT"]).format('0,0.000') }${ ' ms' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'RTT' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("RWND" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'TCP RWND' }</b></td><td>${ reverseResult["ACTUAL_RWND"] }${ ' Bytes' }</td></tr>`);
+        
+        if ("RWND" in reverseResult && (reverseResult["RWND"] || reverseResult["RWND"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'TCP RWND' }</b></td><td>${ reverseResult["ACTUAL_RWND"] }${ ' Bytes' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'TCP RWND' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("THPT_AVG" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average TCP Throughput' }</b></td><td>${ numeral(reverseResult["THPT_AVG"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
+
+        if ("THPT_AVG" in reverseResult && (reverseResult["THPT_AVG"] || reverseResult["THPT_AVG"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Average TCP Throughput' }</b></td><td>${ numeral(reverseResult["THPT_AVG"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average TCP Throughput' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("THPT_IDEAL" in reverseResult){
+
+        if ("THPT_IDEAL" in reverseResult && (reverseResult["THPT_IDEAL"] || reverseResult["THPT_IDEAL"] === 0)){
             reverseResult["THPT_IDEAL"] /= 1.2;
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Ideal TCP Throughput' }</b></td><td>${ numeral(reverseResult["THPT_IDEAL"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Ideal TCP Throughput' }</b></td><td>${ numeral(reverseResult["THPT_IDEAL"]).format('0,0.000') }${ ' Mbps' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Ideal TCP Throughput' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("TRANSFER_AVG" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average Transfer Time' }</b></td><td>${ numeral(reverseResult["TRANSFER_AVG"]).format('0,0.000') }${ ' s' }</td></tr>`);
+
+        if ("TRANSFER_AVG" in reverseResult && (reverseResult["TRANSFER_AVG"] || reverseResult["TRANSFER_AVG"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Average Transfer Time' }</b></td><td>${ numeral(reverseResult["TRANSFER_AVG"]).format('0,0.000') }${ ' s' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average Transfer Time' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("TRANSFER_IDEAL" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Ideal Transfer Time' }</b></td><td>${ numeral(reverseResult["TRANSFER_IDEAL"]).format('0,0.000') }${ ' s' }</td></tr>`);
+
+        if ("TRANSFER_IDEAL" in reverseResult && (reverseResult["TRANSFER_IDEAL"] || reverseResult["TRANSFER_IDEAL"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Ideal Transfer Time' }</b></td><td>${ numeral(reverseResult["TRANSFER_IDEAL"]).format('0,0.000') }${ ' s' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Ideal Transfer Time' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("TCP_TTR" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'TCP TTR' }</b></td><td>${ numeral(reverseResult["TCP_TTR"]).format('0.000%') }${ '' }</td></tr>`);
+
+        if ("TCP_TTR" in reverseResult && (reverseResult["TCP_TTR"] || reverseResult["TCP_TTR"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'TCP TTR' }</b></td><td>${ numeral(reverseResult["TCP_TTR"]).format('0.000%') }${ '' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'TCP TTR' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("TRANS_BYTES" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Transmitted Bytes' }</b></td><td>${ reverseResult["TRANS_BYTES"] }${ ' Bytes' }</td></tr>`);
+
+        if ("TRANS_BYTES" in reverseResult && (reverseResult["TRANS_BYTES"] || reverseResult["TRANS_BYTES"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Transmitted Bytes' }</b></td><td>${ reverseResult["TRANS_BYTES"] }${ ' Bytes' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Transmitted Bytes' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("RETX_BYTES" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Retransmitted Bytes' }</b></td><td>${ reverseResult["RETX_BYTES"] }${ ' Bytes' }</td></tr>`);
+
+        if ("RETX_BYTES" in reverseResult && (reverseResult["RETX_BYTES"] || reverseResult["RETX_BYTES"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Retransmitted Bytes' }</b></td><td>${ reverseResult["RETX_BYTES"] }${ ' Bytes' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Retransmitted Bytes' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("TCP_EFF" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'TCP Efficiency' }</b></td><td>${ numeral(reverseResult["TCP_EFF"]).format('0.000%') }${ '' }</td></tr>`);
+
+        if ("TCP_EFF" in reverseResult && (reverseResult["TCP_EFF"] || reverseResult["TCP_EFF"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'TCP Efficiency' }</b></td><td>${ numeral(reverseResult["TCP_EFF"]).format('0.000%') }${ '' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'TCP Efficiency' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("AVE_RTT" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average RTT' }</b></td><td>${ numeral(reverseResult["AVE_RTT"]).format('0.000') }${ ' ms' }</td></tr>`);
+
+        if ("AVE_RTT" in reverseResult && (reverseResult["AVE_RTT"] || reverseResult["AVE_RTT"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Average RTT' }</b></td><td>${ numeral(reverseResult["AVE_RTT"]).format('0.000') }${ ' ms' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Average RTT' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
-        if ("BUF_DELAY" in reverseResult){
-            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Buffer Delay' }</b></td><td>${ numeral(reverseResult["BUF_DELAY"]).format('0.000%') }${ '' }</td></tr>`);
+
+        if ("BUF_DELAY" in reverseResult && (reverseResult["BUF_DELAY"] || reverseResult["BUF_DELAY"] === 0)){
+            $(remoteResultId).append(`<tr><td class="text-info"><b>${ 'Buffer Delay' }</b></td><td>${ numeral(reverseResult["BUF_DELAY"]).format('0.000%') }${ '' }</td></tr>`);
+        } else {
+            $(remoteResultId).append(`<tr><td class="text-secondary"><b>${ 'Buffer Delay' }</b></td><td><span class="text-muted"><i>(no result)</i></span></td></tr>`);
         }
     } else {
         $(remoteResultId).append(`<tr><td><span class="text-muted">${ 'No measured results' }<span></td></tr>`);
@@ -423,3 +461,9 @@ function renderRemoteThroughputEfficiencyGraph(result) {
         });
     }));
 }
+
+
+$(function () {
+    $('#cir').val(10);
+    printreverse(reverseTestResults);
+});
