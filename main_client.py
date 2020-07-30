@@ -121,34 +121,34 @@ current_username = ""
 def login(username, password):
     global current_username
     current_username = username
-    # global dev_hash
-    # read_hash()
-    # hash_data = {
-    #     "hash": dev_hash
-    # }
+    global dev_hash
+    read_hash()
+    hash_data = {
+        "hash": dev_hash
+    }
 
-    # try:
-    #     # Request for Agent token
-    #     r = requests.post(url=url+"/api/gettoken", data=hash_data, auth = (username, password))
-    # except Exception as e:
-    #     print(e)
+    try:
+        # Request for Agent token
+        r = requests.post(url=url+"/api/gettoken", data=hash_data, auth = (username, password))
+    except Exception as e:
+        print(e)
 
-    # if r.status_code == 401:
-    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-    #     eel.alert_debug("Invalid username/password!")
-    #     return
-    # elif r.status_code == 400:
-    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-    #     eel.alert_debug("Device not registered. Please register the device using new_dev_reg")
-    #     return
-    # elif r.status_code != 200:
-    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-    #     eel.alert_debug("Error occured")
-    #     return
+    if r.status_code == 401:
+        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.alert_debug("Invalid username/password!")
+        return
+    elif r.status_code == 400:
+        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.alert_debug("Device not registered. Please register the device using new_dev_reg")
+        return
+    elif r.status_code != 200:
+        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.alert_debug("Error occured")
+        return
 
-    # global token
-    # token = ast.literal_eval(r.text)['Token']
-    # print(token)
+    global token
+    token = ast.literal_eval(r.text)['Token']
+    print(token)
 
     eel.hide_login()
 
