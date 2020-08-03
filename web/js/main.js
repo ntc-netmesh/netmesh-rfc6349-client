@@ -140,6 +140,7 @@ function cancel(){
 
 eel.expose(add_servers);
 function add_servers(servers) {
+    
     var serverSelect = $('#server');
 
     serverSelect.append(`
@@ -1191,7 +1192,7 @@ $(function () {
     // $('#lon').val(121.072027);
     // alert(eel.getLoggedUsername());
 
-    eel.set_current_username()
+    eel.set_current_username();
 
     // generateTestResultsPdfReport();
 });
