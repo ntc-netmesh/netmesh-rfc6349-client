@@ -475,8 +475,3 @@ function renderLocalThroughputEfficiencyGraph(stepsCount, result) {
         });
     }));
 }
-
-$(function () {
-    $('#cir').val(10);
-    printnormal(normalTestResults);
-});
