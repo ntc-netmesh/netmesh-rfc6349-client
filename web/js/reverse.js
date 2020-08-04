@@ -546,3 +546,7 @@ function renderRemoteThroughputEfficiencyGraph(stepsCount, result) {
         });
     }));
 }
+
+// $(function () {
+//     printreverse(reverseTestResults);
+// });

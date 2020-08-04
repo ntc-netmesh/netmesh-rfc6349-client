@@ -328,7 +328,7 @@ function renderLocalWindowScanGraph(stepsCount, result) {
                             fontSize: '14px',
                             fontWeight: 'bold',
                         },
-                        text: throughputIdeal ? `Max THPT: ${ numeral(result["THPT_IDEAL"]).format('0.000') } Mbps` : null
+                        text: throughputIdeal ? `Max THPT: ${ numeral(result["ACTUAL_IDEAL"]).format('0.000') } Mbps` : null
                     }
                 }
             ]
@@ -475,3 +475,7 @@ function renderLocalThroughputEfficiencyGraph(stepsCount, result) {
         });
     }));
 }
+
+// $(function () {
+//     printnormal(normalTestResults);
+// });
