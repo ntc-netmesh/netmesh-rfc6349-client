@@ -4,4 +4,4 @@
 **/*.pyc
 **/*.log
 #Temp File
-tempfiles
+/tempfiles
