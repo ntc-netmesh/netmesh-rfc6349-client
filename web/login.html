@@ -47,7 +47,12 @@
                                             <input type="checkbox" checked="checked" name="remember"> Remember me
                                         </label>
                                     </div>
-                                    <button type="submit" class="btn btn-success float-right">Log in</button>
+                                    <button id="btnLogIn" type="submit" class="btn btn-success float-right">
+                                        <div id="spinnerLogIn" class="spinner-border spinner-border-sm" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                        <span id="spanLogIn">Log in</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
