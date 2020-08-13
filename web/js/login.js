@@ -11,7 +11,36 @@ function user_login(){
     eel.login(username,password); 
 }
 
+eel.expose(disable_login_form)
+function disable_login_form() {
+    setLogInFormStatus(true);
+}
+
+eel.expose(enable_login_form)
+function enable_login_form() {
+    setLogInFormStatus(false);
+}
+
+
+function setLogInFormStatus(disabled) {
+    $('#uname').attr('disabled', disabled);
+    $('#psw').attr('disabled', disabled);
+    $('#btnLogIn').attr('disabled', disabled);
+
+    if (disabled) {
+        $('#spinnerLogIn').show();
+        $('#spanLogIn').text('Logging in...');
+    } else {
+        $('#spinnerLogIn').hide();
+        $('#spanLogIn').text('Log in');
+    }
+}
+
 eel.expose(alert_debug);
 function alert_debug(message){
     alert(message);
 }
+
+$(function () {
+    $('#spinnerLogIn').hide();
+});
