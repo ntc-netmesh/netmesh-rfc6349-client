@@ -1,3 +1,4 @@
+import eel
 import asyncio
 import websockets
 import subprocess
@@ -14,6 +15,7 @@ import mtu_process, rtt_process, baseline_bandwidth_process, \
         windows_scan, throughput_test, analyzer_process
 
 LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
+eel.init('web', allowed_extensions=['.js', '.html'])
 
 '''
     LOCAL TO REMOTE PROTOCOL HANDLER
@@ -37,6 +39,12 @@ LOGFILE = datetime.today().strftime('logfiles/%Y-%m-%d-%H-%M-%S.log')
                                            < CONNECTION_TEARDOWN >
 '''
 async def normal_client(logger, SERVER_IP, cir):
+    eel.mode('Measuring upload speed...')
+    eel.start_measurement_timer()
+
+    print("server_ip")
+    print(SERVER_IP)
+
     results = {}
     ws_url = "ws://"+SERVER_IP+":3001"
     client_ip = None
@@ -45,36 +53,64 @@ async def normal_client(logger, SERVER_IP, cir):
     bb = None
     rwnd = None
     logf = None
+
+    progress_count = 7
+
     mss = None
     conn = None
     actual_rwnd = None
     try:
-        logf = open(LOGFILE,"w+")
+        eel.printprogress("Initializing...")
+        print("Getting client IP address...")
+        try:
+            logf = open(LOGFILE,"w+")
+        except FileNotFoundError as e:
+            print(e)
+
         client_ip = client_utils.get_client_ip()
     except:
+        # progress error
+        eel.printprogress("Cannot initialize :(")
         logger.error("cant get client ip")
         traceback.print_exc(file=logf)
         return
 
     try:
+        print("Trying to connect...")
         async with websockets.connect(ws_url) as websocket:
 
             await websocket.send("normal test start")
             state = await websocket.recv()
+            print("normal test started")
 
             try:
+                # progress 1
+                eel.printprogress("Processing maximum transmission unit...")
+                eel.progress_now(1 / progress_count * 100)
+                print("Processing maximum transmission unit...")
+                
                 mtu = mtu_process.mtu_process(SERVER_IP, UDP_PORT)
                 results["MTU"] = mtu
             except:
                 traceback.print_exc(file=logf)
 
             try:
+                # progress 2
+                eel.printprogress("Measuring round-trip delay time...")
+                eel.progress_now(2 / progress_count * 100)
+                print("Measuring round-trip delay time...")
+
                 rtt = rtt_process.measure_rtt(SERVER_IP, client_ip, mtu)
                 results["RTT"] = rtt
             except:
                 traceback.print_exc(file=logf)
 
             try:
+                # progress 3
+                eel.printprogress("Measuring baseline bandwidth...")
+                eel.progress_now(3 / progress_count * 100)
+                print("Measuring baseline bandwidth...")
+
                 bb, bdp, mss, rwnd, conn, actual_rwnd = baseline_bandwidth_process.bandwidth_measure(SERVER_IP, cir, rtt, mtu)
                 results["BB"]                    = bb
                 results["BDP"]                   = bdp
@@ -86,6 +122,11 @@ async def normal_client(logger, SERVER_IP, cir):
                 traceback.print_exc(file=logf)
 
             try:
+                # progress 4
+                eel.printprogress("Performing window scan...")
+                eel.progress_now(4 / progress_count * 100)
+                print("Performing windows scan...")
+
                 param_list = { "client_ip"   : client_ip,
                                "server_ip"   : SERVER_IP,
                                "rtt"         : rtt,
@@ -105,6 +146,11 @@ async def normal_client(logger, SERVER_IP, cir):
                 traceback.print_exc(file=logf)
 
             try:
+                # progress 5
+                eel.printprogress("Measuring throughput...")
+                eel.progress_now(5 / progress_count * 100)
+                print("Measuring throughput...")
+
                 filename = "tempfiles/normal_mode/testresults.pcapng"
                 throughput_average, throughput_ideal, transfer_time_average, \
                         transfer_time_ideal, tcp_ttr, speed_plot, actual_ideal = \
@@ -120,6 +166,11 @@ async def normal_client(logger, SERVER_IP, cir):
                 traceback.print_exc(file=logf)
 
             try:
+                # progress 6
+                eel.printprogress("Analyzing efficiency...")
+                eel.progress_now(6 / progress_count * 100)
+                print("Analyzing efficiency...")
+
                 filename = "tempfiles/normal_mode/testresults.pcapng"
                 transmitted_bytes, retransmitted_bytes, tcp_efficiency = \
                         analyzer_process.analyze_efficiency(filename, client_ip)
@@ -130,6 +181,11 @@ async def normal_client(logger, SERVER_IP, cir):
                 traceback.print_exc(file=logf)
 
             try:
+                # progress 7
+                eel.printprogress("Analyzing buffer delay...")
+                eel.progress_now(7 / progress_count * 100)
+                print("Analyzing buffer delay...")
+
                 filename = "tempfiles/normal_mode/testresults.pcapng"
                 average_rtt, buffer_delay =\
                         analyzer_process.analyze_buffer_delay\
@@ -143,6 +199,7 @@ async def normal_client(logger, SERVER_IP, cir):
             logger.debug(str(results))
             await websocket.send("normal test done")
             await websocket.close()
+
             return results
     except:
         logger.error("connection error")

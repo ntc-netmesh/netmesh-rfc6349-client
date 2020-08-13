@@ -1,6 +1,6 @@
 eel.expose(alert_debug);
 function alert_debug(message){
-    console.log(message);
+    // console.log(message);
     alert(message);
 }
 

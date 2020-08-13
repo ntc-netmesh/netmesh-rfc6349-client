@@ -9,6 +9,7 @@ from utilities import client_utils
 
 GLOBAL_LOGGER = getStreamLogger()
 
+
 '''
         Starts throughput measuring subproc instances
         one process for packet measuring (shark)

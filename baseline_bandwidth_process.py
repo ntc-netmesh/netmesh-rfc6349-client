@@ -31,7 +31,12 @@ def find_throughput_params(bdp, mtu):
             x += 1
             rwnd = x*mss
 
-        connections = ceil( rwnd / (64*1024)  )
+        #connections = ceil( rwnd / (64*1024)  )
+        connections = floor( rwnd / (64*1024)  )
+
+        if connections <= 1:
+            connections = 2
+
         return mss, rwnd, connections
     except:
         GLOBAL_LOGGER.error("RWND calculation error")

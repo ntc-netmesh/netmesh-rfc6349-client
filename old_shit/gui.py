@@ -14,11 +14,13 @@ from datetime import datetime
 import random ##for testing purposes only##
 import pytz
 
+import time
+
 ###results server credentials###
 username = "agent1"
 password = "6ff98bf9d"
 uuid = "6817ca74-4e23-4e16-a004-feae757a45c0"
-url = "https://www.sago-gulaman.xyz"
+url = "https://netmesh.pregi.net"
 server1 = "334b293b-1ebe-4195-a3ec-eaa3f8f37b23"
 server2 = "a83250c2-4125-4a58-a183-6c90bcf16e43"
 server3 = "334b293b-1ebe-4195-a3ec-eaa3f8f37b23"
@@ -120,63 +122,66 @@ def send_res(results, mode, lat, lon):
             "set1": parse_results(results[0],'forward'),
             "set2": parse_results(results[1],'reverse'),
         }
-    data_point = {
-        "uuid": uuid,
-        "test_type": "RFC6349",
-        "network": "dsl",
-        "pcap": "sample.pcap",
-        "lat": lat,
-        "long": lon,
-        "mode": mode,
-        "results": res
-    }
+    # data_point = {
+    #     "uuid": uuid,
+    #     "test_type": "RFC6349",
+    #     "network": "dsl",
+    #     "pcap": "sample.pcap",
+    #     "lat": lat,
+    #     "long": lon,
+    #     "mode": mode,
+    #     "results": res
+    # }
 
-    creds = {
-        "username": username,
-        "password": password,
-        "uuid": uuid # agent uuid
-    }
-    try:
-        # Request for Agent token
-        r = requests.post(url=url+"/api/register", data=creds)
-    except Exception as e:
-        print(e)
+    # creds = {
+    #     "username": username,
+    #     "password": password,
+    #     "uuid": uuid # agent uuid
+    # }
+    # try:
+    #     # Request for Agent token
+    #     r = requests.post(url=url+"/api/register", data=creds)
+    # except Exception as e:
+    #     print(e)
 
-    if r.status_code != 200:
-        print("Exiting due to status code %s" % r.status_code)
-        quit()
+    # if r.status_code != 200:
+    #     print("Exiting due to status code %s" % r.status_code)
+    #     quit()
 
-    mytoken = ast.literal_eval(r.text)['Token']
-    data_json = json.dumps(data_point, default=str)
-    status_len = len(data_json)
+    # mytoken = ast.literal_eval(r.text)['Token']
+    # data_json = json.dumps(data_point, default=str)
+    # status_len = len(data_json)
 
-    headers = {
-        "Authorization": "Token %s" % mytoken,
-        "Content-Type": "application/json; charset=utf-8",
-        "Content-Length": str(status_len)
-    }
+    # headers = {
+    #     "Authorization": "Token %s" % mytoken,
+    #     "Content-Type": "application/json; charset=utf-8",
+    #     "Content-Length": str(status_len)
+    # }
 
-    try:
-        print(data_json)
-        r = requests.post(url+"/api/submit",
-                          headers=headers,
-                          data=data_json,
-                          timeout=30)
+    # try:
+    #     print(data_json)
+    #     r = requests.post(url+"/api/submit",
+    #                       headers=headers,
+    #                       data=data_json,
+    #                       timeout=30)
 
-    except Exception as e:
-        print("ERROR: %s." % e)
+    # except Exception as e:
+    #     print("ERROR: %s." % e)
 
-    if r.status_code == 200:
-        print("Submit success!")
-    else:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+    # if r.status_code == 200:
+    #     print("Submit success!")
+    # else:
+    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
 
 
-ws_url = 'ws://202.92.132.191:3001'
-server_ip = "202.92.132.191"
+# ws_url = 'ws://202.92.132.191:3001'
+ws_url = 'ws://192.168.91.154:3001'
+# server_ip = "202.92.132.191"
+server_ip = "192.168.91.154"
 
 ###set ip here####
-client_ip = "192.168.60.207"
+# client_ip = "192.168.60.207"
+client_ip = "192.168.90.146"
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
@@ -184,7 +189,7 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 
 
 @eel.expose 
-def normal(lat, lon, cir):
+def normal(lat, lon, cir, s, n): #temporarily added s and n parameters
     print("normal mode")
     asyncio.get_event_loop().run_until_complete(l_to_r(lat, lon, cir))
 
@@ -207,6 +212,8 @@ def traceroute(server_ip):
     p = subprocess.Popen(["traceroute", server_ip], stdout = subprocess.PIPE)
     p.wait()
 
+    ip_add = ""
+    ip_name = ""
     hop_num = 0
     hop = {}
     for line in p.stdout:
@@ -241,28 +248,27 @@ def traceroute(server_ip):
         hop_num += 1
 
     ## send readings to result server
-    data_point = {
-        "dest_ip":dest_ip,
-        "dest_name":dest_name,
-        "hops": hop
-    }
+    # data_point = {
+    #     "dest_ip":dest_ip,
+    #     "dest_name":dest_name,
+    #     "hops": hop
+    # }
     
-    data_json = json.dumps(data_point, default=str)
+    # data_json = json.dumps(data_point, default=str)
 
-    headers = {
-        "Content-Type": "application/json; charset=utf-8",
-        "Content-Length": str(len(data_json))
-    }
-
+    # headers = {
+    #     "Content-Type": "application/json; charset=utf-8",
+    #     "Content-Length": str(len(data_json))
+    # }
     
-    try:
-        r= requests.post(url=url+"/api/submit/traceroute", data = data_json, headers = headers)
-    except Exception as e:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+    # try:
+    #     r= requests.post(url=url+"/api/submit/traceroute", data = data_json, headers = headers)
+    # except Exception as e:
+    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))
 
-    if r.status_code != 200:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))    
-        quit()
+    # if r.status_code != 200:
+    #     print("Exiting due to status code %s: %s" % (r.status_code, r.text))    
+    #     quit()
 
 global flag
 flag = 0
@@ -274,7 +280,31 @@ def cancel_test():
 
                       
 async def l_to_r(lat, lon, cir):
-    traceroute(server_ip)
+    print("1234567890 yeah")
+
+    for i in range(1, 7):
+        if i == 1:
+            eel.printprogress("Performing PLPMTUD...")
+        elif i == 2:
+            eel.printprogress("Measuring Ping...")
+        elif i == 3:
+            eel.printprogress("Executing iPerf UDP...")
+        elif i == 4:
+            eel.printprogress("Executing iPerf TCP...")
+        elif i == 5:
+            eel.printprogress("Measuring TCP Efficiency...")
+        elif i == 6:
+            eel.printprogress("Measuring Buffer Delay...")
+
+        time.sleep(3)
+        eel.progress_now(100/6*i)
+
+    eel.printprogress("Done")
+    eel.progress_now(100)
+
+    # return
+
+    # traceroute(server_ip)
 
     results = []
     async with websockets.connect(ws_url) as websocket:

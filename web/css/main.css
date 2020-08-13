@@ -3,11 +3,19 @@
 	width:50%
 }
 
-.container:after{
+body {
+	min-width: 480px;
+}
+
+/* .card {
+
+} */
+
+/* .container:after{
 	content: "";
 	display: table;
 	clear:both;
-}
+} */
 
 .line{
     fill:none;
@@ -15,14 +23,14 @@
     stroke-width:5px;
 }
 
-body{
-	background-image:url("ntc_logo.png");
+/* body{
+	background-image:url("../images/ntc_logo.png");
 	background-repeat: no-repeat;
 	background-position: center;
 	background-attachment: fixed;
-}
+} */
 
-#tab0,#tab1,#tab2,#tab3,#rtab0,#rtab1,#rtab2,#rtab3{
+/* #tab0,#tab1,#tab2,#tab3,#rtab0,#rtab1,#rtab2,#rtab3{
 	float:left;
 	padding: 5px 10px 5px 10px;
 	background:#63ABF7;
@@ -30,7 +38,7 @@ body{
 	margin:0px 5px 0px 5px;
 	cursor: pointer;
 	border-radius: 5px;
-}
+} */
 
 #tab0Content{
 	display:block;
@@ -48,9 +56,10 @@ body{
 	display:none;
 }
 
-.progress{
+.progress.prog_bar{
 	margin: 10px;
-	width: 700px;
+	min-width: 200px;
+	/* max-width: 800px; */
 }
 
 .imgcontainer{
@@ -60,7 +69,9 @@ body{
 }
 
 img.avatar{
-	width: 40%;
+	width: 50%;
+	min-width: 160px;
+	max-width: 240px;
 	border-radius: 50%;
 }
 
@@ -69,7 +80,7 @@ span.psw{
 	padding-top: 16px;
 }
 
-.modal{
+/* .modal{
 	display: none;
 	position: fixed;
 	z-index: 1;
@@ -88,9 +99,9 @@ span.psw{
 	margin: 5px auto;
 	border: 1px solid #888;
 	width: 80%;
-}
+} */
 
-.close{
+/* .close{
 	position: absolute;
 	right: 25px;
 	top: 0;
@@ -103,7 +114,7 @@ span.psw{
 .close:focus{
 	color: red;
 	cursor: pointer;
-}
+} */
 
 .animate{
 	-webkit-animation: animatezoom 0.6s;

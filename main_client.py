@@ -21,21 +21,83 @@ import pytz
 import queue_process
 from constants import NORMAL_MODE, REVERSE_MODE
 
+import time
+import ADB
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
 eel.init('web', allowed_extensions=['.js', '.html'])
 
+queue_place_path = './tempfiles/queue/queue_place'
+
+if __name__ == "__main__":
+    patterns = "*"
+    ignore_patterns = ""
+    ignore_directories = False
+    case_sensitive = True
+    queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+
+    path = "./tempfiles/queue"
+    go_recursively = False
+
+def on_created(event):
+    print("hey, {} has been created!".format(event.src_path))
+
+def on_deleted(event):
+    print(f"what the f**k! Someone deleted {event.src_path}!")
+
+def on_modified(event):
+    print(f"hey buddy, {event.src_path} has been modified")
+
+    if (event.src_path.split('/')[-1].startswith('.goutputstream')):
+        return
+
+    print("aa")
+    f = open(event.src_path + "/queue_place", "r")
+    f_content = f.read()
+    print("content:" + str(f_content))
+    global current_queue_place
+    current_queue_place = int(f_content)
+
+    if current_queue_place > 0:
+        eel.set_queue(current_queue_place)
+        print("set queue place to " + str(current_queue_place))
+    else:
+        eel.close_queue_dialog()
+        eel.start_test(test_mode)
+        print("queue dialog closed")
+
+        queue_place_observer.stop()
+        # queue_place_observer.join()
+        
+
+def on_moved(event):
+    print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
+
+queue_place_event_handler.on_modified = on_modified
+global queue_place_observer
+queue_place_observer = None
+
+global current_queue_place
+current_queue_place = 0
+
+global test_mode
+test_mode = ""
+
 @eel.expose
 def retrieve_servers():
-    response = requests.get("https://sago-gulaman.xyz/api/servers/")
+    # server_list = []
+    response = requests.get("https://netmesh.pregi.net/api/servers/")
     server_list = response.json()
-    index=0
-    for i in server_list:
-        print(i["nickname"])
-        if (i["test_method"] == "2"):
-            location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
-            eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
+    # index=0
+    # for i in server_list:
+    #     print(i["nickname"])
+    #     if (i["test_method"] == "2"):
+    #         location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
+    #         eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
+    eel.add_servers(server_list)
 
 ###results server credentials###
 global dev_hash
@@ -48,13 +110,17 @@ global token
 token = ""
 global net_type
 net_type = ""
-url = "https://www.sago-gulaman.xyz"
+url = "https://netmesh.pregi.net"
 global server_uuid
 server_uuid = ""
+global current_username
+current_username = ""
 
 #Verify test agent user login
 @eel.expose
-def login(username,password):
+def login(username, password):
+    global current_username
+    current_username = username
     global dev_hash
     read_hash()
     hash_data = {
@@ -83,6 +149,7 @@ def login(username,password):
     global token
     token = ast.literal_eval(r.text)['Token']
     print(token)
+
     eel.hide_login()
 
 #Verify if laptop is registered.
@@ -251,16 +318,56 @@ def set_location(x,y):
     global lon
     lon = y
 
+@eel.expose
+def check_queue(mode):
+    global test_mode
+    test_mode = mode
+    print("mode:")
+    print(test_mode)
+
+    f = open(queue_place_path, "r")
+    f_content = f.read()
+    print("content:" + str(f_content))
+    global current_queue_place
+    if (str(f_content).isdigit()):
+        current_queue_place = int(f_content)
+    else:
+        current_queue_place = int(f_content)
+
+    if current_queue_place > 0:
+        eel.set_queue(current_queue_place)
+        eel.open_queue_dialog()
+        
+        global queue_place_observer
+        queue_place_observer = None
+        queue_place_observer = Observer()
+        queue_place_observer.schedule(queue_place_event_handler, path, recursive=go_recursively)
+        queue_place_observer.start()
+        # queue_place_observer.join()
+        
+        print("queue_place_observer started")
+    else:
+        eel.start_test(test_mode)
+        print("no queue")
+
 #CATCH JS CALL FOR NORMAL MODE
 @eel.expose 
 def normal(lat, lon, cir, serv_ip, network_type):
     print("normal mode")
+    print(lat)
+    print(lon)
+    print(cir)
+    print(serv_ip)
+    print(network_type)
 
     ip = re.split(",", serv_ip)
-    global server_uuid
-    server_uuid = ip[1]
-    global server_ip
-    server_ip = ip[0]
+    if ip is not None:
+        global server_uuid
+        server_uuid = ip[1]
+    
+        global server_ip
+        server_ip = ip[0]
+
     global net_type
     net_type = network_type
 
@@ -271,8 +378,18 @@ def normal(lat, lon, cir, serv_ip, network_type):
 
     #####CALL NORMAL MODE HERE#####
     global dev_hash
-    results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash)
-    eel.printnormal(results[0][0])
+    print("hash: {}\n".format(dev_hash))
+    try:
+        results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
+        if results is not None and results[0][0] is not None:
+            eel.printnormal(results[0][0])
+        else:
+            eel.print_test_error("An unexpected error occurred. Please try again.")
+    except error as Exception:
+        eel.print_test_error(error)
+
+    eel.progress_now(100, "true")
+    eel.printprogress("Done")
     #CALL eel.printlocal(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR REVERSE MODE
@@ -296,8 +413,13 @@ def rev(lat, lon, cir, serv_ip, network_type):
     #####CALL REVERSE MODE HERE#####
     #results = queue_process.join_queue(REVERSE_MODE, server_ip)
     global dev_hash
-    results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash)
-    eel.printreverse(results)
+    print("hash: {}\n".format(dev_hash))
+    results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash, cir)
+    print("RESULTS DOWNLOAD: {}".format(results[0][0]))
+    eel.printreverse(results[0][0])
+    
+    eel.printprogress("Done")
+    eel.progress_now(100, "true")
     #CALL eel.printremote(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR SIMULTANEOUS MODE
@@ -385,6 +507,23 @@ def traceroute(server_ip):
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))    
         quit()
 
+@eel.expose
+def get_gps_from_android():
+    print("coordinates")
+    try:
+        coordinates = ADB.getRawGpsCoordinates()
+        print(coordinates)
+        if coordinates is None:
+            eel.set_gps_from_android(None, None)
+            return
+
+        eel.set_gps_from_android(coordinates[0], coordinates[1])
+
+    except Exception as e:
+        print(e)
+        eel.set_gps_from_android(None, None)
+
+
 #CATCH CANCEL CALL FROM JS. NOT FULLY WORKING
 global flag
 flag = 0
@@ -394,4 +533,23 @@ def cancel_test():
     global flag
     flag = 1
 
-eel.start('hello.html', size=(1100,600), port=8080)             # Start (this blocks and enters loop)
+@eel.expose
+def leave_queue():
+    print('left queue')
+    global current_queue_place
+    current_queue_place = -1
+
+    queue_place_observer.stop()
+    # queue_place_observer.join()
+
+def close():
+    # print("babay")
+    pass
+
+@eel.expose
+def set_current_username():
+    global current_username
+    global region
+    eel.set_current_username(current_username, region)
+
+eel.start('login.html', size=(1024,768), port=8080, close_callback=close)             # Start (this blocks and enters loop)

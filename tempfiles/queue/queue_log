@@ -1,5 +1,35 @@
 Traceback (most recent call last):
-  File "queue_process.py", line 96, in join_queue
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 114, in join_queue
     results = loop.run_until_complete(all_groups)
   File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
     self.run_forever()
@@ -11,198 +41,57 @@ Traceback (most recent call last):
     fd_event_list = self._epoll.poll(timeout, max_ev)
 KeyboardInterrupt
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 672, in readexactly
-    raise IncompleteReadError(incomplete, n)
-asyncio.streams.IncompleteReadError: 0 bytes read on a total of 2 expected bytes
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
-    await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
-    await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
-    raise self.connection_closed_exc()
-websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 674, in readexactly
-    yield from self._wait_for_data('readexactly')
-  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
-    yield from self._waiter
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
 concurrent.futures._base.CancelledError
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
     await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
     await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 674, in readexactly
-    yield from self._wait_for_data('readexactly')
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 101, in read_http_response
+    status_code, reason, headers = await read_response(self.reader)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 139, in read_response
+    status_line = await read_line(stream)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/http.py", line 213, in read_line
+    line = await stream.readline()
+  File "/usr/lib/python3.6/asyncio/streams.py", line 488, in readline
+    line = yield from self.readuntil(sep)
+  File "/usr/lib/python3.6/asyncio/streams.py", line 581, in readuntil
+    yield from self._wait_for_data('readuntil')
   File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
     yield from self._waiter
-concurrent.futures._base.CancelledError
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 714, in _read_ready
+    data = self._sock.recv(self.max_size)
+ConnectionResetError: [Errno 104] Connection reset by peer
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
-    await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
-    await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
-    raise self.connection_closed_exc()
-websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 674, in readexactly
-    yield from self._wait_for_data('readexactly')
-  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
-    yield from self._waiter
-concurrent.futures._base.CancelledError
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
-    await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
-    await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
-    raise self.connection_closed_exc()
-websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 674, in readexactly
-    yield from self._wait_for_data('readexactly')
-  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
-    yield from self._waiter
-concurrent.futures._base.CancelledError
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
-    await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
-    await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
-    raise self.connection_closed_exc()
-websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 674, in readexactly
-    yield from self._wait_for_data('readexactly')
-  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
-    yield from self._waiter
-concurrent.futures._base.CancelledError
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
-    await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
-    await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
-    raise self.connection_closed_exc()
-websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
-Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1018, in read_frame
-    extensions=self.extensions,
-  File "/usr/local/lib/python3.6/dist-packages/websockets/framing.py", line 121, in read
-    data = await reader(2)
-  File "/usr/lib/python3.6/asyncio/streams.py", line 674, in readexactly
-    yield from self._wait_for_data('readexactly')
-  File "/usr/lib/python3.6/asyncio/streams.py", line 464, in _wait_for_data
-    yield from self._waiter
-concurrent.futures._base.CancelledError
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "queue_process.py", line 37, in queue_client
-    await socket.send("done")
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 530, in send
-    await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 771, in ensure_open
-    raise self.connection_closed_exc()
-websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
-Traceback (most recent call last):
-  File "queue_process.py", line 21, in queue_client
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
     async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 519, in __aenter__
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
     return await self
-  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 537, in __await_impl__
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 547, in __await_impl__
+    extra_headers=protocol.extra_headers,
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 290, in handshake
+    status_code, response_headers = await self.read_http_response()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 103, in read_http_response
+    raise InvalidMessage("did not receive a valid HTTP response") from exc
+websockets.exceptions.InvalidMessage: did not receive a valid HTTP response
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
     transport, protocol = await self._create_connection()
   File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
     raise exceptions[0]
@@ -212,9 +101,466 @@ Traceback (most recent call last):
     return (yield from fut)
   File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
     raise OSError(err, 'Connect call failed %s' % (address,))
-ConnectionRefusedError: [Errno 111] Connect call failed ('202.92.132.191', 10015)
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
 Traceback (most recent call last):
-  File "/home/netmesh/shitty_netmesh/netmesh-rfc6349-client/queue_process.py", line 96, in join_queue
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 567, in send
+    await self.write_frame(True, opcode, data)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1083, in write_frame
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 51, in queue_client
+    results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 362, in wait_for
+    raise futures.TimeoutError()
+concurrent.futures._base.TimeoutError
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 51, in queue_client
+    results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 362, in wait_for
+    raise futures.TimeoutError()
+concurrent.futures._base.TimeoutError
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('35.185.183.104', 10015)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 114, in join_queue
     results = loop.run_until_complete(all_groups)
   File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
     self.run_forever()
@@ -226,64 +572,672 @@ Traceback (most recent call last):
     fd_event_list = self._epoll.poll(timeout, max_ev)
 KeyboardInterrupt
 Traceback (most recent call last):
-  File "/home/netmesh/shitty_netmesh/netmesh-rfc6349-client/queue_process.py", line 96, in join_queue
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 114, in join_queue
     results = loop.run_until_complete(all_groups)
   File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
     self.run_forever()
   File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
     self._run_once()
-  File "/usr/lib/python3.6/asyncio/base_events.py", line 1451, in _run_once
-    handle._run()
-  File "/usr/lib/python3.6/asyncio/events.py", line 145, in _run
-    self._callback(*self._args)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 795, in transfer_data
-    message = await self.read_message()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 863, in read_message
-    frame = await self.read_data_frame(max_size=self.max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 938, in read_data_frame
-    frame = await self.read_frame(max_size)
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1020, in read_frame
-    logger.debug("%s < %r", self.side, frame)
-  File "/usr/lib/python3.6/logging/__init__.py", line 1296, in debug
-    self._log(DEBUG, msg, args, **kwargs)
-  File "/usr/lib/python3.6/logging/__init__.py", line 1444, in _log
-    self.handle(record)
-  File "/usr/lib/python3.6/logging/__init__.py", line 1454, in handle
-    self.callHandlers(record)
-  File "/usr/lib/python3.6/logging/__init__.py", line 1516, in callHandlers
-    hdlr.handle(record)
-  File "/usr/lib/python3.6/logging/__init__.py", line 865, in handle
-    self.emit(record)
-  File "/usr/lib/python3.6/logging/__init__.py", line 996, in emit
-    stream.write(msg)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
 KeyboardInterrupt
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 806, in transfer_data
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
     await asyncio.shield(self._put_message_waiter)
 concurrent.futures._base.CancelledError
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "queue_process.py", line 27, in queue_client
-    current_turn = await socket.recv()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 484, in recv
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
     await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
 Traceback (most recent call last):
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 806, in transfer_data
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
     await asyncio.shield(self._put_message_waiter)
 concurrent.futures._base.CancelledError
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
-  File "queue_process.py", line 27, in queue_client
-    current_turn = await socket.recv()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 484, in recv
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
     await self.ensure_open()
-  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 780, in ensure_open
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('202.90.158.168', 10015)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('35.185.183.104', 10015)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 24, in queue_client
+    async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 517, in __aenter__
+    return await self
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 535, in __await_impl__
+    transport, protocol = await self._create_connection()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 794, in create_connection
+    raise exceptions[0]
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 781, in create_connection
+    yield from self.sock_connect(sock, address)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 439, in sock_connect
+    return (yield from fut)
+  File "/usr/lib/python3.6/asyncio/selector_events.py", line 469, in _sock_connect_cb
+    raise OSError(err, 'Connect call failed %s' % (address,))
+ConnectionRefusedError: [Errno 111] Connect call failed ('35.185.183.104', 10015)
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 114, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 55, in queue_client
+    print(print_this)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/client.py", line 525, in __aexit__
+    await self.ws_client.close()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 679, in close
+    loop=self.loop if sys.version_info[:2] < (3, 8) else None,
+  File "/usr/lib/python3.6/asyncio/tasks.py", line 358, in wait_for
+    return fut.result()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1101, in write_close_frame
+    await self.write_frame(True, OP_CLOSE, data, _expected_state=State.CLOSING)
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 1083, in write_frame
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 53, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 118, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 56, in queue_client
+    await socket.send("done")
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 555, in send
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 803, in ensure_open
     raise self.connection_closed_exc()
 websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
