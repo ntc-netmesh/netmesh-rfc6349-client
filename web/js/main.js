@@ -150,27 +150,27 @@ function add_servers(servers) {
     
     var serverSelect = $('#server');
 
-    serverSelect.append(`
-        <option value="" selected="selected" hidden="hidden"> 
-            Select test server...
-        </option>
-    `); 
+    // serverSelect.append(`
+    //     <option value="" selected="selected" hidden="hidden"> 
+    //         Select test server...
+    //     </option>
+    // `); 
 
-    serverSelect.append(`
-        <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
-            ${ 'Google Cloud Server (THIS IS A TEST)' }
-        </option>`
-    );
-    serverSelect.append(`
-        <option value="${ '35.198.221.235,uuid.35.198.221.235' }"> 
-            ${ 'Region 1 Server (THIS IS A TEST)' }
-        </option>`
-    );
-    serverSelect.append(`
-        <option value="${ '202.90.158.168,uuid.202.90.158.168' }"> 
-            ${ 'Local test server (THIS IS A TEST)' }
-        </option>`
-    );
+    // serverSelect.append(`
+    //     <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
+    //         ${ 'Google Cloud Server (THIS IS A TEST)' }
+    //     </option>`
+    // );
+    // serverSelect.append(`
+    //     <option value="${ '35.198.221.235,uuid.35.198.221.235' }"> 
+    //         ${ 'Region 1 Server (THIS IS A TEST)' }
+    //     </option>`
+    // );
+    // serverSelect.append(`
+    //     <option value="${ '202.90.158.168,uuid.202.90.158.168' }"> 
+    //         ${ 'Local test server (THIS IS A TEST)' }
+    //     </option>`
+    // );
 
     for (var server of servers) {
         serverSelect.append(`
