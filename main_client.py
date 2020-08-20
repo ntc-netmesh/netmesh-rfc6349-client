@@ -30,6 +30,7 @@ from watchdog.events import PatternMatchingEventHandler
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
 eel.init('web', allowed_extensions=['.js', '.html'])
 
+queue_place_event_handler = None
 queue_place_path = './tempfiles/queue/queue_place'
 
 if __name__ == "__main__":
