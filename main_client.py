@@ -30,18 +30,17 @@ from watchdog.events import PatternMatchingEventHandler
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
 eel.init('web', allowed_extensions=['.js', '.html'])
 
-queue_place_event_handler = None
 queue_place_path = './tempfiles/queue/queue_place'
 
-if __name__ == "__main__":
-    patterns = "*"
-    ignore_patterns = ""
-    ignore_directories = False
-    case_sensitive = True
-    queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+# Declaration of watchdog event handler
+patterns = "*"
+ignore_patterns = ""
+ignore_directories = False
+case_sensitive = True
+queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
-    path = "./tempfiles/queue"
-    go_recursively = False
+path = "./tempfiles/queue"
+go_recursively = False
 
 def on_created(event):
     print("hey, {} has been created!".format(event.src_path))
