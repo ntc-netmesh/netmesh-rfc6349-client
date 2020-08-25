@@ -115,6 +115,8 @@ global server_uuid
 server_uuid = ""
 global current_username
 current_username = ""
+global is_results_already_sent
+is_results_already_sent = False
 
 #Verify test agent user login
 @eel.expose
@@ -223,7 +225,7 @@ def parse_results(results,direction):
         retrans_bytes = results["RETX_BYTES"]
 
     if "TCP_EFF" in results.keys():
-        eff = results["TCP_EFF"] * 100
+        eff = round(results["TCP_EFF"] * 100, 2)
 
     if "AVE_RTT" in results.keys():
         ave_rtt = round(results["AVE_RTT"], 2)
@@ -259,7 +261,12 @@ def parse_results(results,direction):
     return data
 
 #Send test results to results server
+@eel.expose
 def send_res(results, mode, lat, lon):
+    global is_results_already_sent
+    if is_results_already_sent:
+        return
+
     eel.show_sending_results_toast()
     if mode == 'normal':
         res = {
@@ -318,12 +325,13 @@ def send_res(results, mode, lat, lon):
     except Exception as e:
         print("ERROR: %s." % e)
 
-    if r is not None and r.status_code == 200:
+    if r is not None and hasattr(r, "status_code") and r.status_code == 200:
         eel.set_show_sending_results_toast_status(True)
+        is_results_already_sent = True
         print("Submit success!")
     else:
         eel.set_show_sending_results_toast_status(False)
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        print("Exiting due to status code %s: %s" % (r.status_code if hasattr(r, "status_code") else "(no status code)", r.text if hasattr(r, "text") else "(no text)"))
 
 
 ws_url = ""
@@ -387,6 +395,9 @@ def normal(lat, lon, cir, serv_ip, network_type):
     print(serv_ip)
     print(network_type)
 
+    global is_results_already_sent
+    is_results_already_sent = False
+
     ip = re.split(",", serv_ip)
     if ip is not None:
         global server_uuid
@@ -428,6 +439,9 @@ def normal(lat, lon, cir, serv_ip, network_type):
 @eel.expose 
 def rev(lat, lon, cir, serv_ip, network_type):
     print("reverse mode")
+
+    global is_results_already_sent
+    is_results_already_sent = False
 
     ip = re.split(",", serv_ip)
     global server_uuid

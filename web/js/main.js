@@ -33,6 +33,8 @@ eel.expose(start_test)
 function start_test(mode) {
     disableMainForm(true);
 
+    isSendingResultsFailed = false;
+
     if (chartPromises && chartPromises.length > 0) {
         ApexCharts.exec('windowsScanLocalToRemoteChart', 'destroy', []);
         ApexCharts.exec('throughputEfficiencyLocalToRemoteChart', 'destroy', []);
@@ -211,23 +213,37 @@ function getMainFormData() {
 
 eel.expose(show_sending_results_toast)
 function show_sending_results_toast() {
+    $('#toast-success-send-results').toast('dispose');
+    $('#toast-success-send-results').hide();
+    
+    $('#toast-failed-send-results').toast('dispose');
+    $('#toast-failed-send-results').hide();
+    
+    $('#toast-send-results').show();
     $('#toast-send-results').toast('show');
 }
 
 eel.expose(set_show_sending_results_toast_status)
 function set_show_sending_results_toast_status(isSuccessful) {
-    $('#sending-results').hide();
+    $('#toast-send-results').toast('dispose');
+    $('#toast-send-results').hide();
 
     if (isSuccessful) {
-        $('#btn-close-send-results-toast').show();
-        $('#sending-successful').show();
-        $('#sending-failed').hide();
+
+        $('#toast-success-send-results').show();
+        $('#toast-success-send-results').toast('show');
     }
     else {
-        $('#sending-successful').hide();
-        $('#sending-failed').show();
+        $('#toast-failed-send-results').show();
+        $('#toast-failed-send-results').toast('show');
+        
+        if (!isSendingResultsFailed) {
+            isSendingResultsFailed = true;
+            generateTestResultsPdfReport();
+        }
     }
 }
+
 // function normal_mode() {
 //     var lat = document.getElementById("lat").value;
 //     var lon = document.getElementById("lon").value;

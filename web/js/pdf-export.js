@@ -291,14 +291,14 @@ function windowScanTestPage(content, isNormal = true) {
 
             pageBodyWidths.push('*');
         }
-        steps.push('THPT');
-        windowSizes.push(`${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`);
-        averageTcpThroughputs.push(`${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`);
-        idealTcpThroughputs.push(`${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] ).format('0.000')} Mbps`);
-        tcpEfficiencies.push(`${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`);
-        bufferDelays.push(`${ testResults["BUF_DELAY"] == null ? "---" : numeral(testResults["BUF_DELAY"]).format('0.[000]%')}`);
-        pageBodyWidths.push('*');
     }
+    steps.push('THPT');
+    windowSizes.push(`${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`);
+    averageTcpThroughputs.push(`${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`);
+    idealTcpThroughputs.push(`${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] ).format('0.000')} Mbps`);
+    tcpEfficiencies.push(`${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`);
+    bufferDelays.push(`${ testResults["BUF_DELAY"] == null ? "---" : numeral(testResults["BUF_DELAY"]).format('0.[000]%')}`);
+    pageBodyWidths.push('*');
 
     var width = pageBodyWidths.length - 1;
 
@@ -438,8 +438,8 @@ async function generateTestResultsPdfReport() {
     var timestampKebab = moment(testStartedAt).format('YYYY-MM-DD-HHmmss');
     var generatedTimestamp = moment().format('YYYY-MM-DD HH:mm:ss');
 
-    var fileName = `netmesh-test-results-${testMeasurementMode.toLowerCase()}-${"agent1"}-${timestampCondensed}`;
-    var documentName = `NTC NetMesh Test Measurement Results (${testModeProperName}) - ${"agent1"} - ${timestampKebab}`;
+    var fileName = `netmesh-test-results-${testMeasurementMode.toLowerCase()}-${ username }-${ timestampCondensed }`;
+    var documentName = `NTC NetMesh Test Measurement Results (${ testModeProperName }) - ${ username } - ${ timestampKebab }`;
 
     var dd = {};
 

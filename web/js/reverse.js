@@ -6,6 +6,9 @@ function printreverse(result){
     testFinishedAt = moment().format('YYYY-MM-DD HH:mm:ss');
     clearInterval(measurementTimer);
 
+    test_latitude = $('#lat').val();
+    test_longitude = $('#lon').val();
+
     // alert('printreverse');
     //document.getElementById("remote_result").value += result + "\n";
     remoteResultId = '#tblRemoteResult tbody';

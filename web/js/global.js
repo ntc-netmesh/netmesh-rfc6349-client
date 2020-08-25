@@ -5,6 +5,10 @@ var loggedUsername = "";
 
 var normalTestResults = {};
 var reverseTestResults = {};
+var isSendingResultsFailed = false;
+
+var test_latitude = 0;
+var test_longitude = 0;
 
 const emptyImageURI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+P+/HgAFhAJ/wlseKgAAAABJRU5ErkJggg==';
 var chartPromises = [];
