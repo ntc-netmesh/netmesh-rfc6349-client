@@ -30,7 +30,7 @@ from watchdog.events import PatternMatchingEventHandler
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
 eel.init('web', allowed_extensions=['.js', '.html'])
 
-queue_placement_filename = './tempfiles/queue/queue_place'
+queue_place_path = './tempfiles/queue/queue_place'
 
 # Declaration of watchdog event handler
 patterns = "*"
@@ -131,17 +131,11 @@ def login(username, password):
         "hash": dev_hash
     }
 
-    r = None
     try:
         # Request for Agent token
         r = requests.post(url=url+"/api/gettoken", data=hash_data, auth = (username, password))
     except Exception as e:
         print(e)
-
-    if r is None:
-        eel.alert_debug("Network error. Please try again")
-        eel.enable_login_form()
-        return
 
     if r.status_code == 401:
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))
@@ -164,16 +158,7 @@ def login(username, password):
     print("user-token")
     print(token)
 
-    # ALWAYS RESET QUEUE after login
-    reset_queue()
-
     eel.hide_login()
-
-# reset queue
-def reset_queue(): 
-    with open(queue_placement_filename, "w+") as f:
-        f.write("CURRENT_TURN")
-        f.close()
 
 #Verify if laptop is registered.
 def read_hash():
@@ -375,20 +360,16 @@ def check_queue(mode):
     print("mode:")
     print(test_mode)
 
-    f = open(queue_placement_filename, "r")
+    f = open(queue_place_path, "r")
     f_content = f.read()
     print("content:" + str(f_content))
     global current_queue_place
     if (str(f_content).isdigit()):
         current_queue_place = int(f_content)
     else:
-        try:
-            current_queue_place = int(f_content)
-        except:
-            current_queue_place = f_content
+        current_queue_place = int(f_content)
 
-
-    if current_queue_place != "CURRENT_TURN":
+    if current_queue_place > 0:
         eel.set_queue(current_queue_place)
         eel.open_queue_dialog()
         
@@ -443,15 +424,12 @@ def normal(lat, lon, cir, serv_ip, network_type):
             eel.printnormal(results[0][0])
             successful_result = True
         else:
-            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or press 'F5' to refresh this app.")
+            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or refresh this app by pressing F5.")
     except error as Exception:
         eel.print_test_error(error)
 
     eel.progress_now(100, "true")
-    if successful_result:
-        eel.printprogress("Done")
-    else:
-        eel.printprogress("Failed")
+    eel.printprogress("Done")
 
     if successful_result:
         send_res(results[0], 'normal', lat, lon)
@@ -490,7 +468,7 @@ def rev(lat, lon, cir, serv_ip, network_type):
             eel.printreverse(results[0][0])
             successful_result = True
         else:
-            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or press 'F5' to refresh this app.")
+            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or refresh this app by pressing F5.")
     except error as Exception:
         eel.print_test_error(error)
 
@@ -612,7 +590,6 @@ def cancel_test():
     global flag
     flag = 1
 
-
 @eel.expose
 def leave_queue():
     print('left queue')
@@ -621,9 +598,6 @@ def leave_queue():
 
     queue_place_observer.stop()
     # queue_place_observer.join()
-
-    reset_queue()
-
 
 def close():
     # print("babay")
