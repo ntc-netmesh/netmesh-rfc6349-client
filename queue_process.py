@@ -28,12 +28,12 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             current_turn = await socket.recv()
             f = None
 
-            if current_turn != "CURRENT_TURN" and current_turn != "0":
+            if current_turn != "CURRENT_TURN":
                 eel.set_queue(current_queue_place)
                 eel.open_queue_dialog()
 
             # while not "CURRENT_TURN" == current_turn: 
-            while current_turn != "CURRENT_TURN" and current_turn != "0":
+            while current_turn != "CURRENT_TURN":
                 print("BEFORE current_turn")
                 print(current_turn)
                 current_turn = await socket.recv()
