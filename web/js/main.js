@@ -152,11 +152,11 @@ function add_servers(servers) {
     
     var serverSelect = $('#server');
 
-    // serverSelect.append(`
-    //     <option value="" selected="selected" hidden="hidden"> 
-    //         Select test server...
-    //     </option>
-    // `); 
+    serverSelect.append(`
+        <option value="" selected="selected" hidden="hidden"> 
+            Select test server...
+        </option>
+    `); 
 
     // serverSelect.append(`
     //     <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
@@ -185,6 +185,8 @@ function add_servers(servers) {
 
 eel.expose(print_test_error);
 function print_test_error(message) {
+    clearInterval(measurementTimer);
+
     $('#error-info').show();
     $('#results-info').hide();
 

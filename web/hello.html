@@ -147,7 +147,7 @@
                   <label for="cir"><b>Internet Subscription Rate</b></label>
                   <input type="text" id="cir" class="form-control email" placeholder="Enter Mbps" required>
                   <div class="invalid-feedback">
-                    Please provide the internet subscription rate of the customer
+                    Enter the internet subscription rate of the customer
                   </div>
                 </div>
                 
@@ -173,6 +173,9 @@
                   <label for="server"><b>Test Server</b></label>
                   <select class="form-control" id="server" required>
                   </select>
+                  <div class="invalid-feedback">
+                    Select a test server
+                  </div>
                 </div>
               </div>
       
@@ -181,14 +184,14 @@
                   <label for="lat"><b>GPS Latitude</b></label>
                   <input type="text" id="lat" class="form-control" placeholder="Latitude" required>
                   <div class="invalid-feedback">
-                    Please provide the latitude coordinate of your current location
+                    Enter the latitude coordinate of your current location
                   </div>
                 </div>
                 <div class="form-group col">
                   <label for="lon"><b>GPS Longitude</b></label>
                   <input type="text" id="lon" class="form-control" placeholder="Longitude" required>
                   <div class="invalid-feedback">
-                    Please provide the longitude coordinate of your current location
+                    Enter the longitude coordinate of your current location
                   </div>
                 </div>
                 <div class="form-group col-auto">
@@ -419,7 +422,7 @@
         <div class="mb-5" id="error-info" >
           <div class="card shadow">
             <div class="card-header">
-              <span class="h4 text-danger"><b>Test Unsuccessful</b></span>
+              <span class="h4 text-danger"><b>Test Failed</b></span>
             </div>
             <div class="card-body">
               <div id="test-error-message">
