@@ -494,8 +494,11 @@ def rev(lat, lon, cir, serv_ip, network_type):
     except error as Exception:
         eel.print_test_error(error)
 
-    eel.printprogress("Done")
     eel.progress_now(100, "true")
+    if successful_result:
+        eel.printprogress("Done")
+    else:
+        eel.printprogress("Failed")
 
     if successful_result:
         send_res(results[0], 'reverse', lat, lon)

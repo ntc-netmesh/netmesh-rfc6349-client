@@ -7,6 +7,7 @@ from constants import *
 import traceback
 import normal_client, reverse_client
 import sys
+import eel
 
 '''
     registers this client on to the server queue
@@ -22,6 +23,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
     
     try:
         print("server IP: " + server_ip)
+        print("QUEUE PORT " + str(QUEUE_PORT))
         async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
             print("Sending client hash...")
             await socket.send(str(client_hash))
@@ -33,7 +35,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             print("CURRENT TURN: ",current_turn)
 
             if current_turn != "CURRENT_TURN":
-                eel.set_queue(current_queue_place)
+                eel.set_queue(current_turn)
                 eel.open_queue_dialog()
 
             # while not "CURRENT_TURN" == current_turn: 

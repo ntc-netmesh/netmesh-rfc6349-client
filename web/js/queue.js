@@ -12,6 +12,7 @@ function set_queue(queue_place) {
     // $("#queue-progress").css("width", queue_progress + "%").attr("aria-valuenow", queue_progress);
 
     $("#selected-server").text($('#server option:selected').text());
+    $("#test-mode").text(testMeasurementMode);
 
     if (queue_place > 1) {
         $('#queue_remaining').text(queue_place);
