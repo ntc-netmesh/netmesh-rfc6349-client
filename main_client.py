@@ -373,7 +373,7 @@ def check_queue(mode):
             current_queue_place = f_content
 
 
-    if current_queue_place != "current_turn":
+    if current_queue_place != "CURRENT_TURN":
         eel.set_queue(current_queue_place)
         eel.open_queue_dialog()
         
