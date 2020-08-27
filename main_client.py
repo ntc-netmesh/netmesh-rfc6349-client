@@ -367,9 +367,13 @@ def check_queue(mode):
     if (str(f_content).isdigit()):
         current_queue_place = int(f_content)
     else:
-        current_queue_place = int(f_content)
+        try:
+            current_queue_place = int(f_content)
+        except:
+            current_queue_place = f_content
 
-    if current_queue_place > 0:
+
+    if current_queue_place != "current_turn":
         eel.set_queue(current_queue_place)
         eel.open_queue_dialog()
         
