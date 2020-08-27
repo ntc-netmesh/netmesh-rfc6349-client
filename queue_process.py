@@ -26,6 +26,8 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             await socket.send(str(client_hash))
             #go signal
             current_turn = await socket.recv()
+            print("The current turn is...")
+            print(current_turn)
             f = None
 
             if current_turn != "CURRENT_TURN":
