@@ -10,6 +10,8 @@ fi
 
 sudo apt --yes --force-yes install python3-pip
 sudo apt --yes --force-yes install iperf3
+python3 -m pip install --upgrade pip
+python3 -m pip install watchdog
 pip3 install websockets
 pip3 install eel
 pip3 install --pre scapy[basic]
