@@ -33,6 +33,8 @@ eel.expose(start_test)
 function start_test(mode) {
     disableMainForm(true);
 
+    isSendingResultsFailed = false;
+
     if (chartPromises && chartPromises.length > 0) {
         ApexCharts.exec('windowsScanLocalToRemoteChart', 'destroy', []);
         ApexCharts.exec('throughputEfficiencyLocalToRemoteChart', 'destroy', []);
@@ -41,6 +43,7 @@ function start_test(mode) {
     }
     chartPromises = [];
 
+    $('#toast-send-results').toast('hide');
     $('#progress-finished-title').hide();
     $('#progress-status-info').show();
     $('#results-info').hide();
@@ -65,9 +68,14 @@ function start_test(mode) {
             $('#remoteResultCard').hide();
 
             $('#mode-icon').removeClass("fa-download");
-            $('#mode-icon').removeClass("text-info");
             $('#mode-icon').addClass("fa-upload");
-            $('#mode-icon').addClass("text-primary");
+
+            $('#mode-icon, #progress').removeClass("text-info");
+            $('#mode-icon, #progress').addClass("text-primary");
+            $('#process-progress-bar').removeClass('border-info');
+            $('#process-progress-bar').addClass('border-primary');
+            $('#dynamic').removeClass('bg-info');
+            $('#dynamic').addClass('bg-primary');
 
             eel.normal(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
 
@@ -81,9 +89,14 @@ function start_test(mode) {
             $('#remoteResultCard').show();
 
             $('#mode-icon').removeClass("fa-upload");
-            $('#mode-icon').removeClass("text-primary");
             $('#mode-icon').addClass("fa-download");
-            $('#mode-icon').addClass("text-info");
+
+            $('#mode-icon, #progress').removeClass("text-primary");
+            $('#mode-icon, #progress').addClass("text-info");
+            $('#process-progress-bar').removeClass('border-primary');
+            $('#process-progress-bar').addClass('border-info');
+            $('#dynamic').removeClass('bg-primary');
+            $('#dynamic').addClass('bg-info');
             
             eel.rev(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
             break;
@@ -109,10 +122,6 @@ function progress_now(value, completed = false){
     if (value >= 0) {
         $('#dynamic').addClass('progress-bar-striped progress-bar-animated');
 
-        $('#process-progress-bar').removeClass('border-secondary');
-        $('#process-progress-bar').addClass('border-primary');
-        $('#dynamic').removeClass('bg-secondary');
-        $('#dynamic').addClass('bg-primary');
         $('#progress-status-title').show();
         $('#progress-finished-title').hide();
     }
@@ -143,31 +152,31 @@ function add_servers(servers) {
     
     var serverSelect = $('#server');
 
-    serverSelect.append(`
-        <option value="" selected="selected" hidden="hidden"> 
-            Select test server...
-        </option>
-    `); 
+    // serverSelect.append(`
+    //     <option value="" selected="selected" hidden="hidden"> 
+    //         Select test server...
+    //     </option>
+    // `); 
 
-    serverSelect.append(`
-        <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
-            ${ 'Google Cloud Server (THIS IS A TEST)' }
-        </option>`
-    );
-    serverSelect.append(`
-        <option value="${ '35.198.221.235,uuid.35.198.221.235' }"> 
-            ${ 'Region 1 Server (THIS IS A TEST)' }
-        </option>`
-    );
-    serverSelect.append(`
-        <option value="${ '202.90.158.168,uuid.202.90.158.168' }"> 
-            ${ 'Local test server (THIS IS A TEST)' }
-        </option>`
-    );
+    // serverSelect.append(`
+    //     <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
+    //         ${ 'Google Cloud Server (THIS IS A TEST)' }
+    //     </option>`
+    // );
+    // serverSelect.append(`
+    //     <option value="${ '35.198.221.235,uuid.35.198.221.235' }"> 
+    //         ${ 'Region 1 Server (THIS IS A TEST)' }
+    //     </option>`
+    // );
+    // serverSelect.append(`
+    //     <option value="${ '202.90.158.168,uuid.202.90.158.168' }"> 
+    //         ${ 'Local test server (THIS IS A TEST)' }
+    //     </option>`
+    // );
 
     for (var server of servers) {
         serverSelect.append(`
-            <option value="${server.ip_address}"> 
+            <option value="${server.ip_address},${server.uuid}"> 
                 ${server.nickname} 
             </option>
         `); 
@@ -201,6 +210,40 @@ function getMainFormData() {
         return null;
     }
 }
+
+eel.expose(show_sending_results_toast)
+function show_sending_results_toast() {
+    $('#toast-success-send-results').toast('dispose');
+    $('#toast-success-send-results').hide();
+    
+    $('#toast-failed-send-results').toast('dispose');
+    $('#toast-failed-send-results').hide();
+    
+    $('#toast-send-results').show();
+    $('#toast-send-results').toast('show');
+}
+
+eel.expose(set_show_sending_results_toast_status)
+function set_show_sending_results_toast_status(isSuccessful) {
+    $('#toast-send-results').toast('dispose');
+    $('#toast-send-results').hide();
+
+    if (isSuccessful) {
+
+        $('#toast-success-send-results').show();
+        $('#toast-success-send-results').toast('show');
+    }
+    else {
+        $('#toast-failed-send-results').show();
+        $('#toast-failed-send-results').toast('show');
+        
+        if (!isSendingResultsFailed) {
+            isSendingResultsFailed = true;
+            generateTestResultsPdfReport();
+        }
+    }
+}
+
 // function normal_mode() {
 //     var lat = document.getElementById("lat").value;
 //     var lon = document.getElementById("lon").value;

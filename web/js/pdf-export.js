@@ -139,6 +139,7 @@ function throughputTestPage(content, fromLocal = true) {
                 table: {
                     body: [
                         [{ text: 'Test Conditions', colSpan: 2, fillColor: '#cccccc' }, {}],
+                        ['CIR', `${ cir } Mbps`],
                         ['Mode', { text: testMeasurementMode }],
                         ['Direction', `${ testMeasurementMode == "Upload" ? 'Local to Remote' :  'Remote to Local' }`],
                         ['Window Size', `${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"]).format('0') } Bytes`],
@@ -146,7 +147,6 @@ function throughputTestPage(content, fromLocal = true) {
                         ['BDP', `${ testResults["BDP"] == null ? "---" : numeral(testResults["BDP"]).format('0') } bits`],
                         ['Path MTU', `${ testResults["MTU"] == null ? "---" : testResults["MTU"] } Bytes`],
                         ['Baseline RTT', `${ testResults["RTT"] == null ? "---" : numeral(testResults["RTT"]).format('0.000') } ms`],
-                        ['CIR', `${ cir } Mbps`],
 
                         [{ text: 'TCP Throughput', colSpan: 2, fillColor: '#cccccc' }, {}],
                         ['Average', `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`],
@@ -165,7 +165,8 @@ function throughputTestPage(content, fromLocal = true) {
                         ['TCP Efficiency %', `${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.[000]%') }`],
 
                         [{ text: 'RTT', colSpan: 2, fillColor: '#cccccc' }, {}],
-                        ['Minimum', `${ testResults["RTT"] == null ? "---" : numeral(testResults["RTT"]).format('0.000') } ms`],
+                        ['Baseline RTT', `${ testResults["RTT"] == null ? "---" : numeral(testResults["RTT"]).format('0.000') } ms`],
+                        ['Average RTT', `${ testResults["AVE_RTT"] == null ? "---" : numeral(testResults["AVE_RTT"]).format('0.000') } ms`],
                         // ['Average', `${ reverseTestResults["TRANSFER_IDEAL"] }`, `${ reverseTestResults["TRANSFER_IDEAL"] }`],
                         // ['Maximum', `${ reverseTestResults["TRANSFER_AVG"] / reverseTestResults["TRANSFER_IDEAL"] }`, `${ reverseTestResults["TRANSFER_AVG"] / reverseTestResults["TRANSFER_IDEAL"] }`],
                         ['Buffer Delay', `${ testResults["BUF_DELAY"] == null ? "---" : numeral(testResults["BUF_DELAY"]).format('0.[000]%') }`],
@@ -290,18 +291,19 @@ function windowScanTestPage(content, isNormal = true) {
 
             pageBodyWidths.push('*');
         }
-        steps.push('THPT');
-        windowSizes.push(`${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`);
-        averageTcpThroughputs.push(`${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`);
-        idealTcpThroughputs.push(`${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] ).format('0.000')} Mbps`);
-        tcpEfficiencies.push(`${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`);
-        bufferDelays.push(`${ testResults["BUF_DELAY"] == null ? "---" : numeral(testResults["BUF_DELAY"]).format('0.000%')}`);
-        pageBodyWidths.push('*');
     }
+    steps.push('THPT');
+    windowSizes.push(`${ testResults["ACTUAL_RWND"] == null ? "---" : numeral(testResults["ACTUAL_RWND"] ).format('0')} Bytes`);
+    averageTcpThroughputs.push(`${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"] ).format('0.000')} Mbps`);
+    idealTcpThroughputs.push(`${ testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] == null ? "---" : numeral(testResults[isNormal ? "ACTUAL_IDEAL" : "THPT_IDEAL"] ).format('0.000')} Mbps`);
+    tcpEfficiencies.push(`${ testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.000%')}`);
+    bufferDelays.push(`${ testResults["BUF_DELAY"] == null ? "---" : numeral(testResults["BUF_DELAY"]).format('0.[000]%')}`);
+    pageBodyWidths.push('*');
 
     var width = pageBodyWidths.length - 1;
 
     pageBody.push([{ text: 'Test Conditions', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
+    pageBody.push(['CIR', { text: `${ cir } Mbps`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
     pageBody.push(['Mode', { text: testMeasurementMode, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
 
     pageBody.push(steps);
@@ -313,7 +315,6 @@ function windowScanTestPage(content, isNormal = true) {
     pageBody.push(['BDP', { text: `${ testResults["BDP"] == null ? "---" : testResults["BDP"] } bits`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
     pageBody.push(['Path MTU', { text: `${ testResults["MTU"] == null ? "---" : testResults["MTU"] } Bytes`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
     pageBody.push(['Baseline RTT', { text: `${ testResults["RTT"] == null ? "---" : testResults["RTT"] } ms`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
-    pageBody.push(['CIR', { text: `${ cir } Mbps`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
 
     pageBody.push([{ text: 'TCP Thoughput', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
     pageBody.push(['Average', { text: `${ testResults["THPT_AVG"] == null ? "---" : numeral(testResults["THPT_AVG"]).format('0.000') } Mbps`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
@@ -322,7 +323,9 @@ function windowScanTestPage(content, isNormal = true) {
     pageBody.push([{ text: 'Data Transfer', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
     pageBody.push(['TCP Efficiency', { text: testResults["TCP_EFF"] == null ? "---" : numeral(testResults["TCP_EFF"]).format('0.[000]%'), colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
     pageBody.push([{ text: 'RTT', colSpan: width + 1, fillColor: '#cccccc' }].concat(new Array(width).fill([{}]).flat()));
-    pageBody.push(['Average', { text: testResults["RTT"] == null ? "---" :  `${ numeral(testResults["RTT"]).format('0.000') } ms`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['Baseline RTT', { text: testResults["RTT"] == null ? "---" :  `${ numeral(testResults["RTT"]).format('0.000') } ms`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['Average RTT ', { text: testResults["AVE_RTT"] == null ? "---" :  `${ numeral(testResults["AVE_RTT"]).format('0.000') } ms`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
+    pageBody.push(['Buffer Delay', { text: testResults["BUF_DELAY"] == null ? "---" :  `${ numeral(testResults["BUF_DELAY"]).format('0.000%') }`, colSpan: width }].concat(new Array(width - 1).fill([{}]).flat()));
 
     content.push({
         table: {
@@ -435,8 +438,8 @@ async function generateTestResultsPdfReport() {
     var timestampKebab = moment(testStartedAt).format('YYYY-MM-DD-HHmmss');
     var generatedTimestamp = moment().format('YYYY-MM-DD HH:mm:ss');
 
-    var fileName = `netmesh-test-results-${testMeasurementMode.toLowerCase()}-${"agent1"}-${timestampCondensed}`;
-    var documentName = `NTC NetMesh Test Measurement Results (${testModeProperName}) - ${"agent1"} - ${timestampKebab}`;
+    var fileName = `netmesh-test-results-${testMeasurementMode.toLowerCase()}-${ username }-${ timestampCondensed }`;
+    var documentName = `NTC NetMesh Test Measurement Results (${ testModeProperName }) - ${ username } - ${ timestampKebab }`;
 
     var dd = {};
 
@@ -468,7 +471,7 @@ async function generateTestResultsPdfReport() {
     dd.info = {
         fileName: fileName,
         title: documentName,
-        author: username, // TODO: MAKE THIS AN ACTUAL USER
+        author: username,
         subject: 'Test measurement results',
     };
     dd.content = [];

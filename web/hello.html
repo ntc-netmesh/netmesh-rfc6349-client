@@ -45,6 +45,20 @@
         $('#results-info').hide();
         $('#error-info').hide();
 
+        $('#toast-success-send-results').hide();
+        $('#toast-failed-send-results').hide();
+
+        $('#btn-send-results-try-again').on('click', function () {
+          if (testMeasurementMode == "Upload") {
+            eel.send_res([normalTestResults], "normal", test_latitude, test_longitude);
+          }
+          else if (testMeasurementMode == "Download") {
+            eel.send_res([reverseTestResults], "reverse", test_latitude, test_longitude);
+          }
+        });
+
+        // $('#toast-send-results').toast('show');
+
         // var dummyResults = {};
         // dummyResults["WND_SIZES"] = [20, 40, 60, 80];
         // dummyResults["WND_AVG_TCP"] = [15, 30, 45, 60];
@@ -140,7 +154,7 @@
                 <div class="form-group col">
                   <label for="net_type"><b>Network Connection Type</b></label>
                   <select class="form-control" id="net_type">
-                    <option value="" selected="selected" hidden="hidden">Ethernet</option>
+                    <option value="Ethernet" selected="selected" hidden="hidden">Ethernet</option>
                     <!-- <option value="Broadband">Broadband</option>
                     <option value="Cable Internet">Cable Internet</option>
                     <option value="Dial-ip">Dial-up</option>
@@ -157,7 +171,7 @@
               <div class="row">
                 <div class="form-group col">
                   <label for="server"><b>Test Server</b></label>
-                  <select class="form-control" id="server">
+                  <select class="form-control" id="server" required>
                   </select>
                 </div>
               </div>
@@ -222,7 +236,7 @@
           </div>
           <div class="card-body">
             <div class="px-2">
-              <span id="progress" class="text-primary">Initializing...</span>
+              <span id="progress">Initializing...</span>
               <span id="measurement-timer" class="text-secondary float-right">0:00</span>
               <!-- <ul class="list-unstyled">
                 <li>
@@ -233,17 +247,17 @@
                 </li>
               </ul> -->
             </div>
-            <div id="process-progress-bar" class="progress prog_bar border border-secondary">
-              <div id="dynamic" class="progress-bar bg-secondary progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div id="process-progress-bar" class="progress prog_bar border">
+              <div id="dynamic" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                 
               </div>
             </div>
           </div>
-          <div class="card-footer">
+          <!-- <div class="card-footer">
             <div class="float-right">
-              <button class="btn btn-outline-danger" role="button" id="cancel" onclick="cancel()" style="display:none;">Abort measuring</button>
+              <button class="btn btn-outline-danger" role="button" id="cancel" onclick="cancel()">Abort measurement</button>
             </div>
-          </div>
+          </div> -->
         </div>
 
         <div class="mb-5" id="results-info">
@@ -492,5 +506,49 @@
         </div>
       </div>
     </main>
+    <div aria-live="polite" aria-atomic="true" style="position: relative;">
+      <div style="position: fixed; bottom: 2rem; left: 2rem;">
+        <div id="toast-success-send-results" class="toast" aria-live="assertive" aria-atomic="true" data-autohide="true" data-delay="10000" style="min-width: 360px;">
+          <div class="toast-header">
+            <img src="images/user_login.png" class="rounded mr-2" alt="..." style="width: 24px; height: 24px;">
+            <strong class="mr-auto">RFC-6349 App</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="toast-body">
+            <i class="fa fa-check-circle text-success"></i>
+            <span class="h6 text-success">
+              Successfully sent test results to the results server!
+            </span>
+          </div>
+        </div>
+        <div id="toast-failed-send-results" class="toast" aria-live="assertive" aria-atomic="true" data-autohide="false" style="min-width: 360px;">
+          <div class="toast-header">
+            <img src="images/user_login.png" class="rounded mr-2" alt="..." style="width: 24px; height: 24px;">
+            <strong class="mr-auto">RFC-6349 App</strong>
+          </div>
+          <div class="toast-body">
+            <span class="h6 text-danger">
+              Failed to send the results. <button id="btn-send-results-try-again" type="button" class="btn btn-sm btn-link">Try again</button>
+            </span>
+          </div>
+        </div>
+        <div id="toast-send-results" class="toast" aria-live="assertive" aria-atomic="true" data-autohide="false" style="min-width: 360px;">
+          <div class="toast-header">
+            <img src="images/user_login.png" class="rounded mr-2" alt="..." style="width: 24px; height: 24px;">
+            <strong class="mr-auto">RFC-6349 App</strong>
+          </div>
+          <div class="toast-body">
+            <div class="spinner-grow spinner-grow-sm" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <span class="h6">
+              Sending test results to web server...
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

@@ -32,15 +32,15 @@ eel.init('web', allowed_extensions=['.js', '.html'])
 
 queue_place_path = './tempfiles/queue/queue_place'
 
-if __name__ == "__main__":
-    patterns = "*"
-    ignore_patterns = ""
-    ignore_directories = False
-    case_sensitive = True
-    queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
+# Declaration of watchdog event handler
+patterns = "*"
+ignore_patterns = ""
+ignore_directories = False
+case_sensitive = True
+queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
-    path = "./tempfiles/queue"
-    go_recursively = False
+path = "./tempfiles/queue"
+go_recursively = False
 
 def on_created(event):
     print("hey, {} has been created!".format(event.src_path))
@@ -115,10 +115,14 @@ global server_uuid
 server_uuid = ""
 global current_username
 current_username = ""
+global is_results_already_sent
+is_results_already_sent = False
 
 #Verify test agent user login
 @eel.expose
 def login(username, password):
+    eel.disable_login_form()
+
     global current_username
     current_username = username
     global dev_hash
@@ -135,19 +139,23 @@ def login(username, password):
 
     if r.status_code == 401:
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.enable_login_form()
         eel.alert_debug("Invalid username/password!")
         return
     elif r.status_code == 400:
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.enable_login_form()
         eel.alert_debug("Device not registered. Please register the device using new_dev_reg")
         return
     elif r.status_code != 200:
         print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.enable_login_form()
         eel.alert_debug("Error occured")
         return
 
     global token
     token = ast.literal_eval(r.text)['Token']
+    print("user-token")
     print(token)
 
     eel.hide_login()
@@ -167,58 +175,66 @@ def read_hash():
     else:
         print("error")
         eel.alert_debug("Device not registered! Please register the device before using.")
+
     return False
 
 #CHANGE THIS
+@eel.expose
 def parse_results(results,direction):
-    for i in results:
-        if "MTU" in i:
-            mtu = results["MTU"]
+    mtu = base_rtt = bb = bdp = rwnd = tcp_tput = ideal_tput = att = itt = ttr = trans_bytes = retrans_bytes = eff = ave_rtt = buff_delay = None
 
-        elif "Baseline" in i:
-            base_rtt = results["RTT"]
+    # print(results)
+    # print('results.keys()')
+    # print(results.keys())
+    # for i in results:
 
-        elif "Bottleneck" in i:
-            bb = results["BB"]
+    if "MTU" in results.keys():
+        mtu = results["MTU"]
 
-        elif "BDP" in i:
-            bdp = results["BDP"]
+    if "RTT" in results.keys():
+        base_rtt = results["RTT"]
 
-        elif "RWND" in i:
-            rwnd = results["RWND"]
+    if "BB" in results.keys():
+        bb = results["BB"]
 
-        elif "Average TCP Throughput" in i:
-            tcp_tput = results["THPT_AVG"]
+    if "BDP" in results.keys():
+        bdp = results["BDP"]
 
-        elif "Ideal TCP Throughput" in i:
-            ideal_tput = results["THPT_IDEAL"]
+    if "ACTUAL_RWND" in results.keys():
+        rwnd = results["ACTUAL_RWND"]
 
-        elif "Actual Transfer" in i:
-            att = results["TRANSFER_AVG"]
+    if "THPT_AVG" in results.keys():
+        tcp_tput = results["THPT_AVG"]
 
-        elif "Ideal Transfer" in i:
-            itt = results["TRANSFER_IDEAL"]
+    if "THPT_IDEAL" in results.keys():
+        ideal_tput = results["THPT_IDEAL"] / 1.2
 
-        elif "TTR" in i:
-            ttr = results["TCP_TTR"]
+    if "TRANSFER_AVG" in results.keys():
+        att = results["TRANSFER_AVG"]
 
-        elif "Transmitted Bytes" in i:
-            trans_bytes = results["TRANS_BYTES"]
+    if "TRANSFER_IDEAL" in results.keys():
+        itt = results["TRANSFER_IDEAL"]
 
-        elif "Retransmitted" in i:
-            retrans_bytes = results["RETX_BYTES"]
+    if "TCP_TTR" in results.keys():
+        ttr = results["TCP_TTR"]
 
-        elif "Efficiency" in i:
-            eff = results["TCP_EFF"]
+    if "TRANS_BYTES" in results.keys():
+        trans_bytes = results["TRANS_BYTES"]
 
-        elif "ave RTT" in i:
-            ave_rtt = results["AVE_RTT"]
+    if "RETX_BYTES" in results.keys():
+        retrans_bytes = results["RETX_BYTES"]
 
-        elif "buffer delay" in i:
-            buff_delay = results["BUF_DELAY"]
+    if "TCP_EFF" in results.keys():
+        eff = round(results["TCP_EFF"] * 100, 2)
+
+    if "AVE_RTT" in results.keys():
+        ave_rtt = round(results["AVE_RTT"], 2)
+
+    if "BUF_DELAY" in results.keys():
+        buff_delay = results["BUF_DELAY"] * 100
 
     data = {
-        "ts": datetime.now(),   # TODO: add timezone information, or assume that clients will always send in UTC
+        "ts": pytz.utc.localize(datetime.utcnow()),   # TODO: add timezone information, or assume that clients will always send in UTC
         "server": server_uuid,
         "direction": direction,
         "path_mtu": mtu,
@@ -238,17 +254,27 @@ def parse_results(results,direction):
         "buffer_delay": buff_delay,
     }
 
+
+    # print('data-results')
+    # print(data)
+
     return data
 
 #Send test results to results server
+@eel.expose
 def send_res(results, mode, lat, lon):
+    global is_results_already_sent
+    if is_results_already_sent:
+        return
+
+    eel.show_sending_results_toast()
     if mode == 'normal':
         res = {
-            "set1": parse_results(results,'forward'),
+            "set1": parse_results(results[0],'forward'),
         }
     elif mode =='reverse':
         res = {
-            "set1": parse_results(results,'reverse'),
+            "set1": parse_results(results[0],'reverse'),
         }
     elif mode == 'bidirectional':
         res = {
@@ -284,19 +310,28 @@ def send_res(results, mode, lat, lon):
         "Content-Length": str(status_len)
     }
 
+    print("headers")
+    print(headers)
+
+    print("data_json")
+    print(data_json)
+
+    r = None
     try:
         r = requests.post(url+"/api/submit",
                           headers=headers,
                           data=data_json,
                           timeout=30)
-
     except Exception as e:
         print("ERROR: %s." % e)
 
-    if r.status_code == 200:
+    if r is not None and hasattr(r, "status_code") and r.status_code == 200:
+        eel.set_show_sending_results_toast_status(True)
+        is_results_already_sent = True
         print("Submit success!")
     else:
-        print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+        eel.set_show_sending_results_toast_status(False)
+        print("Exiting due to status code %s: %s" % (r.status_code if hasattr(r, "status_code") else "(no status code)", r.text if hasattr(r, "text") else "(no text)"))
 
 
 ws_url = ""
@@ -360,6 +395,9 @@ def normal(lat, lon, cir, serv_ip, network_type):
     print(serv_ip)
     print(network_type)
 
+    global is_results_already_sent
+    is_results_already_sent = False
+
     ip = re.split(",", serv_ip)
     if ip is not None:
         global server_uuid
@@ -379,23 +417,31 @@ def normal(lat, lon, cir, serv_ip, network_type):
     #####CALL NORMAL MODE HERE#####
     global dev_hash
     print("hash: {}\n".format(dev_hash))
+    successful_result = False
     try:
         results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
         if results is not None and results[0][0] is not None:
             eel.printnormal(results[0][0])
+            successful_result = True
         else:
-            eel.print_test_error("An unexpected error occurred. Please try again.")
+            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or refresh this app by pressing F5.")
     except error as Exception:
         eel.print_test_error(error)
 
     eel.progress_now(100, "true")
     eel.printprogress("Done")
+
+    if successful_result:
+        send_res(results[0], 'normal', lat, lon)
     #CALL eel.printlocal(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR REVERSE MODE
 @eel.expose 
 def rev(lat, lon, cir, serv_ip, network_type):
     print("reverse mode")
+
+    global is_results_already_sent
+    is_results_already_sent = False
 
     ip = re.split(",", serv_ip)
     global server_uuid
@@ -414,12 +460,23 @@ def rev(lat, lon, cir, serv_ip, network_type):
     #results = queue_process.join_queue(REVERSE_MODE, server_ip)
     global dev_hash
     print("hash: {}\n".format(dev_hash))
-    results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash, cir)
-    print("RESULTS DOWNLOAD: {}".format(results[0][0]))
-    eel.printreverse(results[0][0])
-    
+    successful_result = False
+    try:
+        results = queue_process.join_queue(REVERSE_MODE, server_ip, dev_hash, cir)
+        if results is not None and results[0][0] is not None:
+            print("RESULTS DOWNLOAD: {}".format(results[0][0]))
+            eel.printreverse(results[0][0])
+            successful_result = True
+        else:
+            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or refresh this app by pressing F5.")
+    except error as Exception:
+        eel.print_test_error(error)
+
     eel.printprogress("Done")
     eel.progress_now(100, "true")
+
+    if successful_result:
+        send_res(results[0], 'reverse', lat, lon)
     #CALL eel.printremote(text) TO ADD RESULT TO TEXTAREA IN APP#
 
 #CATCH JS CALL FOR SIMULTANEOUS MODE

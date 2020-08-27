@@ -42,12 +42,17 @@
                                         <label class="form-control-static" for="psw"><b>Password</b></label>
                                         <input class="form-control" type="password" placeholder="Enter Password" name="psw" id="psw">
                                     </div>
-                                    <div>
+                                    <!-- <div>
                                         <label class="float-left">
                                             <input type="checkbox" checked="checked" name="remember"> Remember me
                                         </label>
-                                    </div>
-                                    <button type="submit" class="btn btn-success float-right">Log in</button>
+                                    </div> -->
+                                    <button id="btnLogIn" type="submit" class="btn btn-success float-right">
+                                        <div id="spinnerLogIn" class="spinner-border spinner-border-sm" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                        <span id="spanLogIn">Log in</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>

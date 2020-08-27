@@ -6,6 +6,9 @@ function printnormal(result){
     testFinishedAt = moment().format('YYYY-MM-DD HH:mm:ss');
     clearInterval(measurementTimer);
 
+    test_latitude = $('#lat').val();
+    test_longitude = $('#lon').val();
+
     // alert('printnormal');
     //document.getElementById("local_result").value += result + "\n";
     localResultId = '#tblLocalResult tbody';
