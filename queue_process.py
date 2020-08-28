@@ -30,7 +30,6 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             f = None
             print(" #########################################################################################################")
             print("CURRENT TURN: ",current_turn)
-            print("CURRENT TURN TYPE: ",int(current_turn))
             try:
                 current_turn = int(current_turn)
                 print("set_queue : ",current_queue_place)
