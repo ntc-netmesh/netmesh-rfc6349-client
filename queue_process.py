@@ -33,7 +33,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             try:
                 current_turn = int(current_turn)
                 print("set_queue : ",current_queue_place)
-                eel.set_queue(current_queue_place)
+                eel.set_queue(current_turn)
                 eel.open_queue_dialog()
             except:
                 pass
