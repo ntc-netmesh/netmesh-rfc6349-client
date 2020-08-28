@@ -1701,3 +1701,39 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/selectors.py", line 445, in select
     fd_event_list = self._epoll.poll(timeout, max_ev)
 KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 124, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 124, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 124, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt

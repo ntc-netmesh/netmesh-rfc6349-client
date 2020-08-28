@@ -32,14 +32,14 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             print("CURRENT TURN: ",current_turn)
             if current_turn.isdigit():
                 current_turn = int(current_turn)
-            if current_turn > 0:
-                print("set_queue : ",current_queue_place)
-                eel.set_queue(current_queue_place)
-                eel.open_queue_dialog()
+                if current_turn > 0:
+                    print("set_queue : ",current_queue_place)
+                    eel.set_queue(current_queue_place)
+                    eel.open_queue_dialog()
 
             # while not "CURRENT_TURN" == current_turn: 
             print("ENTERING WHILE LOOP")
-            while current_turn != "CURRENT_TURN":
+            while current_turn != "CURRENT_TURN" and current_turn != 0:
                 print("BEFORE current_turn")
                 print(current_turn)
                 current_turn = await socket.recv()
