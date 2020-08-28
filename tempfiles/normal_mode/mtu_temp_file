@@ -9,8 +9,8 @@ Testing MTU size 1344 bytes...valid
 Testing MTU size 1472 bytes...valid
 Testing MTU size 1536 bytes...packet too big for local interface
 Testing MTU size 1504 bytes...packet too big for local interface
-Testing MTU size 1488 bytes...valid
-Testing MTU size 1496 bytes...Testing MTU size 1496 bytes...valid
+Testing MTU size 1488 bytes...Testing MTU size 1488 bytes...valid
+Testing MTU size 1496 bytes...valid
 Testing MTU size 1500 bytes...valid
 Testing MTU size 1502 bytes...packet too big for local interface
 Testing MTU size 1501 bytes...packet too big for local interface

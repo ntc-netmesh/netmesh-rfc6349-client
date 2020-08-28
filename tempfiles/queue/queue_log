@@ -2052,3 +2052,105 @@ Traceback (most recent call last):
   File "/usr/lib/python3.6/selectors.py", line 445, in select
     fd_event_list = self._epoll.poll(timeout, max_ev)
 KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 29, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 509, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 125, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 29, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 509, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 125, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 125, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 46, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 509, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 125, in join_queue
+    results = loop.run_until_complete(all_groups)
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 471, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 438, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.6/asyncio/base_events.py", line 1415, in _run_once
+    event_list = self._selector.select(timeout)
+  File "/usr/lib/python3.6/selectors.py", line 445, in select
+    fd_event_list = self._epoll.poll(timeout, max_ev)
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 838, in transfer_data
+    await asyncio.shield(self._put_message_waiter)
+concurrent.futures._base.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 46, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 509, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedError: code = 1006 (connection closed abnormally [internal]), no reason
+Traceback (most recent call last):
+  File "/home/jay/Desktop/netmesh/netmesh-rfc6349-client/queue_process.py", line 29, in queue_client
+    current_turn = await socket.recv()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 509, in recv
+    await self.ensure_open()
+  File "/usr/local/lib/python3.6/dist-packages/websockets/protocol.py", line 812, in ensure_open
+    raise self.connection_closed_exc()
+websockets.exceptions.ConnectionClosedOK: code = 1000 (OK), no reason
