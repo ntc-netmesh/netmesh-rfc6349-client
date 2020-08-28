@@ -30,11 +30,14 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             f = None
             print(" #########################################################################################################")
             print("CURRENT TURN: ",current_turn)
-            if current_turn.isdigit():
+            print("CURRENT TURN TYPE: ",int(current_turn))
+            try:
                 current_turn = int(current_turn)
                 print("set_queue : ",current_queue_place)
                 eel.set_queue(current_queue_place)
                 eel.open_queue_dialog()
+            except:
+                pass
 
             # while not "CURRENT_TURN" == current_turn: 
             print("ENTERING WHILE LOOP")
