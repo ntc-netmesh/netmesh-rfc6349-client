@@ -6,6 +6,7 @@ import sys
 from constants import *
 import traceback
 import normal_client, reverse_client
+import eel
 
 '''
     registers this client on to the server queue
@@ -27,13 +28,18 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             #go signal
             current_turn = await socket.recv()
             f = None
-
-            if current_turn != "CURRENT_TURN" and current_turn != "0":
+            print(" #########################################################################################################")
+            print("CURRENT TURN: ",current_turn)
+            if current_turn.isdigit():
+                current_turn = int(current_turn)
+            if current_turn > 0:
+                print("set_queue : ",current_queue_place)
                 eel.set_queue(current_queue_place)
                 eel.open_queue_dialog()
 
             # while not "CURRENT_TURN" == current_turn: 
-            while current_turn != "CURRENT_TURN" and current_turn != "0":
+            print("ENTERING WHILE LOOP")
+            while current_turn != "CURRENT_TURN":
                 print("BEFORE current_turn")
                 print(current_turn)
                 current_turn = await socket.recv()

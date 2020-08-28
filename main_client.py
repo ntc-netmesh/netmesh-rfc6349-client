@@ -31,7 +31,8 @@ from watchdog.events import PatternMatchingEventHandler
 eel.init('web', allowed_extensions=['.js', '.html'])
 
 queue_place_path = './tempfiles/queue/queue_place'
-
+with open(queue_place_path,"w") as qp:
+    qp.write("CURRENT_TURN")
 # Declaration of watchdog event handler
 patterns = "*"
 ignore_patterns = ""
@@ -46,7 +47,7 @@ def on_created(event):
     print("hey, {} has been created!".format(event.src_path))
 
 def on_deleted(event):
-    print(f"what the f**k! Someone deleted {event.src_path}!")
+    print(f"OOPS! Someone deleted {event.src_path}!")
 
 def on_modified(event):
     print(f"hey buddy, {event.src_path} has been modified")
@@ -54,14 +55,13 @@ def on_modified(event):
     if (event.src_path.split('/')[-1].startswith('.goutputstream')):
         return
 
-    print("aa")
     f = open(event.src_path + "/queue_place", "r")
     f_content = f.read()
     print("content:" + str(f_content))
     global current_queue_place
-    current_queue_place = int(f_content)
+    current_queue_place = f_content
 
-    if current_queue_place > 0:
+    if current_queue_place != "CURRENT_TURN":
         eel.set_queue(current_queue_place)
         print("set queue place to " + str(current_queue_place))
     else:
@@ -167,6 +167,8 @@ def read_hash():
         global dev_hash
         dev_hash = file.readline()[:-1]
         print(dev_hash)
+
+        eel.printprogress("DEV HASH".format(dev_hash))
         global region
         region = file.readline()[:-1]
         print(region)
@@ -364,12 +366,9 @@ def check_queue(mode):
     f_content = f.read()
     print("content:" + str(f_content))
     global current_queue_place
-    if (str(f_content).isdigit()):
-        current_queue_place = int(f_content)
-    else:
-        current_queue_place = int(f_content)
-
-    if current_queue_place > 0:
+    current_queue_place = f_content
+    print("CURRENT QUEUE PLACE IS : ",f_content)
+    if current_queue_place !=  "CURRENT_TURN":
         eel.set_queue(current_queue_place)
         eel.open_queue_dialog()
         
@@ -417,9 +416,14 @@ def normal(lat, lon, cir, serv_ip, network_type):
     #####CALL NORMAL MODE HERE#####
     global dev_hash
     print("hash: {}\n".format(dev_hash))
+    f = open("hash.txt",'r')
+    hash = f.readline()
+    eel.printprogress("DEV HASH {}".format(dev_hash))
     successful_result = False
     try:
+        eel.printprogress("PERFORMING NORMAL MODE")
         results = queue_process.join_queue(NORMAL_MODE, server_ip, dev_hash, cir)
+        eel.printprogress("NORMAL MODE DONE")
         if results is not None and results[0][0] is not None:
             eel.printnormal(results[0][0])
             successful_result = True
