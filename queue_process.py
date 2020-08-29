@@ -3,10 +3,13 @@ import websockets
 import json
 import random
 import sys
+import threading
+import time
 from constants import *
 import traceback
 import normal_client, reverse_client
 import eel
+
 
 '''
     registers this client on to the server queue
@@ -22,48 +25,63 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
     
     try:
         print("server IP: " + server_ip)
-        async with websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT)) as socket:
-            print("Sending client hash...")
-            await socket.send(str(client_hash))
-            #go signal
-            current_turn = await socket.recv()
-            f = None
-            print(" #########################################################################################################")
-            print("CURRENT TURN: ",current_turn)
-            try:
-                current_turn = int(current_turn)
-                #print("set_queue : ",current_queue_place)
-                eel.open_queue_dialog()
-                eel.set_queue(current_turn)
-            except:
-                pass
+        socket = await websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT))
+        print("Sending client hash...")
+        await socket.send(str(client_hash))
+        #go signal
+        current_turn = await socket.recv()
+        f = None
+        print(" #########################################################################################################")
+        print("CURRENT TURN: ",current_turn)
+        try:
+            current_turn = int(current_turn)
+            #print("set_queue : ",current_queue_place)
+            eel.open_queue_dialog()
+            eel.set_queue(current_turn)
+        except:
+            pass
 
-            # while not "CURRENT_TURN" == current_turn: 
-            print("ENTERING WHILE LOOP")
-            while current_turn != "CURRENT_TURN":
+        # while not "CURRENT_TURN" == current_turn: 
+        print("ENTERING WHILE LOOP")
+        while current_turn != "CURRENT_TURN":
+            try:
                 print("BEFORE current_turn")
                 print(current_turn)
                 current_turn = await socket.recv()
                 print("AFTER current_turn")
                 print(current_turn)
-                queue_placement_filename = "tempfiles/queue/queue_place"
-                with open(queue_placement_filename, "w+") as f:
-                    f.write(current_turn)
-                    f.close()
+            except websockets.exceptions.ConnectionClosedError as e:
+                print(e)
+                print("reconnecting")
+                socket = await websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT))
+                print("SENDING CLIENT HASH")
+                await socket.send(str(client_hash))
+            #queue_placement_filename = "tempfiles/queue/queue_place"
+            #with open(queue_placement_filename, "w+") as f:
+            #    f.write(current_turn)
+            #    f.close()
 
             # send current_turn data to api endpoint
             
             #await the function mode
-            results = mode_function(server_ip, cir)
-            results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
+        eel.printprogress("Waiting for Server...")
+        eel.close_queue_dialog()
+        eel.printprogress("Getting Ready...")
+        await asyncio.sleep(5)
+        print(current_turn,"\n")
+        print("Exited loop")
+        results = mode_function(server_ip, cir)
+        results = await asyncio.wait_for(results, timeout=DEFAULT_TIMEOUT_VAL)
 
-            print("results")
-            print(results)
-            
-            await socket.send("done")
-            print_this = await socket.recv()
-            print(print_this)
+        print("results")
+        print(results)
+        
+        await socket.send("done")
+        print_this = await socket.recv()
+        print(print_this)
+        await socket.close()
     except:
+        traceback.print_exc()
         try:
             filename = "tempfiles/queue/queue_log"
             logf = open(filename,"a+")
@@ -123,9 +141,12 @@ def join_queue(mode, server_ip, client_hash, cir):
         group = asyncio.gather(queue_client(mode_function, server_ip, client_hash, cir))
         all_groups = asyncio.gather(group)
         results = loop.run_until_complete(all_groups)
+        print("exited Try join Queue")
         #loop.close()
         return results
     except:
+        traceback.print_exc()
+        print("entered except join Queue")
         try:
             logf = open(filename,"a+")
             traceback.print_exc(file=logf)
