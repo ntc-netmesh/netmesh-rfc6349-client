@@ -66,8 +66,6 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
             #await the function mode
         eel.printprogress("Waiting for Server...")
         eel.close_queue_dialog()
-        eel.printprogress("Getting Ready...")
-        await asyncio.sleep(5)
         print(current_turn,"\n")
         print("Exited loop")
         results = mode_function(server_ip, cir)
