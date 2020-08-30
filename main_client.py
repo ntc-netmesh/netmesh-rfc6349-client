@@ -31,8 +31,6 @@ from watchdog.events import PatternMatchingEventHandler
 eel.init('web', allowed_extensions=['.js', '.html'])
 
 queue_place_path = './tempfiles/queue/queue_place'
-with open(queue_place_path,"w") as qp:
-    qp.write("CURRENT_TURN")
 # Declaration of watchdog event handler
 patterns = "*"
 ignore_patterns = ""
@@ -355,34 +353,6 @@ def set_location(x,y):
     global lon
     lon = y
 
-@eel.expose
-def check_queue(mode):
-    global test_mode
-    test_mode = mode
-    print("mode:")
-    print(test_mode)
-
-    f = open(queue_place_path, "r")
-    f_content = f.read()
-    print("content:" + str(f_content))
-    global current_queue_place
-    current_queue_place = f_content
-    print("CURRENT QUEUE PLACE IS : ",f_content)
-    if current_queue_place !=  "CURRENT_TURN":
-        eel.set_queue(current_queue_place)
-        eel.open_queue_dialog()
-        
-        global queue_place_observer
-        queue_place_observer = None
-        queue_place_observer = Observer()
-        queue_place_observer.schedule(queue_place_event_handler, path, recursive=go_recursively)
-        queue_place_observer.start()
-        # queue_place_observer.join()
-        
-        print("queue_place_observer started")
-    else:
-        eel.start_test(test_mode)
-        print("no queue")
 
 #CATCH JS CALL FOR NORMAL MODE
 @eel.expose 
