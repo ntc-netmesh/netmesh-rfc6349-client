@@ -56,14 +56,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
                 socket = await websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT))
                 print("SENDING CLIENT HASH")
                 await socket.send(str(client_hash))
-            #queue_placement_filename = "tempfiles/queue/queue_place"
-            #with open(queue_placement_filename, "w+") as f:
-            #    f.write(current_turn)
-            #    f.close()
 
-            # send current_turn data to api endpoint
-            
-            #await the function mode
         eel.printprogress("Waiting for Server...")
         eel.close_queue_dialog()
         print(current_turn,"\n")
