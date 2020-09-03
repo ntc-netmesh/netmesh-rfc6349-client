@@ -147,7 +147,7 @@
                   <label for="cir"><b>Internet Subscription Rate</b></label>
                   <input type="text" id="cir" class="form-control email" placeholder="Enter Mbps" required>
                   <div class="invalid-feedback">
-                    Please provide the internet subscription rate of the customer
+                    Enter the internet subscription rate of the customer
                   </div>
                 </div>
                 
@@ -173,6 +173,9 @@
                   <label for="server"><b>Test Server</b></label>
                   <select class="form-control" id="server" required>
                   </select>
+                  <div class="invalid-feedback">
+                    Select the test server
+                  </div>
                 </div>
               </div>
       
@@ -181,14 +184,14 @@
                   <label for="lat"><b>GPS Latitude</b></label>
                   <input type="text" id="lat" class="form-control" placeholder="Latitude" required>
                   <div class="invalid-feedback">
-                    Please provide the latitude coordinate of your current location
+                    Enter the latitude coordinate of your current location
                   </div>
                 </div>
                 <div class="form-group col">
                   <label for="lon"><b>GPS Longitude</b></label>
                   <input type="text" id="lon" class="form-control" placeholder="Longitude" required>
                   <div class="invalid-feedback">
-                    Please provide the longitude coordinate of your current location
+                    Enter the longitude coordinate of your current location
                   </div>
                 </div>
                 <div class="form-group col-auto">
@@ -456,8 +459,13 @@
                 <div id="queue-progress" class="progress-bar bg-dark progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%;"></div>
                 <!-- <div class="progress-bar bg-light progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" style="width: 80%;"></div> -->
               </div>
-              <div class="text-center text-muted m-1">
-                <i id="selected-server"></i>
+              <div>
+                <div class="text-center text-muted m-1">
+                  <i id="selected-server"></i>
+                </div>
+                <div class="text-center text-muted m-1">
+                  <span id="test-mode"></span>
+                </div>
               </div>
             </div>
             <div class="modal-footer">

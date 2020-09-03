@@ -392,12 +392,15 @@ def normal(lat, lon, cir, serv_ip, network_type):
             eel.printnormal(results[0][0])
             successful_result = True
         else:
-            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or refresh this app by pressing F5.")
+            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or press F5 to refresh this app.")
     except error as Exception:
         eel.print_test_error(error)
 
     eel.progress_now(100, "true")
-    eel.printprogress("Done")
+    if successful_result:
+        eel.printprogress("Done")
+    else:
+        eel.printprogress("Failed")
 
     if successful_result:
         send_res(results[0], 'normal', lat, lon)
@@ -436,12 +439,15 @@ def rev(lat, lon, cir, serv_ip, network_type):
             eel.printreverse(results[0][0])
             successful_result = True
         else:
-            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or refresh this app by pressing F5.")
+            eel.print_test_error("An unexpected error occurred.\nPlease select the test mode again, or press F5 to refresh this app.")
     except error as Exception:
         eel.print_test_error(error)
 
-    eel.printprogress("Done")
     eel.progress_now(100, "true")
+    if successful_result:
+        eel.printprogress("Done")
+    else:
+        eel.printprogress("Failed")
 
     if successful_result:
         send_res(results[0], 'reverse', lat, lon)

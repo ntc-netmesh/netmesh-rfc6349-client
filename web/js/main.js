@@ -31,6 +31,12 @@ function set_gps_from_android(lat, long) {
 
 eel.expose(start_test)
 function start_test(mode) {
+    
+    var data = getMainFormData();
+    if (!data) {
+        return;
+    }
+
     disableMainForm(true);
 
     isSendingResultsFailed = false;
@@ -152,11 +158,11 @@ function add_servers(servers) {
     
     var serverSelect = $('#server');
 
-    // serverSelect.append(`
-    //     <option value="" selected="selected" hidden="hidden"> 
-    //         Select test server...
-    //     </option>
-    // `); 
+    serverSelect.append(`
+        <option value="" selected="selected" hidden="hidden"> 
+            Select test server...
+        </option>
+    `); 
 
     // serverSelect.append(`
     //     <option value="${ '35.185.183.104,uuid.35.185.183.104' }"> 
