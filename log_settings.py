@@ -8,7 +8,7 @@ import logging
 def getStreamLogger():
     formatter = logging.Formatter("%(asctime)s   :   %(levelname)s\n\n%(message)s\n\n")
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.ERROR)
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
     ch.setFormatter(formatter)

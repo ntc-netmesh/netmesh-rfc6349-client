@@ -5,3 +5,6 @@
 **/*.log
 #Temp File
 tempfiles/
+#hash
+hash.txt
+hash.txt.bak

@@ -76,12 +76,12 @@ async def normal_client(logger, SERVER_IP, cir):
         return
 
     try:
-        print("Trying to connect...")
+        eel.printprogress("Trying to connect...")
         async with websockets.connect(ws_url) as websocket:
 
             await websocket.send("normal test start")
             state = await websocket.recv()
-            print("normal test started")
+            eel.printprogress("normal test started")
 
             try:
                 # progress 1

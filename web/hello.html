@@ -174,7 +174,7 @@
                   <select class="form-control" id="server" required>
                   </select>
                   <div class="invalid-feedback">
-                    Select a test server
+                    Select the test server
                   </div>
                 </div>
               </div>
@@ -208,11 +208,11 @@
             </div>
             <div class="card-footer">
               <div class="float-right">
-                <button id="btnUploadMode" class="btn btn-primary mx-1" role="button" type="submit" onclick="check_queue('normal')">
+                <button id="btnUploadMode" class="btn btn-primary mx-1" role="button" type="submit" onclick="start_test('normal')">
                   <i class="fa fa-long-arrow-alt-up"></i>
                   Upload Mode
                 </button>
-                <button id="btnDownloadMode" class="btn btn-primary" role="button" type="submit" onclick="check_queue('reverse')">
+                <button id="btnDownloadMode" class="btn btn-primary" role="button" type="submit" onclick="start_test('reverse')">
                   <i class="fa fa-long-arrow-alt-down"></i>
                   Download Mode
                 </button>
