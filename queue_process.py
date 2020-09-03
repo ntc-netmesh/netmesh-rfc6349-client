@@ -50,7 +50,7 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
                 current_turn = await socket.recv()
                 print("AFTER current_turn")
                 print(current_turn)
-            except:
+            except websockets.exceptions.ConnectionClosedError:
                 print("reconnecting")
                 socket = await websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT))
                 print("SENDING CLIENT HASH")
