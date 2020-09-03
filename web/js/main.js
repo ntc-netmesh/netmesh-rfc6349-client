@@ -82,7 +82,7 @@ function start_test(mode) {
             $('#process-progress-bar').addClass('border-primary');
             $('#dynamic').removeClass('bg-info');
             $('#dynamic').addClass('bg-primary');
-
+            
             eel.normal(data.lat, data.lon, data.cir, data.server_ip, data.net_type);
 
             break;
