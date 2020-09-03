@@ -23,8 +23,6 @@ from constants import NORMAL_MODE, REVERSE_MODE
 
 import time
 import ADB
-from watchdog.observers import Observer
-from watchdog.events import PatternMatchingEventHandler
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
@@ -36,7 +34,6 @@ patterns = "*"
 ignore_patterns = ""
 ignore_directories = False
 case_sensitive = True
-queue_place_event_handler = PatternMatchingEventHandler(patterns, ignore_patterns, ignore_directories, case_sensitive)
 
 path = "./tempfiles/queue"
 go_recursively = False
@@ -74,9 +71,6 @@ def on_modified(event):
 def on_moved(event):
     print(f"ok ok ok, someone moved {event.src_path} to {event.dest_path}")
 
-queue_place_event_handler.on_modified = on_modified
-global queue_place_observer
-queue_place_observer = None
 
 global current_queue_place
 current_queue_place = 0

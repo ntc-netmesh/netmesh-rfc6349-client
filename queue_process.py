@@ -50,12 +50,12 @@ async def queue_client(mode_function, server_ip, client_hash, cir):
                 current_turn = await socket.recv()
                 print("AFTER current_turn")
                 print(current_turn)
-            except websockets.exceptions.ConnectionClosedError as e:
-                print(e)
+            except:
                 print("reconnecting")
                 socket = await websockets.connect("ws://"+server_ip+":"+str(QUEUE_PORT))
                 print("SENDING CLIENT HASH")
-                await socket.send(str(client_hash))
+                await socket.send("CONN")
+                #await socket.send(str(client_hash))
 
         eel.printprogress("Waiting for Server...")
         eel.close_queue_dialog()
