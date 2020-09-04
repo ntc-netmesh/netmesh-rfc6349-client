@@ -1,4 +1,5 @@
 import asyncio
+import eel
 import websockets
 import subprocess
 import re
@@ -43,6 +44,7 @@ async def scan_process(**kwargs):
             modified_kwargs = {**kwargs}
             modified_kwargs["recv_window"] = rwnd
             modified_kwargs["tempfile"] = tempfile
+            eel.printprogress("Throughput Measurement")
             thpt_results = await reverse_throughput_process.throughput_process(**modified_kwargs)
             if x < 4:
                 scan_results["WND_SIZES"].append(rwnd)
