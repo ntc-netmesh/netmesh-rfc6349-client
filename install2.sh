@@ -10,18 +10,14 @@ fi
 
 sudo apt --yes --force-yes install python3-pip
 sudo apt --yes --force-yes install iperf3
-pip3 install websockets
-pip3 install eel
-pip3 install --pre scapy[basic]
-pip3 install PyQt5
-pip3 install requests
-pip3 install wget
-apt --yes --force-yes install iperf3
+python3 -m pip install --upgrade pip
+python3 -m pip install websockets eel PyQt5 requests wget
+python3 -m  install --pre scapy[basic]
 sudo apt --yes --force-yes install traceroute
 sudo apt --yes --force-yes install net-tools
 sudo apt --yes --force-yes install tshark
 sudo apt --yes --force-yes install wireshark
-sudo apt install ethtool
+sudo apt install ethtool adb
 #echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 #sudo DEBIAN_FRONTEND=noninteractive apt-get -y install wireshark
 sudo dpkg-reconfigure wireshark-common
