@@ -1,5 +1,5 @@
 
-all: allow tempfiles icon mov
+all: install allow tempfiles icon mov
 
 allow:
 	chmod +x *.sh
