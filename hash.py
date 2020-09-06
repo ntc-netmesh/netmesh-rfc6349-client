@@ -2,6 +2,7 @@
 
 import os
 import hashlib
+import random
 import eel
 import requests
 import json
@@ -79,4 +80,9 @@ def process_submit(user, password, serial, region):
             print(e)
 
 if __name__ == "__main__":
-    eel.start('home.html', size=(1024, 600))
+    user = "sample-user-3"
+    password = user
+    serial = str(random.randint(100000000,900000000))
+    region = "ncr"
+    process_submit(user, password, serial, region)
+    #eel.start('home.html', size=(1024, 600))

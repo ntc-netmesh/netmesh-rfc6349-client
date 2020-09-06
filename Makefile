@@ -1,5 +1,5 @@
 
-all: install allow tempfiles icon mov
+all: allow install tempfiles icon mov reg
 
 allow:
 	chmod +x *.sh
@@ -9,6 +9,8 @@ icon:
 	./create_shortcut.sh
 mov:
 	cp rfc6349.desktop ~/Desktop && chmod +x ~/Desktop/rfc6349.desktop
+reg:
+	python3 hash.py
 
 install:
 	./install.sh
