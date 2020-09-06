@@ -83,6 +83,6 @@ if __name__ == "__main__":
     user = "sample-user-3"
     password = user
     serial = str(random.randint(100000000,900000000))
-    region = "ncr"
+    region = "R1"
     process_submit(user, password, serial, region)
     #eel.start('home.html', size=(1024, 600))
