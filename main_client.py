@@ -26,9 +26,9 @@ import ADB
 
 # Set web files folder and optionally specify which file types to check for eel.expose()
 #   *Default allowed_extensions are: ['.js', '.html', '.txt', '.htm', '.xhtml']
-eel.init('web', allowed_extensions=['.js', '.html'])
+web_path = os.path.abspath("web")
+eel.init(web_path, allowed_extensions=['.js', '.html'])
 
-queue_place_path = './tempfiles/queue/queue_place'
 # Declaration of watchdog event handler
 patterns = "*"
 ignore_patterns = ""
@@ -301,7 +301,6 @@ def send_res(results, mode, lat, lon):
     headers = {
         "Authorization": "Token %s" % token,
         "Content-Type": "application/json; charset=utf-8",
-        "Content-Length": str(status_len)
     }
 
     print("headers")

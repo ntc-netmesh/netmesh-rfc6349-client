@@ -135,4 +135,5 @@ def download_update():
     p.wait()
 
 if __name__ == "__main__":
-    get_latest_release()
+    import main_client
+    #get_latest_release()

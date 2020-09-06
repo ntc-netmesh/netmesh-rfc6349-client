@@ -8,3 +8,5 @@ tempfiles/
 #hash
 hash.txt
 hash.txt.bak
+#icon
+rfc6349.desktop
