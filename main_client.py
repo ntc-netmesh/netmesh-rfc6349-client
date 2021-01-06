@@ -83,13 +83,16 @@ def retrieve_servers():
     # server_list = []
     response = requests.get("https://netmesh.pregi.net/api/servers/")
     server_list = response.json()
-    # index=0
-    # for i in server_list:
-    #     print(i["nickname"])
-    #     if (i["test_method"] == "2"):
-    #         location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
-    #         eel.add_server(i["nickname"]+location,i["ip_address"] + "," +  i["uuid"])
-    eel.add_servers(server_list)
+    print(server_list)
+    servers = []
+     #index=0
+    for i in server_list:
+        print(i["nickname"])
+        if (i["test_method"] == "2" and i['nickname'] == 'RF Local test server'):
+            #location = " - " + i["city"] + ", " + i["province"] + ", "  + i["country"]
+            servers.append(i)
+    print(servers)
+    eel.add_servers(servers)
 
 ###results server credentials###
 global dev_hash
