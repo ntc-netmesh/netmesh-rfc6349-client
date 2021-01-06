@@ -8,15 +8,15 @@ else
 	sudo dpkg -i google-chrome-stable_current_amd64.deb
 fi
 
-sudo apt --yes --force-yes install python3-pip
-sudo apt --yes --force-yes install iperf3
+sudo apt --yes --assume-yes install python3-pip
+sudo apt --yes --assume-yes install iperf3
 python3 -m pip install --upgrade pip
 python3 -m pip install websockets eel PyQt5 requests wget
 python3 -m  install --pre scapy[basic]
-sudo apt --yes --force-yes install traceroute
-sudo apt --yes --force-yes install net-tools
-sudo apt --yes --force-yes install tshark
-sudo apt --yes --force-yes install wireshark
+sudo apt --yes --assume-yes install traceroute
+sudo apt --yes --assume-yes install net-tools
+sudo apt --yes --assume-yes install tshark
+sudo apt --yes --assume-yes install wireshark
 sudo apt install ethtool adb
 #echo "wireshark-common wireshark-common/install-setuid boolean true" | sudo debconf-set-selections
 #sudo DEBIAN_FRONTEND=noninteractive apt-get -y install wireshark

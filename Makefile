@@ -14,3 +14,6 @@ reg:
 
 install:
 	./install.sh
+
+update:
+	git pull origin master
