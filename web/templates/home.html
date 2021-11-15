@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Home</title>
+<style>
+  .vertical-center {
+    min-height: calc(100% - 98px);
+    position: absolute;
+    left: calc(50% + 0px);
+    bottom: calc(7%);
+    display: flex;
+    align-items: center;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+
+  <div class="col-lg-4">
+    <form
+      id="mainForm"
+      class="main-form needs-validation"
+      onsubmit="return false"
+      novalidate
+    >
+      <div class="card shadow mb-4">
+        <h5 class="card-header">Enter test details</h5>
+        <div class="card-body">
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="form-label" for="cir">Internet Subscription Rate*</label>
+              <input
+                type="text"
+                id="cir"
+                class="form-control"
+                placeholder="Enter Mbps"
+                required
+              />
+              <div class="invalid-feedback">
+                Enter the internet subscription rate of the customer
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="form-label" for="net_type">Network Connection Type*</label>
+              <select class="form-select" id="net_type">
+                <option value="Ethernet" selected="selected" hidden="hidden">
+                  Ethernet
+                </option>
+                <!-- <option value="Broadband">Broadband</option>
+                <option value="Cable Internet">Cable Internet</option>
+                <option value="Dial-ip">Dial-up</option>
+                <option value="DSL">DSL</option>
+                <option value="Ethernet Cable">Ethernet Cable</option>
+                <option value="Fiber-optic">Fiber-optic</option>
+                <option value="Fixed Wireless">Fixed Wireless</option>
+                <option value="Wi-fi">Wi-fi</option>
+                <option value="Others">Others</option> -->
+              </select>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="form-group col">
+              <label class="form-label" for="server">Test Server*</label>
+              <select class="form-select" id="server" required></select>
+              <div class="invalid-feedback">Select the test server</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group col">
+              <label class="form-label" for="lat">GPS Latitude</label>
+              <input
+                type="text"
+                id="lat"
+                class="form-control"
+                placeholder="Latitude"
+                required
+              />
+              <div class="invalid-feedback">
+                Enter the latitude coordinate of your current location
+              </div>
+            </div>
+            <div class="form-group col">
+              <label class="form-label" for="lon">GPS Longitude</label>
+              <input
+                type="text"
+                id="lon"
+                class="form-control"
+                placeholder="Longitude"
+                required
+              />
+              <div class="invalid-feedback">
+                Enter the longitude coordinate of your current location
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div id="btn-group-gps" class="mb-3">
+              <button
+                id="btnGetGps"
+                type="button"
+                class="btn btn-link p-1"
+                onclick="get_gps_from_android()"
+              >
+                <!-- <span
+                  class="spinner-grow spinner-grow-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span> -->
+                Get coordinates
+              </button>
+              <button type="button" class="btn btn-link p-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-question-circle" viewBox="0 0 16 16">
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                  <path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="form-label" for="net_type">Test Type*</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="radTestType" id="radUpload">
+                <label class="form-check-label" for="radUpload">
+                  Upload
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="radTestType" id="radDownload">
+                <label class="form-check-label" for="radDownload">
+                  Download
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="radTestType" id="radBidirectional">
+                <label class="form-check-label" for="radBidirectional">
+                  Bidirectional
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="form-label" for="cir">Firmware</label>
+              <input
+                type="text"
+                id="firmware"
+                class="form-control"
+                placeholder="Enter firmware"
+                required
+              />
+              <div class="invalid-feedback">
+                Enter the firmware
+              </div>
+            </div>
+            <div class="form-group mb-3">
+              <label class="form-label" for="cir">Modem model</label>
+              <input
+                type="text"
+                id="modem"
+                class="form-control"
+                placeholder="Enter modem model"
+                required
+              />
+              <div class="invalid-feedback">
+                Enter the modem model
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="pull-right">
+            <button
+              id="btnStartTest"
+              class="btn btn-primary"
+              role="button"
+              type="button"
+              onclick="renderChart()"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-speedometer2" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5V6a.5.5 0 0 1-1 0V4.5A.5.5 0 0 1 8 4zM3.732 5.732a.5.5 0 0 1 .707 0l.915.914a.5.5 0 1 1-.708.708l-.914-.915a.5.5 0 0 1 0-.707zM2 10a.5.5 0 0 1 .5-.5h1.586a.5.5 0 0 1 0 1H2.5A.5.5 0 0 1 2 10zm9.5 0a.5.5 0 0 1 .5-.5h1.5a.5.5 0 0 1 0 1H12a.5.5 0 0 1-.5-.5zm.754-4.246a.389.389 0 0 0-.527-.02L7.547 9.31a.91.91 0 1 0 1.302 1.258l3.434-4.297a.389.389 0 0 0-.029-.518z"/>
+                <path fill-rule="evenodd" d="M0 10a8 8 0 1 1 15.547 2.661c-.442 1.253-1.845 1.602-2.932 1.25C11.309 13.488 9.475 13 8 13c-1.474 0-3.31.488-4.615.911-1.087.352-2.49.003-2.932-1.25A7.988 7.988 0 0 1 0 10zm8-7a7 7 0 0 0-6.603 9.329c.203.575.923.876 1.68.63C4.397 12.533 6.358 12 8 12s3.604.532 4.923.96c.757.245 1.477-.056 1.68-.631A7 7 0 0 0 8 3z"/>
+              </svg>
+              Start Test
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="col-lg-8">
+    <div class="vertical-center">
+      <div class="container">
+        <img src="{{url_for('static', filename='images/ntc_logo.png')}}" title="RFC-6349 Appllication" alt="Avatar" style="width: 50%; opacity: 12%;" >
+      </div>
+    </div>
+    <div>
+      <div class="card shadow mb-4">
+        <h5 class="card-header">Testing upload speed...</h5>
+        <div class="card-body">
+          <div class="mb-4">
+            <div class="progress">
+              <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="14.29" aria-valuemin="0" aria-valuemax="100" style="width: 14.29%"></div>
+            </div>
+          </div>
+          <div class="mb-4 mx-3">
+            <table>
+              <tr>
+                <td>
+                  <i class="bi bi-check-circle-fill text-success"></i>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2">0:12</span>
+                </td>
+                <td>
+                  <span class="mx-2">Initialized</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="spinner-border spinner-border-sm text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2">0:13</span>
+                </td>
+                <td>
+                  <span class="mx-2">Performing PLPMTUD...</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <i class="bi bi-circle text-muted"></i>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2"></span>
+                </td>
+                <td>
+                  <span class="text-muted mx-2">Measure Ping</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <i class="bi bi-circle text-muted"></i>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2"></span>
+                </td>
+                <td>
+                  <span class="text-muted mx-2">Execute iPerf UDP</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <i class="bi bi-circle text-muted"></i>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2"></span>
+                </td>
+                <td>
+                  <span class="text-muted mx-2">Execute iPerf TCP</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <i class="bi bi-circle text-muted"></i>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2"></span>
+                </td>
+                <td>
+                  <span class="text-muted mx-2">Measure TCP Efficiency</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <i class="bi bi-circle text-muted"></i>
+                </td>
+                <td>
+                  <span class="text-muted text-sm mx-2"></span>
+                </td>
+                <td>
+                  <span class="text-muted mx-2">Measure Buffer Delay</span>
+                </td>
+              </tr>
+            </table>
+          </div>
+          <hr class="my-3" />
+          <div class="mb-4">
+            <h5 class="card-title mb-4">Upload test results</h5>
+            <h6 class="card-title text-bold">SUMMARY</h6>
+            <div class="mx-3 mb-4">
+              <dl class="row">
+                <dt class="col-sm-2 text-secondary">CIR</dt>
+                <dd class="col-sm-10">10 mbps</dd>
+              
+                <dt class="col-sm-2 text-secondary">Test server</dt>
+                <dd class="col-sm-10">ASTI Server</dd>
+              
+                <dt class="col-sm-2 text-secondary">Coordinates</dt>
+                <dd class="col-sm-10">14.6417, 120.4818</dd>
+              </dl>
+            </div>
+            <h6 class="card-title text-bold">THROUGHPUT TEST</h6>
+            <div class="mx-3 mb-4">
+              <h6 class="card-title text-secondary">Throughput and TCP Efficiency Chart (Upload Test)</h6>
+              <div id="chart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
