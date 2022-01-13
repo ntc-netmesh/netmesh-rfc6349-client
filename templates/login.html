@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Log in</title>
+{{ super() }}
+<style>
+	body,
+	html {
+		height: 100%;
+	}
+
+	img.background-logo {
+		width: 50%;
+		min-width: 160px;
+		max-width: 240px;
+		border-radius: 50%;
+	}
+
+	span.psw {
+		float: right;
+		padding-top: 16px;
+	}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="h-100 row align-items-center justify-content-md-center">
+	<div class="card w-50 shadow" style="max-width: 540px;">
+		<div class="card-body">
+			<div class="p-3">
+				<div class="p-2 row justify-content-md-center">
+					<img
+						src="{{url_for('static', filename='images/ntc_logo.png')}}"
+						title="RFC-6349 Application"
+						alt="RFC-6349"
+						class="background-logo"
+					/>
+				</div>
+				<div class="p-2 row justify-content-md-center">
+					<span class="h2 text-center"><b>RFC-6349 Application</b></span>
+				</div>
+			</div>
+			<form id="login-form" action="/login-submit" method="POST">
+				<div class="container p-2">
+					{% if error %}
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						{{ error }}
+					</div>
+					{% endif %}
+					<div class="row p-3">
+						<div class="col">
+							<div class="form-group">
+								<label class="form-control-static" for="uname"
+									><b>Username</b></label
+								>
+								<input
+									class="form-control has-validation mb-3"
+									type="text"
+									placeholder="Enter Username"
+									name="uname"
+									id="uname"
+									value="{{ username }}"
+								/>
+								<div id="validationServerUsernameFeedback" class="invalid-feedback">
+									Please choose a username.
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="form-control-static" for="psw"
+									><b>Password</b></label
+								>
+								<input
+									class="form-control has-validation mb-3"
+									type="password"
+									placeholder="Enter Password"
+									name="psw"
+									id="psw"
+									value="{{ password }}"
+								/>
+							</div>
+							<div class="d-flex flex-column">
+								<button	id="btnLogIn" type="submit" class="btn btn-success mb-2">
+									<div id="spinnerLogIn" class="spinner-border spinner-border-sm" role="status" hidden>
+										<span class="sr-only">Loading...</span>
+									</div>
+									<span id="spanLogIn">Log in</span>
+								</button>
+								<a href="/register-device" type="button" class="btn btn-link align-self-center mb-2">
+									Register this device
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
+{% endblock %}

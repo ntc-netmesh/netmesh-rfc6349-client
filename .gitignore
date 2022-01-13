@@ -6,4 +6,6 @@
 #Temp File
 tempfiles/
 
-env/
+venv/
+dist/
+build/

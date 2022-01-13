@@ -1,8 +1,0 @@
-@font-face {
-  font-family: Roboto, sans-serif;
-  src: ('Roboto-Regular.ttf') format('truetype');
-}
-
-body, html {
-  font-size: Roboto, sans-serif !important;
-}

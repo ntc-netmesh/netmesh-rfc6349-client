@@ -1,0 +1,9 @@
+@font-face {
+  font-family: Ubuntu, sans-serif;
+  src: ('../fonts/Ubuntu/Ubuntu-Regular.ttf') format('truetype');
+}
+
+body, html {
+  font-size: Ubuntu, sans-serif;
+  overflow: visible;
+}
