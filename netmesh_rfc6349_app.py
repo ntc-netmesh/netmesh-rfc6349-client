@@ -1,15 +1,13 @@
 import os
 import sys
-from re import split
 import subprocess
+import uuid
+
+from re import split
 
 import ast
 import json
 import hashlib
-
-from PySide2 import QtCore, QtWebEngineWidgets, QtWidgets
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QFileDialog
 
 from flask.helpers import make_response
 import requests
@@ -20,8 +18,9 @@ import wrappers
 import user_auth
 import ADB
 
-from webui import WebUI
+from pysideflask_ext import init_gui
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
+from flask_login import LoginManager, login_user, logout_user
 
 import pdfkit
 
@@ -29,7 +28,7 @@ def resource_path(relative_path):
   """ Get absolute path to resource, works for dev and for PyInstaller """
   base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
   return os.path.join(base_path, relative_path)
-
+  
 if getattr(sys, 'frozen', False):
   template_folder = resource_path('templates')
   static_folder = resource_path('static')
@@ -38,19 +37,45 @@ if getattr(sys, 'frozen', False):
               static_folder=static_folder)
 else:
   app = Flask(__name__)
-
+  
 app.config['SECRET_KEY'] = os.urandom(24)
-ui = WebUI(app, debug=False, app_name="NetMesh RFC-6349 App")
-ui.view.setMinimumSize(800, 600)
-ui.view.setContextMenuPolicy(Qt.PreventContextMenu)
+
+# ui.view.setMinimumSize(800, 600)
+# ui.view.setContextMenuPolicy(Qt.PreventContextMenu)
+# ui.page.profile().downloadRequested.connect(onDownloadRequested)
+# ui.page.profile().clearHttpCache()
+# ui.page.profile().clearAllVisitedLinks()
+# ui.page.profile().scripts().clear()
+
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 @app.route('/')
 def login_page():
+  if 'api_session_token' in session and session['api_session_token'] and 'username' in session and session['username']:
+    print('api_session_token')
+    print(session['api_session_token'])
+    print('username')
+    print(session['username'])
+    
+    return redirect(url_for('home_page'))
+  
   return render_template('login.html')
 
 @app.route('/register-device')
 def register_device_page():
-  return render_template('register_device.html')
+  serial_number = ""
+  process = subprocess.Popen("sudo dmidecode -t system | grep Serial ", shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
+  stdout,stderr = process.communicate()
+  if stdout:
+    serial_number = stdout.decode().split(':')[1].strip()
+  else:
+    return render_template('register_device.html',
+      error=stderr)
+    
+  return render_template('register_device.html', serial_number=serial_number)
 
 # ********************************
 # PAGES
@@ -59,39 +84,21 @@ def register_device_page():
 @wrappers.require_api_token
 def home_page():
   print(session['api_session_token'])
-  return render_template('home.html', username=session['username'])
-
-# @QtCore.pyqtSlot(QtWebEngineWidgets.QWebEngineDownloadItem)
-# def on_downloadRequested(self, download):
-#   path, _ = QtWidgets.QFileDialog.getSaveFileName(
-#       self, "Save File", "sample.pdf", "*.pdf"
-#   )
-#   if path:
-#     download.setPath(path)
-#     download.accept()
+  return render_template('home.html', name=session['username'])
 
 @app.route('/report', methods=['POST'])
-def report():
-  # ui.exportFile()
-  # name = QFileDialog.getSaveFileName(None, 'Save File')
-  # file = open(name,'w')
-  # text = 'username'
-  # file.write(text)
-  # file.close()
-  
+def report():  
   server_name = request.form['serverName']
   started_on = request.form['startedOn']
   finished_on = request.form['finishedOn']
   duration = request.form['duration']
   generated_on = request.form['generatedOn']
+  username = session['username']
   directions = json.loads(request.form['directions'])
+  
   results = {}
   for d in directions:
     results[d] = json.loads(session[d+'_test_results'])
-    
-  username = session['username']
-  
-  # return render_template('report.html', mode=mode, username=username, results=results)
   
   return render_template('report.html',
                          cir=session['test_details-cir'],
@@ -111,8 +118,7 @@ def report():
                         )
   
   
-
-
+  
 # ********************************
 # COMPONENTS
 # ********************************
@@ -148,9 +154,19 @@ def login():
     return redirect(url_for('home_page'))
   else:
     return render_template('login.html',
-      error = error)
+      error=error)
+
+@app.route('/logout')
+def logout():
+  session['api_session_token'] = None
+  session['username'] = None
+  return redirect(url_for('login_page'))
+
+@login_manager.user_loader
+def load_user():
+    return session['username']
     
-@app.route('/set-test-details', methods = ['POST'])
+@app.route('/set-test-details', methods=['POST'])
 def setTestDetails():
   cir = request.form.get("cir")
   net = request.form.get("net")
@@ -194,7 +210,7 @@ def setTestDetails():
 # ********************************
 # API
 # ********************************
-@app.route('/process', methods = ['GET', 'POST'])
+@app.route('/process', methods=['GET', 'POST'])
 def process():
   try:
     json_data = {
@@ -481,57 +497,86 @@ def get_gps_coordinates():
 def sample_function():
   print("yehey")
 
-# @app.route('/get-')
+@app.route('/register')
+def register_api():
+  if check_if_registered():
+    return render_template('register_device.html',
+      error="Device aleady registered")
+  else:
+    reg_file = open("~/.config/netmesh-rfc6349/hash.txt","r")
+    dev_hash = reg_file.readline()[:-1]
+    reg_file.close()
+    
+    url = "https://netmesh.pregi.net"
+    # sha_signature = encrypt_string(serial)
 
-# def register_api():
-#   if check_if_registered():
-#     # eel.alert_debug("Device already registered!")
-#     pass
+    # data = {
+    #   "hash": sha_signature
+    # }
 
-#   else:
-#     url = "https://netmesh.pregi.net"
-#     sha_signature = encrypt_string(serial)
+    try:
+      # r = requests.post(url = url+"/api/register", data = data, auth = (user, password))
+      pass
+      # if r.status_code == 200:
+      #     # eel.alert_debug("Submit success!")
+      #     # file = open("hash.txt", "w")
+      #     # file.write(sha_signature + "\n")
+      #     # file.write(region + "\n")
+      #     # file.write(serial)
+      #     # file.close()
+      # elif r.status_code == 400: #work on this
+      #     # eel.alert_debug("Hash already exists")
+      #     pass
+      # elif r.status_code == 401:
+      #     # eel.alert_debug("Invalid Username/Password")
+      #     pass
+      # elif r.status_code == 404:
+      #     # eel.alert_debug("User not authorized. Please login using super admin / staff account.")
+      #     pass
+      # else:
+      #     # print("Exiting due to status code %s: %s" % (r.status_code, r.text))
+      #     pass
+    except Exception as ee:
+      pass
+      # print(e)
 
-#     data = {
-#       "hash": sha_signature
-#     }
+def check_if_registered():
+  parent_dir = "/etc"
+  folder = "netmesh-rfc6349"
+  registration_file = "hash.txt"
+  
+  if not os.path.exists(f"{parent_dir}/{folder}"):
+    print("not existintig tey")
+    os.mkdir(f"{parent_dir}/{folder}", mode=0o777)
 
-#     try:
-#       r = requests.post(url = url+"/api/register", data = data, auth = (user, password))
+  if not os.path.exists(f"{parent_dir}/{folder}/{registration_file}"):
+    return False
+    # Creates a new file
+    # with open(f"{parent_dir}/{folder}/{registration_file}", 'w') as fp:
+    # To write data to new file uncomment
+    # this fp.write("New file created")
+  
+  return True
+
+
+
+def encrypt_string(hash_string):
+  sha_signature = \
+      hashlib.sha256(hash_string.encode()).hexdigest()
+  return sha_signature
+
+# @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
+# def onDownloadRequested(self, download):
+#   print("yeah yeah yeah")
+#   if download.state() == QtWebEngineWidgets.QWebEngineDownloadItem.DownloadRequested:
+#     path, _ = QtWidgets.QFileDialog.getSaveFileName(
+#       self, self.tr("Save as"), download.path()
+#     )
+#     if path:
+#       download.setPath(path)
+#       download.accept()
       
-#       if r.status_code == 200:
-#           # eel.alert_debug("Submit success!")
-#           file = open("hash.txt", "w")
-#           file.write(sha_signature + "\n")
-#           file.write(region + "\n")
-#           file.write(serial)
-#           file.close()
-#       elif r.status_code == 400: #work on this
-#           # eel.alert_debug("Hash already exists")
-#           pass
-#       elif r.status_code == 401:
-#           # eel.alert_debug("Invalid Username/Password")
-#           pass
-#       elif r.status_code == 404:
-#           # eel.alert_debug("User not authorized. Please login using super admin / staff account.")
-#           pass
-#       else:
-#           # print("Exiting due to status code %s: %s" % (r.status_code, r.text))
-#           pass
-#     except Exception as ee:
-#       print(e)
-
-# def check_if_registered():
-#   if os.path.exists("hbbash.txt"):
-#       return True
-#   return False
-
-# def encrypt_string(hash_string):
-#   sha_signature = \
-#       hashlib.sha256(hash_string.encode()).hexdigest()
-#   return sha_signature
-
 if __name__ == "__main__":
-  app.run(debug=True)
-  # ui.run()
+  # app.run(debug=True)
+  init_gui(application=app, width=1280, height=720, window_title="NetMesh RFC-6349 App")
   

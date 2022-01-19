@@ -20,7 +20,7 @@
     const ntcBlueColor = '#0038a7';
     const ntcRedColor = '#CE1127';
     const greenColor = '#38A700';
-4
+    
     const uploadColor = '#4824FF';
     const downloadColor = '#008ca7';
     const directionColor = direction == 'upload' ? uploadColor : downloadColor;
@@ -67,13 +67,14 @@
 
       const options = getThroughputChartOptions(direction, thpt_avg, thpt_ideal);
       const chart = new ApexCharts(document.querySelector(`#${direction}-isr-thpt-chart`), options);
-      chart.render().then(() => {
+      chart.render();
+      /*chart.render().then(() => {
         setTimeout(function () {
           chart.dataURI({scale: 0.9}).then(({imgURI}) => {
             _thoughputChartImgURI = imgURI;
           });
         }, 500);
-      });
+      });*/
     }
 
     function renderTransferComparisonChart({transfer_avg, transfer_ideal}) {
@@ -81,13 +82,14 @@
 
       const options = getTransferChartOptions(direction, transfer_avg, transfer_ideal);
       const chart = new ApexCharts(document.querySelector(`#${direction}-transfer-chart`), options);
-      chart.render().then(() => {
+      chart.render();
+      /*chart.render().then(() => {
         setTimeout(function () {
           chart.dataURI({scale: 0.9}).then(({imgURI}) => {
             _transferChartImgURI = imgURI;
           });
         }, 500);
-      });;
+      });;*/
     }
   })();
 </script>

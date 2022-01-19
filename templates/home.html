@@ -1,6 +1,7 @@
 {% extends 'nav_page.html' %}
 
 {% block head %}
+
 <title>Home</title>
 <style>
   .vertical-center {
@@ -16,11 +17,12 @@
     width: 480px;
   }
 </style>
+
 {% endblock %}
 
 {% block content %}
-<div class="row">
-  <div class="col-xl-4">
+<div class="row justify-content-center">
+  <div class="col-md-9 col-lg-4 col-xxl-4">
     <form
       id="mainForm"
       class="main-form needs-validation"
@@ -190,13 +192,7 @@
         </div>
         <div class="card-footer">
           <div class="d-flex bd-highlight">
-            <button
-              id="btnStartTest"
-              class="btn btn-primary ms-auto bd-highlight"
-              type="submit"
-              role="button"
-              onclick="startTest()"
-            >
+            <button id="btnStartTest" class="btn btn-primary ms-auto bd-highlight" type="submit" role="button" onclick="startTest()">
               Start Test
             </button>
           </div>
@@ -204,12 +200,10 @@
       </fieldset>
     </form>
   </div>
-  <div class="col-xl-8">
-    <div class="vertical-center">
-      <div class="container">
-        <img src="{{url_for('static', filename='images/ntc_logo.png')}}" title="RFC-6349 Application" alt="Avatar" style="width: 50%; opacity: 12%;" >
-      </div>
-    </div>
+  <div class="col-md-9 col-lg-8 col-xxl-7">
+    <!-- <div class="position-absolute top-50 start-50 translate-middle">
+      <img src="/static/images/ntc_logo.png" title="RFC-6349 Application" alt="Avatar" style="width: 360px; opacity: 12%;">
+    </div> -->
     <div id="test-measurement-card">
       <div id="measurement-card" class="card shadow mb-4">
         <div class="card-header d-flex align-items-center">
@@ -460,7 +454,7 @@
                 <div class="ms-auto p-0">
                   <button id="btnSaveAsPdf" class="btn btn-primary" role="button" type="button" onclick="saveAsPdf();">
                     Save as PDF
-                  </button> 
+                  </button>
                 </div>
               </div>
             </li>
@@ -550,9 +544,9 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalGpsHelp" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalGpsHelpLabel" aria-hidden="true" style="z-index: 1050;">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
+<div class="modal fade" id="modalGpsHelp" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="modalGpsHelpLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content ">
       <div class="modal-header">
         <h4 class="modal-title" id="modalQueueLabel">How to get GPS coordinates?</h4>
       </div>
@@ -571,8 +565,8 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalGpsProblem" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalGpsProblemLabel" aria-hidden="true" style="z-index: 1050;">
-  <div class="modal-dialog modal-dialog-centered" role="document">
+<div class="modal fade" id="modalGpsProblem" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalGpsProblemLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title" id="modalQueueLabel">Cannot get GPS coordinates</h4>
@@ -594,13 +588,26 @@
   </div>
 </div>
 
-<div id="results-pdf">
-
+<div class="modal fade" id="modalPdfReport" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalPdfReportLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Save as PDF</h4>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.0/jspdf.umd.min.js" integrity="sha512-5yTVoG0jFRsDhgYEoKrZCj5Bazxqa0VnETLN7k0SazQcARBsbgrSb6um+YpzWKNKV2kjb8bhna4fDfOk3YPr4Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+<div>
+  <div id="results-pdf"></div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P/uRW6/sruonlYj+Q7UHWeKfTAkBW+g83NKM+jMJFJ4iAPfSnVp7BKD4dKMHmVSvICUbE/V1sSw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script> -->
 {% endblock %}

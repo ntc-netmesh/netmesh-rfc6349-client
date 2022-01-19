@@ -1,61 +1,85 @@
-{% extends 'base.html' %}
-
-{% block head %}
+{% extends 'base.html' %} {% block head %}
 <title>Device Registration</title>
 {{ super() }}
 <style>
-  body,
+	body,
 	html {
 		height: 100%;
 	}
 </style>
-{% endblock %}
+{% endblock %} {% block body %}
+<div class="container d-flex justify-content-center h-100">
+	<div class="row align-self-center">
+		<div class="card shadow">
+			<div class="card-body">
+				<div class="row">
+					<img
+						class="col-auto"
+						src="{{url_for('static', filename='images/ntc_logo.png')}}"
+						width="72"
+						height="72"
+					/>
+					<div class="col">
+						<h3 class="m-0">RFC 6349</h3>
+						<h3>New Laptop Registration</h3>
+					</div>
+				</div>
+				<form class="mt-4" action="{{ url_for('register_api') }}">
+					<label class="form-label small" for="username">Username</label>
+					<input
+						type="text"
+						class="form-control mb-3"
+						id="username"
+						placeholder="Enter Username"
+						required=""
+					/>
 
-{% block body %}
-<div class="h-100 row align-items-center justify-content-md-center">
-  <div class="card w-50 shadow">
-    <div class="card-body">
-      <div class="row">
-        <img class="col-auto" src="{{url_for('static', filename='images/ntc_logo.png')}}" width="72" height="72">
-        <div class="col">
-          <h3 class="m-0">RFC 6349</h3>
-          <h3>New Laptop Registration</h3>
-        </div>
-      </div> 
-      <form class="mt-4" action="javascript:void(0);" onsubmit="submit_reg()">
-        <label for="username">Username</label>
-        <input type="text" class="form-control mb-3" id="username" placeholder="Enter Username" required="">
-        
-        <label for="password">Password</label>
-        <input type="password" class="form-control mb-3" id="password" placeholder="Enter Password" required="">
-        
-        <label for="region">Region</label>
-        <select class="form-select mb-3" id="region">
-            <option value = "NCR">National Capital Region</option>
-            <option value = "R01">Region I</option>
-            <option value = "CAR">Cordillera Administrative Region</option>
-            <option value = "R02">Region II</option>
-            <option value = "R03">Region III</option>
-            <option value = "R4A">Region IV-A</option>
-            <option value = "R4B">Region IV-B</option>
-            <option value = "R05">Region V</option>
-            <option value = "R06">Region VI</option>
-            <option value = "R07">Region VII</option>
-            <option value = "R08">Region VIII</option>
-            <option value = "R09">Region IX</option>
-            <option value = "R10">Region X</option>
-            <option value = "R11">Region XI</option>
-            <option value = "R12">Region XII</option>
-            <option value = "R13">Region XIII</option>
-        </select>
-        
-        <label for="serial">Laptop Serial Number</label>
-        <input type="text" class="form-control mb-3" id="serial" placeholder="Enter Laptop Serial Number" required="">
+					<label class="form-label small" for="password">Password</label>
+					<input
+						type="password"
+						class="form-control mb-3"
+						id="password"
+						placeholder="Enter Password"
+						required=""
+					/>
 
-        <button type="submit" class="btn btn-primary">Register</button>
-        <a href="/" class="btn btn-secondary">Back</a>
-      </form>
-    </div>
-  </div>
+					<label class="form-label small" for="region">Region</label>
+					<select class="form-select mb-3" id="region">
+						<option value="NCR">National Capital Region</option>
+						<option value="R01">Region I</option>
+						<option value="CAR">Cordillera Administrative Region</option>
+						<option value="R02">Region II</option>
+						<option value="R03">Region III</option>
+						<option value="R4A">Region IV-A</option>
+						<option value="R4B">Region IV-B</option>
+						<option value="R05">Region V</option>
+						<option value="R06">Region VI</option>
+						<option value="R07">Region VII</option>
+						<option value="R08">Region VIII</option>
+						<option value="R09">Region IX</option>
+						<option value="R10">Region X</option>
+						<option value="R11">Region XI</option>
+						<option value="R12">Region XII</option>
+						<option value="R13">Region XIII</option>
+						<option value="BARMM">
+							Bangsamoro Autonomous Region in Muslim Mindanao
+						</option>
+					</select>
+
+					<label class="form-label small" for="serial">Laptop Serial Number</label>
+					<input
+						type="text"
+						readonly
+						class="form-control-plaintext mb-3"
+						id="serial"
+						value="{{ serial_number }}"
+					/>
+
+					<button type="submit" class="btn btn-primary">Register</button>
+					<a href="/" class="btn btn-secondary">Back</a>
+				</form>
+			</div>
+		</div>
+	</div>
 </div>
 {% endblock %}

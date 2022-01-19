@@ -395,6 +395,7 @@ function renderTransferComparisonChart() {
 function createMeasurementProcessesTable(directions) {
   $('#measurement-processes-timeline').html('');
   $('#measurement-results').html('');
+  $(`#process-error`).html('');
 
   for (const dName of directions) {
     console.log(dName);
@@ -450,27 +451,7 @@ function createMeasurementProcessesTable(directions) {
         </div>
       </div>
     `);
-
-
-
-    // $('#results-tabContent').append(`
-    //   <div class="tab-pane fade ${dName === directions[0] ? "show active" : ""}" id="${testDirection.name}Results" role="tabpanel" aria-labelledby="${testDirection.name}Results-tab">
-    //     <ul class="list-group">
-    //       <li class="list-group-item p-3">
-    //         <h6 class="card-title text-bold">THROUGHPUT TEST</h6>
-    //         <div class="row g-1">
-    //           <div class="col">
-    //             <table id="${testDirection.name}-measurement-results-table" class="table table-sm table-bordered table-hover caption-top" aria-hidden="true">
-    //               <caption>Measurement results</caption>
-    //               <tbody>
-    //               </tbody>
-    //             </table>
-    //           </div>
-    //         </div>
-    //       </li>
-    //     </ul>
-    //   </div>
-    // `);
+    
 
     // $(`#${testDirection.name}-measurement-results-table tbody`).html('');
     // for (const [key, value] of Object.entries(resultsParameters)) {
@@ -486,6 +467,9 @@ function createMeasurementProcessesTable(directions) {
     //   `);
     // }
   }
+
+  $('#summary-test-finished-on').html('<span class="placeholder col-6"></span>');
+  $('#summary-test-duration').html('<span class="placeholder col-6"></span>');
 }
 
 function startTest() {
@@ -1037,8 +1021,8 @@ function showTestFailed(err, processIndex, modeName, directionName) {
       </div>
     </div>
     <div class="mx-2 my-1 mb-2">
-      <button class="btn btn-sm btn-primary" onclick="tryAgain(${processIndex})">Restart test</button>
-      <button class="btn btn-sm btn-secondary" onclick="resetTest(${processIndex})">Cancel test</button>
+      <button class="btn btn-sm btn-primary" onclick="tryAgain()">Restart test</button>
+      <button class="btn btn-sm btn-secondary" onclick="resetTest()">Cancel test</button>
     </div>
   `);
 
@@ -1061,13 +1045,21 @@ function closeTest() {
     return;
   }
 
+  $(`#process-error`).html('');
+
   $('#mainForm fieldset').attr('disabled', false);
+
   $("#mainForm").trigger('reset');
+  $('#mainForm').removeClass('was-validated');
 
   $('#measurement-card').hide();
-  $('#measurement-results-card').hide();
+  $('#measurement-failed-card').hide();
+
+  $('#net-warning').hide();
 
   renderMap();
+  
+  $('#cir').focus();
 }
 
 function repeatTest() {
@@ -1079,23 +1071,29 @@ function repeatTest() {
   startTest();
 }
 
-function tryAgain(processIndex) {
+function tryAgain() {
   // TODO: clear error html after clicking this
   // TODO: change try again to "RESTART test"
-  $(`#process-error-${processIndex}`).html('');
+  $(`#process-error`).html('');
+  $('#measurement-failed-card').hide();
+
   startTest();
 }
 
-function resetTest(processIndex) {
+function resetTest() {
   // TODO: clear error html after clicking this
-  $(`#process-error-${processIndex}`).html('');
+  $(`#process-error`).html('');
   $('#mainForm fieldset').attr('disabled', false);
 
   $('#measurement-card').hide();
   $('#measurement-failed-card').hide();
+
+  $('#net-warning').hide();
 }
 
 function saveAsPdf() {
+  // $('#modalPdfReport').modal('show');
+  
   const directions = testModes[_mode].directions;
   const now = moment();
   const nowProper = now.format('YYYY-MM-DD HH:mm:ss');
@@ -1113,12 +1111,14 @@ function saveAsPdf() {
       generatedOn: nowProper
     },
     dataType: 'html',
-    success: function (reportHtml) {
+    success: async function (reportHtml) {
       $('#results-pdf').html(reportHtml);
+
+      const defaultFileName = `netmesh_rfc-6349_${_mode}_${nowFileName}.pdf`;
 
       const opt = {
         margin: [1, 1],
-        filename: `netmesh_rfc-6349_${_mode}_${nowFileName}.pdf`,
+        filename: defaultFileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 3, letterRendering: true },
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
@@ -1139,6 +1139,7 @@ function saveAsPdf() {
         for (i = 1; i <= totalPages; i++) {
           const pageWidth = pdf.internal.pageSize.getWidth();
           const pageHeight = pdf.internal.pageSize.getHeight();
+          
           pdf.setPage(i);
           pdf.setFontSize(8);
           pdf.setTextColor(108);

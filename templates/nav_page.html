@@ -1,6 +1,12 @@
-{% extends 'base.html' %} {% block head %} {{ super() }} {% endblock %} {% block
-body %} {{ super() }}
-<nav class="navbar navbar-expand-sm navbar-light bg-light">
+{% extends 'base.html' %}
+
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+<nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top shadow-sm">
 	<div class="container">
 		<a class="navbar-brand" href="#">
 			<img
@@ -57,18 +63,18 @@ body %} {{ super() }}
 			<div class="navbar-text">
 				<span id="loggedUsername" class="text-muted">{{ username }}</span>
 				<span class="text-muted p-1"> • </span>
-				<!--
-          <span id="region-name" class="text-muted">---</span> -->
-				<button type="button" class="btn btn-link p-0" onclick="logout()">
+					<!--
+						<span id="region-name" class="text-muted">---</span> -->
+				<a href="{{ url_for('logout') }}" class="btn btn-link text-primary p-0" role="button">
 					Log out
-				</button>
+				</a>
 			</div>
 		</div>
 	</div>
 </nav>
 
-<main class="container">
-	<div class="p-xl-4">{% block content %} {% endblock %}</div>
+<main class="py-4">
+	<div class="container">{% block content %} {% endblock %}</div>
 </main>
 
 <div
