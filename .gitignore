@@ -3,6 +3,8 @@
 **/*.pcap*
 **/*.pyc
 **/*.log
+*.spec
+
 #Temp File
 tempfiles/
 
