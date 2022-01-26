@@ -845,6 +845,6 @@ def open_downloads_folder():
 
 
 if __name__ == "__main__":
-  app.run(debug=True)
-  # pysideflask_ext.init_gui(application=app, width=1280, height=720, window_title=netmesh_config.APP_TITLE)
+  # app.run(debug=True)
+  pysideflask_ext.init_gui(application=app, width=1280, height=720, window_title=netmesh_config.APP_TITLE)
   
