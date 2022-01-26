@@ -3,11 +3,8 @@ import sys
 
 from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QFont
+
 import socket
-
-from netmesh_utils import resource_path
-
 
 class ApplicationThread(QtCore.QThread):
     def __init__(self, application, port=5000):
@@ -21,6 +18,15 @@ class ApplicationThread(QtCore.QThread):
     def run(self):
         self.application.run(port=self.port, threaded=True)
 
+class MainGUI(QtWidgets.QMainWindow):
+    def closeEvent(self, event):
+        reply = QtWidgets.QMessageBox.question(self, 'Message',
+            "Close this app?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            event.accept()
+        else:
+            event.ignore()
 
 class WebPage(QtWebEngineWidgets.QWebEnginePage):
     def __init__(self, root_url):
@@ -58,7 +64,7 @@ def init_gui(application, port=0, width=800, height=600,
     qtapp.aboutToQuit.connect(webapp.terminate)
 
     # Main Window Level
-    window = QtWidgets.QMainWindow()
+    window = MainGUI()
     window.resize(width, height)
     window.setWindowTitle(window_title)
     window.setWindowIcon(QtGui.QIcon(icon))
@@ -69,11 +75,6 @@ def init_gui(application, port=0, width=800, height=600,
     webView.setAcceptDrops(False)
     webView.setMinimumSize(800, 600)
     
-    # style_path = os.path.join(resource_path("static"), 'css', 'base.css')
-    # print(style_path)
-    # with open(style_path, "r") as fh:
-    #     webView.setStyleSheet(fh.read())
-        
     window.setCentralWidget(webView)
 
     # WebPage Level

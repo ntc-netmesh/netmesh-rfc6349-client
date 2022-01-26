@@ -8,7 +8,7 @@ import os, stat
 import time
 from utilities import client_utils
 import windows_scan
-from netmesh_config import *
+from netmesh_constants import *
 import traceback
 from datetime import datetime
 import baseline_bandwidth_process

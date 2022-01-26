@@ -11,6 +11,8 @@ let measurementTimes = {
 let currentTestDirection = "";
 let currentProcessIndex = 0;
 
+let appState = AppState.Ready;
+
 $('#net-warning').hide();
 $('#btnStartTest').attr('disabled', true);
 $('#btnGetGpsCoordinates .spinner-grow').hide();
@@ -99,7 +101,27 @@ $(function () {
         });
     }, false);
   })();
-  
+
+  window.onbeforeunload = function (e) {
+    console.log("onbeforeunload");
+    e = e || window.event;
+
+    let message = "Close this app?";
+    switch (appState) {
+      case AppState.Testing:
+        message = "Test is ongoing.\n\nClose this app anyway?"
+        break;
+    }
+
+    // For IE and Firefox prior to version 4
+    if (e) {
+      e.returnValue = message;
+    }
+
+    console.log(message);
+    // For Safari
+    return message;
+  };
   // window.addEventListener('online', (e) => console.log(e, "you're online"));
   // window.addEventListener('offline', (e) => {
     
@@ -148,11 +170,12 @@ function setTestServers() {
       console.log("GET get-test-servers error");
       console.log({jqXHR, textStatus, errorThrown});
       console.log(errorThrown);
-      let errorContent = "An error occured";
+
+      let errorContent = "Unknown error occured";
       if (jqXHR.readyState == 0) {
-        errorContent = "Network error";
-      } else if (jqXHR.readyState == 4 && jqXHR.responseJSON.error) {
-        errorContent = jqXHR.responseJSON.error
+        errorContent = "Network error: Please check your internet connection";
+      } else if (jqXHR.readyState == 4) {
+        errorContent = jqXHR.responseJSON.error ?? jqXHR.responseJSON ?? "Unknown error occured"
       };
 
       $('#testServersPlaceholder').html(`<div class="alert alert-danger p-2 py-1" role="alert">
@@ -490,6 +513,8 @@ function createMeasurementProcessesTable(directions) {
 }
 
 function startTest() {
+  appState = AppState.Testing;
+
   $('#btnStartTest').attr('disabled', true);
   $('#btnStartTest .spinner-border').removeClass('d-none');
 
@@ -518,6 +543,7 @@ function startTest() {
     success: function (response) {
       console.log(response);
 
+      $('#btnStartTest').attr('disabled', false);
       $('#mainForm fieldset').attr('disabled', true);
 
       _cir = response['cir'];
@@ -577,6 +603,8 @@ function startTest() {
           const directionName = testMode.directions[0];
           executeMeasurements(_testServer, directionName)
             .then(resultsHtml => {
+              appState = AppState.TestFinished;
+
               clearInterval(timerInterval);
 
               $("#measurement-card .card-header h5").text(`Finished`);
@@ -602,6 +630,8 @@ function startTest() {
               return executeMeasurements(_testServer, testMode.directions[directionIndex]);
             })
             .then(resultsHtml => {
+              appState = AppState.TestFinished;
+              
               clearInterval(timerInterval);
               showTestResults(resultsHtml, testMode.directions[directionIndex]);
 
@@ -609,6 +639,8 @@ function startTest() {
               setTestFinishTimes(testMode.directions[directionIndex]);
             })
             .catch(err => {
+              appState = AppState.TestFinished;
+
               console.log(err);
               clearInterval(timerInterval);
               showTestFailed(err, currentProcessIndex, testMode.name, directionIndex);
@@ -700,6 +732,7 @@ function executeMeasurements(testServer, directionName) {
             testServerUrl: testServer.hostname,
             mode: testDirection.mode,
             jobId,
+            measurementTestName: process.label
           },
           dataType: 'json',
           timeout: 120 * 1000,
@@ -1122,6 +1155,8 @@ function closeTest() {
     return;
   }
 
+  appState = AppState.Ready;
+
   $(`#process-error`).html('');
 
   $('#mainForm fieldset').attr('disabled', false);
@@ -1160,6 +1195,8 @@ function tryAgain() {
 }
 
 function resetTest() {
+  appState = AppState.Ready;
+
   // TODO: clear error html after clicking this
   $(`#process-error`).html('');
   $('#mainForm fieldset').attr('disabled', false);

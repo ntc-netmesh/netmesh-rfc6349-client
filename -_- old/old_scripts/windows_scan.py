@@ -6,7 +6,7 @@ from utilities import client_utils
 import logging
 from log_settings import getStreamLogger
 from datetime import datetime
-from netmesh_config import *
+from netmesh_constants import *
 from analyzer_process import analyze_efficiency, analyze_buffer_delay
 
 GLOBAL_LOGGER = getStreamLogger()

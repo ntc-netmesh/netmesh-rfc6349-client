@@ -7,7 +7,7 @@ import sys
 import json
 import os, stat
 from utilities import client_utils
-from netmesh_config import *
+from netmesh_constants import *
 import traceback
 from datetime import datetime
 import baseline_bandwidth_process

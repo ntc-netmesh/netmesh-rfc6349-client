@@ -11,7 +11,7 @@ import subprocess
 import sys
 from datetime import datetime
 import re
-from netmesh_config import *
+from netmesh_constants import *
 # ip_addr = '202.92.132.191'
 ip_addr = DEFAULT_SERVER
 port = 5005

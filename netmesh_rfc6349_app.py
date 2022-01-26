@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import sys
 import os
 import webbrowser
@@ -15,12 +16,14 @@ import pysideflask_ext
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
 from flask_login import LoginManager, login_user, logout_user
 
-import netmesh_config
-import netmesh_utils
 import wrappers
 import user_auth
 import ADB
-  
+import log_settings
+
+import netmesh_constants
+import netmesh_utils
+
 if getattr(sys, 'frozen', False):
   template_folder = netmesh_utils.resource_path('templates')
   static_folder = netmesh_utils.resource_path('static')
@@ -38,15 +41,15 @@ login_manager.init_app(app)
 @app.route('/')
 def login_page():
   if 'api_session_token' in session and session['api_session_token'] and 'username' in session and session['username']:
-    print('api_session_token')
-    print(session['api_session_token'])
-    print('username')
-    print(session['username'])
+    # print('api_session_token')
+    # print(session['api_session_token'])
+    # print('username')
+    # print(session['username'])
     
     return redirect(url_for('home_page'))
   
   return render_template('login.html',
-                         app_version=netmesh_config.APP_VERSION,
+                         app_version=netmesh_constants.APP_VERSION,
                          ubuntu_version=netmesh_utils.get_ubuntu_version())
 
 @app.route('/register-device')
@@ -59,7 +62,6 @@ def register_device_page():
       error=str(e))
   
   return render_template('register_device.html', serial_number=serial_number)
-    
 
 # ----------------------------------------------------------------
 # PAGES
@@ -67,7 +69,7 @@ def register_device_page():
 @app.route('/home')
 @wrappers.require_api_token
 def home_page():
-  return render_template('home.html', username=session['username'], app_version=netmesh_config.APP_VERSION)
+  return render_template('home.html', username=session['username'], app_version=netmesh_constants.APP_VERSION)
 
 
 @app.route('/report', methods=['POST'])
@@ -85,7 +87,7 @@ def report():
     results[d] = json.loads(session[d+'_test_results'])
   
   return render_template('report.html',
-                         app_version=netmesh_config.APP_VERSION,
+                         app_version=netmesh_constants.APP_VERSION,
                          cir=session['test_details-cir'],
                          net=session['test_details-net'],
                          server_name=server_name,
@@ -196,15 +198,27 @@ def map_html():
 def login():
   username = request.form.get("uname")
   password = request.form.get("psw")
-
-  result = user_auth.login(username, password)
-  error = result['error']
-  if error is None:
+  
+  error = None
+  try:
+    token = user_auth.login(username, password)
+    session['api_session_token'] = token
     session['username'] = username
+  except requests.exceptions.ConnectionError as ce:
+    error = "Connection error. Please check your Internet connection"
+  except requests.exceptions.Timeout as te:
+    error = "Connection timeout. Please try again"
+  except requests.exceptions.RequestException as req:
+    error = "Cannot login"
+  except Exception as e:
+    error = str(e)
+    
+  if error is None:
     return redirect(url_for('home_page'))
   else:
+    log_settings.log_error(error)
     return render_template('login.html',
-      app_version=netmesh_config.APP_VERSION,
+      app_version=netmesh_constants.APP_VERSION,
       ubuntu_version=netmesh_utils.get_ubuntu_version(),
       error=error)
 
@@ -269,35 +283,51 @@ def get_test_servers():
     r = requests.get(
       url=test_servers_url,
     )
-    
+    r.raise_for_status()
     # local_test_servers = list(filter(lambda x: (x['type'] == "local"), json.loads(r.text)))
     test_servers = json.loads(r.text)
-    print("test_servers")
-    print(test_servers)
+    # print("test_servers")
+    # print(test_servers)
+    return Response(json.dumps(test_servers))
+  except requests.exceptions.HTTPError as eh:
+    status_code = eh.response.status_code
     
-    if r.status_code == 200:
-      return Response(json.dumps(test_servers))
-    elif r.status_code == 404:
-      return Response(json.dumps({
-        "error": f"Cannot connect to {main_url}"
-      }), r.status_code)
-  except requests.exceptions.ConnectionError as ece:
+    error = "HTTP error"
+    log_settings.log_error(error)
+    
+    if status_code == 404:
+      error = f"Cannot connect to {main_url}"
+      
     return Response(json.dumps({
-      "error": "Connection error",
+      "error": error,
+      "message": str(eh)
+    }), status_code)
+  except requests.exceptions.ConnectionError as ece:
+    error = "Connection error"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
       "message": str(ece)
     }), 500)
   except requests.exceptions.Timeout as et:
+    error = "Request timeout"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": "Request timeout",
+      "error": error,
       "message": str(et)
     }), 500)
   except requests.exceptions.RequestException as e:
+    error = "Cannot get test servers"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": "Cannot get test servers",
+      "error": error,
     }), 500)
   except Exception as e:
+    error = "Cannot get test servers"
+    log_settings.log_error(error)
+    
     return Response(json.dumps({
-      "error": "Cannot get test servers"
+      "error": error
     }), 500)
 
 @app.route('/process', methods=['GET', 'POST'])
@@ -310,6 +340,8 @@ def process():
     headers = {
       "Authorization": "Bearer " + session['api_session_token']
     }
+    
+    process_id = ""
     
     if request.method == 'POST':
       test_server_name = request.form['testServerName']
@@ -329,31 +361,9 @@ def process():
         json=json_data,
         headers=headers,
       )
-      
-      if r.status_code == 200:
-        return Response(json.dumps({}))
-      elif r.status_code == 401:
-        error_json = json.loads(r.text)
-        error_content = ""
-        if "msg" in error_json:
-          error_content = error_json["msg"]
-        else:
-          error_content = r.text
-        return Response(json.dumps({
-          "error": error_content
-        }), r.status_code)
-      elif r.status_code == 404:
-        return Response(json.dumps({
-          "error": f"Cannot connect to {test_server_name}"
-        }), r.status_code)
-      else:
-        print("r.status_code")
-        print(r.status_code)
-        return Response(json.dumps({
-          "error": f"Cannot send the measurements",
-          "message": r.text
-        }), r.status_code)
-        
+      r.raise_for_status()
+      return Response(json.dumps({}))
+    
     elif request.method == 'GET':
       test_server_name = request.args.get('testServerName')
       test_server_url = request.args.get('testServerUrl')
@@ -371,45 +381,54 @@ def process():
         json=json_data,
         headers=headers
       )
-      
-      if r.status_code == 200:
-        return Response(r.text)
-      elif r.status_code == 404:
-        return Response(json.dumps({
-          "error": f"Cannot connect to {test_server_name}"
-        }), r.status_code)
-      else:
-        print("ERROR IN Get /process (not exception)")
-        return Response(json.dumps({
-          "error": f"Test failed",
-          "message": r.text
-        }), r.status_code)
-    else:
-      return Response(json.dumps({
-        "error": "POST or GET request only"
-      }), 400)
-  except requests.exceptions.ConnectionError as ece:
-    print(ece.args)
-    print(ece.__class__)
-    print(ece.__dict__)
-    print(ece.__cause__)
+      r.raise_for_status()
+      return Response(r.text)
+  except requests.exceptions.HTTPError as eh:
+    status_code = eh.response.status_code
+    
+    error = f"Cannot proceed to {process_id} test" if request.method == 'GET' else f"Cannot send test measurements"
+    log_settings.log_error(error)
+    
+    if status_code == 401:
+      error_json = json.loads(r.text)
+      if "msg" in error_json:
+        error = error_json["msg"]
+    elif status_code == 404:
+      error = f"Cannot connect to {test_server_name}"
+        
     return Response(json.dumps({
-      "error": "Connection error",
+      "error": error,
+      "message": str(eh)
+    }), status_code)
+  except requests.exceptions.ConnectionError as ece:
+    error = "Connection error"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
       "message": str(ece)
     }), 500)
   except requests.exceptions.Timeout as et:
+    error = "Request timeout"
+    log_settings.log_error(error)
+    
     return Response(json.dumps({
-      "error": "Request timeout",
+      "error": error,
       "message": str(et)
     }), 500)
   except requests.exceptions.RequestException as e:
+    error = "Unexpected error"
+    log_settings.log_error(error)
+    
     return Response(json.dumps({
-      "error": "Unexpected error",
+      "error": error,
       "message": str(e)
     }), 500)
   except Exception as e:
+    error = "Unexpected error"
+    log_settings.log_error(error)
+    
     return Response(json.dumps({
-      "error": "Unexpected error",
+      "error": error,
       "message": str(e)
     }), 500)
 
@@ -421,6 +440,7 @@ def check_status():
     test_server_url = request.args.get('testServerUrl')
     mode = request.args.get('mode')
     job_id = request.args.get('jobId')
+    measurement_test_name = request.args.get('measurementTestName')
     
     api_url = f'{test_server_url}/api/{mode}/status/{job_id}'
     print(api_url)
@@ -429,35 +449,46 @@ def check_status():
       url=api_url,
       headers={"Authorization":"Bearer "+session['api_session_token']}
     )
-    if r.status_code == 200:
-      return Response(r.text)
-    elif r.status_code == 404:
-      return Response(json.dumps({
-        "error": f"Cannot connect to {test_server_name}"
-      }), r.status_code)
-    else:
-      return Response(json.dumps({
-        "error": f"Cannot check the status of this process",
-        "message": r.text
-      }), r.status_code)
-  except requests.exceptions.ConnectionError as ece:
+    r.raise_for_status()
+    return Response(r.text)
+  except requests.exceptions.HTTPError as eh:
+    status_code = eh.response.status_code
+    
+    error = "HTTP error"
+    log_settings.log_error(error)
+    
+    if status_code == 404:
+      error = f"Cannot connect to {test_server_name}"
     return Response(json.dumps({
-      "error": "Connection error",
+      "error": error,
+      "message": str(eh)
+    }), status_code)
+  except requests.exceptions.ConnectionError as ece:
+    error = "Connection error"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
       "message": str(ece)
     }), 500)
   except requests.exceptions.Timeout as et:
+    error = "Request timeout"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": "Request timeout",
+      "error": error,
       "message": str(et)
     }), 500)
-  except requests.exceptions.RequestException as e:
+  except requests.exceptions.RequestException as er:
+    error = f"Cannot check the queue status of {measurement_test_name}"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": f"Cannot check the status of this process",
-      "message": str(e)
+      "error": error,
+      "message": str(er)
     }), 500)
   except Exception as e:
+    error = f"Cannot check the queue status of {measurement_test_name}"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": f"Cannot check the status of this process",
+      "error": error,
       "message": str(e)
     }), 500)
 
@@ -476,40 +507,49 @@ def get_results():
       url=api_url,
       headers={"Authorization":"Bearer "+session['api_session_token']}
     )
-    if r.status_code == 200:
-      session[direction+'_test_results'] = r.text
-      return render_template('results.html',
-                             results=json.loads(session[direction+'_test_results']),
-                             direction=direction)
-    elif r.status_code == 404:
-      return Response(json.dumps({
-        "error": f"Cannot connect to {test_server_name}"
-      }), r.status_code)
-    else:
-      return Response(json.dumps({
-        "error": f"Cannot get the test results",
-        "message": r.text
-      }), r.status_code)
-  except requests.exceptions.ConnectionError as ece:
+    r.raise_for_status()
+    session[direction+'_test_results'] = r.text
+    return render_template('results.html',
+                            results=json.loads(session[direction+'_test_results']),
+                            direction=direction)
+  except requests.exceptions.HTTPError as eh:
+    status_code = eh.response.status_code
+    
+    error = "Cannot get the test results"
+    if status_code == 404:
+      error = f"Cannot connect to {test_server_name}"
+      
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": "Connection error",
+      "error": error,
+      "message": str(eh)
+    }), status_code)
+  except requests.exceptions.ConnectionError as ece:
+    error = "Connection error"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
       "message": str(ece)
     }), 500)
   except requests.exceptions.Timeout as et:
+    error = "Request timeout"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": "Request timeout",
+      "error": error,
       "message": str(et)
     }), 500)
   except requests.exceptions.RequestException as e:
-    print("e.args")
-    print(e.args)
+    error = f"Cannot get the test results"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": f"Cannot get the test results",
+      "error": error,
       "message": str(e)
     }), 500)
   except Exception as e:
+    error = f"Cannot get the test results"
+    log_settings.log_error(error)
     return Response(json.dumps({
-      "error": f"Cannot get the test results",
+      "error": error,
       "message": str(e)
     }), 500)
 
@@ -603,8 +643,10 @@ def run_process_script(mode, command_array, output_params):
     lines = list(filter(None, raw_lines))
     
     if len(lines) == 0:
+      error = "Script error: No output"
+      log_settings.log_error(f"{error}\n>> {command}\n{stdout.decode()}")
       abort(Response(json.dumps({
-        "error": "Script error: No output",
+        "error": error,
         "message": {
           "shell_command": command,
           "shell_output": stdout.decode()
@@ -613,8 +655,10 @@ def run_process_script(mode, command_array, output_params):
       
     script_data = {}
     if len(lines) != len(output_params):
+      error = "Script error: Unexpected output"
+      log_settings.log_error(f"{error}\n>> {command}\n{stdout.decode()}")
       abort(Response(json.dumps({
-        "error": f"Script error: Unexpected output",
+        "error": error,
         "message": {
           "shell_command": command,
           "shell_output": stdout.decode()
@@ -629,8 +673,10 @@ def run_process_script(mode, command_array, output_params):
       
       line_split = line.split(':')
       if len(line_split) != 2:
+        error = "Script error: Cannot parse into key-value pair"
+        log_settings.log_error(f"{error}\n>> {command}\n{stdout.decode()}")
         abort(Response(json.dumps({
-          "error": "Script error: Cannot parse into key-value pair",
+          "error": error,
           "message": {
             "shell_command": command,
             "shell_output": stdout.decode()
@@ -640,8 +686,10 @@ def run_process_script(mode, command_array, output_params):
       line_key = line_split[0].strip()
       line_value = line_split[1].strip()
       if line_key != pName:
+        error = f"Script error: Cannot find key '{pName}'"
+        log_settings.log_error(f"{error}\n>> {command}\n{stdout.decode()}")
         abort(Response(json.dumps({
-          "error": f"Script error: Cannot find key '{pName}'",
+          "error": error,
           "message": {
             "shell_command": command,
             "shell_output": stdout.decode()
@@ -652,8 +700,10 @@ def run_process_script(mode, command_array, output_params):
       value_quantity  = value_split[0]
       value_number = float(value_quantity)
       if math.isnan(value_number):
+        error = f"Script error: '{pName}' is NaN"
+        log_settings.log_error(f"{error}\n>> {command}\n{stdout.decode()}")
         abort(Response(json.dumps({
-          "error": f"Script error: '{pName}' is NaN",
+          "error": error,
           "message": {
             "shell_command": command,
             "shell_output": stdout.decode()
@@ -664,14 +714,15 @@ def run_process_script(mode, command_array, output_params):
       
     return Response(json.dumps(script_data))
   else:
+    error = f"Script error: Command error"
+    log_settings.log_error(f"{error}\nshell_command: {command}\nshell_output: {stderr.decode()}")
     abort(Response(json.dumps({
       "error": f"Script error: {stderr.decode()}",
       "message": {
         "shell_command": command,
-        "shell_output": stdout.decode()
+        "shell_output": stderr.decode()
       }
     }), 400))
-
 
 
 def get_network_interface(mode, network_connection_type_name, network_prefix):
@@ -686,12 +737,16 @@ def get_network_interface(mode, network_connection_type_name, network_prefix):
     if len(interfaces) > 0:
       return interfaces[0]
     else:
+      error = f"{network_connection_type_name} connection not found"
+      log_settings.log_error(error)
       abort(Response(json.dumps({
         "error": f"{network_connection_type_name} connection not found"
       }), 500))
   else:
+    error = "Network interface error"
+    log_settings.log_error(error)
     abort(Response(json.dumps({
-      "error": f"Network interface error",
+      "error": error,
       "message": stderr.decode()
     }), 500))
 
@@ -764,7 +819,6 @@ def check_if_registered():
   registration_file = "hash.txt"
   
   if not os.path.exists(f"{parent_dir}/{folder}"):
-    print("not existintig tey")
     os.mkdir(f"{parent_dir}/{folder}", mode=0o777)
 
   if not os.path.exists(f"{parent_dir}/{folder}/{registration_file}"):
@@ -845,6 +899,6 @@ def open_downloads_folder():
 
 
 if __name__ == "__main__":
-  # app.run(debug=True)
-  pysideflask_ext.init_gui(application=app, width=1280, height=720, window_title=netmesh_config.APP_TITLE)
+  app.run(debug=True)
+  # pysideflask_ext.init_gui(application=app, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
   

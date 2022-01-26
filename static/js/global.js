@@ -57,6 +57,12 @@ const measurementProcesses = [
   },
 ];
 
+const AppState = {
+  Ready: 'Ready',
+  Testing: 'Testing',
+  TestFinished: 'TestFinished',
+}
+
 let _throughputChartImgURI = {
   upload: '',
   download: ''

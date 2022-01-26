@@ -4,7 +4,7 @@ import traceback
 import logging
 from log_settings import getStreamLogger
 from datetime import datetime
-from netmesh_config import *
+from netmesh_constants import *
 from utilities import client_utils
 from math import floor, ceil
 

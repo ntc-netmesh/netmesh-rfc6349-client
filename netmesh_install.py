@@ -2,7 +2,7 @@ import os
 import subprocess
 import stat
 
-import netmesh_config
+import netmesh_constants
 import netmesh_utils
 
 def run(command):
@@ -16,7 +16,7 @@ def run(command):
 if __name__ == "__main__":
   ubuntu_version = netmesh_utils.get_ubuntu_version()
   
-  app_name = f'netmesh-rfc-6349-app_{netmesh_config.APP_VERSION}_u{ubuntu_version}'
+  app_name = f'netmesh-rfc-6349-app_{netmesh_constants.APP_VERSION}_u{ubuntu_version}'
   installer_command = f'pyinstaller netmesh_rfc6349_app.py -n "{app_name}" -s -F --clean --add-data "templates:templates" --add-data "static:static"'
   
   for line in run(installer_command):

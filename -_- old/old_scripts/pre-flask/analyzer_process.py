@@ -3,11 +3,11 @@ import asyncio
 import traceback
 import logging
 from scapy.all import *
-from netmesh_config import *
+from netmesh_constants import *
 from utilities import client_utils
 from log_settings import getStreamLogger
 from datetime import datetime
-from netmesh_config import *
+from netmesh_constants import *
 from tcp_efficiency_analyzer import get_tcp_metrics
 from buffer_delay_analyzer import get_average_rtt
 #from utilities import server_utils

@@ -1,5 +1,5 @@
 import queue_process
-from netmesh_config import *
+from netmesh_constants import *
 import sys
 
 

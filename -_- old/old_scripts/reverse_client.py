@@ -7,7 +7,7 @@ import json
 import os, stat
 from utilities import client_utils
 import windows_scan
-from netmesh_config import *
+from netmesh_constants import *
 import traceback
 from datetime import datetime
 from log_settings import getStreamLogger, getFileLogger
