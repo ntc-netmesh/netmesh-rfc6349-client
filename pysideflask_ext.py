@@ -1,7 +1,12 @@
+import os
 import sys
+
 from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QFont
 import socket
+
+from netmesh_utils import resource_path
 
 
 class ApplicationThread(QtCore.QThread):
@@ -61,14 +66,23 @@ def init_gui(application, port=0, width=800, height=600,
     # WebView Level
     webView = QtWebEngineWidgets.QWebEngineView(window)
     webView.setContextMenuPolicy(Qt.PreventContextMenu)
+    webView.setAcceptDrops(False)
+    webView.setMinimumSize(800, 600)
+    
+    # style_path = os.path.join(resource_path("static"), 'css', 'base.css')
+    # print(style_path)
+    # with open(style_path, "r") as fh:
+    #     webView.setStyleSheet(fh.read())
+        
     window.setCentralWidget(webView)
 
     # WebPage Level
     page = WebPage('http://localhost:{}'.format(port))
     
     profile = page.profile()
+    profile.clearHttpCache()
+    profile.clearAllVisitedLinks()
     profile.downloadRequested.connect(onDownloadRequested)
-    
     
     page.home()
     webView.setPage(page)

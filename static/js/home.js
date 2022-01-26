@@ -1,85 +1,26 @@
-const testDirections = {
-  "upload": {
-    name: "upload",
-    mode: "normal",
-    titleCase: "Upload",
-  },
-  "download": {
-    name: "download",
-    mode: "reverse",
-    titleCase: "Download",
-  },
-}
-
-const testModes = {
-  "normal": {
-    name: "normal",
-    titleCase: "Normal",
-    directions: ["upload"]
-  },
-  "reverse": {
-    name: "reverse",
-    titleCase: "Reverse",
-    directions: ["download"]
-  },
-  "bidirectional": {
-    name: "bidirectional",
-    titleCase: "Bidirectional",
-    directions: ["download", "upload"]
-  }
-};
-
-const networkConnectionTypes = {
-  "Ethernet": {
-    prefix: "en"
-  },
-  "Wi-Fi": {
-    prefix: "wlp"
-  },
-};
-
-const measurementProcesses = [
-  {
-    processId: 'mtu',
-    label: 'MTU test',
-  },
-  {
-    processId: 'rtt',
-    label: 'RTT test',
-  },
-  {
-    processId: 'bdp',
-    label: 'BDP test',
-  },
-  {
-    processId: 'thpt',
-    label: 'Throughput test',
-  },
-];
-
 let requiredGetParamaters = {
   rtt: null,
   rwnd: null,
-}
+};
 
 let measurementTimes = {
   upload: [],
   download: []
 };
-let testDurationText = "";
 
 let currentTestDirection = "";
 let currentProcessIndex = 0;
 
-let _cir, _netType, _testServer, _mode, _lon, _lat;
-let _netTypeName, _testServerName;
-let _testStartedOnText, _testFinishedOnText, _testDurationText;
-let _thoughputChartImgURI, _transferChartImgURI;
-
 $('#net-warning').hide();
+$('#btnStartTest').attr('disabled', true);
 $('#btnGetGpsCoordinates .spinner-grow').hide();
+
+$('#btnSaveAsPdf .spinner-border').hide();
+$('#modalPdfReport .btn-close').hide();
 $('#measurement-card').hide();
-$('#measurement-results-card').hide();
+// $('#measurement-results-card').hide();
+
+$('#measurement-results').html('');
 $('#measurement-failed-card').hide();
 
 $(function () {
@@ -105,13 +46,8 @@ $(function () {
     })
   });
 
-  $('#server').html('');
-  $('#server').append(`
-    <option value="${'202.90.158.6:12000'}"> 
-      ${'Temporary test server'}
-    </option>`
-  );
-
+  setTestServers();
+  
   $('#netType').html('');
   for (const netType of Object.keys(networkConnectionTypes)) {
     $('#netType').append(`
@@ -125,7 +61,7 @@ $(function () {
     if (selectedNetType === "Ethernet") {
       $('#net-warning').hide();
     } else {
-      $('#net-warning .message').text(`Measuring with ${selectedNetType} may NOT be accurate`);
+      $('#net-warning .message').text(`RFC-6349 methodology focuses on Ethernet-terminated services`);
       $('#net-warning').show();
     }
   });
@@ -151,7 +87,7 @@ $(function () {
       // Fetch all the forms we want to apply custom Bootstrap validation styles to
       var forms = document.querySelectorAll('.needs-validation')
       // Loop over them and prevent submission
-      Array.prototype.slice.call(forms)
+      Array.prototype.slice.call(forms) 
         .forEach(function (form) {
           form.addEventListener('submit', function (event) {
             if (!form.checkValidity()) {
@@ -163,10 +99,76 @@ $(function () {
         });
     }, false);
   })();
+  
+  // window.addEventListener('online', (e) => console.log(e, "you're online"));
+  // window.addEventListener('offline', (e) => {
+    
+  // });
 
-  renderThoughputComparisonChart();
-  renderTransferComparisonChart();
+  // renderThoughputComparisonChart();
+  // renderTransferComparisonChart();
+  // generateReport();
 });
+
+function setTestServers() {
+  $.ajax({
+    url: 'get-test-servers',
+    method: 'GET',
+    dataType: 'json',
+    timeout: 120 * 1000,
+    success: function (data) {
+      $('#testServersPlaceholder').html(`<select class="form-select" id="testServers" required></select>
+        <div class="invalid-feedback">Select a test server</div>`);
+      $('#testServers').on('change', function () {
+        const selectedServer = $('#testServers option:selected').text();
+        if (selectedServer) {
+          $(this).attr('title', selectedServer.trim());
+        }
+      });
+
+      let $testServers = $('#testServers');
+      $testServers.html('');
+      $testServers.append('<option selected disabled value="">Select a test server...</option>');
+
+      testServers = [];
+      testServers = data;
+
+      for (let i = 0; i < testServers.length; i++) {
+        const server = testServers[i];
+        $testServers.append(`
+          <option value="${i}"> 
+            ${server.nickname}
+          </option>`
+        );
+      }
+
+      $('#btnStartTest').attr('disabled', false);
+    },
+    error: function (jqXHR, textStatus, errorThrown) {
+      console.log("GET get-test-servers error");
+      console.log({jqXHR, textStatus, errorThrown});
+      console.log(errorThrown);
+      let errorContent = "An error occured";
+      if (jqXHR.readyState == 0) {
+        errorContent = "Network error";
+      } else if (jqXHR.readyState == 4 && jqXHR.responseJSON.error) {
+        errorContent = jqXHR.responseJSON.error
+      };
+
+      $('#testServersPlaceholder').html(`<div class="alert alert-danger p-2 py-1" role="alert">
+        <p class="small mb-0">${errorContent}</p>
+        <button class="btn btn-sm btn-link text-primary p-0" onclick="reloadTestServers()" type="button" role="button">Reload test servers</button>
+      </div>`);
+    }
+  });
+}
+
+function reloadTestServers() {
+  $('#testServersPlaceholder').html(`<div class="placeholder-wave">
+    <span class="placeholder col-12"></span>
+  </div>`);
+  setTestServers();
+}
 
 function renderThoughputComparisonChart() {
   const isrColor = '#4824FF'; //#008ca7 - download
@@ -280,8 +282,12 @@ function renderThoughputComparisonChart() {
     }
   };
 
-  var chart = new ApexCharts(document.querySelector(`#download-measurement-results .thpt-chart`), options);
+  const chart = new ApexCharts(document.querySelector(`#download-thpt-chart`), options);
   chart.render();
+  console.log(chart.width);
+  chart.dataURI({scale: 3}).then(({ imgURI, blob }) => {
+    _throughputChartImgURI['download'] = imgURI;
+  });
 }
 
 function renderTransferComparisonChart() {
@@ -388,8 +394,11 @@ function renderTransferComparisonChart() {
     }
   };
 
-  var chart = new ApexCharts(document.querySelector(`#download-measurement-results .transfer-chart`), options);
+  var chart = new ApexCharts(document.querySelector(`#download-transfer-chart`), options);
   chart.render();
+  chart.dataURI({scale: 4}).then(({ imgURI, blob }) => {
+    _transferChartImgURI['download'] = imgURI;
+  });
 }
 
 function createMeasurementProcessesTable(directions) {
@@ -468,14 +477,28 @@ function createMeasurementProcessesTable(directions) {
     // }
   }
 
-  $('#summary-test-finished-on').html('<span class="placeholder col-6"></span>');
-  $('#summary-test-duration').html('<span class="placeholder col-6"></span>');
+  $('#summary-test-finished-on').html(`
+    <div class="placeholder-wave">
+      <span class="placeholder col-6"></span>
+    </div>
+  `);
+  $('#summary-test-duration').html(`
+    <div class="placeholder-wave">
+      <span class="placeholder col-6"></span>
+    </div>
+  `);
 }
 
 function startTest() {
+  $('#btnStartTest').attr('disabled', true);
+  $('#btnStartTest .spinner-border').removeClass('d-none');
+
   const c_cir = $('#cir').val();
   const c_netType = $('#netType').val();
-  const c_testServer = $('#server').val();
+  
+  const testServerIndex = $('#testServers').val();
+  const c_testServer = testServers[testServerIndex];
+  
   const c_selectedTestMode = $('input[name="radTestMode"]:checked').val();
   const c_lat = $('#lat').val();
   const c_lon = $('#lon').val();
@@ -486,8 +509,8 @@ function startTest() {
     data: {
       cir: c_cir,
       net: c_netType,
-      server: c_testServer,
       mode: c_selectedTestMode,
+      serverIP: c_testServer?.ip_address,
       lon: c_lon,
       lat: c_lat
     },
@@ -497,14 +520,12 @@ function startTest() {
 
       $('#mainForm fieldset').attr('disabled', true);
 
-      // set current test details
       _cir = response['cir'];
       
       _netType = response['net'];
       _netTypeName = _netType;
 
-      _testServer = response['server'];
-      _testServerName = $('#server option:selected').text();
+      _testServer = c_testServer;
 
       _mode = response['mode'];
       _lon = response['lon'];
@@ -521,14 +542,14 @@ function startTest() {
 
       $('#summary-cir').text(_cir + " Mbps");
       $('#summary-net').text(_netTypeName);
-      $('#summary-server').text(_testServerName);
+      $('#summary-server').text(_testServer.nickname);
       $('#summary-mode').text(testMode.titleCase);
       $('#summary-coordinates').text(_lat + ", " + _lon);
 
       $("#measurement-card .card-header h5").text(`Testing ${testMode.titleCase} mode...`);
 
       $('#measurement-card').show();
-      $('#measurement-results-card').hide();
+      // $('#measurement-results-card').hide();
       $('#measurement-failed-card').hide();
       $('.btn-test-done-options').hide();
       $('#btnBackToTop').show();
@@ -542,7 +563,7 @@ function startTest() {
         const minutes = parseInt(elapsedSeconds / 60);
         const seconds = parseInt(elapsedSeconds) % 60;
 
-        testDurationText = `${numeral(minutes).format("0")}m ${numeral(seconds).format("00")}s`
+        _testDurationText = `${numeral(minutes).format("0")}m ${numeral(seconds).format("00")}s`
 
         $(`#${currentTestDirection}-process-time-${currentProcessIndex}`).text(`${numeral(minutes).format("0")}:${numeral(seconds).format("00")}`);
       }, 100);
@@ -559,11 +580,8 @@ function startTest() {
               clearInterval(timerInterval);
 
               $("#measurement-card .card-header h5").text(`Finished`);
-              // $("#measurement-results-card .card-header").text(`${testMode.altTitleCase} mode results`);
-              // $('#measurement-results-card').show();
+              
               setTestFinishTimes(directionName);
-
-              // console.log(resultsHtml);
 
               showTestResults(resultsHtml, directionName);
             })
@@ -571,53 +589,42 @@ function startTest() {
               console.log("normal/reverse");
               console.log({ err });
               clearInterval(timerInterval);
-              showTestFailed(err, currentProcessIndex, testMode.name, testMode.directions[0]);
+              showTestFailed(err, currentProcessIndex, testMode.name, 0);
             });
           break;
         case "bidirectional":
-          const directionName1 = testMode.directions[0];
-          const directionName2 = testMode.directions[1];
-          executeMeasurements(_testServer, directionName1)
+          let directionIndex = 0;
+          executeMeasurements(_testServer, testMode.directions[directionIndex])
             .then(resultsHtml => {
-              // $('#measurement-results-card').show();
-              
-              showTestResults(resultsHtml, directionName1);
+              showTestResults(resultsHtml, testMode.directions[directionIndex]);
+              directionIndex++;
 
-              return executeMeasurements(_testServer, directionName2);
+              return executeMeasurements(_testServer, testMode.directions[directionIndex]);
             })
             .then(resultsHtml => {
               clearInterval(timerInterval);
-              showTestResults(resultsHtml, directionName2);
+              showTestResults(resultsHtml, testMode.directions[directionIndex]);
 
               $("#measurement-card .card-header h5").text(`Finished`);
-              setTestFinishTimes(directionName2);
-              // $("#measurement-results-card .card-header").text(`${testMode.altTitleCase} mode results`);
+              setTestFinishTimes(testMode.directions[directionIndex]);
             })
             .catch(err => {
               console.log(err);
               clearInterval(timerInterval);
-              showTestFailed(err, currentProcessIndex, testMode.name, testMode.directions[0]);
+              showTestFailed(err, currentProcessIndex, testMode.name, directionIndex);
             });
           break;
       }
     },
     error: function (err) {
-      console.log(err);
-      if (err.type === 'mode') {
-        alert(err.errmsg);
-      }
+      $('#btnStartTest').attr('disabled', false);
+    },
+    complete: function () {
+      $('#btnStartTest .spinner-border').addClass('d-none');
     }
   });
 
-  // if (!(cir && netType && testServer /*&& lat && lon*/)) {
-  //   return;
-  // }
-  // if (!testMode) {
-  //   alert("Select a test mode");
-  //   return;
-  // }
-
-  
+  return false;
 }
 
 function setTestFinishTimes(directionName) {
@@ -626,14 +633,14 @@ function setTestFinishTimes(directionName) {
 
   _testFinishedOnText = moment(lastMeasurementTime).format('YYYY-MM-DD HH:mm:ss');
   $('#summary-test-finished-on').html(_testFinishedOnText);
-  $('#summary-test-duration').html(testDurationText);
+  $('#summary-test-duration').html(_testDurationText);
 
   $('#btnBackToTop').hide();
   $('#btnSaveAsPdf').show();
   $('.btn-test-done-options').show();
 }
 
-function executeMeasurements(testServerHost, directionName) {
+function executeMeasurements(testServer, directionName) {
   const testDirection = testDirections[directionName];
 
   currentTestDirection = directionName;
@@ -642,13 +649,7 @@ function executeMeasurements(testServerHost, directionName) {
   const executeProcess = (process) => {
 
     console.log({ process });
-    console.log(`Current process: ${process.processId} - http://${testServerHost}/api/${testDirection.mode}/${process.processId}`);
-
-    $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`<div class="spinner-border spinner-border-sm text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>`);
-    $(`#${testDirection.name}-process-label-${currentProcessIndex}`).html(`${process.label}...`);
-    $(`#${testDirection.name}-process-label-${currentProcessIndex}`).removeClass("text-muted");
+    console.log(`Current process: ${process.processId} - ${testServer.hostname}/api/${testDirection.mode}/${process.processId}`);
 
     const directExecutions = ['mtu', 'rtt'];
 
@@ -664,19 +665,21 @@ function executeMeasurements(testServerHost, directionName) {
           url: 'process',
           method: 'GET',
           data: {
-            testServer: testServerHost,
+            testServerName: testServer.nickname,
+            testServerUrl: testServer.hostname,
             mode: testDirection.mode,
             processId: process.processId,
             requiredParams: JSON.stringify(getRequiredGetParameters(processId))
           },
           dataType: 'json',
-          success: function (response) {
-            resolve(response);
+          timeout: 120 * 1000,
+          success: function (data) {
+            resolve(data);
           },
-          error: function (err) {
+          error: function (jqXHR, textStatus, errorThrown) {
             console.log("GET process error");
-            console.log(err);
-            reject(err);
+            console.log({jqXHR, textStatus, errorThrown});
+            reject(jqXHR);
           }
         });
       });
@@ -693,20 +696,22 @@ function executeMeasurements(testServerHost, directionName) {
           url: 'check-status',
           method: 'GET',
           data: {
-            testServer: testServerHost,
+            testServerName: testServer.nickname,
+            testServerUrl: testServer.hostname,
             mode: testDirection.mode,
             jobId,
           },
           dataType: 'json',
-          success: function (response) {
+          timeout: 120 * 1000,
+          success: function (data) {
             setTimeout(function () {
-              resolve(response);
+              resolve(data);
             }, statusCheckingInterval);
           },
-          error: function (err) {
+          error: function (jqXHR, textStatus, errorThrown) {
             console.log("GET checkStatus error");
-            console.log(err);
-            reject(err);
+            console.log({jqXHR, textStatus, errorThrown});
+            reject(jqXHR);
           }
         });
       });
@@ -714,6 +719,7 @@ function executeMeasurements(testServerHost, directionName) {
 
     let isLooped = false;
     const checkQueue = (jobId, port) => checkStatus(jobId).then(status => {
+      console.log({status});
       if (Number.isInteger(status)) {
         const queuePlacement = parseInt(status) + 1;
         if (!isLooped) {
@@ -737,6 +743,7 @@ function executeMeasurements(testServerHost, directionName) {
         return checkQueue(jobId, port);
       }
       else {
+        isLooped = false;
         return Promise.resolve(port);
       }
     });
@@ -748,13 +755,14 @@ function executeMeasurements(testServerHost, directionName) {
           method: 'POST',
           data: getRequiredScriptParameters(processId, port, testDirection),
           dataType: 'json',
+          timeout: 120 * 1000,
           success: function (scriptData) {
             resolve(scriptData);
           },
-          error: function (err) {
+          error: function (jqXHR, textStatus, errorThrown) {
             console.log("GET runScriptProcess error");
-            console.log(err);
-            reject(err);
+            console.log({jqXHR, textStatus, errorThrown});
+            reject(jqXHR);
           }
         });
       });
@@ -777,38 +785,65 @@ function executeMeasurements(testServerHost, directionName) {
           url: 'process',
           method: 'POST',
           data: {
-            testServer: testServerHost,
+            testServerName: testServer.nickname,
+            testServerUrl: testServer.hostname,
             mode: testDirection.mode,
             processId: process.processId,
             scriptData: JSON.stringify(scriptData)
           },
           dataType: 'json',
+          timeout: 120 * 1000,
           success: function () {
             resolve();
           },
-          error: function (err) {
+          error: function (jqXHR, textStatus, errorThrown) {
             console.log("GET postProcess error");
-            console.log(err);
-            reject(err);
+            console.log({jqXHR, textStatus, errorThrown});
+            reject(jqXHR);
           }
         });
       });
     };
 
     return new Promise((resolve, reject) => {
+      $(`#${testDirection.name}-process-label-${currentProcessIndex}`).html(`${process.label}...`);
+      $(`#${testDirection.name}-process-label-${currentProcessIndex}`).removeClass("text-muted");
+
+      $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small">Connecting to test server...</i>');
+      $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      `);
+
       getProcessInfo(process.processId)
         .then(response => {
           if (response != null) {
+            $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-nowrap">Checking queue...</i>');
+
             return checkQueue(response.job_id, response.port);
           }
         })
         .then(port => {
           measurementTimes[directionName].push([Date.now(), null]);
-          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small">Processing...</i>');
+
+          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-primary text-nowrap">Measuring...</i>');
+          $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`
+            <div class="spinner-grow spinner-grow-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          `);
 
           return runScriptProcess(process.processId, port)
         })
         .then(scriptData => {
+          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-primary text-nowrap">Sending measurements...</i>');
+          $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`
+            <div class="spinner-border spinner-border-sm text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          `);
+          
           return postProcess(scriptData);
         })
         .then(() => {
@@ -842,15 +877,19 @@ function executeMeasurements(testServerHost, directionName) {
           url: 'get-results',
           method: "GET",
           data: {
-            testServer: testServerHost,
+            testServerName: testServer.nickname,
+            testServerUrl: testServer.hostname,
             mode: testDirection.mode,
           },
           dataType: 'html',
+          timeout: 120 * 1000,
           success: function (resultsHtml) {
             resolve(resultsHtml);
           },
-          error: function (err) {
-            reject(err);
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log('GET get-results error');
+            console.log({jqXHR, textStatus, errorThrown});
+            reject(jqXHR);
           }
         });
       }, 500);
@@ -950,17 +989,16 @@ function getRequiredScriptParameters(processId, port, testDirection) {
     case "rtt":
       data = {
         mode: testDirection.mode,
+        networkConnectionTypeName: _netType,
         networkPrefix: netConnectionType.prefix,
-        // remove port for a while
-        serverIP: _testServer.split(':')[0],
+        serverIP: _testServer.ip_address,
       }
       break;
     case "bdp":
       data = {
         mode: testDirection.mode,
         rtt: requiredGetParamaters.rtt,
-        // remove port for a while
-        serverIP: _testServer.split(':')[0],
+        serverIP: _testServer.ip_address,
         port,
       }
       break;
@@ -970,8 +1008,7 @@ function getRequiredScriptParameters(processId, port, testDirection) {
         rtt: requiredGetParamaters.rtt,
         rwnd: requiredGetParamaters.rwnd,
         ideal: _cir,
-        // remove port for a while
-        serverIP: _testServer.split(':')[0],
+        serverIP: _testServer.ip_address,
         port,
       }
       break;
@@ -988,18 +1025,51 @@ function showTestResults(resultsHtml, directionName) {
   $(`#${directionName}-test-results-status`).html(successIconHtml);
 }
 
-function showTestFailed(err, processIndex, modeName, directionName) {
+function showTestFailed(err, processIndex, modeName, directionIndex) {
   const process = measurementProcesses[processIndex];
   const testMode = testModes[modeName];
 
   console.log({ process });
 
-  $(`#${directionName}-process-status-${processIndex}`).html('<i class="bi bi-x-octagon-fill text-danger"></i>');
-  $(`#${directionName}-process-label-${processIndex}`).text(process.label);
-  $(`#${directionName}-process-label-${processIndex}`).addClass("text-danger");
-  $(`#${directionName}-process-status-label-${processIndex}`).html(`<span class="px-2 text-nowrap text-danger">Failed</span>`);
+  const directionName = testMode.directions[directionIndex];
+  if (process) {
+    $(`#${directionName}-process-status-${processIndex}`).html('<i class="bi bi-x-octagon-fill text-danger"></i>');
+    $(`#${directionName}-process-label-${processIndex}`).text(process.label);
+    $(`#${directionName}-process-label-${processIndex}`).addClass("text-danger");
+    $(`#${directionName}-process-status-label-${processIndex}`).html(`<span class="px-2 text-nowrap text-danger">Failed</span>`);
+  }
 
   $("#measurement-card .card-header h5").text(`${testMode.titleCase} mode failed`);
+
+  let errorTitle = "Unexpected error occured";
+  let errorContent = err.responseText;
+
+  if (err.readyState == 0) {
+    errorTitle = "Network error";
+    errorContent = err.statusText;
+  } else if (err.readyState == 4) {
+    const errorJson = err.responseJSON ?? JSON.parse(err.responseText);
+    if ("error" in errorJson) {
+      errorTitle = errorJson.error;
+    }
+    if ("message" in errorJson) {
+      errorContent = JSON.stringify(errorJson.message);
+    }
+  }
+
+  const errorTitleLower = errorTitle.toLowerCase();
+  let errorButtonsHtml = `
+    <button class="btn btn-sm btn-primary" onclick="tryAgain()">Restart test</button>
+    <button class="btn btn-sm btn-secondary" onclick="resetTest()">Cancel test</button>
+  `;
+
+  if (errorTitleLower.includes("token") && errorTitleLower.includes("expired")) {
+    errorButtonsHtml = `
+      <a href="/logout" class="btn btn-sm btn-link text-primary" role="button">
+        Log in again
+      </a>
+    `;
+  }
 
   $('#process-error').html(`
     <div class="border border-danger bg-light mt-1 mx-2">
@@ -1007,13 +1077,13 @@ function showTestFailed(err, processIndex, modeName, directionName) {
         <div class="accordion-item">
           <h2 class="accordion-header" id="headingError">
             <button class="accordion-button collapsed bg-danger bg-opacity-10 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="true" aria-controls="collapseError">
-              An error occured
+              ${errorTitle}
             </button>
           </h2>
           <div id="collapseError" class="accordion-collapse collapse" aria-labelledby="headingError" data-bs-parent="#accordionError">
             <div class="accordion-body bg-light">
               <span class="font-monospace small">
-                ${err.responseText?.replace(/\n/g, "<br />")}
+                ${errorContent}
               </span>
             </div>
           </div>
@@ -1021,10 +1091,17 @@ function showTestFailed(err, processIndex, modeName, directionName) {
       </div>
     </div>
     <div class="mx-2 my-1 mb-2">
-      <button class="btn btn-sm btn-primary" onclick="tryAgain()">Restart test</button>
-      <button class="btn btn-sm btn-secondary" onclick="resetTest()">Cancel test</button>
+      ${errorButtonsHtml}
     </div>
   `);
+
+  for (const dName of testMode.directions) {
+    $(`#${dName}-test-results-status`).html('<i class="bi bi-x-octagon text-danger"></i>');
+  }
+  
+  _testFinishedOnText = moment().format('YYYY-MM-DD HH:mm:ss');
+  $('#summary-test-finished-on').html(`<span class="text-secondary">${_testFinishedOnText}</span>`);
+  $('#summary-test-duration').html(`<span class="text-secondary">${_testDurationText}</span>`);
 
   for (const [key, _] of Object.entries(resultsParameters)) {
     if ($(`#${directionName}-results-param-${key} div span`).hasClass('placeholder')) {
@@ -1035,7 +1112,7 @@ function showTestFailed(err, processIndex, modeName, directionName) {
 
 function backToTop() {
   $('html, body').animate({
-    scrollTop: $('#measurement-card').offset().top
+    scrollTop: $('#measurement-card').offset().top - 72
   }, 200);
 }
 
@@ -1068,6 +1145,8 @@ function repeatTest() {
     return;
   }
 
+  $('#measurement-card').hide();
+  
   startTest();
 }
 
@@ -1092,29 +1171,43 @@ function resetTest() {
 }
 
 function saveAsPdf() {
-  // $('#modalPdfReport').modal('show');
-  
+
+  $('#btnSaveAsPdf').attr('disabled', true);
+  $('#btnSaveAsPdf .spinner-border').show();
+
   const directions = testModes[_mode].directions;
   const now = moment();
   const nowProper = now.format('YYYY-MM-DD HH:mm:ss');
-  const nowFileName = now.format('YYYY-MM-DD-HHmmss');
 
-  $.ajax({
+  $('#modalPdfReport .progress').show();
+  $('#modalPdfReport .btn-close').show();
+
+  $('#results-pdf').html(`<div class="d-flex justify-content-start">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    <h6 class="ms-2">Please wait...</h6>
+  </div>`);
+
+  $('#modalPdfReport').modal("show");
+
+  const pdfAjax = $.ajax({
     url: 'report',
     method: 'POST',
     data: {
       directions: JSON.stringify(directions),
-      serverName: _testServerName,
+      serverName: _testServer.nickname,
       startedOn: _testStartedOnText,
       finishedOn: _testFinishedOnText,
-      duration: testDurationText,
+      duration: _testDurationText,
       generatedOn: nowProper
     },
     dataType: 'html',
     success: async function (reportHtml) {
+      $('#modalPdfReport .btn-close').hide();
+
       $('#results-pdf').html(reportHtml);
 
-      const defaultFileName = `netmesh_rfc-6349_${_mode}_${nowFileName}.pdf`;
+      const testFinisedOnFileName = moment(_testFinishedOnText).format('YYYY-MM-DD-HHmmss');
+      const defaultFileName = `netmesh_rfc-6349_${_mode}_${testFinisedOnFileName}.pdf`;
 
       const opt = {
         margin: [1, 1],
@@ -1133,31 +1226,54 @@ function saveAsPdf() {
 
       const element = document.getElementById('results-pdf');
 
-      html2pdf().from(element).set(opt).toPdf().get('pdf').then(function (pdf) {
-        var totalPages = pdf.internal.getNumberOfPages();
-      
-        for (i = 1; i <= totalPages; i++) {
-          const pageWidth = pdf.internal.pageSize.getWidth();
-          const pageHeight = pdf.internal.pageSize.getHeight();
-          
-          pdf.setPage(i);
-          pdf.setFontSize(8);
-          pdf.setTextColor(108);
-          pdf.text('Page ' + i + ' of ' + totalPages, pageWidth - 0.5, pageHeight - 0.5, {
-            align: 'right',
-          });
-          pdf.text(`${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServerName}`, opt.margin[1] - 0.5, pageHeight - 0.5, {
-            align: 'left',
-          });
-        }
+      setTimeout(function () {
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+          var totalPages = pdf.internal.getNumberOfPages();
+        
+          for (i = 1; i <= totalPages; i++) {
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            
+            pdf.setPage(i);
+            pdf.setFontSize(8);
+            pdf.setTextColor(108);
+            pdf.text('Page ' + i + ' of ' + totalPages, pageWidth - 0.5, pageHeight - 0.5, {
+              align: 'right',
+            });
+            pdf.text(`${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServer.nickname}`, opt.margin[1] - 0.5, pageHeight - 0.5, {
+              align: 'left',
+            });
+          }
 
-        $('#results-pdf').html('');
-      }).save();
+          $('#modalPdfReport .progress').hide();
+          $('#modalPdfReport .btn-close').show();
+  
+          $('#btnSaveAsPdf').attr('disabled', false);
+          $('#btnSaveAsPdf .spinner-border').hide();
+          
+          $('#results-pdf').html(`<div>
+            <h5 class="text-success">Successfully saved!</h5>
+            <span>${defaultFileName}</span>
+            <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary" role="button" onclick="openDownloadsFolder()">Open Downloads folder</a>
+          </div>`);
+        }).save();
+      }, 300);
     },
     error: function (err) {
+      $('#modalPdfReport .btn-close').show();
+      $('#modalPdfReport .progress').hide();
+  
+      $('#btnSaveAsPdf').attr('disabled', false);
+      $('#btnSaveAsPdf .spinner-border').hide();
       console.error(err);
+    },
+    complete: function () {
     }
-  })
+  });
+
+  $('#modalPdfReport').on('hide.bs.modal', function () {
+    pdfAjax.abort();
+  });
 }
 
 function renderMap(lat = null, lon = null) {
@@ -1203,4 +1319,11 @@ function renderMap(lat = null, lon = null) {
   } else {
     $map.html('');
   }
+}
+
+function openDownloadsFolder() {
+  $('#btnOpenDownloadsFolder').attr('disabled', true);
+  $.get('/open-downloads-folder', function () {
+    $('#btnOpenDownloadsFolder').attr('disabled', false);
+  })
 }

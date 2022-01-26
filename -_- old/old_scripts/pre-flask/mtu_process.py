@@ -4,7 +4,7 @@ import traceback
 import logging
 from log_settings import getStreamLogger
 from datetime import datetime
-from constants import *
+from netmesh_config import *
 from utilities import client_utils
 
 GLOBAL_LOGGER = getStreamLogger()

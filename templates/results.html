@@ -42,7 +42,7 @@
         if (value !== 1) {
           quantityHtml = `<td>
             <div>
-              ${measurementText}<small class="text-muted ps-1">${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"}</small>
+              ${measurementText}<small class="text-muted ps-1">${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"} than ideal</small>
             </div>
           </td>`;
         }
@@ -68,13 +68,13 @@
       const options = getThroughputChartOptions(direction, thpt_avg, thpt_ideal);
       const chart = new ApexCharts(document.querySelector(`#${direction}-isr-thpt-chart`), options);
       chart.render();
-      /*chart.render().then(() => {
+      /* chart.render().then(() => {
         setTimeout(function () {
           chart.dataURI({scale: 0.9}).then(({imgURI}) => {
-            _thoughputChartImgURI = imgURI;
+            _throughputChartImgURI[direction] = imgURI;
           });
         }, 500);
-      });*/
+      }); */
     }
 
     function renderTransferComparisonChart({transfer_avg, transfer_ideal}) {
@@ -83,13 +83,13 @@
       const options = getTransferChartOptions(direction, transfer_avg, transfer_ideal);
       const chart = new ApexCharts(document.querySelector(`#${direction}-transfer-chart`), options);
       chart.render();
-      /*chart.render().then(() => {
+      /* chart.render().then(() => {
         setTimeout(function () {
           chart.dataURI({scale: 0.9}).then(({imgURI}) => {
-            _transferChartImgURI = imgURI;
+            _transferChartImgURI[direction] = imgURI;
           });
         }, 500);
-      });;*/
+      });; */
     }
   })();
 </script>

@@ -17,11 +17,16 @@
         <div class="h5"><small>NATIONAL TELECOMMUNICATIONS COMMISSION</small></div>
       </div>
     </div>
-    <h5 class="text-center mb-3">RFC-6349 TEST RESULTS</h5>
+    <h5 class="text-center mb-1">RFC-6349 TEST RESULTS</h5>
+    <h6 class="text-center text-secondary small mb-3">{{ app_version }}</h6>
     <h6 class="text-left mb-2">TEST DETAILS</h6>
     <h6 class="text-left mb-2 small text-secondary">Test Inputs</h6>
     <table class="table table-sm table-bordered w-auto">
       <tbody class="small" >
+        <tr>
+          <td>Test Mode</td>
+          <td>{{ mode.capitalize() }}</td>
+        </tr>
         <tr>
           <td>Internet Subscription Rate (ISR)</td>
           <td>{{ cir }} Mbps</td>
@@ -43,10 +48,6 @@
     <h6 class="text-left mb-2 small text-secondary">Test Time</h6>
     <table class="table table-sm table-bordered w-auto">
       <tbody class="small">
-        <tr>
-          <td>Test Mode</td>
-          <td>{{ mode.capitalize() }}</td>
-        </tr>
         <tr>
           <td>Started On</td>
           <td>{{ started_on }}</td>
@@ -151,7 +152,7 @@
           if (value !== 1) {
             quantityHtml = `<td>
               <div>
-                ${measurementText}<small class="text-muted ps-1">${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"}</small>
+                ${measurementText}<small class="text-muted ps-1">${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"} than ideal</small>
               </div>
             </td>`;
           }
@@ -171,23 +172,27 @@
     function renderThoughputComparisonChart({thpt_avg, thpt_ideal}, direction) {
       const thptAvgColor = ntcBlueColor;
 
-      const options = getThroughputChartOptions(direction, thpt_avg, thpt_ideal);
+      const options = getThroughputChartOptions(direction, thpt_avg, thpt_ideal, fontSize = 12);
       options.chart.height = 90;
       options.chart.width = 480;
-      console.log("thpt chart direction: " + direction);
+
       const chart = new ApexCharts(document.querySelector(`#${direction}-thpt-chart-report`), options);
-      chart.render();
+      setTimeout(() => {
+        chart.render();
+      }, 200);
     }
 
     function renderTransferComparisonChart({transfer_avg, transfer_ideal}, direction) {
       const transferColor = ntcBlueColor;
 
-      const options = getTransferChartOptions(direction, transfer_avg, transfer_ideal);
+      const options = getTransferChartOptions(direction, transfer_avg, transfer_ideal, fontSize = 12);
       options.chart.height = 128;
       options.chart.width = 480;
-      console.log("transfer chart direction: " + direction);
+
       const chart = new ApexCharts(document.querySelector(`#${direction}-transfer-chart-report`), options);
-      chart.render();
+      setTimeout(() => {
+        chart.render();
+      }, 200);
     }
   })();
 </script>

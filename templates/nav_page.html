@@ -8,15 +8,20 @@
 {{ super() }}
 <nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top shadow-sm">
 	<div class="container">
-		<a class="navbar-brand" href="#">
+		<div class="navbar-brand">
 			<img
 				src="{{url_for('static', filename='images/ntc_logo.png')}}"
 				title="RFC-6349 Application"
 				alt="Avatar"
 				style="width: 48px"
 			/>
-			<span class="p-2">RFC-6349</span>
-		</a>
+			<span class="p-2">
+				<span>RFC-6349</span>
+				<span class="p-1 small text-secondary">
+					{{ app_version }}
+				</span>
+			</span>
+		</div>
 		<button
 			class="navbar-toggler"
 			type="button"
@@ -30,13 +35,13 @@
 		</button>
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-				<li class="nav-item">
+				<!-- <li class="nav-item">
 					<a class="nav-link btn active" aria-current="page" href="#">Home</a>
-				</li>
+				</li> -->
 				<!-- <li class="nav-item">
             <button class="nav-link btn btn-link" onclick="showSettingsModal()">Test a process</button>
           </li> -->
-				<li class="nav-item">
+				<!-- <li class="nav-item">
 					<a
 						class="nav-link btn"
 						aria-current="page"
@@ -44,7 +49,7 @@
 						href="https://netmesh.pregi.net/web/speedtest/"
 						>Web speedtest</a
 					>
-				</li>
+				</li> -->
 				<!-- <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Settings

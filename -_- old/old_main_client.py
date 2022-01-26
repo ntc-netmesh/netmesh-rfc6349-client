@@ -19,7 +19,7 @@ from datetime import datetime
 import random ##for testing purposes only##
 import pytz
 import queue_process
-from constants import NORMAL_MODE, REVERSE_MODE
+from netmesh_config import NORMAL_MODE, REVERSE_MODE
 
 import time
 import ADB

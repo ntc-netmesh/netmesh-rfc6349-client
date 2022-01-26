@@ -21,12 +21,13 @@
 {% endblock %}
 
 {% block content %}
+<!-- <iframe frameborder="1" id="pdfPreview" height="800" width="960"></iframe> -->
 <div class="row justify-content-center">
   <div class="col-md-9 col-lg-4 col-xxl-4">
     <form
       id="mainForm"
-      class="main-form needs-validation"
-      onsubmit="return false"
+      class="needs-validation"
+      onsubmit="return startTest()"
       novalidate
     >
       <fieldset class="card shadow mb-4">
@@ -35,11 +36,11 @@
           <div class="row">
             <div class="form-group mb-3">
               <label class="small form-label mb-1" for="cir">Internet Subscription Rate (ISR)*</label>
-              <div class="input-group w-50">
+              <div class="input-group" style="width: 160px;">
                 <input type="number" id="cir" min="0" max="100" class="form-control align-right" aria-label="Enter speed" aria-describedby="basic-addon2" required data-bind="value:replyNumber">
                 <span class="input-group-text" id="basic-addon2">Mbps</span>
-                <div class="invalid-feedback">
-                  Invalid subscription rate
+                <div class="invalid-feedback" id="cir-validation">
+                  Enter between 1 to 100 Mbps
                 </div>
               </div>
             </div>
@@ -65,7 +66,6 @@
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
                   <div class="small lh-1 message">
-
                   </div>
                 </div>
               </div>
@@ -73,14 +73,17 @@
           </div>
           <div class="row">
             <div class="form-group mb-3">
-              <label class="small form-label mb-1" for="server">Test Server*</label>
-              <select class="form-select" id="server" required></select>
-              <div class="invalid-feedback">Select the test server</div>
+              <label class="small form-label mb-1" for="testServers">Test Server*</label>
+              <div id="testServersPlaceholder">
+                <div class="placeholder-wave py-2">
+                  <span class="placeholder placeholder-lg col-12"></span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="row">
+          <div class="row mb-3">
             <label class="mb-1 small form-label">Test Mode*</label>
-            <div class="btn-group mb-3" role="group" aria-label="Test mode">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons" role="group" aria-label="Test mode">
               <input id="radUpload" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="normal" required>
               <label class="btn btn-sm btn-outline-primary" for="radUpload" data-bs-toggle="tooltip" data-bs-placement="top" title="Upload test">
                 Normal
@@ -93,9 +96,13 @@
               <label class="btn btn-sm btn-outline-primary" for="radBidirectional" data-bs-toggle="tooltip" data-bs-placement="top" title="Download test first, then upload test" autocomplete="off" value="bidirectional">
                 Bidirectional
               </label>
-              <!-- <div class="invalid-feedback">Select a test mode</div> -->
+            </div>
+            <input type="radio" name="radTestMode" class="d-none" name="radio" required>
+            <div class="invalid-feedback">
+              Select a test mode
             </div>
             <!-- <div class="btn-group btn-group-vertical" role="group" aria-label="Test mode">
+              <input id="radSimultaneous" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="simultaneous" required>
               <input id="radSimultaneous" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="simultaneous" required>
               <label class="btn btn-sm btn-outline-primary" for="radSimultaneous" data-bs-toggle="tooltip" data-bs-placement="top" title="Simultaneous upload and download test" autocomplete="off" value="simultaneous">
                 Simultaneous
@@ -192,7 +199,8 @@
         </div>
         <div class="card-footer">
           <div class="d-flex bd-highlight">
-            <button id="btnStartTest" class="btn btn-primary ms-auto bd-highlight" type="submit" role="button" onclick="startTest()">
+            <button id="btnStartTest" class="btn btn-primary ms-auto bd-highlight" type="submit" role="button">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
               Start Test
             </button>
           </div>
@@ -319,7 +327,7 @@
               </h5>
               <div class="card border-0 mt-1">
                 <div class="card-body p-1">
-                  <div class="row gy-2 gx-1">
+                  <div class="row gy-2 gx-3">
                     <div class="col-md-4">
                       <div class="text-secondary">
                         <small>Internet Subscription Rate (ISR)</small>
@@ -354,7 +362,7 @@
                 </div>
               </div>
               <div class="mx-1 mt-2">
-                <div class="row gy-2 gx-1">
+                <div class="row gy-2 gx-3">
                   <div class="col-md-4">
                     <div class="text-secondary">
                       <small>Started on</small>
@@ -366,7 +374,7 @@
                       <small>Finished on</small>
                     </div>
                     <div id="summary-test-finished-on">
-                      <div class="placeholder-glow">
+                      <div class="placeholder-wave">
                         <span class="placeholder col-6"></span>
                       </div>
                     </div>
@@ -376,7 +384,7 @@
                       <small>Duration</small>
                     </div>
                     <div id="summary-test-duration">
-                      <div class="placeholder-glow">
+                      <div class="placeholder-wave">
                         <span class="placeholder col-6"></span>
                       </div>
                     </div>
@@ -405,7 +413,7 @@
                       </div>
                     </div>
                     <div class="p-2">
-                      <div class="d-flex inline-block align-items-center thpt-chart">
+                      <div id="download-thpt-chart" class="d-flex inline-block align-items-center">
                       </div>
                       <table class="table table-sm table-bordered table-hover caption-top mt-4" aria-hidden="true">
                         <tbody>
@@ -417,7 +425,7 @@
                           </tr>
                         </tbody>
                       </table>
-                      <div class="d-flex inline-block align-items-center transfer-chart">
+                      <div id="download-transfer-chart" class="d-flex inline-block align-items-center">
                       </div>
                     </div>
                   </div>
@@ -430,7 +438,7 @@
                     </div>
                   </div>
                   <div class="border border-1 p-2">
-                    <div class="d-flex inline-block align-items-center thpt-chart">
+                    <div id="upload-thpt-chart" class="d-flex inline-block align-items-center">
                     </div>
                     <table class="table table-sm table-bordered table-hover caption-top mt-4" aria-hidden="true">
                       <tbody>
@@ -442,7 +450,7 @@
                         </tr>
                       </tbody>
                     </table>
-                    <div class="d-flex inline-block align-items-center transfer-chart">
+                    <div id="upload-transfer-chart" class="d-flex inline-block align-items-center">
                     </div>
                   </div>
                 </div>
@@ -452,7 +460,8 @@
                   <button id="btnBackToTop" class="btn btn-link p-0" role="button" type="button" onclick="backToTop();">Back to top</button>
                 </div>
                 <div class="ms-auto p-0">
-                  <button id="btnSaveAsPdf" class="btn btn-primary" role="button" type="button" onclick="saveAsPdf();">
+                  <button id="btnSaveAsPdf" class="btn btn-primary" type="button" onclick="saveAsPdf();">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     Save as PDF
                   </button>
                 </div>
@@ -565,7 +574,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalGpsProblem" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalGpsProblemLabel" aria-hidden="true">
+<div class="modal fade" id="modalGpsProblem" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalGpsProblemLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -588,26 +597,28 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalPdfReport" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="modalPdfReportLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl">
+<div class="modal fade" id="modalPdfReport" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalPdfReportLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h4 class="modal-title">Save as PDF</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Close</button>
+        <div class="progress mb-3">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+        <div id="results-pdf"></div>
       </div>
     </div>
   </div>
 </div>
 
-<div>
-  <div id="results-pdf"></div>
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P/uRW6/sruonlYj+Q7UHWeKfTAkBW+g83NKM+jMJFJ4iAPfSnVp7BKD4dKMHmVSvICUbE/V1sSw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.4/pdfmake.min.js" integrity="sha512-vCaf5rysVLu1/zVMefJew+IjqlQibggltPWqeo96XsdyJ4ihR3eEDV1oU60afiRXTGf8DqKUjLs2Q99HCbnjAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/global.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>
+<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script> -->
 <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

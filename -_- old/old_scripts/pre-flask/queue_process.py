@@ -3,7 +3,7 @@ import websockets
 import json
 import random
 import sys
-from constants import *
+from netmesh_config import *
 import traceback
 import normal_client, reverse_client
 

@@ -90,7 +90,7 @@ const greenColor = '#38A700';
 const uploadColor = '#4824FF';
 const downloadColor = '#008ca7';
 
-function getThroughputChartOptions(direction, thpt_avg, thpt_ideal) {
+function getThroughputChartOptions(direction, thpt_avg, thpt_ideal, fontSize = 14) {
   const thptAvgColor = ntcBlueColor;
   const directionColor = direction == 'upload' ? uploadColor : downloadColor;
 
@@ -138,6 +138,7 @@ function getThroughputChartOptions(direction, thpt_avg, thpt_ideal) {
       align: 'center',
       margin: 0,
       style: {
+        fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu'
       }
     },
@@ -172,7 +173,7 @@ function getThroughputChartOptions(direction, thpt_avg, thpt_ideal) {
             offsetY: -6,
             style: {
               color: thptAvgColor,
-              fontSize: '14px',
+              fontSize: `${fontSize}px`,
               fontWeight: 'bold',
               fontFamily: 'Ubuntu'
             }
@@ -185,9 +186,9 @@ function getThroughputChartOptions(direction, thpt_avg, thpt_ideal) {
         return `${numeral(val).format("0.[00]")} Mbps`;
       },
       textAnchor: 'start',
-      offsetX: 14,
+      offsetX: fontSize,
       style: {
-        fontSize: '14px',
+        fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu',
         colors: [thpt_avg >= thpt_ideal ? greenColor : ntcRedColor]
       },
@@ -202,7 +203,7 @@ function getThroughputChartOptions(direction, thpt_avg, thpt_ideal) {
   };
 }
 
-function getTransferChartOptions(direction, transfer_avg, transfer_ideal) {
+function getTransferChartOptions(direction, transfer_avg, transfer_ideal, fontSize = 14) {
   const transferColor = ntcBlueColor;
   const directionColor = direction == 'upload' ? uploadColor : downloadColor;
 
@@ -261,13 +262,14 @@ function getTransferChartOptions(direction, transfer_avg, transfer_ideal) {
       align: 'center',
       margin: 0,
       style: {
+        fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu'
       },
     },
     plotOptions: {
       bar: {
         horizontal: true,
-        borderRadius: 14,
+        borderRadius: fontSize,
         dataLabels: {
           position: 'bottom'
         }
@@ -276,6 +278,9 @@ function getTransferChartOptions(direction, transfer_avg, transfer_ideal) {
     xaxis: {
       type: 'numeric',
       labels: {
+        style: {
+          fontSize: fontSize * 0.85
+        },
         formatter: function (value, timestamp, opts) {
           const minutes = Math.floor(value / 60);
           const seconds = value % 60;
@@ -291,7 +296,7 @@ function getTransferChartOptions(direction, transfer_avg, transfer_ideal) {
       textAnchor: 'start',
       offsetX: 0,
       style: {
-        fontSize: '14px',
+        fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu',
         colors: [transfer_ideal >= transfer_avg ? greenColor : ntcRedColor, ntcBlueColor]
       },
