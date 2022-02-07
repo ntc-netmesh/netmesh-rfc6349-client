@@ -35,11 +35,11 @@
         <div class="card-body">
           <div class="row">
             <div class="form-group mb-3">
-              <label class="small form-label mb-1" for="cir">Internet Subscription Rate (ISR)*</label>
+              <label class="small form-label mb-1" for="isr">Internet Subscription Rate (ISR)*</label>
               <div class="input-group" style="width: 160px;">
-                <input type="number" id="cir" min="0" max="100" class="form-control align-right" aria-label="Enter speed" aria-describedby="basic-addon2" required data-bind="value:replyNumber">
+                <input type="number" id="isr" min="0" max="100" class="form-control align-right" aria-label="Enter speed" aria-describedby="basic-addon2" required data-bind="value:replyNumber">
                 <span class="input-group-text" id="basic-addon2">Mbps</span>
-                <div class="invalid-feedback" id="cir-validation">
+                <div class="invalid-feedback" id="isr-validation">
                   Enter between 1 to 100 Mbps
                 </div>
               </div>
@@ -62,7 +62,7 @@
                 <option value="Fixed Wireless">Fixed Wireless</option>
                 <option value="Others">Others</option> -->
               </select>
-              <div id="net-warning" class="alert alert-warning p-0 m-1" role="alert">
+              <div id="net-warning" class="alert alert-warning p-0 m-1 d-none" role="alert">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
                   <div class="small lh-1 message">
@@ -144,7 +144,7 @@
                 type="button"
                 class="btn btn-sm btn-link p-1"
               >
-                <div class="spinner-grow spinner-grow-sm" role="status">
+                <div class="spinner-grow spinner-grow-sm d-none" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
                 Get coordinates
@@ -154,7 +154,6 @@
               </button>
             </div>
             <div id="map-snippet">
-              Map here!
             </div>
           </div>
           <!-- <div class="row">
@@ -213,7 +212,7 @@
       <img src="/static/images/ntc_logo.png" title="RFC-6349 Application" alt="Avatar" style="width: 360px; opacity: 12%;">
     </div> -->
     <div id="test-measurement-card">
-      <div id="measurement-card" class="card shadow mb-4">
+      <div id="measurement-card" class="card shadow mb-4 d-none">
         <div class="card-header d-flex align-items-center">
           <h5 class="mb-0 me-auto">Testing...</h5>
           <button type="button" class="btn btn-sm btn-link-secondary btn-test-done-options me-3 p-0" onclick="repeatTest()" data-bs-toggle="tooltip" data-bs-placement="top" title="Repeat test">
@@ -297,6 +296,41 @@
                 </table> -->
               </div>
               <div id="process-error">
+                <!-- <div class="card border-danger rounded-0 mt-1 mx-2">
+                  <div class="card-header bg-danger bg-opacity-10 text-danger p-3">Header</div>
+                  <div class="card-body bg-light monospace">
+                    <table cellpadding="3">
+                      <tbody class="card-text font-monospace small">
+                        <tr>
+                          <td>Timestamp:</td>
+                          <td>(timestamp)</td>
+                        </tr>
+                        <tr>
+                          <td>Server:</td>
+                          <td>(server_name) (ip_address)</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="border border-danger bg-light mt-1 mx-2">
+                  <div class="accordion border-0" id="accordionError">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingError">
+                        <button class="accordion-button bg-danger bg-opacity-10 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="true" aria-controls="collapseError">
+                          ${errorTitle}
+                        </button>
+                      </h2>
+                      <div id="collapseError" class="accordion-collapse collapse show" aria-labelledby="headingError" data-bs-parent="#accordionError">
+                        <div class="accordion-body bg-light">
+                          <span class="font-monospace small">
+                            ${errorContent}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div> -->
                 <!-- <div class="border border-danger bg-light mt-1 mx-2">
                   <div class="accordion border-0" id="accordionError">
                     <div class="accordion-item">
@@ -332,7 +366,7 @@
                       <div class="text-secondary">
                         <small>Internet Subscription Rate (ISR)</small>
                       </div>
-                      <span id="summary-cir">75 Mbps</span>
+                      <span id="summary-isr">75 Mbps</span>
                     </div>
                     <div class="col-md-4">
                       <div class="text-secondary">
@@ -357,6 +391,12 @@
                         <small>Coordinates</small>
                       </div>
                       <span id="summary-coordinates">14.123, 121.234</span>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>ISP</small>
+                      </div>
+                      <span id="summary-isp"></span>
                     </div>
                   </div>
                 </div>
@@ -455,15 +495,19 @@
                   </div>
                 </div>
               </div>
-              <div class="d-flex align-items-center mt-4 mb-2">
+              <div class="d-flex mt-4 mb-2">
                 <div class="p-0">
                   <button id="btnBackToTop" class="btn btn-link p-0" role="button" type="button" onclick="backToTop();">Back to top</button>
                 </div>
-                <div class="ms-auto p-0">
-                  <button id="btnSaveAsPdf" class="btn btn-primary" type="button" onclick="saveAsPdf();">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <div class="ms-auto p-0 justify-content-end">
+                  <button id="btnSaveAsPdf" class="btn btn-primary d-none" type="button" onclick="saveAsPdf();">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     Save as PDF
                   </button>
+                  <div id="pdfSaved" class="d-none">
+                    <span class="text-success text-right">Successfully saved!</span>
+                    <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary p-2 mb-1" role="button" onclick="openDownloadsFolder()">Open Downloads folder</a>
+                  </div>
                 </div>
               </div>
             </li>
@@ -597,7 +641,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="modalPdfReport" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalPdfReportLabel" aria-hidden="true">
+<!-- <div class="modal fade" id="modalPdfReport" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalPdfReportLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -612,13 +656,13 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P/uRW6/sruonlYj+Q7UHWeKfTAkBW+g83NKM+jMJFJ4iAPfSnVp7BKD4dKMHmVSvICUbE/V1sSw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.4/pdfmake.min.js" integrity="sha512-vCaf5rysVLu1/zVMefJew+IjqlQibggltPWqeo96XsdyJ4ihR3eEDV1oU60afiRXTGf8DqKUjLs2Q99HCbnjAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.4/pdfmake.min.js" integrity="sha512-vCaf5rysVLu1/zVMefJew+IjqlQibggltPWqeo96XsdyJ4ihR3eEDV1oU60afiRXTGf8DqKUjLs2Q99HCbnjAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/global.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>
-<!-- <script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script> -->
+<script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
 {% endblock %}

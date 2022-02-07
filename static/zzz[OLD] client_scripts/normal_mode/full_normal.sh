@@ -1,7 +1,7 @@
 #!/bin/bash
 
-IP=202.90.158.6
-PORT=12000
+IP=127.0.0.1
+PORT=5000
 
 # Auth
 GLOBAL_DATA='{"username":"user1","mode":"normal"}'
@@ -119,13 +119,11 @@ THPT_IDEAL=1000
 TRANSFER_AVG=10
 TRANSFER_IDEAL=9
 TCP_TTR=1.1
-AVE_RTT=40
-BUF_DEL=100
 
 THPT_POST=$(curl --header "Content-Type: application/json"\
   --header "Authorization: Bearer $TOKEN"\
   --request POST --silent \
-  --data "{\"username\":\"user1\",\"mode\":\"normal\",\"thpt_avg\":$THPT_AVG,\"thpt_ideal\":$THPT_IDEAL,\"transfer_avg\":$TRANSFER_AVG,\"transfer_ideal\":$TRANSFER_IDEAL,\"tcp_ttr\":$TCP_TTR,\"ave_rtt\":$AVE_RTT,\"buf_del\":$BUF_DEL}" \
+  --data "{\"username\":\"user1\",\"mode\":\"normal\",\"thpt_avg\":$THPT_AVG,\"thpt_ideal\":$THPT_IDEAL,\"transfer_avg\":$TRANSFER_AVG,\"transfer_ideal\":$TRANSFER_IDEAL,\"tcp_ttr\":$TCP_TTR}" \
   $IP:$PORT/api/normal/thpt
 )
 sleep 1;

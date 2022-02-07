@@ -1,73 +1,97 @@
-
+const resultsTestNames = {
+  MtuTest: "MTU Test",
+  RttTest: "RTT Test",
+  BdpTest: "BDP Bandwidth Test",
+  ThroughputTest: "Throughput Test",
+}
 
 const resultsParameters = {
   mtu: {
     name: "Maximum Transfer Unit (MTU)",
+    test: resultsTestNames.MtuTest,
     getMeasurement: function (val) {
       return `${val} bytes`
     },
   },
   rtt: {
     name: "Round-trip Time (RTT)",
+    test: resultsTestNames.RttTest,
     getMeasurement: function (val) {
       return `${numeral(val).format("0.[000]")} ms`
     },
   },
   bb: {
     name: "Baseline Bandwidth (BB)",
+    test: resultsTestNames.BdpTest,
     getMeasurement: function (val) {
       return `${val} Mbits/sec`
     },
   },
   bdp: {
     name: "Bandwidth Delay Product (BDP)",
+    test: resultsTestNames.BdpTest,
     getMeasurement: function (val) {
       return `${val} bytes`
     },
   },
   rwnd: {
     name: "Receiver Window (RWND)",
+    test: resultsTestNames.BdpTest,
     getMeasurement: function (val) {
       return `${val} KBytes`
     },
   },
   thpt_avg: {
     name: "Throughput Average",
+    test: resultsTestNames.ThroughputTest,
     getMeasurement: function (val) {
-      return `${val} Mbits/sec`
+      return `${numeral(val).format("0.00")} Mbits/sec`
     },
   },
   thpt_ideal: {
     name: "Throughput Ideal",
+    test: resultsTestNames.ThroughputTest,
     getMeasurement: function (val) {
       return `${val} Mbits/sec`
     },
   },
+  ave_rtt: {
+    name: "Average RTT",
+    test: resultsTestNames.ThroughputTest,
+    getMeasurement: function (val) {
+      return `${numeral(val).format("0.000")} ms`
+    },
+  },
+  buf_delay: {
+    name: "Buffer Delay",
+    test: resultsTestNames.ThroughputTest,
+    getMeasurement: function (val) {
+      return `${numeral(val).format("0.[00]")}%`
+    },
+  },
   transfer_avg: {
     name: "Transfer Average",
+    test: resultsTestNames.ThroughputTest,
     getMeasurement: function (val) {
       return `${numeral(val).format("0.[000]")} sec`
     },
   },
   transfer_ideal: {
     name: "Transfer Ideal",
+    test: resultsTestNames.ThroughputTest,
     getMeasurement: function (val) {
       return `${numeral(val).format("0.[000]")} sec`
     },
   },
   tcp_ttr: {
     name: "TCP Transfer Time Ratio",
+    test: resultsTestNames.ThroughputTest,
     getMeasurement: function (val) {
       return `${numeral(val).format("0.000")}`
     },
   },
   // tcp_eff: {
   //   name: "TCP Efficiency",
-  //   unit: "",
-  //   format: "",
-  // },
-  // buf_delay: {
-  //   name: "Buffer Delay",
   //   unit: "",
   //   format: "",
   // },
@@ -90,9 +114,9 @@ const greenColor = '#38A700';
 const uploadColor = '#4824FF';
 const downloadColor = '#008ca7';
 
-function getThroughputChartOptions(direction, thpt_avg, thpt_ideal, fontSize = 14) {
+function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) {
   const thptAvgColor = ntcBlueColor;
-  const directionColor = direction == 'upload' ? uploadColor : downloadColor;
+  const directionColor = method == 'upload' ? uploadColor : downloadColor;
 
   return {
     series: [
@@ -203,9 +227,9 @@ function getThroughputChartOptions(direction, thpt_avg, thpt_ideal, fontSize = 1
   };
 }
 
-function getTransferChartOptions(direction, transfer_avg, transfer_ideal, fontSize = 14) {
+function getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize = 14) {
   const transferColor = ntcBlueColor;
-  const directionColor = direction == 'upload' ? uploadColor : downloadColor;
+  const directionColor = method == 'upload' ? uploadColor : downloadColor;
 
   return {
     series: [

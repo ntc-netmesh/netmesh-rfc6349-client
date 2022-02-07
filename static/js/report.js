@@ -25,66 +25,228 @@ pdfMake.tableLayouts = {
     },
     vLineColor: function () {
       return '#e0e0e0';
+    },
+  },
+  box: {
+    hLineWidth: function (i, node) {
+      if (i === 0 || i === node.table.body.length) {
+        return 1;
+      }
+      return 0;
+    },
+    hLineColor: function () {
+      return 'gray';
+    },
+    vLineWidth: function (i, node) {
+      if (i === 0 || i === node.table.widths.length) {
+        return 1;
+      }
+      return 0;
+    },
+    vLineColor: function () {
+      return 'gray';
+    },
+    paddingLeft: function (i) {
+      return 5;
+    },
+    paddingRight: function (i, node) {
+      return 5;
+    },
+    paddingTop: function (i) {
+      return 5;
+    },
+    paddingBottom: function (i, node) {
+      return 5;
+    }
+  },
+  horizontalStripes: {
+    hLineWidth: function (i, node) {
+      return 1;
+    },
+    hLineColor: function () {
+      return 'gray';
+    },
+    vLineWidth: function (i, node) {
+      if (i === 0 || i === node.table.widths.length) {
+        return 1;
+      }
+      return 0;
+    },
+    vLineColor: function () {
+      return 'gray';
+    },
+    paddingLeft: function (i) {
+      return 5;
+    },
+    paddingRight: function (i, node) {
+      return 5;
+    },
+    paddingTop: function (i) {
+      return 5;
+    },
+    paddingBottom: function (i, node) {
+      return 5;
     }
   }
 };
 
-async function generateReport(results) {
+async function generateReport(testInputs, testTime, testClient, results) {
+  const methods = Object.keys(results);
+  const testMode = TEST_MODES[testInputs.mode];
+
+  const fileNameTimestamp = moment(testTime.finishedOn).format("YYYY-MM-DD-HHmmss");
+  const defaultFileName = `netmesh-rfc-6349_${testMode.name}_${fileNameTimestamp}.pdf`;
+
   let resultsBody = [];
-  for (const [key, param] of Object.entries(resultsParameters)) {
-    console.log({key});
-    console.log(Object.keys(results));
-    if (!Object.keys(results).includes(key)) {
-      continue;
+  
+  for (let i = 0; i < methods.length; i++) {
+    const method = methods[i];
+    const dResults = results[method];
+
+    let resultsGrouped = {};
+    for (const [key, measurement] of Object.entries(resultsParameters)) {
+      if (!resultsGrouped[measurement.test]) {
+        resultsGrouped[measurement.test] = {};
+      }
+      resultsGrouped[measurement.test][key] = measurement;
     }
 
-    const value = numeral(results[key]).value();
+    let resultsTables = [];
+    for (const [groupName, groupResults] of Object.entries(resultsGrouped)) {
+      let tablesBody = [];
+      for (const [key, measurement] of Object.entries(groupResults)) {
+        if (!Object.keys(groupResults).includes(key)) {
+          continue;
+        }
 
-    let measurementText = "";
-    if (key in results) {
-      measurementText = `${param.getMeasurement(value)}`;
-    }
-
-    let quantityText = [measurementText]
-    if (key == "tcp_ttr") {
-      const relative = value < 1 ? 1 / value : value;
-      quantityText.push({
-        text: `${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"} than ideal`,
-        fontSize: 9,
-        color: '#808080'
+        const value = numeral(dResults[key]).value();
+        let measurementText = "";
+        if (key in groupResults) {
+          measurementText = `${measurement.getMeasurement(value)}`;
+        }
+    
+        let quantityText = [measurementText];
+        switch (key) {
+          case "tcp_ttr":
+            const relative = value < 1 ? 1 / value : value;
+            quantityText.push({
+              text: "  " + `${value === 1 ? "Same as ideal" : `${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"} than ideal`}`,
+              fontSize: 8,
+              color: '#808080',
+            });
+            break;
+          case "buf_delay":
+            const absolute = Math.abs(value);
+            quantityText.push({
+              text: "  " + `Average RTT is ${value === 1 ? "same as RTT" : `${numeral(absolute).format('0.[00]')}% ${value < 1 ? "faster" : "slower"} than RTT`}`,
+              fontSize: 8,
+              color: '#808080',
+              margin: [8, 0, 0, 0]
+            });
+            break;
+        }
+        tablesBody.push([
+          {
+            text: measurement.name,
+            fontSize: 10
+          },
+          {
+            text: quantityText,
+            fontSize: 10
+          }
+        ]);
+      }
+      
+      resultsTables.push({
+        text: groupName,
+        bold: true,
+        lineHeight: 1.5,
+      });
+      
+      resultsTables.push({
+        layout: 'details',
+        table: {
+          headerRows: 0,
+          widths: [150, '*'],
+          body: tablesBody,
+        },
+        margin: [0, 0, 0, 15]
       });
     }
 
     resultsBody.push([
       {
-        text: param.name,
-        fontSize: 11
+        text: `${method.toUpperCase()} TEST`,
+        fontSize: 10,
+        bold: true,
+        margin: [0, 0, 0, 10]
       },
       {
-        text: quantityText,
-        fontSize: 11
-      }
+        image: chartImageUris.throughputCharts[method] ?? blankImageEncoded,
+        height: 62.5,
+        width: 400,
+        alignment: 'center',
+        margin: [0, 0, 0, 12]
+      },
+      {
+        image: chartImageUris.transferCharts[method] ?? blankImageEncoded,
+        height: 90,
+        width: 400,
+        alignment: 'center',
+        margin: [0, 0, 0, 12]
+      },
+      resultsTables
     ]);
+
+    if (i + 1 < methods.length) {
+      resultsBody.push({
+        text: '',
+        pageBreak: 'before',
+      })
+    }
   }
-  console.log({resultsBody});
 
   // ----------------------------------------------------------------
   // LAYOUT REPORT
   // ----------------------------------------------------------------
 
   const ntcLogoData = await getBase64ImageFromURLAsync('static/images/ntc_logo.png');
-  var docDefinition = {
-    pageMargins: [0.5 * 72, 0.5 * 72, 0.5 * 72, 0.5 * 72],
+
+  const pageMarginInches = 0.5;
+  const pageMarginPixels = pageMarginInches * 72;
+
+  const docDefinition = {
+    pageMargins: [pageMarginPixels, pageMarginPixels + 8, pageMarginPixels, pageMarginPixels + 8],
     defaultStyle: {
-      font: 'Ubuntu'
+      font: 'Ubuntu',
+      fontSize: 10
+    },
+    // ${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServer.nickname}
+    footer: function(currentPage, pageCount) {
+      const testInfo = {
+        text: `${testTime.finishedOn} | ISR: ${testInputs.isr} Mbps | ${testInputs.net} | ${testMode.titleCase}\n${testInputs.serverName}`,
+        width: '*',
+      };
+      const pageInfo = {
+        text: `\nPage ${currentPage.toString()} of ${pageCount}`,
+        alignment: 'right',
+        fontSize: 8,
+      };
+
+      return  {
+        columns: [testInfo, pageInfo],
+        color: 'gray',
+        fontSize: 8,
+        margin: [pageMarginPixels, 0, pageMarginPixels, 0]
+      }
     },
     content: [
       {
         columns: [
           {
             image: ntcLogoData,
-            width: 0.9 * 72,
-            height: 0.9 * 72,
+            width: 0.8 * 72,
+            height: 0.8 * 72,
           },
           [
             {
@@ -103,130 +265,129 @@ async function generateReport(results) {
             // }
           ]
         ],
-        columnGap: 18,
-        margin: [0, 0, 0, 12]
+        columnGap: 10,
+        margin: [0, 0, 0, 10]
       },
       {
-        text: "RFC-6349 RESULTS",
-        fontSize: 14,
+        text: "RFC-6349 TEST RESULTS",
+        fontSize: 12,
         alignment: 'center',
         bold: true,
         margin: [0, 0, 0, 12]
       },
       {
-        columns: [
-          {
-            width: '58%',
-            layout: 'details',
-            table: {
-              headerRows: 0,
-              widths: ['45%', '55%'],
-              body: [
-                [
-                  'Test Mode',
-                  'Bidirectional'
-                ],
-                [
-                  'Internet Subscription Rate (ISR)',
-                  '35 Mbps'
-                ],
-                [
-                  'Network Connection Type',
-                  'Wi-Fi'
-                ],
-                [
-                  'Test Server',
-                  'UP Diliman Department of Computer Science Test Server'
-                ],
-                [
-                  'Coordinates',
-                  '14.0134, 121.01294'
-                ],
-              ]
-            }
-          },
-          {
-            width: '42%',
-            layout: 'details',
-            table: {
-              headerRows: 0,
-              widths: ['auto', '*'],
-              body: [
-                [
-                  'Started On',
-                  '2022-01-24 17:10:19'
-                ],
-                [
-                  'Finished On',
-                  '2022-01-24 17:11:44'
-                ],
-                [
-                  'Duration',
-                  '1m 25s'
-                ],
-                [
-                  'Generated By',
-                  'sample_user'
-                ],
-                [
-                  'Generated On',
-                  '2022-01-24 17:14:28'
-                ],
-              ]
-            },
-          },
-        ],
-        columnGap: 12,
-        margin: [0, 0, 0, 12]
+        text: "TEST DETAILS",
+        decoration: 'underline',
+        fontSize: 11,
+        bold: true,
+        margin: [0, 0, 0, 11]
       },
       {
-        columns: [
-          [
-            {
-              image: _throughputChartImgURI['download'] ?? blankImageEncoded,
-              height: 40,
-              width: 256,
-              margin: [0, 0, 0, 12]
-            },
-            {
-              image: _transferChartImgURI['download'] ?? blankImageEncoded,
-              height: 56,
-              width: 256,
-              margin: [0, 0, 0, 12]
-            },
-            {
-              layout: 'details',
-              table: {
-                headerRows: 0,
-                widths: ['auto', '*'],
-                body: resultsBody
-              }
-            }
-          ],
-          [
-            {
-              image: _throughputChartImgURI['download'] ?? blankImageEncoded,
-              height: 36,
-              width: 256,
-              margin: [0, 0, 0, 12]
-            },
-            {
-              image: _transferChartImgURI['download'] ?? blankImageEncoded,
-              height: 56,
-              width: 256,
-              margin: [0, 0, 0, 12]
-            },
-            {
-              layout: 'details',
-              table: {
-                headerRows: 0,
-                widths: ['auto', '*'],
-                body: resultsBody
-              }
-            }
+        text: "TEST INPUTS",
+        fontSize: 10,
+        lineHeight: 1.5,
+        bold: true,
+      },
+      {
+        layout: 'box',
+        table: {
+          headerRows: 0,
+          widths: [150, '*'],
+          body: [
+            [
+              'Test Mode:',
+              testMode.titleCase
+            ],
+            [
+              'Internet Subscription Rate (ISR):',
+              `${testInputs.isr} Mbps`
+            ],
+            [
+              'Network Connection Type:',
+              testInputs.net
+            ],
+            [
+              'Test Server:',
+              testInputs.serverName
+            ],
+            [
+              'Coordinates:',
+              `${testInputs.lon}, ${testInputs.lat}`
+            ],
           ]
-        ]
-      }
+        },
+        margin: [0, 0, 0, 10]
+      },
+      {
+        text: "TEST TIME",
+        fontSize: 10,
+        lineHeight: 1.5,
+        bold: true,
+      },
+      {
+        layout: 'box',
+        table: {
+          headerRows: 0,
+          widths: [150, '*'],
+          body: [
+            [
+              'Started on:',
+              testTime.startedOn
+            ],
+            [
+              'Finished on:',
+              testTime.finishedOn
+            ],
+            [
+              'Duration:',
+              testTime.duration
+            ],
+          ]
+        },
+        margin: [0, 0, 0, 10]
+      },
+      {
+        text: "TEST CLIENT",
+        fontSize: 10,
+        lineHeight: 1.5,
+        bold: true,
+      },
+      {
+        layout: 'box',
+        table: {
+          headerRows: 0,
+          widths: [150, '*'],
+          body: [
+            [
+              'Performed by:',
+              {
+                text: [
+                  testClient.username,
+                  // {
+                  //   text: testClient.userId,
+                  //   color: 'gray',
+                  //   fontSize: 9
+                  // }
+                ]
+              },
+            ],
+            [
+              'ISP:',
+              testClient.isp
+            ],
+          ]
+        },
+        margin: [0, 0, 0, 10]
+      },
+      {
+        pageBreak: 'before',
+        text: `${testMode.name.toUpperCase()} MODE MEASUREMENTS`,
+        decoration: 'underline',
+        fontSize: 11,
+        bold: true,
+        margin: [0, 0, 0, 11]
+      },
+      resultsBody,
     ]
   };
 
@@ -235,10 +396,11 @@ async function generateReport(results) {
   // ----------------------------------------------------------------
   
   const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-  pdfDocGenerator.getDataUrl((dataUrl) => {
-    const iframe = document.querySelector('#pdfPreview');
-    iframe.src = dataUrl;
-  });
+  pdfDocGenerator.download(defaultFileName);
+  // pdfDocGenerator.getDataUrl((dataUrl) => {
+  //   const iframe = document.querySelector('#pdfPreview');
+  //   iframe.src = dataUrl;
+  // });
 }
 
 async function getBase64ImageFromURLAsync(url) {

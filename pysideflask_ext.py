@@ -48,15 +48,19 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
 
 def init_gui(application, port=0, width=800, height=600,
              window_title="PySideFlask", icon="appicon.png", argv=None):
+  
     if argv is None:
         argv = sys.argv
 
     if port == 0:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('localhost', 0))
+        sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
         sock.close()
 
+    
+    print("Opening NetMesh RFC-6349 App...")
+    
     # Application Level
     qtapp = QtWidgets.QApplication(argv)
     webapp = ApplicationThread(application, port)
@@ -78,7 +82,7 @@ def init_gui(application, port=0, width=800, height=600,
     window.setCentralWidget(webView)
 
     # WebPage Level
-    page = WebPage('http://localhost:{}'.format(port))
+    page = WebPage('http://127.0.0.1:{}'.format(port))
     
     profile = page.profile()
     profile.clearHttpCache()
@@ -87,8 +91,11 @@ def init_gui(application, port=0, width=800, height=600,
     
     page.home()
     webView.setPage(page)
-
+    
     window.show()
+    
+    print("App opened")
+    
     return qtapp.exec_()
 
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)

@@ -8,8 +8,7 @@
 export _rtt="$1"
 export _ip="$2" 
 export _port="$3"
-export _mode="$4"
-if [[ -z "$_rtt" || -z "$_ip" || -z "$_port"  || -z "$_mode" ]]
+if [[ -z "$_rtt" || -z "$_ip" || -z "$_port" ]]
 then
 echo "Normal Mode BB finder"
 echo "Usage: ./bb.sh <rtt> <ip> <port>"
@@ -21,16 +20,6 @@ exit 1;
 
 fi
 
-if [[ "$_mode" = "normal" ]];
-then
-  _mode="";
-elif [[ "$_mode" = "reverse" ]];
-then
-  _mode="--reverse";
-else
-  echo "invalid mode"
-  exit 1;
-fi
 # iperf3 
 # | extract results line | retrieve BDP
 
@@ -39,7 +28,7 @@ fi
 #  | sed -e '1,/Jitter/ d; /sec/!d' | awk -F" " '{print $7}')
 #echo "bb: $BB Mbits/sec"
 
-BB=$(iperf3 $_mode --client $_ip --port $_port --time 10 --format m --bandwidth 1000M \
+BB=$(iperf3 --client $_ip --port $_port --time 10 --format m --bandwidth 1000M \
   | sed -n -e '/sender/p' | awk -F" " '{print $7}')
 echo "bb: $BB Mbits/sec"
 

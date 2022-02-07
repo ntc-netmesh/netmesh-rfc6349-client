@@ -11,26 +11,26 @@ let measurementTimes = {
 let currentTestDirection = "";
 let currentProcessIndex = 0;
 
-let appState = AppState.Ready;
+let appState = APP_STATE.Ready;
 
-$('#net-warning').hide();
+// $('#net-warning').hide();
+// $('#btnGetGpsCoordinates .spinner-grow').hide();
 $('#btnStartTest').attr('disabled', true);
-$('#btnGetGpsCoordinates .spinner-grow').hide();
 
-$('#btnSaveAsPdf .spinner-border').hide();
-$('#modalPdfReport .btn-close').hide();
-$('#measurement-card').hide();
-// $('#measurement-results-card').hide();
+// $('#btnSaveAsPdf .spinner-border').hide();
+// $('#pdfSaved').hide();
+// $('#modalPdfReport .btn-close').hide();
+// $('#measurement-card').hide();
 
-$('#measurement-results').html('');
-$('#measurement-failed-card').hide();
+// $('#measurement-results').html('');
+// $('#measurement-failed-card').hide();
 
 $(function () {
   renderMap();
 
   $('#btnGetGpsCoordinates').on('click', function () {
     $('#btnGetGpsCoordinates, #btnStartTest').attr('disabled', true);
-    $('#btnGetGpsCoordinates .spinner-grow').show();
+    $('#btnGetGpsCoordinates .spinner-grow').removeClass('d-none');
 
     $.post('/get-gps-coordinates', function (coordinates) {
       const lat = coordinates[0];
@@ -44,14 +44,14 @@ $(function () {
       }
 
       $('#btnGetGpsCoordinates, #btnStartTest').attr('disabled', false);
-      $('#btnGetGpsCoordinates .spinner-grow').hide();
+      $('#btnGetGpsCoordinates .spinner-grow').addClass('d-none');
     })
   });
 
   setTestServers();
   
   $('#netType').html('');
-  for (const netType of Object.keys(networkConnectionTypes)) {
+  for (const netType of Object.keys(NETWORK_CONNECTION_TYPES)) {
     $('#netType').append(`
       <option value="${netType}" ${netType == "Ethernet" ? "selected" : ""}> 
         ${netType}
@@ -61,10 +61,10 @@ $(function () {
   $('#netType').on('change', function () {
     const selectedNetType = $(this).val();
     if (selectedNetType === "Ethernet") {
-      $('#net-warning').hide();
+      $('#net-warning').addClass('d-none');
     } else {
       $('#net-warning .message').text(`RFC-6349 methodology focuses on Ethernet-terminated services`);
-      $('#net-warning').show();
+      $('#net-warning').removeClass('d-none');
     }
   });
   $('#netType').val("Ethernet").trigger('change');
@@ -82,7 +82,7 @@ $(function () {
     }
   });
 
-  $('#cir').focus();
+  // $('#isr').focus();
 
   (function () {
     window.addEventListener('load', function () {
@@ -108,7 +108,7 @@ $(function () {
 
     let message = "Close this app?";
     switch (appState) {
-      case AppState.Testing:
+      case APP_STATE.Testing:
         message = "Test is ongoing.\n\nClose this app anyway?"
         break;
     }
@@ -129,7 +129,45 @@ $(function () {
 
   // renderThoughputComparisonChart();
   // renderTransferComparisonChart();
-  // generateReport();
+  // const testInputs = {
+  //   mode: 'reverse',
+  //   isr: 35,
+  //   net: "Ethernet",
+  //   serverName: 'UP Diliman Department of Computer Science Test Server',
+  //   lon: 14.9876,
+  //   lat: 121.67895
+  // };
+  // const testTime = {
+  //   startedOn: '2022-01-24 16:17:18',
+  //   finishedOn: '2022-01-24 16:19:20',
+  //   duration: '2m 02s',
+  // };
+  // const testClient = {
+  //   username: 'hardcoded_user',
+  //   ipAddress: 'hardcoded_ip_address',
+  // };
+  // const sampleResults = {
+  //   download: {
+  //     ave_rtt: 0,
+  //     bb: 42.7,
+  //     bdp: 346425,
+  //     buf_delay: 0,
+  //     mtu: 1500,
+  //     retx_bytes: 0,
+  //     rtt: 8.113,
+  //     rwnd: 43,
+  //     tcp_eff: 0,
+  //     tcp_ttr: 0.844594594595,
+  //     thpt_avg: 43.5,
+  //     thpt_ideal: 35,
+  //     transfer_avg: 10,
+  //     transfer_ideal: 11.84,
+  //     tx_bytes: 0
+  //   }
+  // };
+  // setTimeout(function () {
+  //   generateReport(testInputs, testTime, testClient, sampleResults);
+  // }, 500);
 });
 
 function setTestServers() {
@@ -137,7 +175,7 @@ function setTestServers() {
     url: 'get-test-servers',
     method: 'GET',
     dataType: 'json',
-    timeout: 120 * 1000,
+    timeout: MEASUREMENT_TIMEOUT,
     success: function (data) {
       $('#testServersPlaceholder').html(`<select class="form-select" id="testServers" required></select>
         <div class="invalid-feedback">Select a test server</div>`);
@@ -305,11 +343,20 @@ function renderThoughputComparisonChart() {
     }
   };
 
+  options.chart.width = 640;
+  options.chart.height = 100;
   const chart = new ApexCharts(document.querySelector(`#download-thpt-chart`), options);
-  chart.render();
-  console.log(chart.width);
-  chart.dataURI({scale: 3}).then(({ imgURI, blob }) => {
-    _throughputChartImgURI['download'] = imgURI;
+  chart.render().then(() => {
+    setTimeout(function () {
+      chart.dataURI({scale: 3}).then(({imgURI}) => {
+        chartImageUris.throughputCharts['download'] = imgURI;
+      });
+      chart.destroy();
+
+      options.chart.width = '100%';
+      const chart2 = new ApexCharts(document.querySelector(`#download-thpt-chart`), options);
+      chart2.render();
+    }, 200);
   });
 }
 
@@ -417,46 +464,56 @@ function renderTransferComparisonChart() {
     }
   };
 
-  var chart = new ApexCharts(document.querySelector(`#download-transfer-chart`), options);
-  chart.render();
-  chart.dataURI({scale: 4}).then(({ imgURI, blob }) => {
-    _transferChartImgURI['download'] = imgURI;
+  options.chart.width = 640;
+  options.chart.height = 144;
+  const chart = new ApexCharts(document.querySelector(`#download-transfer-chart`), options);
+  chart.render().then(() => {
+    setTimeout(function () {
+      chart.dataURI({scale: 3}).then(({imgURI}) => {
+        chartImageUris.transferCharts['download'] = imgURI;
+      });
+      chart.destroy();
+
+      options.chart.width = '100%';
+      const chart2 = new ApexCharts(document.querySelector(`#download-transfer-chart`), options);
+      chart2.render();
+    }, 200);
   });
 }
 
-function createMeasurementProcessesTable(directions) {
+function createMeasurementProcessesTable(methods) {
   $('#measurement-processes-timeline').html('');
   $('#measurement-results').html('');
   $(`#process-error`).html('');
 
-  for (const dName of directions) {
+  for (const dName of methods) {
     console.log(dName);
-    const testDirection = testDirections[dName];
+    const testMethod = TEST_METHODS[dName];
 
     $('#measurement-processes-timeline').append(`
-      <h6 class="small text-uppercase m-1">${testDirection.name} test</h6>
-      <table id="${testDirection.name}-measurement-processes" class="table table-sm table-borderless table-hover mb-3">
+      <h6 class="small text-uppercase m-1">${testMethod.name} test</h6>
+      <table id="${testMethod.name}-measurement-processes" class="table table-sm table-borderless table-hover mb-3">
         <tbody class="align-middle">
         </tbody>
       </table>
     `);
 
-    $measurementTimeline = $(`#${testDirection.name}-measurement-processes tbody`);
+    $measurementTimeline = $(`#${testMethod.name}-measurement-processes tbody`);
     $measurementTimeline.html('');
-    for (var i = 0; i < measurementProcesses.length; i++) {
-      const process = measurementProcesses[i];
+    for (var i = 0; i < MEASUREMENT_PROCESSES.length; i++) {
+      const process = MEASUREMENT_PROCESSES[i];
       $measurementTimeline.append(`
         <tr>
           <td class="p-0 d-flex inline-block" style="min-width: 56px;">
-            <span id="${testDirection.name}-process-time-${i}" class="text-muted ms-3 me-2">${dName === directions[0] && i === 0 ? "0:00" : ""}</span>
+            <span id="${testMethod.name}-process-time-${i}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? "0:00" : ""}</span>
           </td>
-          <td id="${testDirection.name}-process-status-${i}" class="p-0">
+          <td id="${testMethod.name}-process-status-${i}" class="p-0">
             <i class="bi bi-circle text-muted"></i>
           </td>
           <td class="p-0 w-100">
-            <span id="${testDirection.name}-process-label-${i}" class="text-muted mx-2">${process.label}</span>
+            <span id="${testMethod.name}-process-label-${i}" class="text-muted mx-2">${process.label}</span>
           </td>
-          <td id="${testDirection.name}-process-status-label-${i}" class="p-0 text-end">
+          <td id="${testMethod.name}-process-status-label-${i}" class="p-0 text-end">
             
           </td>
         </tr>
@@ -473,7 +530,7 @@ function createMeasurementProcessesTable(directions) {
                 <span id="${dName}-test-results-status" class="me-1">
                   <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
                 </span>
-                ${testDirection.titleCase} Test...
+                ${testMethod.titleCase} Test...
               </h6>
             </div>
           </div>
@@ -485,12 +542,12 @@ function createMeasurementProcessesTable(directions) {
     `);
     
 
-    // $(`#${testDirection.name}-measurement-results-table tbody`).html('');
+    // $(`#${testMethod.name}-measurement-results-table tbody`).html('');
     // for (const [key, value] of Object.entries(resultsParameters)) {
-    //   $(`#${testDirection.name}-measurement-results-table tbody`).append(`
+    //   $(`#${testMethod.name}-measurement-results-table tbody`).append(`
     //     <tr>
     //       <td>${value.name}</td>
-    //       <td id="${testDirection.name}-results-param-${key}" data-has-value="false">
+    //       <td id="${testMethod.name}-results-param-${key}" data-has-value="false">
     //         <div class="placeholder-glow">
     //           <span class="placeholder bg-secondary" style="width: 72px;"></span>
     //         </div>
@@ -513,51 +570,68 @@ function createMeasurementProcessesTable(directions) {
 }
 
 function startTest() {
-  appState = AppState.Testing;
+  appState = APP_STATE.Testing;
 
   $('#btnStartTest').attr('disabled', true);
   $('#btnStartTest .spinner-border').removeClass('d-none');
 
-  const c_cir = $('#cir').val();
-  const c_netType = $('#netType').val();
+  $('#btnSaveAsPdf').removeClass('d-none');
+  $('#pdfSaved').addClass('d-none');
+
+  const isr = $('#isr').val();
+  const netTypeName = $('#netType').val();
   
   const testServerIndex = $('#testServers').val();
-  const c_testServer = testServers[testServerIndex];
+  const testServer = testServers[testServerIndex];
   
-  const c_selectedTestMode = $('input[name="radTestMode"]:checked').val();
-  const c_lat = $('#lat').val();
-  const c_lon = $('#lon').val();
+  const modeName = $('input[name="radTestMode"]:checked').val();
+  const lon = $('#lon').val();
+  const lat = $('#lat').val();
+
+  console.log({
+    isr, netTypeName, modeName, testServer, lon, lat
+  });
 
   $.ajax({
     url: 'set-test-details',
     method: 'POST',
     data: {
-      cir: c_cir,
-      net: c_netType,
-      mode: c_selectedTestMode,
-      serverIP: c_testServer?.ip_address,
-      lon: c_lon,
-      lat: c_lat
+      isr: isr,
+      net: netTypeName,
+      mode: modeName,
+      serverIP: testServer?.ip_address,
+      lon: lon,
+      lat: lat,
     },
     dataType: 'json',
-    success: function (response) {
-      console.log(response);
+    success: async function (response) {
+      console.log("response", response);
+
+      $('#summary-isp').html('<i class="small text-muted">(undetected)</i>');
+      await getIsp()
+        .then(isp => {
+          testClient.isp = isp;
+        })
+        .catch(ex => {
+          testClient.isp = "";
+          
+          const errorJson = JSON.parse(ex.responseText);
+          errorMsg = ex.responseText;
+          if ("error" in errorJson) {
+            errorMsg = errorJson['error'];
+          }
+          console.log(errorMsg);
+        });
 
       $('#btnStartTest').attr('disabled', false);
       $('#mainForm fieldset').attr('disabled', true);
 
-      _cir = response['cir'];
-      
-      _netType = response['net'];
-      _netTypeName = _netType;
-
-      _testServer = c_testServer;
-
-      _mode = response['mode'];
-      _lon = response['lon'];
-      _lat = response['lat'];
-      
-      const testMode = testModes[_mode];
+      testInputs.isr = response['isr'];
+      testInputs.networkConnectionTypeName = response['net'];
+      testInputs.modeName = response['mode'];
+      testInputs.lon = response['lon'];
+      testInputs.lat = response['lat'];
+      testInputs.testServer = testServer;
 
       backToTop();
 
@@ -566,22 +640,24 @@ function startTest() {
         download: []
       };
 
-      $('#summary-cir').text(_cir + " Mbps");
-      $('#summary-net').text(_netTypeName);
-      $('#summary-server').text(_testServer.nickname);
-      $('#summary-mode').text(testMode.titleCase);
-      $('#summary-coordinates').text(_lat + ", " + _lon);
+      $('#summary-isr').text(testInputs.isr + " Mbps");
+      $('#summary-net').text(testInputs.networkConnectionTypeName);
+      $('#summary-server').text(testInputs.testServer.nickname);
+      $('#summary-mode').text(testInputs.mode.titleCase);
+      $('#summary-coordinates').text(testInputs.coordinates);
 
-      $("#measurement-card .card-header h5").text(`Testing ${testMode.titleCase} mode...`);
+      $('#summary-isp').text(testClient.isp);
 
-      $('#measurement-card').show();
+      $("#measurement-card .card-header h5").text(`Testing ${testInputs.mode.titleCase} mode...`);
+
+      $('#measurement-card').removeClass('d-none');
       // $('#measurement-results-card').hide();
-      $('#measurement-failed-card').hide();
-      $('.btn-test-done-options').hide();
-      $('#btnBackToTop').show();
-      $('#btnSaveAsPdf').hide();
+      // $('#measurement-failed-card').hide();
+      $('.btn-test-done-options').addClass('d-none');
+      $('#btnBackToTop').removeClass('d-none');
+      $('#btnSaveAsPdf').addClass('d-none');
 
-      createMeasurementProcessesTable(testMode.directions);
+      createMeasurementProcessesTable(testInputs.mode.methods);
 
       const startTime = Date.now();
       const timerInterval = setInterval(function () {
@@ -589,61 +665,61 @@ function startTest() {
         const minutes = parseInt(elapsedSeconds / 60);
         const seconds = parseInt(elapsedSeconds) % 60;
 
-        _testDurationText = `${numeral(minutes).format("0")}m ${numeral(seconds).format("00")}s`
+        testTime.duration = `${numeral(minutes).format("0")}m ${numeral(seconds).format("00")}s`;
 
         $(`#${currentTestDirection}-process-time-${currentProcessIndex}`).text(`${numeral(minutes).format("0")}:${numeral(seconds).format("00")}`);
-      }, 100);
+      }, 50);
 
-      _testStartedOnText = moment(startTime).format('YYYY-MM-DD HH:mm:ss');
-      $('#summary-test-started-on').text(_testStartedOnText);
+      testTime.startedOn = moment(startTime).format('YYYY-MM-DD HH:mm:ss');
+      $('#summary-test-started-on').text(testTime.startedOn );
 
-      switch (testMode.name) {
+      switch (testInputs.mode.name) {
         case "normal":
         case "reverse":
-          const directionName = testMode.directions[0];
-          executeMeasurements(_testServer, directionName)
+          const methodName = testInputs.mode.methods[0];
+          executeMeasurements(testInputs.testServer, methodName)
             .then(resultsHtml => {
-              appState = AppState.TestFinished;
+              appState = APP_STATE.TestFinished;
 
               clearInterval(timerInterval);
 
               $("#measurement-card .card-header h5").text(`Finished`);
               
-              setTestFinishTimes(directionName);
+              setTestFinishTimes(methodName);
 
-              showTestResults(resultsHtml, directionName);
+              showTestResults(resultsHtml, methodName);
             })
             .catch((err) => {
               console.log("normal/reverse");
               console.log({ err });
               clearInterval(timerInterval);
-              showTestFailed(err, currentProcessIndex, testMode.name, 0);
+              showTestFailed(err, currentProcessIndex, 0);
             });
           break;
         case "bidirectional":
           let directionIndex = 0;
-          executeMeasurements(_testServer, testMode.directions[directionIndex])
+          executeMeasurements(testInputs.testServer, testInputs.mode.methods[directionIndex])
             .then(resultsHtml => {
-              showTestResults(resultsHtml, testMode.directions[directionIndex]);
+              showTestResults(resultsHtml, testInputs.mode.methods[directionIndex]);
               directionIndex++;
 
-              return executeMeasurements(_testServer, testMode.directions[directionIndex]);
+              return executeMeasurements(testInputs.testServer, testInputs.mode.methods[directionIndex]);
             })
             .then(resultsHtml => {
-              appState = AppState.TestFinished;
+              appState = APP_STATE.TestFinished;
               
               clearInterval(timerInterval);
-              showTestResults(resultsHtml, testMode.directions[directionIndex]);
+              showTestResults(resultsHtml, testInputs.mode.methods[directionIndex]);
 
               $("#measurement-card .card-header h5").text(`Finished`);
-              setTestFinishTimes(testMode.directions[directionIndex]);
+              setTestFinishTimes(testInputs.mode.methods[directionIndex]);
             })
             .catch(err => {
-              appState = AppState.TestFinished;
+              appState = APP_STATE.TestFinished;
 
               console.log(err);
               clearInterval(timerInterval);
-              showTestFailed(err, currentProcessIndex, testMode.name, directionIndex);
+              showTestFailed(err, currentProcessIndex, directionIndex);
             });
           break;
       }
@@ -659,35 +735,34 @@ function startTest() {
   return false;
 }
 
-function setTestFinishTimes(directionName) {
-  const measurementLength = measurementTimes[directionName].length;
-  const lastMeasurementTime = measurementTimes[directionName][measurementLength - 1][1];
+function setTestFinishTimes(methodName) {
+  const measurementLength = measurementTimes[methodName].length;
+  const lastMeasurementTime = measurementTimes[methodName][measurementLength - 1][1];
 
-  _testFinishedOnText = moment(lastMeasurementTime).format('YYYY-MM-DD HH:mm:ss');
-  $('#summary-test-finished-on').html(_testFinishedOnText);
-  $('#summary-test-duration').html(_testDurationText);
+  testTime.finishedOn = moment(lastMeasurementTime).format('YYYY-MM-DD HH:mm:ss');
+  $('#summary-test-finished-on').html(testTime.finishedOn);
+  $('#summary-test-duration').html(testTime.duration);
 
-  $('#btnBackToTop').hide();
-  $('#btnSaveAsPdf').show();
-  $('.btn-test-done-options').show();
+  $('#btnBackToTop').addClass('d-none');
+  $('#btnSaveAsPdf').removeClass('d-none');
+  $('.btn-test-done-options').removeClass('d-none');
 }
 
-function executeMeasurements(testServer, directionName) {
-  const testDirection = testDirections[directionName];
-
-  currentTestDirection = directionName;
+function executeMeasurements(testServer, methodName) {
+  const testMethod = TEST_METHODS[methodName];
+  currentTestDirection = methodName;
   currentProcessIndex = 0;
 
   const executeProcess = (process) => {
-
     console.log({ process });
-    console.log(`Current process: ${process.processId} - ${testServer.hostname}/api/${testDirection.mode}/${process.processId}`);
-
-    const directExecutions = ['mtu', 'rtt'];
+    console.log(`Current process: ${process.processId} - ${testServer.hostname}/api/${testMethod.mode}/${process.processId}`);
 
     const getProcessInfo = (processId) => {
       console.log({ processId });
+
+      const directExecutions = ['mtu', 'rtt'];
       return new Promise(function (resolve, reject) {
+      
         if (directExecutions.includes(processId)) {
           resolve();
           return;
@@ -699,12 +774,12 @@ function executeMeasurements(testServer, directionName) {
           data: {
             testServerName: testServer.nickname,
             testServerUrl: testServer.hostname,
-            mode: testDirection.mode,
+            mode: testMethod.mode,
             processId: process.processId,
             requiredParams: JSON.stringify(getRequiredGetParameters(processId))
           },
           dataType: 'json',
-          timeout: 120 * 1000,
+          timeout: MEASUREMENT_TIMEOUT,
           success: function (data) {
             resolve(data);
           },
@@ -730,12 +805,12 @@ function executeMeasurements(testServer, directionName) {
           data: {
             testServerName: testServer.nickname,
             testServerUrl: testServer.hostname,
-            mode: testDirection.mode,
+            mode: testMethod.mode,
             jobId,
             measurementTestName: process.label
           },
           dataType: 'json',
-          timeout: 120 * 1000,
+          timeout: MEASUREMENT_TIMEOUT,
           success: function (data) {
             setTimeout(function () {
               resolve(data);
@@ -756,7 +831,7 @@ function executeMeasurements(testServer, directionName) {
       if (Number.isInteger(status)) {
         const queuePlacement = parseInt(status) + 1;
         if (!isLooped) {
-          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html(`
+          $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html(`
             <div class="d-flex justify-content-end">
               <div class="progress h-100 mx-2">
                 <div class="px-3 progress-bar progress-bar-striped progress-bar-animated bg-dark" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
@@ -786,9 +861,9 @@ function executeMeasurements(testServer, directionName) {
         $.ajax({
           url: `run-process-${processId}`,
           method: 'POST',
-          data: getRequiredScriptParameters(processId, port, testDirection),
+          data: getRequiredScriptParameters(processId, port, testMethod),
           dataType: 'json',
-          timeout: 120 * 1000,
+          timeout: MEASUREMENT_TIMEOUT,
           success: function (scriptData) {
             resolve(scriptData);
           },
@@ -807,7 +882,7 @@ function executeMeasurements(testServer, directionName) {
         console.log({ key, requiredGetParamaters });
         if ((key in resultsParameters) && (key in scriptData)) {
           const rParam = resultsParameters[key];
-          $(`#${testDirection.name}-results-param-${key}`).text(`${rParam.getMeasurement(scriptData[key])}`);
+          $(`#${testMethod.name}-results-param-${key}`).text(`${rParam.getMeasurement(scriptData[key])}`);
         }
         if (key in requiredGetParamaters) {
           requiredGetParamaters[key] = scriptData[key];
@@ -820,12 +895,12 @@ function executeMeasurements(testServer, directionName) {
           data: {
             testServerName: testServer.nickname,
             testServerUrl: testServer.hostname,
-            mode: testDirection.mode,
+            mode: testMethod.mode,
             processId: process.processId,
             scriptData: JSON.stringify(scriptData)
           },
           dataType: 'json',
-          timeout: 120 * 1000,
+          timeout: MEASUREMENT_TIMEOUT,
           success: function () {
             resolve();
           },
@@ -839,11 +914,11 @@ function executeMeasurements(testServer, directionName) {
     };
 
     return new Promise((resolve, reject) => {
-      $(`#${testDirection.name}-process-label-${currentProcessIndex}`).html(`${process.label}...`);
-      $(`#${testDirection.name}-process-label-${currentProcessIndex}`).removeClass("text-muted");
+      $(`#${testMethod.name}-process-label-${currentProcessIndex}`).html(`${process.label}...`);
+      $(`#${testMethod.name}-process-label-${currentProcessIndex}`).removeClass("text-muted");
 
-      $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small">Connecting to test server...</i>');
-      $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`
+      $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html('<i class="small">Connecting to test server...</i>');
+      $(`#${testMethod.name}-process-status-${currentProcessIndex}`).html(`
         <div class="spinner-border spinner-border-sm" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
@@ -852,16 +927,16 @@ function executeMeasurements(testServer, directionName) {
       getProcessInfo(process.processId)
         .then(response => {
           if (response != null) {
-            $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-nowrap">Checking queue...</i>');
+            $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-nowrap">Checking queue...</i>');
 
             return checkQueue(response.job_id, response.port);
           }
         })
         .then(port => {
-          measurementTimes[directionName].push([Date.now(), null]);
+          measurementTimes[methodName].push([Date.now(), null]);
 
-          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-primary text-nowrap">Measuring...</i>');
-          $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`
+          $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-primary text-nowrap">Measuring...</i>');
+          $(`#${testMethod.name}-process-status-${currentProcessIndex}`).html(`
             <div class="spinner-grow spinner-grow-sm text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
@@ -870,8 +945,8 @@ function executeMeasurements(testServer, directionName) {
           return runScriptProcess(process.processId, port)
         })
         .then(scriptData => {
-          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-primary text-nowrap">Sending measurements...</i>');
-          $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html(`
+          $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html('<i class="small text-primary text-nowrap">Sending measurements...</i>');
+          $(`#${testMethod.name}-process-status-${currentProcessIndex}`).html(`
             <div class="spinner-border spinner-border-sm text-primary" role="status">
               <span class="visually-hidden">Loading...</span>
             </div>
@@ -880,15 +955,15 @@ function executeMeasurements(testServer, directionName) {
           return postProcess(scriptData);
         })
         .then(() => {
-          measurementTimes[directionName][currentProcessIndex][1] = Date.now();
-          $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
+          measurementTimes[methodName][currentProcessIndex][1] = Date.now();
+          $(`#${testMethod.name}-process-status-${currentProcessIndex}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
 
-          $(`#${testDirection.name}-process-label-${currentProcessIndex}`).html(process.label);
-          $(`#${testDirection.name}-process-label-${currentProcessIndex}`).addClass("text-success");
+          $(`#${testMethod.name}-process-label-${currentProcessIndex}`).html(process.label);
+          $(`#${testMethod.name}-process-label-${currentProcessIndex}`).addClass("text-success");
 
-          $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html(`
-            <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${moment(measurementTimes[directionName][currentProcessIndex][0]).format('HH:mm:ss.SSS')} - ${moment(measurementTimes[directionName][currentProcessIndex][1]).format('HH:mm:ss.SSS')}">
-              ${moment(measurementTimes[directionName][currentProcessIndex][0]).format('hh:mm:ss a')} - ${moment(measurementTimes[directionName][currentProcessIndex][1]).format('hh:mm:ss a')}
+          $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html(`
+            <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${moment(measurementTimes[methodName][currentProcessIndex][0]).format('HH:mm:ss.SSS')} - ${moment(measurementTimes[methodName][currentProcessIndex][1]).format('HH:mm:ss.SSS')}">
+              ${moment(measurementTimes[methodName][currentProcessIndex][0]).format('hh:mm:ss a')} - ${moment(measurementTimes[methodName][currentProcessIndex][1]).format('hh:mm:ss a')}
             </span>
           `);
 
@@ -912,10 +987,10 @@ function executeMeasurements(testServer, directionName) {
           data: {
             testServerName: testServer.nickname,
             testServerUrl: testServer.hostname,
-            mode: testDirection.mode,
+            mode: testMethod.mode,
           },
           dataType: 'html',
-          timeout: 120 * 1000,
+          timeout: MEASUREMENT_TIMEOUT,
           success: function (resultsHtml) {
             resolve(resultsHtml);
           },
@@ -931,7 +1006,7 @@ function executeMeasurements(testServer, directionName) {
 
   const executeAllProcesses = async () => {
     return new Promise((resolve, reject) => {
-      measurementProcesses.reduce(async (previousPromise, nextProcess) => {
+      MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
         await previousPromise;
         return executeProcess(nextProcess);
       }, Promise.resolve())
@@ -965,14 +1040,14 @@ function executeMeasurements(testServer, directionName) {
   //       .then(() => {
   //         console.log('return executeProcess');
   //         console.log({process});
-  //         $(`#${testDirection.name}-process-status-${currentProcessIndex}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
+  //         $(`#${testMethod.name}-process-status-${currentProcessIndex}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
 
-  //         $(`#${testDirection.name}-process-label-${currentProcessIndex}`).html(process.label);
-  //         $(`#${testDirection.name}-process-label-${currentProcessIndex}`).addClass("text-success");
+  //         $(`#${testMethod.name}-process-label-${currentProcessIndex}`).html(process.label);
+  //         $(`#${testMethod.name}-process-label-${currentProcessIndex}`).addClass("text-success");
 
-  //         $(`#${testDirection.name}-process-status-label-${currentProcessIndex}`).html(`
-  //           <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${moment(measurementTimes[directionName][currentProcessIndex][0]).format('HH:mm:ss.SSS')} - ${moment(measurementTimes[directionName][currentProcessIndex][1]).format('HH:mm:ss.SSS')}">
-  //             ${moment(measurementTimes[directionName][currentProcessIndex][0]).format('hh:mm:ss a')} - ${moment(measurementTimes[directionName][currentProcessIndex][1]).format('hh:mm:ss a')}
+  //         $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html(`
+  //           <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${moment(measurementTimes[methodName][currentProcessIndex][0]).format('HH:mm:ss.SSS')} - ${moment(measurementTimes[methodName][currentProcessIndex][1]).format('HH:mm:ss.SSS')}">
+  //             ${moment(measurementTimes[methodName][currentProcessIndex][0]).format('hh:mm:ss a')} - ${moment(measurementTimes[methodName][currentProcessIndex][1]).format('hh:mm:ss a')}
   //           </span>
   //         `);
 
@@ -1008,40 +1083,33 @@ function getRequiredGetParameters(processId) {
   return data;
 }
 
-function getRequiredScriptParameters(processId, port, testDirection) {
-  // const cir = $('#cir').val();
-
-  // const testServerIP = $('#server').val();
-
-  // const selectedNetType = $('#netType').val();
-  const netConnectionType = networkConnectionTypes[_netType];
-
+function getRequiredScriptParameters(processId, port, testMethod) {
   let data = {};
   switch (processId) {
     case "mtu":
     case "rtt":
       data = {
-        mode: testDirection.mode,
-        networkConnectionTypeName: _netType,
-        networkPrefix: netConnectionType.prefix,
-        serverIP: _testServer.ip_address,
+        mode: testMethod.mode,
+        networkConnectionTypeName: testInputs.networkConnectionTypeName,
+        networkPrefix: testInputs.networkConnectionType.prefix,
+        serverIP: testInputs.testServer.ip_address,
       }
       break;
     case "bdp":
       data = {
-        mode: testDirection.mode,
+        mode: testMethod.mode,
         rtt: requiredGetParamaters.rtt,
-        serverIP: _testServer.ip_address,
+        serverIP: testInputs.testServer.ip_address,
         port,
       }
       break;
     case "thpt":
       data = {
-        mode: testDirection.mode,
+        mode: testMethod.mode,
         rtt: requiredGetParamaters.rtt,
         rwnd: requiredGetParamaters.rwnd,
-        ideal: _cir,
-        serverIP: _testServer.ip_address,
+        ideal: testInputs.isr,
+        serverIP: testInputs.testServer.ip_address,
         port,
       }
       break;
@@ -1049,27 +1117,27 @@ function getRequiredScriptParameters(processId, port, testDirection) {
   return data;
 }
 
-function showTestResults(resultsHtml, directionName) {
-  $(`#${directionName}-measurement-results`).append(resultsHtml);
+function showTestResults(resultsHtml, methodName) {
+  $(`#${methodName}-measurement-results`).append(resultsHtml);
 
-  const successIconHtml = directionName == "upload"
+  const successIconHtml = methodName == "upload"
     ? '<i class="bi bi-arrow-up-circle"></i>'
     : '<i class="bi bi-arrow-down-circle"></i>';
-  $(`#${directionName}-test-results-status`).html(successIconHtml);
+  $(`#${methodName}-test-results-status`).html(successIconHtml);
 }
 
-function showTestFailed(err, processIndex, modeName, directionIndex) {
-  const process = measurementProcesses[processIndex];
-  const testMode = testModes[modeName];
+function showTestFailed(err, processIndex, directionIndex) {
+  const process = MEASUREMENT_PROCESSES[processIndex];
+  const testMode = testInputs.mode;
 
   console.log({ process });
 
-  const directionName = testMode.directions[directionIndex];
+  const methodName = testMode.methods[directionIndex];
   if (process) {
-    $(`#${directionName}-process-status-${processIndex}`).html('<i class="bi bi-x-octagon-fill text-danger"></i>');
-    $(`#${directionName}-process-label-${processIndex}`).text(process.label);
-    $(`#${directionName}-process-label-${processIndex}`).addClass("text-danger");
-    $(`#${directionName}-process-status-label-${processIndex}`).html(`<span class="px-2 text-nowrap text-danger">Failed</span>`);
+    $(`#${methodName}-process-status-${processIndex}`).html('<i class="bi bi-x-octagon-fill text-danger"></i>');
+    $(`#${methodName}-process-label-${processIndex}`).text(process.label);
+    $(`#${methodName}-process-label-${processIndex}`).addClass("text-danger");
+    $(`#${methodName}-process-status-label-${processIndex}`).html(`<span class="px-2 text-nowrap text-danger">Failed</span>`);
   }
 
   $("#measurement-card .card-header h5").text(`${testMode.titleCase} mode failed`);
@@ -1103,24 +1171,28 @@ function showTestFailed(err, processIndex, modeName, directionIndex) {
       </a>
     `;
   }
+  
+  testInputs.finishedOn = moment().format('YYYY-MM-DD HH:mm:ss');
+  $('#summary-test-finished-on').html(`<span class="text-secondary">${testInputs.finishedOn}</span>`);
+  $('#summary-test-duration').html(`<span class="text-secondary">${testInputs.duration}</span>`);
 
   $('#process-error').html(`
-    <div class="border border-danger bg-light mt-1 mx-2">
-      <div class="accordion border-0" id="accordionError">
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="headingError">
-            <button class="accordion-button collapsed bg-danger bg-opacity-10 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="true" aria-controls="collapseError">
-              ${errorTitle}
-            </button>
-          </h2>
-          <div id="collapseError" class="accordion-collapse collapse" aria-labelledby="headingError" data-bs-parent="#accordionError">
-            <div class="accordion-body bg-light">
-              <span class="font-monospace small">
-                ${errorContent}
-              </span>
-            </div>
-          </div>
-        </div>
+    <div class="card border-danger rounded-0 mt-1 mx-2">
+      <div class="card-header bg-danger bg-opacity-10 text-danger p-3">${errorTitle}</div>
+      <div class="card-body bg-light monospace">
+        <table cellpadding="4">
+          <tbody class="card-text font-monospace small">
+            <tr>
+              <td>Timestamp:</td>
+              <td>${testInputs.finishedOn}</td>
+            </tr>
+            <tr>
+              <td>Test Server:</td>
+              <td>${testInputs.testServer.nickname}</td>
+            </tr>
+          </tbody>
+        </table>
+        <a href="javascript:void(0);" id="btnOpenLogsFolder" class="btn btn-sm btn-link text-primary p-1" role="button" onclick="openLogsFolder()">Open Logs folder</a>
       </div>
     </div>
     <div class="mx-2 my-1 mb-2">
@@ -1128,17 +1200,13 @@ function showTestFailed(err, processIndex, modeName, directionIndex) {
     </div>
   `);
 
-  for (const dName of testMode.directions) {
+  for (const dName of testMode.methods) {
     $(`#${dName}-test-results-status`).html('<i class="bi bi-x-octagon text-danger"></i>');
   }
-  
-  _testFinishedOnText = moment().format('YYYY-MM-DD HH:mm:ss');
-  $('#summary-test-finished-on').html(`<span class="text-secondary">${_testFinishedOnText}</span>`);
-  $('#summary-test-duration').html(`<span class="text-secondary">${_testDurationText}</span>`);
 
   for (const [key, _] of Object.entries(resultsParameters)) {
-    if ($(`#${directionName}-results-param-${key} div span`).hasClass('placeholder')) {
-      $(`#${directionName}-results-param-${key}`).html("<i class='text-muted'>error</i>");
+    if ($(`#${methodName}-results-param-${key} div span`).hasClass('placeholder')) {
+      $(`#${methodName}-results-param-${key}`).html("<i class='text-muted'>error</i>");
     }
   }
 }
@@ -1155,7 +1223,7 @@ function closeTest() {
     return;
   }
 
-  appState = AppState.Ready;
+  appState = APP_STATE.Ready;
 
   $(`#process-error`).html('');
 
@@ -1164,14 +1232,14 @@ function closeTest() {
   $("#mainForm").trigger('reset');
   $('#mainForm').removeClass('was-validated');
 
-  $('#measurement-card').hide();
-  $('#measurement-failed-card').hide();
+  $('#measurement-card').addClass('d-none');
+  // $('#measurement-failed-card').hide();
 
-  $('#net-warning').hide();
+  $('#net-warning').addClass('d-none');
 
   renderMap();
   
-  $('#cir').focus();
+  $('#isr').focus();
 }
 
 function repeatTest() {
@@ -1180,7 +1248,7 @@ function repeatTest() {
     return;
   }
 
-  $('#measurement-card').hide();
+  $('#measurement-card').addClass('d-none');
   
   startTest();
 }
@@ -1189,129 +1257,169 @@ function tryAgain() {
   // TODO: clear error html after clicking this
   // TODO: change try again to "RESTART test"
   $(`#process-error`).html('');
-  $('#measurement-failed-card').hide();
+  // $('#measurement-failed-card').hide();
 
   startTest();
 }
 
 function resetTest() {
-  appState = AppState.Ready;
+  appState = APP_STATE.Ready;
 
   // TODO: clear error html after clicking this
   $(`#process-error`).html('');
   $('#mainForm fieldset').attr('disabled', false);
 
-  $('#measurement-card').hide();
-  $('#measurement-failed-card').hide();
+  $('#measurement-card').addClass('d-none');
+  // $('#measurement-failed-card').hide();
 
-  $('#net-warning').hide();
+  $('#net-warning').addClass('d-none');
 }
 
 function saveAsPdf() {
-
   $('#btnSaveAsPdf').attr('disabled', true);
-  $('#btnSaveAsPdf .spinner-border').show();
+  $('#btnSaveAsPdf .spinner-border').removeClass('d-none');
 
-  const directions = testModes[_mode].directions;
+  const methods = testInputs.mode.methods;
   const now = moment();
   const nowProper = now.format('YYYY-MM-DD HH:mm:ss');
 
-  $('#modalPdfReport .progress').show();
-  $('#modalPdfReport .btn-close').show();
-
-  $('#results-pdf').html(`<div class="d-flex justify-content-start">
-    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-    <h6 class="ms-2">Please wait...</h6>
-  </div>`);
-
-  $('#modalPdfReport').modal("show");
-
-  const pdfAjax = $.ajax({
-    url: 'report',
+  $.ajax({
+    url: 'report-data',
     method: 'POST',
     data: {
-      directions: JSON.stringify(directions),
-      serverName: _testServer.nickname,
-      startedOn: _testStartedOnText,
-      finishedOn: _testFinishedOnText,
-      duration: _testDurationText,
-      generatedOn: nowProper
+      methods: JSON.stringify(methods),
+      serverName: testInputs.testServer.nickname,
+      startedOn: testTime.startedOn,
+      finishedOn: testTime.finishedOn,
+      duration: testTime.duration,
+      isp: testClient.isp
     },
-    dataType: 'html',
-    success: async function (reportHtml) {
-      $('#modalPdfReport .btn-close').hide();
+    dataType: 'json',
+    success: async function ({testInputs, testTime, testClient, results}) {
+      await generateReport(testInputs, testTime, testClient, results);
 
-      $('#results-pdf').html(reportHtml);
-
-      const testFinisedOnFileName = moment(_testFinishedOnText).format('YYYY-MM-DD-HHmmss');
-      const defaultFileName = `netmesh_rfc-6349_${_mode}_${testFinisedOnFileName}.pdf`;
-
-      const opt = {
-        margin: [1, 1],
-        filename: defaultFileName,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 3, letterRendering: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-        pagebreak: { before: [] }
-      };
-
-      const pageBreaks = ['#test-results-title'];
-      if (directions && directions.length == 2) {
-        pageBreaks.push(`#${directions[1]}-test-title`);
-      }
-      opt.pagebreak.before = pageBreaks;
-
-      const element = document.getElementById('results-pdf');
-
-      setTimeout(function () {
-        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-          var totalPages = pdf.internal.getNumberOfPages();
-        
-          for (i = 1; i <= totalPages; i++) {
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            
-            pdf.setPage(i);
-            pdf.setFontSize(8);
-            pdf.setTextColor(108);
-            pdf.text('Page ' + i + ' of ' + totalPages, pageWidth - 0.5, pageHeight - 0.5, {
-              align: 'right',
-            });
-            pdf.text(`${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServer.nickname}`, opt.margin[1] - 0.5, pageHeight - 0.5, {
-              align: 'left',
-            });
-          }
-
-          $('#modalPdfReport .progress').hide();
-          $('#modalPdfReport .btn-close').show();
-  
-          $('#btnSaveAsPdf').attr('disabled', false);
-          $('#btnSaveAsPdf .spinner-border').hide();
-          
-          $('#results-pdf').html(`<div>
-            <h5 class="text-success">Successfully saved!</h5>
-            <span>${defaultFileName}</span>
-            <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary" role="button" onclick="openDownloadsFolder()">Open Downloads folder</a>
-          </div>`);
-        }).save();
-      }, 300);
+      $('#btnSaveAsPdf').attr('disabled', false);
+      $('#btnSaveAsPdf .spinner-border').addClass('d-none');
+      $('#btnSaveAsPdf').addClass('d-none');
+      $('#pdfSaved').removeClass('d-none');
     },
     error: function (err) {
-      $('#modalPdfReport .btn-close').show();
-      $('#modalPdfReport .progress').hide();
-  
       $('#btnSaveAsPdf').attr('disabled', false);
-      $('#btnSaveAsPdf .spinner-border').hide();
+      $('#btnSaveAsPdf .spinner-border').addClass('d-none');
+      $('#btnSaveAsPdf').addClass('d-none');
+      $('#pdfSaved').removeClass('d-none');
+
       console.error(err);
     },
     complete: function () {
     }
   });
-
-  $('#modalPdfReport').on('hide.bs.modal', function () {
-    pdfAjax.abort();
-  });
 }
+
+// function saveAsPdf() {
+//   $('#btnSaveAsPdf').attr('disabled', true);
+//   $('#btnSaveAsPdf .spinner-border').show();
+
+//   const methods = TEST_MODES[_mode].methods;
+//   const now = moment();
+//   const nowProper = now.format('YYYY-MM-DD HH:mm:ss');
+
+//   $('#modalPdfReport .progress').show();
+//   $('#modalPdfReport .btn-close').show();
+
+//   $('#results-pdf').html(`<div class="d-flex justify-content-start">
+//     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+//     <h6 class="ms-2">Please wait...</h6>
+//   </div>`);
+
+//   $('#modalPdfReport').modal("show");
+
+//   const pdfAjax = $.ajax({
+//     url: 'report',
+//     method: 'POST',
+//     data: {
+//       methods: JSON.stringify(methods),
+//       serverName: _testServer.nickname,
+//       startedOn: _testStartedOnText,
+//       finishedOn: _testFinishedOnText,
+//       duration: _testDurationText,
+//       generatedOn: nowProper
+//     },
+//     dataType: 'html',
+//     success: async function (reportHtml) {
+//       $('#modalPdfReport .btn-close').hide();
+
+//       $('#results-pdf').html(reportHtml);
+
+//       const testFinisedOnFileName = moment(_testFinishedOnText).format('YYYY-MM-DD-HHmmss');
+//       const defaultFileName = `netmesh_rfc-6349_${_mode}_${testFinisedOnFileName}.pdf`;
+
+//       const opt = {
+//         margin: [1, 1],
+//         filename: defaultFileName,
+//         image: { type: 'jpeg', quality: 0.98 },
+//         html2canvas: { scale: 3, letterRendering: true },
+//         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+//         pagebreak: { before: [] }
+//       };
+
+//       const pageBreaks = ['#test-results-title'];
+//       if (methods && methods.length == 2) {
+//         pageBreaks.push(`#${methods[1]}-test-title`);
+//       }
+//       opt.pagebreak.before = pageBreaks;
+
+//       const element = document.getElementById('results-pdf');
+
+//       setTimeout(function () {
+//         html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
+//           var totalPages = pdf.internal.getNumberOfPages();
+        
+//           for (i = 1; i <= totalPages; i++) {
+//             const pageWidth = pdf.internal.pageSize.getWidth();
+//             const pageHeight = pdf.internal.pageSize.getHeight();
+            
+//             pdf.setPage(i);
+//             pdf.setFontSize(8);
+//             pdf.setTextColor(108);
+//             pdf.text('Page ' + i + ' of ' + totalPages, pageWidth - 0.5, pageHeight - 0.5, {
+//               align: 'right',
+//             });
+//             pdf.text(`${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServer.nickname}`, opt.margin[1] - 0.5, pageHeight - 0.5, {
+//               align: 'left',
+//             });
+//           }
+
+//           $('#modalPdfReport .progress').hide();
+//           $('#modalPdfReport .btn-close').show();
+  
+//           $('#btnSaveAsPdf').attr('disabled', false);
+//           $('#btnSaveAsPdf .spinner-border').hide();
+          
+//           $('#results-pdf').html(`<div>
+//             <h5 class="text-success">Successfully saved!</h5>
+//             <span>${defaultFileName}</span>
+//             <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary" role="button" onclick="openDownloadsFolder()">Open Downloads folder</a>
+//           </div>`);
+//         }).save();
+//       }, 300);
+//     },
+//     error: function (err) {
+//       $('#modalPdfReport .btn-close').show();
+//       $('#modalPdfReport .progress').hide();
+  
+//       $('#btnSaveAsPdf').attr('disabled', false);
+//       $('#btnSaveAsPdf .spinner-border').hide();
+//       console.error(err);
+//     },
+//     complete: function () {
+//     }
+//   });
+
+//   $('#modalPdfReport').on('hide.bs.modal', function () {
+//     pdfAjax.abort();
+//   });
+// }
 
 function renderMap(lat = null, lon = null) {
   const $map = $('#map-snippet');
@@ -1360,7 +1468,32 @@ function renderMap(lat = null, lon = null) {
 
 function openDownloadsFolder() {
   $('#btnOpenDownloadsFolder').attr('disabled', true);
-  $.get('/open-downloads-folder', function () {
+  $.post('/open-downloads-folder', function () {
     $('#btnOpenDownloadsFolder').attr('disabled', false);
-  })
+  });
+
+  $('#btnSaveAsPdf').removeClass('d-none');
+  $('#pdfSaved').addClass('d-none');
+}
+
+function openLogsFolder() {
+  $('#btnOpenLogsFolder').attr('disabled', true);
+  $.post('/open-logs-folder', function () {
+    $('#btnOpenLogsFolder').attr('disabled', false);
+  });
+}
+
+function getIsp() {
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: 'get-isp',
+      method: 'GET',
+      success: function (isp) {
+        resolve(isp);
+      },
+      error: function (err) {
+        reject(err);
+      }
+    });
+  });
 }

@@ -42,4 +42,9 @@ def getFileLogger():
 def log_error(error):
     logger = getFileLogger()
     logger.error(error, exc_info=True)
+    
+    handlers = logger.handlers[:]
+    for handler in handlers:
+        handler.close()
+        logger.removeHandler(handler)
 

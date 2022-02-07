@@ -37,7 +37,7 @@ Terminal=true
 Name={app_name}
 Icon=utilities-terminal
 Categories=Application;
-Exec=gnome-terminal -- bash -c "cd $(dirname %k) && ./{app_name}";
+Exec=gnome-terminal -- bash -c "sudo apt-get install jq && cd $(dirname %k) && ./{app_name}";
 """)
     f.close()
     

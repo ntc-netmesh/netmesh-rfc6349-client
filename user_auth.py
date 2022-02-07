@@ -9,12 +9,10 @@ url = "http://202.90.158.6:12000"
 
 def login(username, password):
   if not username:
-    return {
-      "error": "Username required",
-    }
+    raise Exception("Username required")
 
-  global dev_hash
-  __read_hash()
+  # global dev_hash
+  # __read_hash()
 
   credentrials = {
     "username": username,
@@ -34,11 +32,7 @@ def login(username, password):
     raise Exception(str(data))
   
   # token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MjY3ODA2NiwianRpIjoiZGNmNzQ5MjgtNzUxMy00NmE1LWI5ZjktODZlMzViMDA1OTNmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjQyNjc4MDY2LCJleHAiOjE2NDI2ODE2NjZ9.N5-z290FwJRdB1VzS_I8ZnjLWLG-QCCqmR-9zIa3s5Y"
-  # session['api_session_token'] = token
-  # return {
-  #   "error": None,
-  #   "token": token
-  # }
+  # return token
 
 #Verify if laptop is registered.
 def __read_hash():

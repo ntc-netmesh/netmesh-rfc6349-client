@@ -11,6 +11,7 @@ import hashlib
 import math
 
 import folium
+import xmltodict
 
 import pysideflask_ext
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
@@ -45,7 +46,6 @@ def login_page():
     # print(session['api_session_token'])
     # print('username')
     # print(session['username'])
-    
     return redirect(url_for('home_page'))
   
   return render_template('login.html',
@@ -69,9 +69,45 @@ def register_device_page():
 @app.route('/home')
 @wrappers.require_api_token
 def home_page():
+  get_my_ip()
   return render_template('home.html', username=session['username'], app_version=netmesh_constants.APP_VERSION)
 
-
+@app.route('/report-data', methods=['POST'])
+def report_data():
+  server_name = request.form['serverName']
+  isp = request.form['isp']
+  started_on = request.form['startedOn']
+  finished_on = request.form['finishedOn']
+  duration = request.form['duration']
+  username = session['username']
+  methods = json.loads(request.form['methods'])
+  
+  results = {}
+  for d in methods:
+    results[d] = json.loads(session[d+'_test_results'])
+  
+  return json.dumps({
+    "testInputs": {
+      "mode": session['test_details-mode'],
+      "isr": session['test_details-isr'],
+      "net": session['test_details-net'],
+      "serverName": server_name,
+      "lon": session['test_details-lon'],
+      "lat": session['test_details-lat'],
+    },
+    "testTime": {
+      "startedOn": started_on,
+      "finishedOn": finished_on,
+      "duration": duration,
+    },
+    "testClient": {
+      "username": username,
+      "userId": results[methods[0]]['userid'],
+      "isp": isp
+    },
+    "results": results,
+  })
+  
 @app.route('/report', methods=['POST'])
 def report():
   server_name = request.form['serverName']
@@ -80,15 +116,15 @@ def report():
   duration = request.form['duration']
   generated_on = request.form['generatedOn']
   username = session['username']
-  directions = json.loads(request.form['directions'])
+  methods = json.loads(request.form['methods'])
   
   results = {}
-  for d in directions:
+  for d in methods:
     results[d] = json.loads(session[d+'_test_results'])
   
   return render_template('report.html',
                          app_version=netmesh_constants.APP_VERSION,
-                         cir=session['test_details-cir'],
+                         isr=session['test_details-isr'],
                          net=session['test_details-net'],
                          server_name=server_name,
                          mode=session['test_details-mode'],
@@ -97,14 +133,14 @@ def report():
                          started_on=started_on,
                          finished_on=finished_on,
                          duration=duration,
-                         directions=directions,
-                         directions_text=json.dumps(directions),
+                         methods=methods,
+                         directions_text=json.dumps(methods),
                          results=results,
                          username=username,
                          generated_on=generated_on
                         )
 
-  # cir = 35
+  # isr = 35
   # net = "Ethernet"
   # mode = "bidirectional"
   # lon = 14
@@ -113,7 +149,7 @@ def report():
   # started_on = "2022-01-01 01:14:23"
   # finished_on = "2022-01-01 01:15:52"
   # duration = "1m 29s"
-  # directions = ["upload", "download"]
+  # methods = ["upload", "download"]
   # generated_on = "2022-01-01 01:19:44"
   # username = "sample_user"
   # results = {
@@ -155,7 +191,7 @@ def report():
   
   # return render_template('report.html',
   #                        app_version=netmesh_config.APP_VERSION,
-  #                        cir=cir,
+  #                        isr=isr,
   #                        net=net,
   #                        server_name=server_name,
   #                        mode=mode,
@@ -164,8 +200,8 @@ def report():
   #                        started_on=started_on,
   #                        finished_on=finished_on,
   #                        duration=duration,
-  #                        directions=directions,
-  #                        directions_text=json.dumps(directions),
+  #                        methods=methods,
+  #                        directions_text=json.dumps(methods),
   #                        results=results,
   #                        username=username,
   #                        generated_on=generated_on
@@ -234,14 +270,14 @@ def load_user():
     
 @app.route('/set-test-details', methods=['POST'])
 def setTestDetails():
-  cir = int(request.form.get("cir"))
-  net = request.form.get("net")
-  server_ip = request.form.get("serverIP")
-  mode = request.form.get("mode")
-  lon = request.form.get("lon")
-  lat = request.form.get("lat")
+  isr = int(request.form["isr"])
+  net = request.form["net"]
+  server_ip = request.form["serverIP"]
+  mode = request.form["mode"]
+  lon = request.form["lon"]
+  lat = request.form["lat"]
   
-  required_fields = cir and net and server_ip and mode and lon and lat
+  required_fields = isr and net and server_ip and mode and lon and lat
   
   if not required_fields:
     return Response(json.dumps({
@@ -251,24 +287,24 @@ def setTestDetails():
   
   min_mbps = 1
   max_mbps = 100
-  if cir < min_mbps or cir > max_mbps:
+  if isr < min_mbps or isr > max_mbps:
     return Response(json.dumps({
-      'field': 'cir',
+      'field': 'isr',
       'invalid-feedback': f"Enter between {min_mbps} to {max_mbps} Mbps"
     }), 400)
     
-  session['test_details-cir'] = cir
+  session['test_details-isr'] = isr
   session['test_details-net'] = net
   session['test_details-mode'] = mode
   session['test_details-lon'] = lon
   session['test_details-lat'] = lat
   
   return Response(json.dumps({
-    'cir': cir,
+    'isr': isr,
     'net': net,
     'mode': mode,
     'lon': lon,
-    'lat': lat
+    'lat': lat,
   }), 200)
   
 
@@ -499,7 +535,7 @@ def get_results():
     test_server_url = request.args.get('testServerUrl')
     
     mode = request.args.get('mode')
-    direction = "upload" if mode == "normal" else "download"
+    method = "upload" if mode == "normal" else "download"
     
     api_url = f'{test_server_url}/api/{mode}'
   
@@ -508,10 +544,10 @@ def get_results():
       headers={"Authorization":"Bearer "+session['api_session_token']}
     )
     r.raise_for_status()
-    session[direction+'_test_results'] = r.text
+    session[method+'_test_results'] = r.text
     return render_template('results.html',
-                            results=json.loads(session[direction+'_test_results']),
-                            direction=direction)
+                            results=json.loads(session[method+'_test_results']),
+                            method=method)
   except requests.exceptions.HTTPError as eh:
     status_code = eh.response.status_code
     
@@ -597,7 +633,7 @@ def run_process_bdp():
   server_ip = request.form['serverIP']
   port = request.form['port']
   
-  command_array = ['sudo', './bb.sh', rtt, server_ip, port]
+  command_array = ['sudo', './bb.sh', rtt, server_ip, port, mode]
   output_params = [
     {'name': 'bb', 'key': 'bb'},
     {'name': 'bdp', 'key': 'bdp'},
@@ -617,14 +653,19 @@ def run_process_thpt():
   server_ip = request.form['serverIP']
   port = request.form['port']
   
-  command_array = ['sudo', './thpt.sh', rtt, rwnd, ideal, server_ip, port]
+  command_array = ['sudo', './thpt.sh', rtt, rwnd, ideal, server_ip, port, mode]
+  # name - from script output
+  # key - based from Required_User_Body in /thpt POST request
+  # Must be IN EXACT ORDER
   output_params = [
     {'name': 'Total Data Sent', 'key': None},
     {'name': 'thpt_avg', 'key': 'thpt_avg'},
     {'name': 'thpt_ideal', 'key': 'thpt_ideal'},
+    {'name': 'ave_rtt', 'key': 'ave_rtt'},
     {'name': 'transfer_avg', 'key': 'transfer_avg'},
     {'name': 'transfer_ideal', 'key': 'transfer_ideal'},
     {'name': 'tcp_ttr', 'key': 'tcp_ttr'},
+    {'name': 'buffer_delay', 'key': 'buf_del'},
   ]
   
   return run_process_script(mode, command_array, output_params)
@@ -636,7 +677,7 @@ def run_process_script(mode, command_array, output_params):
   process = subprocess.Popen(command_array,
                             stdout=subprocess.PIPE,
                             stderr= subprocess.PIPE,
-                            cwd=netmesh_utils.resource_path(f'static/client_scripts/{mode}_mode'))
+                            cwd=netmesh_utils.resource_path(f'static/client_scripts/normal_mode'))
   stdout,stderr = process.communicate()
   if stdout:
     raw_lines = stdout.decode().split('\n')
@@ -697,7 +738,7 @@ def run_process_script(mode, command_array, output_params):
         }), 400))
       
       value_split = line_value.split(' ')
-      value_quantity  = value_split[0]
+      value_quantity  = value_split[0].rstrip("%")
       value_number = float(value_quantity)
       if math.isnan(value_number):
         error = f"Script error: '{pName}' is NaN"
@@ -729,7 +770,7 @@ def get_network_interface(mode, network_connection_type_name, network_prefix):
   process = subprocess.Popen(['./network_interface.sh'],
                              stdout=subprocess.PIPE,
                              stderr= subprocess.PIPE,
-                             cwd=netmesh_utils.resource_path(f'static/client_scripts/{mode}_mode'))
+                             cwd=netmesh_utils.resource_path(f'static/client_scripts/normal_mode'))
   stdout,stderr = process.communicate()
   if stdout:
     lines = stdout.decode().split('\n')
@@ -749,6 +790,61 @@ def get_network_interface(mode, network_connection_type_name, network_prefix):
       "error": error,
       "message": stderr.decode()
     }), 500))
+    
+@app.route('/get-isp', methods=['GET'])
+def get_isp():
+  error = None
+  try:
+    main_url = "http://www.speedtest.net/speedtest-config.php"
+    r = requests.get(
+      url=main_url,
+    )
+    r.raise_for_status()
+    xml_response = xmltodict.parse(r.content)
+    
+    isp = xml_response['settings']['client']['@isp']
+      
+    return Response(isp)
+  except requests.exceptions.HTTPError as eh:
+    status_code = eh.response.status_code
+    
+    error = "HTTP error"
+    log_settings.log_error(error)
+    
+    if status_code == 404:
+      error = f"Cannot connect to {main_url}"
+      
+    return Response(json.dumps({
+      "error": error,
+      "message": str(eh)
+    }), status_code)
+  except requests.exceptions.ConnectionError as ece:
+    error = "Connection error"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
+      "message": str(ece)
+    }), 500)
+  except requests.exceptions.Timeout as et:
+    error = "Request timeout"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
+      "message": str(et)
+    }), 500)
+  except requests.exceptions.RequestException as e:
+    error = "Cannot get ISP"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
+    }), 500)
+  except Exception as e:
+    error = "Cannot get ISP"
+    log_settings.log_error(error)
+    
+    return Response(json.dumps({
+      "error": error
+    }), 500)
 
 # ----------------------------------------------------------------
 # EXTERNAL DATA
@@ -893,12 +989,21 @@ else:
     home = os.path.expanduser("~")
     return os.path.join(home, "Downloads")
 
-@app.route('/open-downloads-folder', methods=['GET'])
+@app.route('/open-downloads-folder', methods=['POST'])
 def open_downloads_folder():
   webbrowser.open('file:///' + get_downloads_folder())
+
+@app.route('/open-logs-folder', methods=['POST'])
+def open_logs_folder():
+  webbrowser.open('file:///' + os.getcwd() + '/log_files')
+
+def get_my_ip():
+  my_ip = request.remote_addr
+  print("my_ip")
+  print(my_ip)
 
 
 if __name__ == "__main__":
   app.run(debug=True)
-  # pysideflask_ext.init_gui(application=app, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
+  # pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
   

@@ -85,15 +85,15 @@
     </div> -->
     <h6 id="test-results-title" class="text-left mb-2">TEST RESULTS</h6>
     <div id="test-results">
-      {% for direction in directions %}
-        <h6 id="{{ direction }}-test-title" class="text-left mb-2 small">{{ direction.capitalize() }} Test</h6>
+      {% for method in directions %}
+        <h6 id="{{ method }}-test-title" class="text-left mb-2 small">{{ method.capitalize() }} Test</h6>
         <div class="px-2">
           <h6 class="text-left mb-2 text-secondary small">THROUGHPUT TEST</h6>
-          <div id="{{ direction }}-thpt-chart-report"></div>
-          <div id="{{ direction }}-transfer-chart-report"></div>
-          <!-- <img id="{{ direction }}-img-thpt-chart"/>
-          <img id="{{ direction }}-img-transfer-chart" height="144"/> -->
-          <table id="{{ direction }}-test-results" class="small table table-sm w-auto">
+          <div id="{{ method }}-thpt-chart-report"></div>
+          <div id="{{ method }}-transfer-chart-report"></div>
+          <!-- <img id="{{ method }}-img-thpt-chart"/>
+          <img id="{{ method }}-img-transfer-chart" height="144"/> -->
+          <table id="{{ method }}-test-results" class="small table table-sm w-auto">
             <tbody class="small">
               <!-- <tr>
                 <td>Internet Subscription Rate (ISR)</td>
@@ -126,10 +126,10 @@
     console.log("directions");
     console.log(directions);
 
-    for (const direction of directions) {
+    for (const method of directions) {
       console.log(results);
-      console.log(direction);
-      const dResults = results[direction];
+      console.log(method);
+      const dResults = results[method];
       console.log(dResults);
 
       for (const [key, param] of Object.entries(resultsParameters)) {
@@ -157,7 +157,7 @@
             </td>`;
           }
         }
-        $(`#${direction}-test-results tbody`).append(`
+        $(`#${method}-test-results tbody`).append(`
           <tr>
             <td>${param.name}</td>
             ${quantityHtml}
@@ -165,31 +165,31 @@
         `);
       }
 
-      renderThoughputComparisonChart(dResults, direction);
-      renderTransferComparisonChart(dResults, direction);
+      renderThoughputComparisonChart(dResults, method);
+      renderTransferComparisonChart(dResults, method);
     }
 
-    function renderThoughputComparisonChart({thpt_avg, thpt_ideal}, direction) {
+    function renderThoughputComparisonChart({thpt_avg, thpt_ideal}, method) {
       const thptAvgColor = ntcBlueColor;
 
-      const options = getThroughputChartOptions(direction, thpt_avg, thpt_ideal, fontSize = 12);
+      const options = getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 12);
       options.chart.height = 90;
       options.chart.width = 480;
 
-      const chart = new ApexCharts(document.querySelector(`#${direction}-thpt-chart-report`), options);
+      const chart = new ApexCharts(document.querySelector(`#${method}-thpt-chart-report`), options);
       setTimeout(() => {
         chart.render();
       }, 200);
     }
 
-    function renderTransferComparisonChart({transfer_avg, transfer_ideal}, direction) {
+    function renderTransferComparisonChart({transfer_avg, transfer_ideal}, method) {
       const transferColor = ntcBlueColor;
 
-      const options = getTransferChartOptions(direction, transfer_avg, transfer_ideal, fontSize = 12);
+      const options = getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize = 12);
       options.chart.height = 128;
       options.chart.width = 480;
 
-      const chart = new ApexCharts(document.querySelector(`#${direction}-transfer-chart-report`), options);
+      const chart = new ApexCharts(document.querySelector(`#${method}-transfer-chart-report`), options);
       setTimeout(() => {
         chart.render();
       }, 200);
