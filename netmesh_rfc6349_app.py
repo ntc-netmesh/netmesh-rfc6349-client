@@ -1232,5 +1232,7 @@ def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
 
 if __name__ == "__main__":
-  app.run(debug=True)
-  # pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
+  if getattr(sys, 'frozen', False):
+    pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
+  else:
+    app.run(debug=True)
