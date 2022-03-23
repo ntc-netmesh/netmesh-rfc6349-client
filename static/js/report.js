@@ -1,5 +1,3 @@
-const blankImageEncoded = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==';
-
 // ----------------------------------------------------------------
 // INITIALIZE pdfMake
 // ----------------------------------------------------------------
@@ -92,10 +90,9 @@ pdfMake.tableLayouts = {
 
 async function generateReport(testInputs, testTime, testClient, results) {
   const methods = Object.keys(results);
-  const testMode = TEST_MODES[testInputs.mode];
 
   const fileNameTimestamp = moment(testTime.finishedOn).format("YYYY-MM-DD-HHmmss");
-  const defaultFileName = `netmesh-rfc-6349_${testMode.name}_${fileNameTimestamp}.pdf`;
+  const defaultFileName = `netmesh-rfc-6349_${testInputs.mode.name}_${fileNameTimestamp}.pdf`;
 
   let resultsBody = [];
   
@@ -128,17 +125,19 @@ async function generateReport(testInputs, testTime, testClient, results) {
         let quantityText = [measurementText];
         switch (key) {
           case "tcp_ttr":
-            const relative = value < 1 ? 1 / value : value;
+            const relative_tcp_ttr = value < 1 ? 1 / value : value;
             quantityText.push({
-              text: "  " + `${value === 1 ? "Same as ideal" : `${numeral(relative).format('0.[00]')} times ${value < 1 ? "faster" : "slower"} than ideal`}`,
+              text: "  " + `${value === 1 ? "Same as ideal" : `${numeral(relative_tcp_ttr).format('0.[000]')} times ${value < 1 ? "faster" : "slower"} than ideal`}`,
               fontSize: 8,
               color: '#808080',
             });
             break;
           case "buf_delay":
-            const absolute = Math.abs(value);
+            const decimalValue = value / 100;
+            console.log("decimalValue", decimalValue);
+            const relative_buf_delay = decimalValue == -1 ? NaN : decimalValue >= 0 ? decimalValue : (1 / (1 + decimalValue)) - 1;
             quantityText.push({
-              text: "  " + `Average RTT is ${value === 1 ? "same as RTT" : `${numeral(absolute).format('0.[00]')}% ${value < 1 ? "faster" : "slower"} than RTT`}`,
+              text: "  " + `Average RTT is ${decimalValue === 0 ? "same as Baseline RTT" : `${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%')} ${decimalValue < 0 ? "faster" : "slower"} than RTT`}`,
               fontSize: 8,
               color: '#808080',
               margin: [8, 0, 0, 0]
@@ -182,14 +181,21 @@ async function generateReport(testInputs, testTime, testClient, results) {
         margin: [0, 0, 0, 10]
       },
       {
-        image: chartImageUris.throughputCharts[method] ?? blankImageEncoded,
+        image: chartImageUris.throughputCharts[method] ?? BLANK_IMAGE_ENCODED,
         height: 62.5,
         width: 400,
         alignment: 'center',
         margin: [0, 0, 0, 12]
       },
       {
-        image: chartImageUris.transferCharts[method] ?? blankImageEncoded,
+        image: chartImageUris.rttCharts[method] ?? BLANK_IMAGE_ENCODED,
+        height: 90,
+        width: 400,
+        alignment: 'center',
+        margin: [0, 0, 0, 12]
+      },
+      {
+        image: chartImageUris.transferCharts[method] ?? BLANK_IMAGE_ENCODED,
         height: 90,
         width: 400,
         alignment: 'center',
@@ -224,7 +230,7 @@ async function generateReport(testInputs, testTime, testClient, results) {
     // ${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServer.nickname}
     footer: function(currentPage, pageCount) {
       const testInfo = {
-        text: `${testTime.finishedOn} | ISR: ${testInputs.isr} Mbps | ${testInputs.net} | ${testMode.titleCase}\n${testInputs.serverName}`,
+        text: `${testTime.finishedOn} | ISR: ${testInputs.isr} Mbps | ${testInputs.networkConnectionTypeName} | ${testInputs.mode.titleCase}\n${testInputs.testServer.nickname}`,
         width: '*',
       };
       const pageInfo = {
@@ -296,7 +302,7 @@ async function generateReport(testInputs, testTime, testClient, results) {
           body: [
             [
               'Test Mode:',
-              testMode.titleCase
+              testInputs.mode.titleCase
             ],
             [
               'Internet Subscription Rate (ISR):',
@@ -304,15 +310,45 @@ async function generateReport(testInputs, testTime, testClient, results) {
             ],
             [
               'Network Connection Type:',
-              testInputs.net
+              testInputs.networkConnectionTypeName
             ],
             [
               'Test Server:',
-              testInputs.serverName
+              testInputs.testServer.nickname
             ],
             [
-              'Coordinates:',
-              `${testInputs.lon}, ${testInputs.lat}`
+              'Location:',
+              [
+                {
+                  text: [
+                    testInputs.location.name,
+                    '\n',
+                    {
+                      text: testInputs.coordinates,
+                      fontSize: 9,
+                      lineHeight: 1.15,
+                    }
+                  ],
+                  lineHeight: 1.15,
+                },
+                {
+                  image: testInputs.mapImage.dataUri ?? BLANK_IMAGE_ENCODED,
+                  width: testInputs.mapImage.width * 0.6,
+                  height: testInputs.mapImage.height * 0.6,
+                  alignment: 'left',
+                  margin: [0, 0, 0, 6]
+                },
+                {
+                  text: '© OpenStreetMap contributors',
+                  color: 'gray',
+                  fontSize: 8,
+                },
+                {
+                  text: testInputs.location.reverseGeoLicense,
+                  color: 'gray',
+                  fontSize: 8,
+                },
+              ]
             ],
           ]
         },
@@ -373,7 +409,11 @@ async function generateReport(testInputs, testTime, testClient, results) {
             ],
             [
               'ISP:',
-              testClient.isp
+              testClient.isp ?? "(undetected)"
+            ],
+            [
+              'Public IP:',
+              testClient.publicIP ?? "(undetected)"
             ],
           ]
         },
@@ -381,7 +421,7 @@ async function generateReport(testInputs, testTime, testClient, results) {
       },
       {
         pageBreak: 'before',
-        text: `${testMode.name.toUpperCase()} MODE MEASUREMENTS`,
+        text: `${testInputs.mode.name.toUpperCase()} MODE MEASUREMENTS`,
         decoration: 'underline',
         fontSize: 11,
         bold: true,

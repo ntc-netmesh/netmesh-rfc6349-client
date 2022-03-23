@@ -4,9 +4,16 @@ import logging
 from datetime import datetime
 
 '''
+    shortens a file path
+'''
+class PathTruncatingFormatter(logging.Formatter):
+    def format(self, record):
+        if 'pathname' in record.__dict__.keys():
+            record.pathname = '{}'.format(record.pathname[20:])
+        return super(PathTruncatingFormatter, self).format(record)
 
+'''
     returns a formatted logger object
-
 '''
 def getStreamLogger():
     formatter = logging.Formatter("%(asctime)s   :   %(levelname)s\n\n%(message)s\n\n")
@@ -20,7 +27,7 @@ def getStreamLogger():
 
 def getFileLogger():
     print("getFileLogger")
-    LOG_FOLDER_PATH = f'{os.getcwd()}/log_files'
+    LOG_FOLDER_PATH = f'{os.getcwd()}/netmesh_log_files'
     print(f"{LOG_FOLDER_PATH}")
     if not os.path.isdir(LOG_FOLDER_PATH):
         os.makedirs(LOG_FOLDER_PATH)
@@ -28,7 +35,7 @@ def getFileLogger():
     ERROR_FILE_NAME = datetime.today().strftime('%Y-%m-%d-%H-%M-%S.log')
     print(f"{LOG_FOLDER_PATH}/{ERROR_FILE_NAME}")
     
-    formatter = logging.Formatter("%(asctime)s   :   %(levelname)s\n\n%(message)s\n\n")
+    formatter = logging.Formatter("%(asctime)s   :   %(levelname)s\n\n%(pathname)s\n\n%(message)s\n\n")
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     

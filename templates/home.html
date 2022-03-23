@@ -3,6 +3,17 @@
 {% block head %}
 
 <title>Home</title>
+
+<link rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+  crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+   crossorigin=""></script>
+
+<script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+
 <style>
   .vertical-center {
     min-height: calc(100% - 98px);
@@ -16,6 +27,8 @@
   #chart {
     width: 480px;
   }
+
+  #map-snippet { height: 224px; }
 </style>
 
 {% endblock %}
@@ -27,7 +40,6 @@
     <form
       id="mainForm"
       class="needs-validation"
-      onsubmit="return startTest()"
       novalidate
     >
       <fieldset class="card shadow mb-4">
@@ -111,36 +123,79 @@
           </div>
           <div class="row gx-2">
             <div class="form-group col">
-              <label class="small form-label mb-1" for="lat">GPS Latitude*</label>
-              <input
-                type="text"
-                id="lat"
-                class="form-control form-control-sm"
-                autocomplete="off"
-                required
-              />
-              <div class="invalid-feedback">
-                Enter the latitude coordinate of your current location
+              <label class="small form-label mb-0" for="lat">Location</label>
+              <div id="location-name-container" class="mb-1">
+                <span>---</span>
               </div>
-            </div>
-            <div class="form-group col">
-              <label class="small form-label mb-1" for="lon">GPS Longitude*</label>
-              <input
-                type="text"
-                id="lon"
-                class="form-control form-control-sm"
-                autocomplete="off"
-                required
-              />
+              <div class="position-relative border">
+                <div id="map-snippet">
+                </div>
+                <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 400;">
+                  <button id="btnMapClear" type="button" class="btn btn-sm btn-primary opacity-75 p-0 px-2">Clear</button>
+                </div>
+                <div id="gpsInputSelection" class="position-absolute top-50 start-50 translate-middle">
+                  <div class="d-flex flex-column">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Get Location Button">
+                      <button id="btnGetGpsCoordinates" type="button" class="btn btn-sm btn-primary">Get Location</button>
+                      <button type="button" id="btnGpsHelp" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-question-circle"></i>
+                      </button>
+                    </div>
+                    <button id="btnEnterGpsManually" type="button" class="btn btn-sm btn-link">Enter manually</button>
+                  </div>
+                </div>
+                <div id="gpsManualInput" class="position-absolute top-50 translate-middle-y mx-2 d-none">
+                  <div class="row gx-2">
+                    <div class="form-group col">
+                      <label class="small form-label mb-1" for="lat">GPS Latitude*</label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        id="lat_manual"
+                        class="form-control form-control-sm"
+                        autocomplete="off"
+                        required
+                      />
+                      <div class="invalid-feedback">
+                        Enter the latitude coordinate of your current location
+                      </div>
+                    </div>
+                    <div class="form-group col">
+                      <label class="small form-label mb-1" for="lon">GPS Longitude*</label>
+                      <input
+                        type="text"
+                        id="lon_manual"
+                        class="form-control form-control-sm"
+                        autocomplete="off"
+                        required
+                      />
+                      <div class="invalid-feedback">
+                        Enter the longitude coordinate of your current location
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end m-2">
+                      <button id="btnManualGpsOK" type="button" class="btn btn-sm btn-primary">OK</button>
+                      <button id="btnManualGpsCancel" type="button" class="btn btn-sm btn-link">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="position-absolute bottom-0">
+                  <div id="gpsError" class="alert alert-danger alert-dismissable fade show overflow-auto p-1 px-2 m-0 mt-2 d-none" style="max-height: 80px;" role="alert">
+                    Cannot get GPS coordinates
+                  </div>
+                </div>
+              </div>
+              <input type="text" id="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
+              <input type="text" id="lon" class="form-control form-control-sm d-none" autocomplete="off" required />
               <div class="invalid-feedback">
-                Enter the longitude coordinate of your current location
+                Invalid Location
               </div>
             </div>
           </div>
-          <div class="row">
+          <!-- <div class="row">
             <div id="btn-group-gps">
               <button
-                id="btnGetGpsCoordinates"
+                
                 type="button"
                 class="btn btn-sm btn-link p-1"
               >
@@ -149,13 +204,8 @@
                 </div>
                 Get coordinates
               </button>
-              <button type="button" id="btnGpsHelp" class="btn btn-sm btn-link p-0">
-                <i class="bi bi-question-circle"></i>
-              </button>
             </div>
-            <div id="map-snippet">
-            </div>
-          </div>
+          </div> -->
           <!-- <div class="row">
             <div class="accordion accordion-flush p-0 m-0" id="accordionOtherDetails">
               <div class="accordion-item">
@@ -212,13 +262,17 @@
       <img src="/static/images/ntc_logo.png" title="RFC-6349 Application" alt="Avatar" style="width: 360px; opacity: 12%;">
     </div> -->
     <div id="test-measurement-card">
+      <!-- d-none -->
       <div id="measurement-card" class="card shadow mb-4 d-none">
         <div class="card-header d-flex align-items-center">
           <h5 class="mb-0 me-auto">Testing...</h5>
-          <button type="button" class="btn btn-sm btn-link-secondary btn-test-done-options me-3 p-0" onclick="repeatTest()" data-bs-toggle="tooltip" data-bs-placement="top" title="Repeat test">
-            <i class="bi bi-arrow-repeat"></i>
+          <button id="btnCancelTest" type="button" class="btn btn-sm btn-link-secondary me-3 p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Back to Test Measurement Details">
+            <i class="bi bi-arrow-left"></i>
           </button>
-          <button type="button" class="btn-close btn-test-done-options" aria-label="Close" onclick="closeTest()" data-bs-toggle="tooltip" data-bs-placement="top" title="Close this test">
+          <button id="btnRestartTest" type="button" class="btn btn-sm btn-link-secondary me-3 p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Restart this test">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <button id="btnCloseTest" type="button" class="btn-close" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="top" title="Close this test">
           </button>
         </div>
         <div class="card-body p-0">
@@ -296,6 +350,37 @@
                 </table> -->
               </div>
               <div id="process-error">
+                <div class="border border-danger bg-light mt-1 mx-2">
+                  <div class="accordion border-0" id="accordionError">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingError">
+                        <button class="accordion-button bg-danger bg-opacity-10 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="false" aria-controls="collapseError">
+                          ${errorTitle}
+                        </button>
+                      </h2>
+                      <div id="collapseError" class="accordion-collapse collapse" aria-labelledby="headingError" data-bs-parent="#accordionError">
+                        <div class="accordion-body bg-light">
+                          <table cellpadding="2">
+                            <tbody class="card-text font-monospace small">
+                              <tr>
+                                <td>Timestamp:</td>
+                                <td>(timestamp)</td>
+                              </tr>
+                              <tr>
+                                <td>Server:</td>
+                                <td>(server_name) (ip_address)</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div class="d-flex align-content-center mt-2">
+                            <button id="btnOpenSendErrorLog" type="button" class="btn btn-sm btn-primary align-self-center" data-bs-toggle="modal" data-bs-target="#modalSendError" data-error-file-name="a">Send error</button>
+                            <a href="javascript:void(0);" id="btnOpenLogsFolder" class="btn btn-sm btn-link text-primary p-0 align-self-center ms-auto" role="button" onclick="openLogsFolder()">Open logs folder</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <!-- <div class="card border-danger rounded-0 mt-1 mx-2">
                   <div class="card-header bg-danger bg-opacity-10 text-danger p-3">Header</div>
                   <div class="card-body bg-light monospace">
@@ -388,15 +473,19 @@
                     </div>
                     <div class="col-md-4">
                       <div class="text-secondary">
-                        <small>Coordinates</small>
+                        <small>Location</small>
                       </div>
-                      <span id="summary-coordinates">14.123, 121.234</span>
+                      <div>
+                        <div id="summary-location-name"><i>Locating...</i></div>
+                        <span class="small">(<span id="summary-coordinates"></span>)</span>
+                      </div>
                     </div>
                     <div class="col-md-4">
                       <div class="text-secondary">
                         <small>ISP</small>
                       </div>
-                      <span id="summary-isp"></span>
+                      <div id="summary-isp"></div>
+                      <span class="small">(<span id="summary-public-ip"></span>)</span>
                     </div>
                   </div>
                 </div>
@@ -455,7 +544,11 @@
                     <div class="p-2">
                       <div id="download-thpt-chart" class="d-flex inline-block align-items-center">
                       </div>
-                      <table class="table table-sm table-bordered table-hover caption-top mt-4" aria-hidden="true">
+                      <div id="download-transfer-chart" class="d-flex inline-block align-items-center">
+                      </div>
+                      <div id="download-rtt-chart" class="d-flex inline-block align-items-center">
+                      </div>
+                      <!-- <table class="table table-sm table-bordered table-hover caption-top mt-4" aria-hidden="true">
                         <tbody>
                           <tr>
                             <td>Throughput Average</td>
@@ -464,9 +557,7 @@
                             </td>
                           </tr>
                         </tbody>
-                      </table>
-                      <div id="download-transfer-chart" class="d-flex inline-block align-items-center">
-                      </div>
+                      </table> -->
                     </div>
                   </div>
                 </div>
@@ -497,16 +588,16 @@
               </div>
               <div class="d-flex mt-4 mb-2">
                 <div class="p-0">
-                  <button id="btnBackToTop" class="btn btn-link p-0" role="button" type="button" onclick="backToTop();">Back to top</button>
+                  <button id="btnBackToTop" class="btn btn-link p-0" role="button" type="button">Back to top</button>
                 </div>
                 <div class="ms-auto p-0 justify-content-end">
-                  <button id="btnSaveAsPdf" class="btn btn-primary d-none" type="button" onclick="saveAsPdf();">
+                  <button id="btnSaveAsPdf" class="btn btn-primary d-none" type="button">
                     <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                     Save as PDF
                   </button>
                   <div id="pdfSaved" class="d-none">
                     <span class="text-success text-right">Successfully saved!</span>
-                    <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary p-2 mb-1" role="button" onclick="openDownloadsFolder()">Open Downloads folder</a>
+                    <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary p-2 mb-1" role="button">Open Downloads folder</a>
                   </div>
                 </div>
               </div>
@@ -641,22 +732,89 @@
   </div>
 </div>
 
-<!-- <div class="modal fade" id="modalPdfReport" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalPdfReportLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
+<div class="modal fade" id="modalReenterPassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalReenterPasswordLabel" aria-hidden="true">
+  <form 
+    class="modal-dialog modal-dialog-centered"
+    method="POST"
+    action="/relogin"
+    onsubmit="return false;"
+    novalidate
+  >
+    <fieldset class="modal-content">
       <div class="modal-header">
-        <h4 class="modal-title">Save as PDF</h4>
+        <h4 class="modal-title">Enter Password</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="progress mb-3">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        <div class="form-group">
+          <label for="reenterPassword" class="form-label">Please enter your password as you logged in</label>
+          <input type="password" id="reenterPassword" class="form-control">
+          <div class="alert alert-danger p-1 px-2 m-0 mt-2 d-none" role="alert">
+            Invalid password
+          </div>
         </div>
-        <div id="results-pdf"></div>
       </div>
-    </div>
-  </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </div>
+    </fieldset>
+  </form>
+</div>
+<!-- 
+<div class="modal fade" id="modalSendError" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalSendError" aria-hidden="true">
+  <form 
+    class="modal-dialog modal-dialog-centered"
+    method="POST"
+    action="/send-error"
+    onsubmit="return false"
+    novalidate
+  >
+    <fieldset class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Send Error</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group mb-3">
+          <label for="errorEmail" class="form-label">Enter your email address</label>
+          <input type="email" id="errorEmail" class="form-control" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label for="textareaErrorProblem" class="form-label">Tell us the problem you've just encountered</label>
+          <textarea rows="3" id="textareaErrorProblem" class="form-control" placeholder="What's the problem?"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">Send</button>
+      </div>
+    </fieldset>
+  </form>
 </div> -->
+
+<div class="modal fade" id="modalSendingError" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalSendingError" aria-hidden="true">
+  <form 
+    class="modal-dialog modal-dialog-centered"
+    method="POST"
+    action="/send-error"
+    onsubmit="return false;"
+    novalidate
+  >
+    <fieldset class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Sending error...</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+      <!-- <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">Send</button>
+      </div> -->
+    </fieldset>
+  </form>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P/uRW6/sruonlYj+Q7UHWeKfTAkBW+g83NKM+jMJFJ4iAPfSnVp7BKD4dKMHmVSvICUbE/V1sSw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.4/pdfmake.min.js" integrity="sha512-vCaf5rysVLu1/zVMefJew+IjqlQibggltPWqeo96XsdyJ4ihR3eEDV1oU60afiRXTGf8DqKUjLs2Q99HCbnjAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

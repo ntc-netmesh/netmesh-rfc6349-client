@@ -1,4 +1,7 @@
+
+
 const MEASUREMENT_TIMEOUT = 5 /*minutes*/ * 60 * 1000;
+const BLANK_IMAGE_ENCODED = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==';
 
 const TEST_METHODS = Object.freeze({
   "upload": Object.freeze({
@@ -17,23 +20,23 @@ const TEST_MODES = Object.freeze({
   "normal": Object.freeze({
     name: "normal",
     titleCase: "Normal",
-    methods: ["upload"]
+    methods: Object.freeze(["upload"])
   }),
   "reverse": Object.freeze({
     name: "reverse",
     titleCase: "Reverse",
-    methods: ["download"]
+    methods: Object.freeze(["download"])
   }),
   "bidirectional": Object.freeze({
     name: "bidirectional",
     titleCase: "Bidirectional",
-    methods: ["download", "upload"]
+    methods: Object.freeze(["download", "upload"])
   })
 });
 
 const NETWORK_CONNECTION_TYPES = Object.freeze({
   "Ethernet": Object.freeze({
-    prefix: "en"
+    prefix: "enx"
   }),
   "Wi-Fi": Object.freeze({
     prefix: "wlp"
@@ -41,22 +44,26 @@ const NETWORK_CONNECTION_TYPES = Object.freeze({
 });
 
 const MEASUREMENT_PROCESSES = Object.freeze([
-  {
+  Object.freeze({
     processId: 'mtu',
     label: 'MTU test',
-  },
-  {
+  }),
+  Object.freeze({
     processId: 'rtt',
     label: 'RTT test',
-  },
-  {
+  }),
+  Object.freeze({
     processId: 'bdp',
     label: 'BDP test',
-  },
-  {
+  }),
+  Object.freeze({
     processId: 'thpt',
     label: 'Throughput test',
-  },
+  }),
+  Object.freeze({
+    processId: 'analysis',
+    label: 'Throughput analysis',
+  }),
 ]);
 
 const APP_STATE = Object.freeze({
@@ -65,39 +72,7 @@ const APP_STATE = Object.freeze({
   TestFinished: 'TestFinished',
 });
 
-const chartImageUris = {
-  throughputCharts: {},
-  transferCharts: {},
-  rttCharts: {}
-};
 
-const testInputs = {
-  isr: null,
-  testServer: null,
-  networkConnectionTypeName: null,
-  get networkConnectionType() {
-    return NETWORK_CONNECTION_TYPES[this.networkConnectionTypeName];
-  },
-  modeName: null,
-  get mode() {
-    return TEST_MODES[this.modeName];
-  },
-  lon: null,
-  lat: null,
-  get coordinates() {
-    return `${this.lon}, ${this.lat}`;
-  },
-};
-
-const testTime = {
-  startedOn: '',
-  finishedOn: '',
-  duration: ''
-}
-
-const testClient = {
-  isp: ''
-}
 
 // let _throughputChartImgURI = {
 //   upload: '',

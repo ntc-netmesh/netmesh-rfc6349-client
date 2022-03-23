@@ -39,7 +39,7 @@ fi
 #  | sed -e '1,/Jitter/ d; /sec/!d' | awk -F" " '{print $7}')
 #echo "bb: $BB Mbits/sec"
 
-BB=$(iperf3 $_mode --client $_ip --port $_port --time 10 --format m --bandwidth 1000M \
+BB=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --format m --bandwidth 1000M \
   | sed -n -e '/sender/p' | awk -F" " '{print $7}')
 echo "bb: $BB Mbits/sec"
 

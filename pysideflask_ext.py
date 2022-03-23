@@ -57,8 +57,7 @@ def init_gui(application, port=0, width=800, height=600,
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
         sock.close()
-
-    
+        
     print("Opening NetMesh RFC-6349 App...")
     
     # Application Level

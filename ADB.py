@@ -8,7 +8,7 @@ def getRawGpsCoordinates():
         process = subprocess.Popen(['adb', 'shell', 'dumpsys', 'location', '|', 'grep', '"network: Location"'],stdout=subprocess.PIPE, stderr= subprocess.PIPE)
         stdout,stderr = process.communicate()
         if not stdout:
-            return None
+            raise Exception(stderr.decode())
         data = stdout.decode().split()[2].split(',')
         return data
     if not stderr:
@@ -17,9 +17,10 @@ def getRawGpsCoordinates():
         data = "".join(data)
         values = re.findall('\d+\.\d+',data)
         if not values:
-            return None
+            raise Exception("No GPS location detected: " + stdout.decode())
         return values
-    return None
+    
+    raise Exception("Error: " + stdout.decode())
 
 def parseGpsCoordinates(raw_gps_coordinates):
     data = raw_gps_coordinates

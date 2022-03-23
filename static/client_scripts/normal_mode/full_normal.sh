@@ -80,7 +80,7 @@ BDP_PORT=$(curl --header "Content-Type: application/json"\
 echo "BDP port : $BDP_PORT";
 sleep 1;
 
-BDP=$(./bb.sh $RTT $IP $BDP_PORT)
+BDP=$(./bb.sh $RTT $IP $BDP_PORT normal)
 echo "BDP RESULTS: $BDP"
 BDP=2000000
 RWND=3000
@@ -112,7 +112,7 @@ THPT_PORT=$(curl --header "Content-Type: application/json"\
 echo "THPT port : $THPT_PORT";
 sleep 1;
 
-THPT=$(./thpt.sh $RTT $RWND 1000 $IP $THPT_PORT)
+THPT=$(./thpt.sh $RTT $RWND 1000 $IP $THPT_PORT normal)
 echo "THPT RESULTS: $THPT"
 THPT_AVG=900
 THPT_IDEAL=1000
