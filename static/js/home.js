@@ -1654,8 +1654,11 @@ const chartImageUris = Object.seal({
     return new Promise(function (resolve, reject) {
       let isPasswordValid = false;
     
-      $('#modalReenterPassword').on('hidden.bs.modal', function () {
+      $('#modalReenterPassword').on('hide.bs.modal', function () {
         if (isPasswordValid) {
+          $('#modalReenterPassword').off('hide.bs.modal');
+          $('#modalReenterPassword').off('shown.bs.modal');
+          $('#modalReenterPassword .btn').off('click');
           resolve();
         } else {
           reject("hindi valid yung password");
