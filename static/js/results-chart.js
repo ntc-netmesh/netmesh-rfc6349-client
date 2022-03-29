@@ -42,20 +42,6 @@ const resultsParameters = Object.freeze({
       return `${numeral(val).format("0,000.[00]")} KBytes`
     },
   }),
-  tx_bytes: Object.freeze({
-    name: "Transmitted Bytes",
-    test: resultsTestNames.ThroughputTest,
-    getMeasurement: function (val) {
-      return `${numeral(val).format("0,000.[000]")} MBytes`
-    },
-  }),
-  retx_bytes: Object.freeze({
-    name: "Retransmitted Bytes",
-    test: resultsTestNames.ThroughputTest,
-    getMeasurement: function (val) {
-      return `${numeral(val / 1000000).format("0,000.[000]")} MBytes`
-    },
-  }),
   thpt_avg: Object.freeze({
     name: "Throughput Average",
     test: resultsTestNames.ThroughputTest,
@@ -70,32 +56,25 @@ const resultsParameters = Object.freeze({
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
   }),
+  tx_bytes: Object.freeze({
+    name: "Transmitted Bytes",
+    test: resultsTestNames.ThroughputTest,
+    getMeasurement: function (val) {
+      return `${numeral(val).format("0,000.[000]")} MBytes`
+    },
+  }),
+  retx_bytes: Object.freeze({
+    name: "Retransmitted Bytes",
+    test: resultsTestNames.ThroughputTest,
+    getMeasurement: function (val) {
+      return `${numeral(val / 1000000).format("0,000.[000]")} MBytes`
+    },
+  }),
   ave_rtt: Object.freeze({
     name: "Average RTT",
     test: resultsTestNames.ThroughputTest,
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} ms`
-    },
-  }),
-  tcp_ttr: Object.freeze({
-    name: "TCP Transfer Time Ratio",
-    test: resultsTestNames.ThroughputAnalysis,
-    getMeasurement: function (val) {
-      return `${numeral(val).format("0,000.000")}`
-    },
-  }),
-  buf_delay: Object.freeze({
-    name: "Buffer Delay",
-    test: resultsTestNames.ThroughputAnalysis,
-    getMeasurement: function (val) {
-      return `${numeral(val).format("0.[00]")}%`
-    },
-  }),
-  tcp_eff: Object.freeze({
-    name: "TCP Efficiency",
-    test: resultsTestNames.ThroughputAnalysis,
-    getMeasurement: function (val) {
-      return `${numeral(val).format("0.00")}%`
     },
   }),
   transfer_avg: Object.freeze({
@@ -110,6 +89,27 @@ const resultsParameters = Object.freeze({
     test: resultsTestNames.ThroughputAnalysis,
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} sec`
+    },
+  }),
+  tcp_ttr: Object.freeze({
+    name: "TCP Transfer Time Ratio",
+    test: resultsTestNames.ThroughputAnalysis,
+    getMeasurement: function (val) {
+      return `${numeral(val).format("0,000.000")}`
+    },
+  }),
+  tcp_eff: Object.freeze({
+    name: "TCP Efficiency",
+    test: resultsTestNames.ThroughputAnalysis,
+    getMeasurement: function (val) {
+      return `${numeral(val).format("0.00")}%`
+    },
+  }),
+  buf_delay: Object.freeze({
+    name: "Buffer Delay",
+    test: resultsTestNames.ThroughputAnalysis,
+    getMeasurement: function (val) {
+      return `${numeral(val).format("0.[00]")}%`
     },
   }),
 });
@@ -220,7 +220,7 @@ function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) 
       style: {
         fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu',
-        colors: [thpt_avg >= thpt_ideal ? greenColor : ntcRedColor]
+        colors: [thpt_avg < thpt_ideal ? ntcRedColor : greenColor]
       },
       background: {
         enabled: true,

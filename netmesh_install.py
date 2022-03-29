@@ -14,6 +14,7 @@ def run(command):
     yield line
 
 if __name__ == "__main__":
+  # Run pyinstaller
   ubuntu_version = netmesh_utils.get_ubuntu_version()
   
   app_name = f'netmesh-rfc-6349-app_{netmesh_constants.APP_VERSION}_u{ubuntu_version}'
@@ -22,6 +23,7 @@ if __name__ == "__main__":
   for line in run(installer_command):
     print(line)
   
+  # Create .desktop file
   file_path = f'{os.getcwd()}/dist/{app_name}.desktop'
   file_action = 'x'
   
@@ -29,6 +31,16 @@ if __name__ == "__main__":
   
   if os.path.isfile(file_path):
     file_action = 'w'
+  
+  additional_commands = [
+    f"sudo apt-get install jq",
+    # Insert additional commands if necessary (ie. APT dependencies)
+  ]
+  
+  file_execution_commands = [
+    *additional_commands,
+    f"cd $(dirname %k) && ./{app_name}" # this will open the app
+  ]
     
   with open(file_path, file_action) as f:
     f.write(f"""[Desktop Entry]
@@ -37,10 +49,11 @@ Terminal=true
 Name={app_name}
 Icon=utilities-terminal
 Categories=Application;
-Exec=gnome-terminal -- bash -c "sudo apt-get install jq && cd $(dirname %k) && ./{app_name}";
+Exec=gnome-terminal -- bash -c "{' && '.join(file_execution_commands)}";
 """)
     f.close()
     
+  # Allow .desktop file to execute
   st = os.stat(file_path)
   os.chmod(file_path, st.st_mode | 0o111)
   

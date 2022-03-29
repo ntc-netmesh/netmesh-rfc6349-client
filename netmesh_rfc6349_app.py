@@ -15,7 +15,6 @@ import folium
 
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
 from flask_login import LoginManager, login_user, logout_user
-from flask_mail import Mail, Message
 
 import wrappers
 import user_auth
@@ -1230,9 +1229,21 @@ def open_downloads_folder():
 @app.route('/open-logs-folder', methods=['POST'])
 def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
+  
+def check_update():
+  pass
+  
+def run_on_desktop():
+  # do updater
+  check_update()
+  
+  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
+
+def run_in_broswer():
+  app.run(debug=True)
 
 if __name__ == "__main__":
   if getattr(sys, 'frozen', False):
-    pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
+    run_on_desktop()
   else:
-    app.run(debug=True)
+    run_in_broswer()

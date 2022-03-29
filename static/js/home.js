@@ -1575,11 +1575,15 @@ const chartImageUris = Object.seal({
         boxZoom: false
       });
       
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      const layerInstance = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         minZoom: 16,
         maxZoom: 16,
       }).addTo(map);
+
+      layerInstance.on('load', function (e) {
+        $('#map-snippet .spinner-border').remove();
+      });
   
       L.marker([lat, lon], {
         keyboard: false,
@@ -1601,16 +1605,24 @@ const chartImageUris = Object.seal({
       $('#location-name-container').html(`<div class="placeholder-wave"><span class="w-100 placeholder"></span></div>`);
       nominatimGetRequestDelay = setTimeout(function () {
         nominatimGetRequest = $.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, function (result) {
+          console.log("reverse-geo", result);
+
+          if ("error" in result) {
+            $('#location-name-container').html(`<span class="w-100 small text-muted">(undetected address)</span>`);
+            $('#summary-location-name').html(`<div class="w-100 small text-muted">(undetected address)</div>`);
+
+            testInputs.location.name = null;
+            return;
+          }
+
           const parts = result.display_name.split(', ');
-          const addressName = `around ${parts.splice(0, parts.length - 2).join(', ')}`;
+          const addressName = `near ${parts.splice(0, parts.length - 2).join(', ')}`;
 
           testInputs.location.name = addressName;
           testInputs.location.reverseGeoLicense = result.licence;
   
           $('#location-name-container').html(`<span class="w-100">${addressName}</span>`);
           $('#summary-location-name').text(addressName);
-          
-          console.log("reverse-geo", result);
         }).fail(function () {
           testInputs.location.name = null;
 

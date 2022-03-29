@@ -5,7 +5,7 @@ import ast
 
 from flask import session
 
-url = "http://202.90.158.6:12000"
+url = "http://netmesh-api.asti.dost.gov.ph"
 
 def login(username, password):
   if not username:
