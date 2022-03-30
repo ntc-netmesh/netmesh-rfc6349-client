@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Terminal=true
-Name=start_main_client
-Icon=utilities-terminal
-Exec=gnome-terminal -- bash -c "cd $(dirname %k) && python3 ./update.py; sleep 5";
-#Path=/home/event1/Desktop/6349_App/
