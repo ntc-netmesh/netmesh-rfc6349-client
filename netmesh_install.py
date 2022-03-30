@@ -33,7 +33,7 @@ if __name__ == "__main__":
     file_action = 'w'
   
   additional_commands = [
-    f"sudo apt-get install jq",
+    "sudo apt-get install jq",
     # Insert additional commands if necessary (ie. APT dependencies)
   ]
   

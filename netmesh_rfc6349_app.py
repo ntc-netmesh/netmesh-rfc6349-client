@@ -1159,23 +1159,10 @@ def check_if_registered():
   
   return True
 
-
-
 def encrypt_string(hash_string):
   sha_signature = \
       hashlib.sha256(hash_string.encode()).hexdigest()
   return sha_signature
-
-# @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
-# def onDownloadRequested(self, download):
-#   print("yeah yeah yeah")
-#   if download.state() == QtWebEngineWidgets.QWebEngineDownloadItem.DownloadRequested:
-#     path, _ = QtWidgets.QFileDialog.getSaveFileName(
-#       self, self.tr("Save as"), download.path()
-#     )
-#     if path:
-#       download.setPath(path)
-#       download.accept()
 
 if os.name == 'nt':
   import ctypes
