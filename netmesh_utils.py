@@ -3,6 +3,8 @@ import sys
 import os
 
 import subprocess
+import requests
+from netmesh_constants import APP_TAG_URL
 
 # ----------------------------------------------------------------
 # Flask
@@ -40,3 +42,34 @@ def get_laptop_serial_number():
   
   return serial_number
     
+# ----------------------------------------------------------------
+# UPDATER
+# ----------------------------------------------------------------
+
+def has_update():
+  current_version = ""
+  process = subprocess.Popen("git describe --tags ", shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
+  stdout, stderr = process.communicate()
+  if stdout:
+    current_version = stdout.decode().strip()
+  else:
+    raise Exception(stderr)
+
+  r = requests.get(APP_TAG_URL)
+  latest_version = r.json()['tag_name']
+  if current_version == latest_version:
+      return False
+  return True
+
+def update():
+  r = requests.get(APP_TAG_URL)
+  latest_tag = r.json()['tag_name']
+  process = subprocess.Popen(f'git checkout {latest_tag}', shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE,
+                          cwd=resource_path(''))
+  stdout,stderr = process.communicate()
+  if not stdout:
+    raise Exception(stderr)

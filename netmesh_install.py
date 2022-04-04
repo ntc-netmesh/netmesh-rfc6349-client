@@ -13,7 +13,7 @@ def run(command):
       break
     yield line
 
-if __name__ == "__main__":
+def install_proj():
   # Run pyinstaller
   ubuntu_version = netmesh_utils.get_ubuntu_version()
   
@@ -57,3 +57,6 @@ Exec=gnome-terminal -- bash -c "{' && '.join(file_execution_commands)}";
   st = os.stat(file_path)
   os.chmod(file_path, st.st_mode | 0o111)
   
+
+if __name__ == "__main__":
+  install_proj()
