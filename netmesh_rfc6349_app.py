@@ -1226,11 +1226,11 @@ def run_on_desktop():
   
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
 
-def run_in_broswer():
+def run_in_browser():
   app.run(debug=True)
 
 if __name__ == "__main__":
   if getattr(sys, 'frozen', False):
     run_on_desktop()
   else:
-    run_in_broswer()
+    run_in_browser()
