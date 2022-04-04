@@ -71,5 +71,4 @@ def update():
                           stderr=subprocess.PIPE,
                           cwd=resource_path(''))
   stdout,stderr = process.communicate()
-  if not stdout:
-    raise Exception(stderr)
+  # Add stdout/err to logfile if necessary
