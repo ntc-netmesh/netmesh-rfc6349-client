@@ -1693,6 +1693,7 @@ const chartImageUris = Object.seal({
             isPasswordValid = true;
   
             setTimeout(function () {
+              $('#modalReenterPassword .alert-danger').addClass("d-none");
               $('#modalReenterPassword').modal('hide');
             }, 100);
           },
@@ -1721,7 +1722,6 @@ const chartImageUris = Object.seal({
       },
       success: function (result) { 
         alert(result);
-
         // $('#modalReenterPassword').modal('hide');
       },
       error: function (err) {
@@ -1734,13 +1734,23 @@ const chartImageUris = Object.seal({
   }
 
   $('#process-error').on('click', '.btn-send-error', function () {
+    let sendingErrorAjax = null;
+
+    $('#modalSendingError').on('hide.bs.modal', function () {
+      sendingErrorAjax?.abort();
+      $('#modalSendingError').off('hide.bs.modal');
+    });
+
     $('#modalSendingError .modal-body').html(`<div class="progress">
       <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
     </div>`);
+
     $('#modalSendingError').modal('show');
 
+    $('#modalSendingError .modal-title').html("Sending error...");
+
     const errorFileName = $('#process-error .btn-send-error').data('error-file-name');
-    $.ajax({
+    sendingErrorAjax = $.ajax({
       url: 'send-error',
       method: 'POST',
       data: {
@@ -1749,17 +1759,21 @@ const chartImageUris = Object.seal({
         errorFileName: errorFileName
       },
       success: function (result) {
-        alert(result);
-        $('#modalSendingError .modal-body').html("Successfully sent!");
+        // alert(result);
+        console.log("na-send");
+        $('#modalSendingError .modal-title').html("Success");
+        $('#modalSendingError .modal-body').html(`Error log "${errorFileName}.txt" was sent successfully.`);
       },
       error: function (err) {
         console.log(err);
-        $('#modalSendingError .modal-body').html("Cannot send error");
+        $('#modalSendingError .modal-title').html("Failed");
+        // $('#modalSendingError .modal-title').html("Send error");
+        $('#modalSendingError .modal-body').html("Cannot send error log");
       }
     });
   });
 })();
-  
+
 function tryAgain() {
 }
 
@@ -1783,28 +1797,27 @@ function openLogsFolder() {
   });
 }
 
-$('#modalSendError .btn').click(function () {
-  
+// $('#modalSendingError .btn-close').click(function () {
+//   alert("ba't mo iko-close???")
+//   // $.ajax({
+//   //   url: 'send-error',
+//   //   method: 'POST',
+//   //   data: {
+//   //     email: $('#errorEmail').val(),
+//   //     // password: $('#errorEmailPassword').val(),
+//   //     problem: $('#textareaErrorProblem').val(),
+//   //     errorFileName: errorFileName
+//   //   },
+//   //   success: function (result) { 
+//   //     alert(result);
 
-  // $.ajax({
-  //   url: 'send-error',
-  //   method: 'POST',
-  //   data: {
-  //     email: $('#errorEmail').val(),
-  //     // password: $('#errorEmailPassword').val(),
-  //     problem: $('#textareaErrorProblem').val(),
-  //     errorFileName: errorFileName
-  //   },
-  //   success: function (result) { 
-  //     alert(result);
-
-  //     // $('#modalReenterPassword').modal('hide');
-  //   },
-  //   error: function (err) {
-  //     console.log(err);
-  //     // const responseJSON = JSON.parse(err.responseText);
-  //     // $('#modalReenterPassword .alert-danger').text(responseJSON?.error ?? "Unexpected error occured");
-  //     // $('#modalReenterPassword .alert-danger').removeClass("d-none");
-  //   }
-  // });
-});
+//   //     // $('#modalReenterPassword').modal('hide');
+//   //   },
+//   //   error: function (err) {
+//   //     console.log(err);
+//   //     // const responseJSON = JSON.parse(err.responseText);
+//   //     // $('#modalReenterPassword .alert-danger').text(responseJSON?.error ?? "Unexpected error occured");
+//   //     // $('#modalReenterPassword .alert-danger').removeClass("d-none");
+//   //   }
+//   // });
+// });
