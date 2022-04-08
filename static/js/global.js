@@ -36,7 +36,7 @@ const TEST_MODES = Object.freeze({
 
 const NETWORK_CONNECTION_TYPES = Object.freeze({
   "Ethernet": Object.freeze({
-    prefix: "enp"
+    prefix: "enx"
   }),
   "Wi-Fi": Object.freeze({
     prefix: "wlp"
