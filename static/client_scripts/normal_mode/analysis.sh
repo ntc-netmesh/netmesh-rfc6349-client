@@ -49,9 +49,9 @@ exit 1;
 
 fi
 
-touch thpt_extract.py
+touch ./thpt_extract.py
 cat << EOF > thpt_extract.py
-
+#!/usr/bin/python3
 import sys
 data_sent= float(sys.argv[1])
 ideal_thpt= float(sys.argv[2])
@@ -71,7 +71,7 @@ print("buffer_delay: " + str(buf_del)+"%")
 print("tcp_efficiency: " + str(tcp_eff)+"%")
 
 EOF
-
+chmod +x thpt_extract.py
 python3 thpt_extract.py $_data_sent $_ideal_thpt $_ave_thpt $_base_rtt $_ave_rtt $_retx_bytes
 rm thpt_extract.py
 
