@@ -34,7 +34,8 @@ if __name__ == "__main__":
   
   additional_commands = [
     "sudo apt-get install jq",
-    # Insert additional commands if necessary (ie. APT dependencies)
+    "alias python=python3"
+    # Insert additional commands if necessary (ex. APT dependencies)
   ]
   
   file_execution_commands = [
