@@ -72,6 +72,6 @@ print("tcp_efficiency: " + str(tcp_eff)+"%")
 
 EOF
 
-python thpt_extract.py $_data_sent $_ideal_thpt $_ave_thpt $_base_rtt $_ave_rtt $_retx_bytes
+python3 thpt_extract.py $_data_sent $_ideal_thpt $_ave_thpt $_base_rtt $_ave_rtt $_retx_bytes
 rm thpt_extract.py
 

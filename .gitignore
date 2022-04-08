@@ -9,6 +9,7 @@
 tempfiles/
 
 venv*/
+.venv/
 dist/
 build/
 

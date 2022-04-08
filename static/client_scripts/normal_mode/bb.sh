@@ -50,9 +50,9 @@ exit 1;
 
 fi
 
-touch bdp_rwnd.py
+touch ./bdp_rwnd.py
 cat << EOF > bdp_rwnd.py
-
+#!/usr/bin/python3
 import sys
 rtt = float(sys.argv[1])
 bb = float(sys.argv[2])
@@ -62,8 +62,8 @@ rwnd = int(bdp/8/1000)
 print("rwnd: " + str(rwnd)+" Kbytes")
 
 EOF
-
-python bdp_rwnd.py $_rtt $BB
+chmod +x bdp_rwnd.py
+./bdp_rwnd.py $_rtt $BB
 rm bdp_rwnd.py
 
 # BDP and RWND not to be included for now because of
