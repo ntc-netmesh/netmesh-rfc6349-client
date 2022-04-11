@@ -34,7 +34,8 @@ if __name__ == "__main__":
   
   additional_commands = [
     "sudo apt-get install jq",
-    "alias python=python3"
+    "sudo apt-get install adb",
+    "alias python=python3",
     # Insert additional commands if necessary (ex. APT dependencies)
   ]
   

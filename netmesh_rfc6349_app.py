@@ -1012,6 +1012,18 @@ def get_isp():
       "error": error
     }), 500)
 
+@app.route('/get-machine-name', methods = ['GET'])
+def get_machine_name():
+  print("machine name")
+  machine_name = ""
+  try:
+    machine_name = netmesh_utils.get_machine_name()
+  except Exception as e:
+    print(e.__cause__)
+    return Response(str(e), 500)
+    
+  return Response(json.dumps(machine_name), mimetype='application/json')
+
 # ----------------------------------------------------------------
 # EXTERNAL DATA
 # ----------------------------------------------------------------

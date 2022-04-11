@@ -42,6 +42,7 @@ const chartImageUris = Object.seal({
 
   const testClient = Object.seal({
     username: $('#loggedUsername').text(),
+    machineName: '',
     isp: '',
     publicIP: '',
   });
@@ -613,6 +614,25 @@ const chartImageUris = Object.seal({
         $('#summary-isp').html('<i class="small text-muted">(undetected)</i>');
         $('#summary-public-ip').html('<i class="small text-muted">(undetected)</i>');
         console.log(errorMsg);
+      });
+
+      getMachineName()
+        .then((machineName) => {
+          testClient.machineName = machineName;
+
+          // $('#machine-name').text(`${testClient.machineName}`);
+        })
+        .catch(ex => {
+          testClient.machineName = "";
+          
+          const errorJson = JSON.parse(ex.responseText);
+          errorMsg = ex.responseText;
+          if ("error" in errorJson) {
+            errorMsg = errorJson['error'];
+          }
+
+          // $('#machine-name').html('<i class="small text-muted">(undetected)</i>');
+          console.log(errorMsg);
       });
 
     $('#btnStartTest').attr('disabled', false);
@@ -1649,6 +1669,23 @@ const chartImageUris = Object.seal({
     return new Promise(function (resolve, reject) {
       $.ajax({
         url: 'get-isp-info',
+        method: 'GET',
+        dataType: 'json',
+        success: function (response) {
+          console.log("response", response);
+          resolve(response);
+        },
+        error: function (err) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  function getMachineName() {
+    return new Promise(function (resolve, reject) {
+      $.ajax({
+        url: 'get-machine-name',
         method: 'GET',
         dataType: 'json',
         success: function (response) {
