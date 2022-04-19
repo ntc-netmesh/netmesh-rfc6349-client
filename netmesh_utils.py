@@ -73,12 +73,14 @@ def has_update():
 
   r = requests.get(APP_TAG_URL)
   latest_version = r.json()['tag_name']
+  print("latest_version: ", latest_version)
   if current_version == latest_version:
       return False
   return True
 
 def update():
   r = requests.get(APP_TAG_URL)
+  print(r.json())
   latest_tag = r.json()['tag_name']
   process = subprocess.Popen(f'git checkout tags/{latest_tag}', shell=True,
                           stdout=subprocess.PIPE,
