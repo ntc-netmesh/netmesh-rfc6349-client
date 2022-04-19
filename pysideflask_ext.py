@@ -3,8 +3,11 @@ import sys
 
 from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
 from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QMessageBox
 
 import socket
+
+import netmesh_utils, netmesh_install
 
 class ApplicationThread(QtCore.QThread):
     def __init__(self, application, port=5000):
@@ -19,14 +22,26 @@ class ApplicationThread(QtCore.QThread):
         self.application.run(port=self.port, threaded=True)
 
 class MainGUI(QtWidgets.QMainWindow):
+    has_update = False
+    
     def closeEvent(self, event):
-        reply = QtWidgets.QMessageBox.question(self, 'Message',
-            "Close this app?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+        if not self.has_update:
+            reply = QtWidgets.QMessageBox.question(self, 'Message',
+                "Close this app?", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
 
-        if reply == QtWidgets.QMessageBox.Yes:
-            event.accept()
-        else:
-            event.ignore()
+            if reply == QtWidgets.QMessageBox.Yes:
+                event.accept()
+            else:
+                event.ignore()
+            
+    # def hasUpdateEvent(self, event):
+    #     reply = QtWidgets.QMessageBox.question(self, 'Message',
+    #         "May update. Paki-update na pleeeeeeeease? uwu", QtWidgets.QMessageBox.Yes, QtWidgets.QMessageBox.No)
+        
+    #     if reply == QtWidgets.QMessageBox.Yes:
+    #         event.accept()
+    #     else:
+    #         event.ignore()
 
 class WebPage(QtWebEngineWidgets.QWebEnginePage):
     def __init__(self, root_url):
@@ -47,7 +62,7 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
 
 
 def init_gui(application, port=0, width=800, height=600,
-             window_title="PySideFlask", icon="appicon.png", argv=None):
+             window_title="PySideFlask", icon="appicon.png", argv=None, has_update=False):
   
     if argv is None:
         argv = sys.argv
@@ -68,6 +83,7 @@ def init_gui(application, port=0, width=800, height=600,
 
     # Main Window Level
     window = MainGUI()
+    window.has_update = has_update
     window.resize(width, height)
     window.setWindowTitle(window_title)
     window.setWindowIcon(QtGui.QIcon(icon))
@@ -82,20 +98,41 @@ def init_gui(application, port=0, width=800, height=600,
 
     # WebPage Level
     page = WebPage('http://127.0.0.1:{}'.format(port))
+    page.home()
     
     profile = page.profile()
     profile.clearHttpCache()
     profile.clearAllVisitedLinks()
     profile.downloadRequested.connect(onDownloadRequested)
     
-    page.home()
-    webView.setPage(page)
-    
     window.show()
+    
+    if has_update:
+        print("MAY UPDATE!!!")
+        msg = QMessageBox(window)
+        msg.setWindowTitle("Update to v3.0.1")
+        msg.setText("Do you want to update this app?")
+        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        
+        reply = msg.exec_()
+        if reply == QtWidgets.QMessageBox.Yes:
+            netmesh_utils.update() # this function will stall
+            netmesh_install.install_proj()
+        else:
+            must_update_msg = QMessageBox(window)
+            must_update_msg.setWindowTitle("Cannot open the app")
+            must_update_msg.setText("You must update this app first before using.")
+            must_update_msg.exec_()
+            
+            window.close()
+            exit()
+    else:
+        webView.setPage(page)
     
     print("App opened")
     
     return qtapp.exec_()
+        
 
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):
