@@ -82,15 +82,12 @@ def update():
   r = requests.get(APP_TAG_URL)
   print(r.json())
   latest_tag = r.json()['tag_name']
-  print("latest_tag: ", latest_tag)
-  print("resource_path: ", resource_path(''))
-  process = subprocess.Popen(f'git checkout {latest_tag}', shell=True,
+  process = subprocess.Popen(f'git checkout tags/{latest_tag}', shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
                           cwd=resource_path(''))
   stdout,stderr = process.communicate()
-  if not stdout:
-    raise Exception(stderr)
+  # Add stdout/err to logfile if necessary
 
 # if __name__ == "__main__":
 #   mn = get_machine_name()
