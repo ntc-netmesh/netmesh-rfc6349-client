@@ -1236,10 +1236,16 @@ def run_on_desktop():
     # GUI popup here asking if user wants to update or not and store it in update_dec
     update_dec = True # tentative value, store user decision here if True or False
     if update_dec:
-        # GUI popup here notifying the user that the app is currently updating
-        netmesh_utils.update() # this function will stall
-        install_proj()
-        # GUI popup here notifying user that the app is done updating and to ask them to start the app again
+        # GUI popup here notifying the user that the app is currently updating (e.g. loading icon)
+        #     this GUI should run in the background while netmesh_utils.update() and install_proj() executes
+
+        #
+        # Updater functions commented out for now
+        #
+        #netmesh_utils.update() 
+        #install_proj()  
+
+        # GUI popup here notifying user that the app is done updating and to ask them to restart the app
         return
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
 
