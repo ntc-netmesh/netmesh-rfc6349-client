@@ -8,6 +8,9 @@
 #Temp File
 tempfiles/
 
-venv/
+venv*/
+.venv/
 dist/
 build/
+
+*.zip
