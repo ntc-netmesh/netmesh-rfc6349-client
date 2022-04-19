@@ -398,7 +398,7 @@ async function generateReport(testInputs, testTime, testClient, results) {
               'Performed by:',
               {
                 text: [
-                  testClient.username,
+                  `${testClient.username}`,
                   // {
                   //   text: testClient.userId,
                   //   color: 'gray',
@@ -406,6 +406,14 @@ async function generateReport(testInputs, testTime, testClient, results) {
                   // }
                 ]
               },
+            ],
+            [
+              'Tested on:',
+              {
+                text: [
+                  `${testClient.machineName}`
+                ]
+              }
             ],
             [
               'ISP:',

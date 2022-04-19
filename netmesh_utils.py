@@ -42,6 +42,20 @@ def get_laptop_serial_number():
   
   return serial_number
     
+def get_machine_name():
+  machine_name = ""
+  process = subprocess.Popen("sudo dmidecode -t system | grep 'Manufacturer:\|Version:\|Serial ' | awk -F': ' '{print $2}'", shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
+  stdout,stderr = process.communicate()
+  if stdout:
+    machine_info = stdout.decode().strip().split('\n')
+    machine_name = "-".join(machine_info)
+  else:
+    raise Exception(stderr)
+  
+  return machine_name
+
 # ----------------------------------------------------------------
 # UPDATER
 # ----------------------------------------------------------------
@@ -73,3 +87,8 @@ def update():
   stdout,stderr = process.communicate()
   if not stdout:
     raise Exception(stderr)
+
+# if __name__ == "__main__":
+#   mn = get_machine_name()
+#   print("mn")
+#   print(mn)

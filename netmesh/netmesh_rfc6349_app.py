@@ -24,7 +24,6 @@ import pysideflask_ext
 
 import netmesh_constants
 import netmesh_utils
-from netmesh_install import install_proj
 
 if getattr(sys, 'frozen', False):
   template_folder = netmesh_utils.resource_path('templates')
@@ -1013,18 +1012,6 @@ def get_isp():
       "error": error
     }), 500)
 
-@app.route('/get-machine-name', methods = ['GET'])
-def get_machine_name():
-  print("machine name")
-  machine_name = ""
-  try:
-    machine_name = netmesh_utils.get_machine_name()
-  except Exception as e:
-    print(e.__cause__)
-    return Response(str(e), 500)
-    
-  return Response(json.dumps(machine_name), mimetype='application/json')
-
 # ----------------------------------------------------------------
 # EXTERNAL DATA
 # ----------------------------------------------------------------
@@ -1230,17 +1217,13 @@ def open_downloads_folder():
 def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
   
+def check_update():
+  pass
+  
 def run_on_desktop():
-
-  if netmesh_utils.has_update():
-    # GUI popup here asking if user wants to update or not and store it in update_dec
-    update_dec = True # tentative value, store user decision here if True or False
-    if update_dec:
-        # GUI popup here notifying the user that the app is currently updating
-        netmesh_utils.update() # this function will stall
-        install_proj()
-        # GUI popup here notifying user that the app is done updating and to ask them to start the app again
-        return
+  # do updater
+  check_update()
+  
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE)
 
 def run_in_browser():
