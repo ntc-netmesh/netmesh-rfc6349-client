@@ -10,6 +10,7 @@ const resultsParameters = Object.freeze({
   mtu: Object.freeze({
     name: "Maximum Transfer Unit (MTU)",
     test: resultsTestNames.MtuTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000")} bytes`
     },
@@ -17,6 +18,7 @@ const resultsParameters = Object.freeze({
   rtt: Object.freeze({
     name: "Round-trip Time (RTT)",
     test: resultsTestNames.RttTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} ms`
     },
@@ -24,6 +26,7 @@ const resultsParameters = Object.freeze({
   bb: Object.freeze({
     name: "Baseline Bandwidth (BB)",
     test: resultsTestNames.BdpTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
@@ -31,6 +34,7 @@ const resultsParameters = Object.freeze({
   bdp: Object.freeze({
     name: "Bandwidth Delay Product (BDP)",
     test: resultsTestNames.BdpTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000")} bytes`
     },
@@ -38,6 +42,7 @@ const resultsParameters = Object.freeze({
   rwnd: Object.freeze({
     name: "Receiver Window (RWND)",
     test: resultsTestNames.BdpTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} KBytes`
     },
@@ -45,6 +50,7 @@ const resultsParameters = Object.freeze({
   thpt_avg: Object.freeze({
     name: "Throughput Average",
     test: resultsTestNames.ThroughputTest,
+    description: "Average network speed measured in the test. The value shows the average bandwidth the connection has",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
@@ -52,6 +58,7 @@ const resultsParameters = Object.freeze({
   thpt_ideal: Object.freeze({
     name: "Throughput Ideal",
     test: resultsTestNames.ThroughputTest,
+    description: "Maximum achievable network speed. In an ideal network condition, the bandwidth should be at the most this speed",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
@@ -59,6 +66,7 @@ const resultsParameters = Object.freeze({
   tx_bytes: Object.freeze({
     name: "Transmitted Bytes",
     test: resultsTestNames.ThroughputTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} MBytes`
     },
@@ -66,6 +74,7 @@ const resultsParameters = Object.freeze({
   retx_bytes: Object.freeze({
     name: "Retransmitted Bytes",
     test: resultsTestNames.ThroughputTest,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val / 1000000).format("0,000.[000]")} MBytes`
     },
@@ -73,6 +82,7 @@ const resultsParameters = Object.freeze({
   ave_rtt: Object.freeze({
     name: "Average RTT",
     test: resultsTestNames.ThroughputTest,
+    description: "Average delay of sending data to a server and receive a reply. Important metric for online gaming as high ping results to lag",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} ms`
     },
@@ -80,6 +90,7 @@ const resultsParameters = Object.freeze({
   transfer_avg: Object.freeze({
     name: "Transfer Average",
     test: resultsTestNames.ThroughputAnalysis,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} sec`
     },
@@ -87,6 +98,7 @@ const resultsParameters = Object.freeze({
   transfer_ideal: Object.freeze({
     name: "Transfer Ideal",
     test: resultsTestNames.ThroughputAnalysis,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} sec`
     },
@@ -94,6 +106,7 @@ const resultsParameters = Object.freeze({
   tcp_ttr: Object.freeze({
     name: "TCP Transfer Time Ratio",
     test: resultsTestNames.ThroughputAnalysis,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.000")}`
     },
@@ -101,6 +114,7 @@ const resultsParameters = Object.freeze({
   tcp_eff: Object.freeze({
     name: "TCP Efficiency",
     test: resultsTestNames.ThroughputAnalysis,
+    description: "Reliability of the internet connection as low efficiency results to substantial amount of data retransmitted",
     getMeasurement: function (val) {
       return `${numeral(val).format("0.00")}%`
     },
@@ -108,6 +122,7 @@ const resultsParameters = Object.freeze({
   buf_delay: Object.freeze({
     name: "Buffer Delay",
     test: resultsTestNames.ThroughputAnalysis,
+    description: "",
     getMeasurement: function (val) {
       return `${numeral(val).format("0.[00]")}%`
     },
@@ -164,7 +179,7 @@ function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) 
       }
     },
     title: {
-      text: "TCP Throughtput",
+      text: "TCP Throughput",
       align: 'center',
       margin: 0,
       style: {

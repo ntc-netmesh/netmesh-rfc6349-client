@@ -59,9 +59,13 @@
           </td>`;
           break;
       }
+      var descriptionHtml = "";
+      if (param.description) {
+        descriptionHtml = ` <i class="bi bi-question-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="${param.description}"></i>`;
+      }
       $(`#${method}-measurement-results tbody`).append(`
         <tr>
-          <td style="color: '${methodColor}'">${param.name}</td>
+          <td style="color: '${methodColor}'">${param.name} ${descriptionHtml}</td>
           ${quantityHtml}
         </tr>
       `);
