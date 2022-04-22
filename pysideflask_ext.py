@@ -43,7 +43,7 @@ class MainGUI(QtWidgets.QMainWindow):
     #     else:
     #         event.ignore()
 
-class WebPage(QtWebEngineWidgets.QWebEnginePage):
+class WebPage(QtWebEngineCore.QWebEnginePage):
     def __init__(self, root_url):
         super(WebPage, self).__init__()
         self.root_url = root_url
