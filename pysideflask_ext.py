@@ -1,9 +1,9 @@
 import os
 import sys
 
-from PySide6 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets, QtWebEngineCore
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QMessageBox
+from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QMessageBox
 
 import socket
 
@@ -43,7 +43,7 @@ class MainGUI(QtWidgets.QMainWindow):
     #     else:
     #         event.ignore()
 
-class WebPage(QtWebEngineCore.QWebEnginePage):
+class WebPage(QtWebEngineWidgets.QWebEnginePage):
     def __init__(self, root_url):
         super(WebPage, self).__init__()
         self.root_url = root_url
@@ -134,6 +134,6 @@ def init_gui(application, port=0, width=800, height=600,
     return qtapp.exec_()
         
 
-@QtCore.Slot(QtWebEngineCore.QWebEngineDownloadRequest)
+@QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):
   download.accept()
