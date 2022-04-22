@@ -1,9 +1,9 @@
 import os
 import sys
 
-from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox
+from PySide6 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets, QtWebEngineCore
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QMessageBox
 
 import socket
 
@@ -134,6 +134,6 @@ def init_gui(application, port=0, width=800, height=600,
     return qtapp.exec_()
         
 
-@QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
+@QtCore.Slot(QtWebEngineCore.QWebEngineDownloadRequest)
 def onDownloadRequested(download):
   download.accept()
