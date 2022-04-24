@@ -85,10 +85,9 @@ def update():
   APP_DIR = resource_path('')
   print(r.json())
   latest_tag = r.json()['tag_name']
-  process = subprocess.Popen(f'cd {APP_DIR} && git checkout tags/{latest_tag}', shell=True,
+  process = subprocess.Popen(f'git checkout tags/{latest_tag}', shell=True,
                           stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          cwd=resource_path(''))
+                          stderr=subprocess.PIPE)
   stdout,stderr = process.communicate()
   if stdout:
       print(stdout.decode().strip())
