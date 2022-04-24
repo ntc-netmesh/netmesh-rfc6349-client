@@ -63,7 +63,7 @@ def get_machine_name():
 def has_update():
   current_version = ""
   APP_DIR = resource_path('')
-  process = subprocess.Popen(f'cd {APP_DIR} && git describe --tags ', shell=True,
+  process = subprocess.Popen(" git describe --tags ", shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
   stdout, stderr = process.communicate()
