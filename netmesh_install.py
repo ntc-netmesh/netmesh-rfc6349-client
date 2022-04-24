@@ -35,9 +35,9 @@ def install_proj():
     file_action = 'w'
 
   additional_commands = [
-    "sudo apt-get install jq",
-    "sudo apt-get install adb",
+    "sudo apt-get install jq adb pip3",
     "alias python=python3",
+    f"cd {MAIN_DIRECTORY} && pip3 install -r requirements.txt"
     # Insert additional commands if necessary (ex. APT dependencies)
   ]
 
