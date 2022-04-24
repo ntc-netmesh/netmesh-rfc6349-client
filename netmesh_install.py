@@ -64,5 +64,4 @@ Exec=gnome-terminal -- bash -c "{' && '.join(file_execution_commands)}";
   
 
 if __name__ == "__main__":
-  #install_proj()
-  print(netmesh_utils.resource_path(''))
+  install_proj()
