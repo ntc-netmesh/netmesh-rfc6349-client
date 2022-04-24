@@ -1230,7 +1230,7 @@ def open_downloads_folder():
 @app.route('/open-logs-folder', methods=['POST'])
 def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
-  
+ 
 def run_on_desktop():
   has_update = netmesh_utils.has_update()
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE, has_update=True)
@@ -1245,8 +1245,6 @@ def run_on_desktop():
   #       install_proj()
   #       # GUI popup here notifying user that the app is done updating and to ask them to start the app again
   #       return
-      
-  
 
 def run_in_browser():
   app.run(debug=True)

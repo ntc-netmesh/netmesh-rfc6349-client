@@ -118,12 +118,17 @@ def init_gui(application, port=0, width=800, height=600,
         if reply == QtWidgets.QMessageBox.Yes:
             netmesh_utils.update() # this function will stall
             netmesh_install.install_proj()
+            new_exec = QMessageBox(window)
+            new_exec.setWindowTitle("New update complete")
+            new_exec.setText("The new update has now been applied, the app will now close, please reopen the app.")
+            new_exec.exec_()
+            window.close()
+            exit()
         else:
             must_update_msg = QMessageBox(window)
             must_update_msg.setWindowTitle("Cannot open the app")
             must_update_msg.setText("You must update this app first before using.")
             must_update_msg.exec_()
-            
             window.close()
             exit()
     else:
