@@ -62,7 +62,8 @@ def get_machine_name():
 
 def has_update():
   current_version = ""
-  process = subprocess.Popen("git describe --tags ", shell=True,
+  APP_DIR = resource_path('')
+  process = subprocess.Popen(f'cd {APP_DIR} && git describe --tags ', shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
   stdout, stderr = process.communicate()
@@ -81,9 +82,10 @@ def has_update():
 
 def update():
   r = requests.get(APP_TAG_URL)
+  APP_DIR = resource_path('')
   print(r.json())
   latest_tag = r.json()['tag_name']
-  process = subprocess.Popen(f'git checkout tags/{latest_tag}', shell=True,
+  process = subprocess.Popen(f'cd {APP_DIR} && git checkout tags/{latest_tag}', shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE,
                           cwd=resource_path(''))
