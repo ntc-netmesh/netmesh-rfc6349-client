@@ -35,9 +35,9 @@ def install_proj():
     file_action = 'w'
 
   additional_commands = [
-    "sudo apt-get install jq",
-    "sudo apt-get install adb",
-    "alias python=python3"
+    "sudo apt-get -y install jq",
+    "sudo apt-get -y install adb",
+    "alias python=python3",
     f"cd {MAIN_DIRECTORY} && pip3 install -r requirements.txt"
     # Insert additional commands if necessary (ex. APT dependencies)
   ]
@@ -55,7 +55,7 @@ Terminal=true
 Name={app_name}
 Icon=utilities-terminal
 Categories=Application;
-Exec=gnome-terminal -- bash -c "{' && '.join(file_execution_commands)}";
+Exec=gnome-terminal -- bash -c "{' ; '.join(file_execution_commands)}";
 """)
     f.close()
 
