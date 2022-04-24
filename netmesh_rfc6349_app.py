@@ -1233,7 +1233,7 @@ def open_logs_folder():
  
 def run_on_desktop():
   has_update = netmesh_utils.has_update()
-  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE, has_update=True)
+  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE, has_update=has_update)
 
   exit()
   # if netmesh_utils.has_update():

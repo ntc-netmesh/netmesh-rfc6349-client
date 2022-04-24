@@ -62,7 +62,8 @@ def get_machine_name():
 
 def has_update():
   current_version = ""
-  process = subprocess.Popen("git describe --tags ", shell=True,
+  APP_DIR = resource_path('')
+  process = subprocess.Popen(" git describe --tags ", shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
   stdout, stderr = process.communicate()
@@ -74,21 +75,26 @@ def has_update():
   r = requests.get(APP_TAG_URL)
   latest_version = r.json()['tag_name']
   print("latest_version: ", latest_version)
+  print("current_version: ", current_version)
   if current_version == latest_version:
       return False
   return True
 
 def update():
   r = requests.get(APP_TAG_URL)
+  APP_DIR = resource_path('')
   print(r.json())
   latest_tag = r.json()['tag_name']
   process = subprocess.Popen(f'git checkout tags/{latest_tag}', shell=True,
                           stdout=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
-                          cwd=resource_path(''))
+                          stderr=subprocess.PIPE)
   stdout,stderr = process.communicate()
-  if not stdout:
-    raise Exception(stderr)
+  if stdout:
+      print(stdout.decode().strip())
+  if stderr:
+      print(stderr.decode().strip())
+  #if not stdout:
+  #  raise Exception(stderr)
 
 # if __name__ == "__main__":
 #   mn = get_machine_name()
