@@ -74,6 +74,7 @@ def has_update():
   r = requests.get(APP_TAG_URL)
   latest_version = r.json()['tag_name']
   print("latest_version: ", latest_version)
+  print("current_version: ", current_version)
   if current_version == latest_version:
       return False
   return True
@@ -87,8 +88,12 @@ def update():
                           stderr=subprocess.PIPE,
                           cwd=resource_path(''))
   stdout,stderr = process.communicate()
-  if not stdout:
-    raise Exception(stderr)
+  if stdout:
+      print(stdout.decode().strip())
+  if stderr:
+      print(stderr.decode().strip())
+  #if not stdout:
+  #  raise Exception(stderr)
 
 # if __name__ == "__main__":
 #   mn = get_machine_name()

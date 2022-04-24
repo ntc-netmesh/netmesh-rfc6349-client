@@ -16,6 +16,7 @@ def run(command):
 def install_proj():
   # Run pyinstaller
   ubuntu_version = netmesh_utils.get_ubuntu_version()
+  MAIN_DIRECTORY = netmesh_utils.resource_path('')
 
   app_name = f'netmesh-rfc-6349-app_{netmesh_constants.APP_VERSION}_u{ubuntu_version}'
   app_location = netmesh_utils.resource_path('netmesh_rfc6349_app.py')
@@ -42,7 +43,8 @@ def install_proj():
 
   file_execution_commands = [
     *additional_commands,
-    f"cd $(dirname %k) && ./{app_name}" # this will open the app
+    f"cd {MAIN_DIRECTORY} && ./dist/{app_name}" # this will open the app
+#    f"cd $(dirname %k) && ./dist/{app_name}" # this will open the app
   ]
 
   with open(file_path, file_action) as f:
@@ -62,4 +64,5 @@ Exec=gnome-terminal -- bash -c "{' && '.join(file_execution_commands)}";
   
 
 if __name__ == "__main__":
-  install_proj()
+  #install_proj()
+  print(netmesh_utils.resource_path(''))
