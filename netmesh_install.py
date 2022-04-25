@@ -18,7 +18,8 @@ if __name__ == "__main__":
   ubuntu_version = netmesh_utils.get_ubuntu_version()
   
   app_name = f'netmesh-rfc-6349-app_{netmesh_constants.APP_VERSION}_u{ubuntu_version}'
-  installer_command = f'pyinstaller netmesh_rfc6349_app.py -n "{app_name}" -s -F --clean --add-data "templates:templates" --add-data "static:static"'
+  # installer_command = f'pyinstaller netmesh_rfc6349_app.py -n "{app_name}" --clean --add-data="templates:templates" --add-data "static:static"'
+  installer_command = f'pyinstaller netmesh_rfc6349_app.py -n "{app_name}" -F --clean --add-data="templates:templates" --add-data="static:static"'
   
   for line in run(installer_command):
     print(line)
