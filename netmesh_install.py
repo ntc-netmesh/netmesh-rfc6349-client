@@ -15,7 +15,6 @@ def run(command):
     yield line
 
 def install_proj():
-  # Run pyinstaller
   ubuntu_version = netmesh_utils.get_ubuntu_version()
 
   # MAKE SURE THAT MAIN_DIRECTORY IS AT THE APP BASE
@@ -25,7 +24,9 @@ def install_proj():
   app_name = f'netmesh-rfc-6349-app_{netmesh_constants.APP_VERSION}_u{ubuntu_version}'
   #app_location = netmesh_utils.resource_path('netmesh_rfc6349_app.py')
   app_location = f'{MAIN_DIRECTORY}/netmesh_rfc6349_app.py'
-  installer_command = f'cd {MAIN_DIRECTORY} && pyinstaller {app_location} -n "{app_name}" -F --clean --add-data "templates:templates" --add-data "static:static"'
+  
+  # Run pyinstaller
+  installer_command = f'cd {MAIN_DIRECTORY} && pyinstaller {app_location} -n "{app_name}" -F --console --clean --add-data "templates:templates" --add-data "static:static"'
 
   for line in run(installer_command):
     print(line)
