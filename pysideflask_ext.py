@@ -7,7 +7,7 @@ from PySide2.QtWidgets import QMessageBox
 
 import socket
 
-import netmesh_utils, netmesh_install
+import netmesh_utils, netmesh_install, netmesh_constants
 
 class ApplicationThread(QtCore.QThread):
     def __init__(self, application, port=5000):
@@ -110,7 +110,7 @@ def init_gui(application, port=0, width=800, height=600,
     if has_update:
         print("MAY UPDATE!!!")
         msg = QMessageBox(window)
-        msg.setWindowTitle("Update to v3.0.1")
+        msg.setWindowTitle(f"Update to {netmesh_constants.app_version}")
         msg.setText("Do you want to update this app?")
         msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
         

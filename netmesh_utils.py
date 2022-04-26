@@ -4,6 +4,7 @@ import os
 
 import subprocess
 import requests
+import netmesh_constants
 from netmesh_constants import APP_TAG_URL
 
 # ----------------------------------------------------------------
@@ -69,6 +70,7 @@ def has_update():
   stdout, stderr = process.communicate()
   if stdout:
     current_version = stdout.decode().strip()
+    netmesh_constants.app_version = current_version
   else:
     raise Exception(stderr)
 
@@ -77,8 +79,8 @@ def has_update():
   print("latest_version: ", latest_version)
   print("current_version: ", current_version)
   if current_version == latest_version:
-      return False
-  return True
+      return (False, current_version)
+  return (True, latest_version)
 
 def update():
   r = requests.get(APP_TAG_URL)

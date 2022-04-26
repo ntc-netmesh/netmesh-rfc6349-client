@@ -61,7 +61,7 @@ def login_page():
     return redirect(url_for('home_page'))
   
   return render_template('login.html',
-                         app_version=netmesh_constants.APP_VERSION,
+                         app_version=netmesh_constants.app_version,
                          ubuntu_version=netmesh_utils.get_ubuntu_version())
 
 @app.route('/register-device')
@@ -78,7 +78,7 @@ def register_device_page():
 @app.route('/home')
 @wrappers.require_api_token
 def home_page():
-  return render_template('home.html', username=session['username'], app_version=netmesh_constants.APP_VERSION)
+  return render_template('home.html', username=session['username'], app_version=netmesh_constants.app_version)
 
 @app.route('/report-data', methods=['POST'])
 def report_data():
@@ -131,7 +131,7 @@ def report():
     results[d] = json.loads(session[d+'_test_results'])
   
   return render_template('report.html',
-                         app_version=netmesh_constants.APP_VERSION,
+                         app_version=netmesh_constants.app_version,
                          isr=session['test_details-isr'],
                          net=session['test_details-net'],
                          server_name=server_name,
@@ -263,7 +263,7 @@ def login():
   else:
     log_settings.log_error(error)
     return render_template('login.html',
-      app_version=netmesh_constants.APP_VERSION,
+      app_version=netmesh_constants.app_version,
       ubuntu_version=netmesh_utils.get_ubuntu_version(),
       error=error)
     
@@ -1232,7 +1232,8 @@ def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
  
 def run_on_desktop():
-  has_update = netmesh_utils.has_update()
+  has_update, app_version = netmesh_utils.has_update()
+  netmesh_constants.app_version = app_version
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE, has_update=has_update)
 
   exit()

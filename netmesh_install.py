@@ -21,8 +21,9 @@ def install_proj():
   temp = os.getcwd().split('dist')[0]
   MAIN_DIRECTORY = temp if temp[-1] != '/' else temp[:-1]
 
-  app_name = f'netmesh-rfc-6349-app_{netmesh_constants.APP_VERSION}_u{ubuntu_version}'
-  #app_location = netmesh_utils.resource_path('netmesh_rfc6349_app.py')
+  # app_name = f'netmesh-rfc-6349-app_{netmesh_constants.app_version}_u{ubuntu_version}'
+  app_name = f'netmesh-rfc-6349-app_u{ubuntu_version}'
+  # app_location = netmesh_utils.resource_path('netmesh_rfc6349_app.py')
   app_location = f'{MAIN_DIRECTORY}/netmesh_rfc6349_app.py'
   
   # Run pyinstaller
