@@ -13,6 +13,9 @@ import math
 
 import folium
 
+import tkinter
+import pyi_splash
+
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
 from flask_login import LoginManager, login_user, logout_user
 
@@ -1232,9 +1235,16 @@ def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
  
 def run_on_desktop():
-  has_update, app_version = netmesh_utils.has_update()
-  netmesh_constants.app_version = app_version
-  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720, window_title=netmesh_constants.APP_TITLE, has_update=has_update)
+  pyi_splash.update_text("Checking update...")
+  
+  has_update, current_version, latest_version = netmesh_utils.has_update()
+  netmesh_constants.app_version = current_version
+  
+  pyi_splash.update_text("Opening the app...")
+  
+  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,
+                           window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
+                           has_update=has_update, latest_version=latest_version)
 
   exit()
   # if netmesh_utils.has_update():

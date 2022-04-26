@@ -79,8 +79,8 @@ def has_update():
   print("latest_version: ", latest_version)
   print("current_version: ", current_version)
   if current_version == latest_version:
-      return (False, current_version)
-  return (True, latest_version)
+      return (False, current_version, latest_version)
+  return (True, current_version, latest_version)
 
 def update():
   r = requests.get(APP_TAG_URL)

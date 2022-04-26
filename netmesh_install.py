@@ -3,6 +3,8 @@ import subprocess
 import stat
 import sys
 
+import shutil
+
 import netmesh_constants
 import netmesh_utils
 
@@ -26,14 +28,18 @@ def install_proj():
   # app_location = netmesh_utils.resource_path('netmesh_rfc6349_app.py')
   app_location = f'{MAIN_DIRECTORY}/netmesh_rfc6349_app.py'
   
-  # Run pyinstaller
-  installer_command = f'cd {MAIN_DIRECTORY} && pyinstaller {app_location} -n "{app_name}" -F --console --clean --add-data "templates:templates" --add-data "static:static"'
+  installer_command = f'cd {MAIN_DIRECTORY} && pyinstaller {app_location} -n "{app_name}" --clean --splash ./static/images/rfc_splash_screen.png --add-data "templates:templates" --add-data "static:static"'
 
+  print(f"Removing existing folder '{MAIN_DIRECTORY}/dist/{app_name}'...")
+  run(f'sudo rm -rf {MAIN_DIRECTORY}/dist/{app_name}')
+  
+  # Run pyinstaller
   for line in run(installer_command):
     print(line)
-
+  
   # Create .desktop file
-  file_path = f'{MAIN_DIRECTORY}/dist/{app_name}.desktop'
+  run(f'sudo rm /usr/share/applications/{app_name}.desktop')
+  file_path = f'/usr/share/applications/{app_name}.desktop'
   file_action = 'x'
 
   print("app location : ", app_location)
@@ -43,16 +49,17 @@ def install_proj():
     file_action = 'w'
 
   additional_commands = [
-    "sudo apt-get -y install jq",
+    "pkexec sudo apt-get -y install jq",
     "sudo apt-get -y install adb",
     "alias python=python3",
-    f"cd {MAIN_DIRECTORY} && pip3 install -r requirements.txt"
+    # f"cd {MAIN_DIRECTORY} && sudo python3 -m pip install -r requirements.txt"
+    "sudo apt-get -y install python3-tk",
     # Insert additional commands if necessary (ex. APT dependencies)
   ]
 
   file_execution_commands = [
     *additional_commands,
-    f'cd {MAIN_DIRECTORY}/dist && ./{app_name}' # this will open the app
+    f'cd {MAIN_DIRECTORY}/dist/{app_name} && ./{app_name}' # this will open the app
 #    f"cd $(dirname %k) && ./{app_name}" # this will open the app
   ]
 
@@ -60,13 +67,15 @@ def install_proj():
     f.write(f"""[Desktop Entry]
 Type=Application
 Terminal=true
-Name={app_name}
-Icon=utilities-terminal
+Name={netmesh_constants.APP_TITLE}
+Icon={app_name}
 Categories=Application;
 Exec=gnome-terminal -- bash -c "{' ; '.join(file_execution_commands)}";
 """)
     f.close()
-
+    
+  shutil.copy("static/images/ntc_icon.png", f"/usr/share/pixmaps/{app_name}.png")
+  
   # Allow .desktop file to execute
   st = os.stat(file_path)
   os.chmod(file_path, st.st_mode | 0o111)
