@@ -49,8 +49,9 @@ def install_proj():
     file_action = 'w'
 
   additional_commands = [
-    "pkexec sudo apt-get -y install jq",
+    "sudo apt-get -y install jq",
     "sudo apt-get -y install adb",
+    "sudo apt install nmap",
     "alias python=python3",
     # f"cd {MAIN_DIRECTORY} && sudo python3 -m pip install -r requirements.txt"
     "sudo apt-get -y install python3-tk",

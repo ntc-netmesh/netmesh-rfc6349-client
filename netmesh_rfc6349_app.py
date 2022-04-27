@@ -14,7 +14,9 @@ import math
 import folium
 
 import tkinter
-import pyi_splash
+
+if getattr(sys, 'frozen', False):
+  import pyi_splash
 
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
 from flask_login import LoginManager, login_user, logout_user
@@ -56,11 +58,12 @@ login_manager.init_app(app)
 # ----------------------------------------------------------------
 @app.route('/')
 def login_page():
+  print("Check if app is already running on desktop")
+  
+  if 'run_on_desktop' in session and session['run_on_desktop'] == True:
+    return "This app is already running on desktop."
+    
   if 'api_session_token' in session and session['api_session_token'] and 'username' in session and session['username']:
-    # print('api_session_token')
-    # print(session['api_session_token'])
-    # print('username')
-    # print(session['username'])
     return redirect(url_for('home_page'))
   
   return render_template('login.html',
@@ -1235,16 +1238,20 @@ def open_logs_folder():
   webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
  
 def run_on_desktop():
-  pyi_splash.update_text("Checking update...")
+  if getattr(sys, 'frozen', False):
+    pyi_splash.update_text("Checking update...")
   
   has_update, current_version, latest_version = netmesh_utils.has_update()
   netmesh_constants.app_version = current_version
   
-  pyi_splash.update_text("Opening the app...")
   
+  if getattr(sys, 'frozen', False):
+    pyi_splash.update_text("Opening the app...")
+  
+  session['run_on_desktop'] = True
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,
                            window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
-                           has_update=has_update, latest_version=latest_version)
+                           has_update=False, latest_version=latest_version)
 
   exit()
   # if netmesh_utils.has_update():
@@ -1258,6 +1265,7 @@ def run_on_desktop():
   #       return
 
 def run_in_browser():
+  session['run_on_desktop'] = False
   app.run(debug=True)
 
 if __name__ == "__main__":
