@@ -402,39 +402,39 @@ const chartImageUris = Object.seal({
         $('#btnStartTest').attr('disabled', false);
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        $('#testServersPlaceholder').html(`<select class="form-select" id="testServers" required></select>
-          <div class="invalid-feedback">Select a test server</div>`);
-        $('#testServers').on('change', function () {
-          const selectedServer = $('#testServers option:selected').text();
-          if (selectedServer) {
-            $(this).attr('title', selectedServer.trim());
-          }
-        });
+        // $('#testServersPlaceholder').html(`<select class="form-select" id="testServers" required></select>
+        //   <div class="invalid-feedback">Select a test server</div>`);
+        // $('#testServers').on('change', function () {
+        //   const selectedServer = $('#testServers option:selected').text();
+        //   if (selectedServer) {
+        //     $(this).attr('title', selectedServer.trim());
+        //   }
+        // });
   
-        let $testServers = $('#testServers');
-        $testServers.html('');
-        $testServers.append('<option selected disabled value="">Select a test server...</option>');
+        // let $testServers = $('#testServers');
+        // $testServers.html('');
+        // $testServers.append('<option selected disabled value="">Select a test server...</option>');
 
-        testServers = [
-          {
-            nickname: 'Down pa yung results server kaya hardcoded muna yung selection ng test server hahaha - ibalik sa dati yung code ah baka makalimutan haha',
-            hostname: 'http://202.90.158.6:12000',
-            ip_address: '202.90.158.6'
-          }
-        ]
+        // testServers = [
+        //   {
+        //     nickname: 'Down pa yung results server kaya hardcoded muna yung selection ng test server hahaha - ibalik sa dati yung code ah baka makalimutan haha',
+        //     hostname: 'http://202.90.158.6:12000',
+        //     ip_address: '202.90.158.6'
+        //   }
+        // ]
   
-        for (let i = 0; i < testServers.length; i++) {
-          const server = testServers[i];
-          $testServers.append(`
-            <option value="${i}"> 
-              ${server.nickname}
-            </option>`
-          );
-        }
+        // for (let i = 0; i < testServers.length; i++) {
+        //   const server = testServers[i];
+        //   $testServers.append(`
+        //     <option value="${i}"> 
+        //       ${server.nickname}
+        //     </option>`
+        //   );
+        // }
   
-        $('#btnStartTest').attr('disabled', false);
+        // $('#btnStartTest').attr('disabled', false);
 
-        return;
+        // return;
 
         console.log("GET get-test-servers error");
         console.log({jqXHR, textStatus, errorThrown});
