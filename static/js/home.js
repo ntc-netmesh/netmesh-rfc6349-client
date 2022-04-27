@@ -389,6 +389,11 @@ const chartImageUris = Object.seal({
   
         testServers = [];
         testServers = data;
+        testServers.push({
+          nickname: 'Local server ni Jean Jay :D',
+          hostname: 'http://192.168.90.20:5000',
+          ip_address: '192.168.90.20'
+        })
   
         for (let i = 0; i < testServers.length; i++) {
           const server = testServers[i];
