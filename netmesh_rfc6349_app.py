@@ -32,6 +32,8 @@ import netmesh_utils
 # import netmesh_updater
 from netmesh_install import install_proj
 
+running_on_desktop = False
+
 if getattr(sys, 'frozen', False):
   template_folder = netmesh_utils.resource_path('templates')
   static_folder = netmesh_utils.resource_path('static')
@@ -60,7 +62,7 @@ login_manager.init_app(app)
 def login_page():
   print("Check if app is already running on desktop")
   
-  if 'run_on_desktop' in session and session['run_on_desktop'] == True:
+  if running_on_desktop == True:
     return "This app is already running on desktop."
     
   if 'api_session_token' in session and session['api_session_token'] and 'username' in session and session['username']:
@@ -1248,7 +1250,7 @@ def run_on_desktop():
   if getattr(sys, 'frozen', False):
     pyi_splash.update_text("Opening the app...")
   
-  session['run_on_desktop'] = True
+  running_on_desktop = True
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,
                            window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
                            has_update=False, latest_version=latest_version)
@@ -1265,7 +1267,7 @@ def run_on_desktop():
   #       return
 
 def run_in_browser():
-  session['run_on_desktop'] = False
+  running_on_desktop = False
   app.run(debug=True)
 
 if __name__ == "__main__":
