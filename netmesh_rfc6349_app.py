@@ -1253,7 +1253,7 @@ def run_on_desktop():
   running_on_desktop = True
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,
                            window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
-                           has_update=False, latest_version=latest_version)
+                           has_update=has_update, latest_version=latest_version)
 
   exit()
   # if netmesh_utils.has_update():
