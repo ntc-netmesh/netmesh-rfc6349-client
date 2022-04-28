@@ -1046,6 +1046,7 @@ const chartImageUris = Object.seal({
           } else if (process.processId == "thpt") {
             postThoughputScriptData = scriptData;
             resolve();
+            return;
           }
           else {
             processScriptData = scriptData;
