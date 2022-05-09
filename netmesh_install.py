@@ -82,6 +82,8 @@ Exec=gnome-terminal -- bash -c "{' ; '.join(file_execution_commands)}";
   # Allow .desktop file to execute
   st = os.stat(file_path)
   os.chmod(file_path, st.st_mode | 0o111)
+
+  os.system("notify-send --urgency=normal --expire-time=10000 'Netmesh Update' 'Netmesh Application has been successfully installed!'")
   
 
 if __name__ == "__main__":
