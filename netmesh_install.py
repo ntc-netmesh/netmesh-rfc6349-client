@@ -50,12 +50,13 @@ def install_proj():
 
   additional_commands = [
     # Insert additional commands if necessary (ex. APT dependencies)
-    "sudo apt-get -y install jq",
-    "sudo apt-get -y install adb",
-    "sudo apt install nmap",
+    "sudo apt-get install -y jq",
+    "sudo apt-get install -y iperf3",
+    "sudo apt-get install -y adb",
+    "sudo apt install -y nmap",
     "alias python=python3",
     f"cd {MAIN_DIRECTORY} && sudo python3 -m pip install -r requirements.txt"
-    "sudo apt-get -y install python3-tk",
+    "sudo apt-get install -y python3-tk",
   ]
 
   file_execution_commands = [
