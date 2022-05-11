@@ -1,9 +1,10 @@
 import os
 import sys
+import threading
 
 from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox
+from PySide2.QtWidgets import QMessageBox, QProgressDialog
 from PySide2.QtGui import QScreen
 
 import socket
@@ -130,8 +131,13 @@ def init_gui(application, port=0, width=800, height=600,
         
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            netmesh_utils.update() # this function will stall
-            netmesh_install.install_proj()
+
+            install_progress = QProgressDialog("Installing updates...", "Cancel", 0, 0)
+            x = threading.Thread(target=update_app, args=(install_progress,))
+            x.start()
+
+            install_progress.exec_()
+            
             new_update_msg = QMessageBox(window)
             new_update_msg.setWindowTitle("New update complete")
             new_update_msg.setText("The new update has now been applied. The app will now close. Please reopen the app")
@@ -153,7 +159,12 @@ def init_gui(application, port=0, width=800, height=600,
     print("App opened")
     
     return qtapp.exec_()
-        
+
+def update_app(progress_dialog):
+    netmesh_utils.update()
+    netmesh_install.install_proj()
+
+    progress_dialog.close()
 
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):
