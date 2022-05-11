@@ -30,9 +30,8 @@ def install_proj():
   
   installer_command = f'cd {MAIN_DIRECTORY} && pyinstaller {app_location} -n "{app_name}" --clean --splash ./static/images/rfc_splash_screen.png --add-data "templates:templates" --add-data "static:static"'
 
-  # print(f"Removing existing folder '{MAIN_DIRECTORY}/dist/{app_name}'...")
-  
-  # subprocess.Popen(['sudo', 'rm', '-rf', f'{MAIN_DIRECTORY}/dist/{app_name}'], stdout=subprocess.PIPE).communicate()
+  print(f"Removing existing folder '{MAIN_DIRECTORY}/dist/{app_name}'...")
+  subprocess.Popen(['sudo', 'rm', '-rf', f'{MAIN_DIRECTORY}/dist/{app_name}'], stdout=subprocess.PIPE).communicate()
   
   # Run pyinstaller
   for line in run(installer_command):
