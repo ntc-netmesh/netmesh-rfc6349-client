@@ -265,7 +265,6 @@ def login():
     error = str(e)
     
   if error is None:
-    print("token: {}".format(session['api_session_token']))
     return redirect(url_for('home_page'))
   else:
     log_settings.log_error(error)
@@ -297,8 +296,6 @@ def relogin():
     error = str(e)
     
   if error is None:
-    print("yeah yeah")
-    print("token: {}".format(session['api_session_token']))
     return Response(json.dumps({}), 200)
   else:
     print("oh no")
