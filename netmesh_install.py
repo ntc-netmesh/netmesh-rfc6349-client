@@ -21,7 +21,12 @@ def install_proj():
 
   # MAKE SURE THAT MAIN_DIRECTORY IS AT THE APP BASE
   temp = os.getcwd().split('dist')[0]
-  MAIN_DIRECTORY = temp if temp[-1] != '/' else temp[:-1]
+  # MAIN_DIRECTORY = temp if temp[-1] != '/' else temp[:-1]
+  home = os.path.expanduser("~")
+  MAIN_DIRECTORY = os.path.join(home, ".netmesh_rfc6349_app")
+
+  if not os.path.exists(MAIN_DIRECTORY):
+    subprocess.Popen(['git', 'clone', 'git@github.com:ntc-netmesh/netmesh-rfc6349-client.git', MAIN_DIRECTORY], stdout=subprocess.PIPE).communicate()
 
   # app_name = f'netmesh-rfc-6349-app_{netmesh_constants.app_version}_u{ubuntu_version}'
   app_name = f'netmesh-rfc-6349-app_u{ubuntu_version}'
@@ -49,14 +54,15 @@ def install_proj():
 
   additional_commands = [
     # Insert additional commands if necessary (ex. APT dependencies)
-    "sudo apt-get install -y jq",
-    "sudo apt-get install -y iperf3",
-    "sudo apt-get install -y adb",
+    "sudo apt install -y jq",
+    "sudo apt install -y iperf3",
+    "sudo apt install -y adb",
+    "sudo apt install -y git",
     "sudo apt install -y nmap",
     'sudo apt install -y nautilus',
     "alias python=python3",
     f"cd {MAIN_DIRECTORY} && sudo python3 -m pip install -r requirements.txt"
-    "sudo apt-get install -y python3-tk",
+    "sudo apt install -y python3-tk",
   ]
 
   file_execution_commands = [
