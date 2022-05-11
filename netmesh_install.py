@@ -54,6 +54,7 @@ def install_proj():
     "sudo apt-get install -y iperf3",
     "sudo apt-get install -y adb",
     "sudo apt install -y nmap",
+    'sudo apt install -y nautilus',
     "alias python=python3",
     f"cd {MAIN_DIRECTORY} && sudo python3 -m pip install -r requirements.txt"
     "sudo apt-get install -y python3-tk",
