@@ -64,7 +64,7 @@ def get_machine_name():
 def has_update():
   current_version = ""
   APP_DIR = resource_path('')
-  process = subprocess.Popen(" git describe --tags ", shell=True,
+  process = subprocess.Popen("apt-cache policy netmesh-rfc6349-app | grep 'Installed:' | awk -F': ' '{ print $2 }'", shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
   stdout, stderr = process.communicate()

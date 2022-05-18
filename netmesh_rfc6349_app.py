@@ -1,7 +1,6 @@
 from asyncio.log import logger
 import sys
 import os
-import webbrowser
 import subprocess
 import uuid
 from importlib_metadata import files
@@ -1233,11 +1232,17 @@ else:
 
 @app.route('/open-downloads-folder', methods=['POST'])
 def open_downloads_folder():
-  webbrowser.open('file:///' + get_downloads_folder())
+  file_explorer_process = subprocess.Popen(['nautilus', '--browser', get_downloads_folder()] ,stdout=subprocess.PIPE, stderr= subprocess.PIPE)
+  stdout,stderr = file_explorer_process.communicate()
+  if stderr:
+    print(stderr)
 
 @app.route('/open-logs-folder', methods=['POST'])
 def open_logs_folder():
-  webbrowser.open('file:///' + os.getcwd() + '/netmesh_log_files')
+  file_explorer_process = subprocess.Popen(['nautilus', '--browser', os.getcwd() + '/netmesh_log_files'] ,stdout=subprocess.PIPE, stderr= subprocess.PIPE)
+  stdout,stderr = file_explorer_process.communicate()
+  if stderr:
+    print(stderr)
  
 def run_on_desktop():
   if getattr(sys, 'frozen', False):
@@ -1255,7 +1260,7 @@ def run_on_desktop():
                            window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
                            has_update=has_update, latest_version=latest_version)
 
-  exit()
+  sys.exit()
   # if netmesh_utils.has_update():
   #   # GUI popup here asking if user wants to update or not and store it in update_dec
   #   update_dec = True # tentative value, store user decision here if True or False

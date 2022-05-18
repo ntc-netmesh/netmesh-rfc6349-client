@@ -1,9 +1,11 @@
 import os
 import sys
+import threading
+import webbrowser
 
 from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox
+from PySide2.QtWidgets import QMessageBox, QProgressDialog
 from PySide2.QtGui import QScreen
 
 import socket
@@ -130,15 +132,10 @@ def init_gui(application, port=0, width=800, height=600,
         
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            netmesh_utils.update() # this function will stall
-            netmesh_install.install_proj()
-            new_update_msg = QMessageBox(window)
-            new_update_msg.setWindowTitle("New update complete")
-            new_update_msg.setText("The new update has now been applied. The app will now close. Please reopen the app")
-            new_update_msg.exec_()
+            webbrowser.open(f"https://github.com/ntc-netmesh/netmesh-rfc6349-client/releases/tag/{latest_version}")
             
             window.close()
-            exit()
+            sys.exit()
         else:
             must_update_msg = QMessageBox(window)
             must_update_msg.setWindowTitle("Cannot open the app")
@@ -146,14 +143,13 @@ def init_gui(application, port=0, width=800, height=600,
             must_update_msg.exec_()
             
             window.close()
-            exit()
+            sys.exit()
     else:
         webView.setPage(page)
     
     print("App opened")
     
     return qtapp.exec_()
-        
 
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):
