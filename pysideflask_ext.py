@@ -132,8 +132,9 @@ def init_gui(application, port=0, width=800, height=600,
         
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            webbrowser.open(f"https://github.com/ntc-netmesh/netmesh-rfc6349-client/releases/tag/{latest_version}")
-            
+            #webbrowser.open(f"https://github.com/ntc-netmesh/netmesh-rfc6349-client/releases/tag/{latest_version}")
+            netmesh_utils.update()
+
             window.close()
             sys.exit()
         else:

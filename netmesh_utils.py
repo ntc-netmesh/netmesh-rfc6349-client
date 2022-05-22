@@ -83,6 +83,24 @@ def has_update():
   return (True, current_version, latest_version)
 
 def update():
+  APP_DIR = resource_path('')
+  RSYNC_URL = "netmesh-rsync@netmesh-api.asti.dost.gov.ph::netmesh-latest-deb-release"
+  process = subprocess.Popen(f"export RSYNC_PASSWORD='netmeshlatestcc2022'; rsync -a {RSYNC_URL} {APP_DIR}", shell=True,
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE)
+  stdout, stderr = process.communicate()
+  if stdout:
+      print(stdout.decode().strip())
+  if stderr:
+      print(stderr.decode().strip())
+      raise Exception(stderr)
+
+  # EXECUTE THE DEB FILE HERE
+  return
+
+
+
+def old_update_github():
   r = requests.get(APP_TAG_URL)
   APP_DIR = resource_path('')
   print(r.json())
@@ -98,7 +116,8 @@ def update():
   #if not stdout:
   #  raise Exception(stderr)
 
-# if __name__ == "__main__":
-#   mn = get_machine_name()
-#   print("mn")
-#   print(mn)
+#if __name__ == "__main__":
+#  update()
+#  #mn = get_machine_name()
+#  #print("mn")
+#  #print(mn)
