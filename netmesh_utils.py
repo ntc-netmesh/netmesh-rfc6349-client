@@ -85,7 +85,8 @@ def has_update():
 def update():
   APP_DIR = resource_path('')
   
-  delete_existing_deb_process = subprocess.Popen(f"cd {APP_DIR} && sudo rm *.deb", shell=True,
+  print("Removing the previous version...")
+  delete_existing_deb_process = subprocess.Popen(f"cd {APP_DIR} && sudo rm netmesh-rfc6349-app_*.deb", shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
   stdout, stderr = delete_existing_deb_process.communicate()
@@ -93,9 +94,8 @@ def update():
       print(stdout.decode().strip())
   if stderr:
       print(stderr.decode().strip())
-      input()
-      raise Exception(stderr)
 
+  print("Updating to the latest version...")
   RSYNC_URL = "netmesh-rsync@netmesh-api.asti.dost.gov.ph::netmesh-latest-deb-release"
   process = subprocess.Popen(f"export RSYNC_PASSWORD='netmeshlatestcc2022'; rsync -a {RSYNC_URL} {APP_DIR}", shell=True,
                           stdout=subprocess.PIPE,
@@ -116,9 +116,9 @@ def update():
       print(stdout.decode().strip())
   if stderr:
       print(stderr.decode().strip())
-      input()
       raise Exception(stderr)
-  return
+      
+  return True
 
 
 

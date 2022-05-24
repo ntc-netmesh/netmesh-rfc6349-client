@@ -1,6 +1,7 @@
 import os
 import sys
 import threading
+import queue
 import webbrowser
 
 from PySide2 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
@@ -132,8 +133,28 @@ def init_gui(application, port=0, width=800, height=600,
         
         reply = msg.exec_()
         if reply == QtWidgets.QMessageBox.Yes:
-            #webbrowser.open(f"https://github.com/ntc-netmesh/netmesh-rfc6349-client/releases/tag/{latest_version}")
-            netmesh_utils.update()
+            q = queue.Queue()
+
+            update_app_progress = QProgressDialog("Updating NetMesh RFC-6349 App...", "Cancel", 0, 0)
+            update_app_progress.setWindowTitle(f"Updating to {latest_version}")
+            update_app_thread = threading.Thread(target=update_app, args=(update_app_progress, q))
+            update_app_thread.start()
+
+            update_app_progress.exec_()
+            
+            is_successful = q.get()
+            if is_successful:
+                update_status_msg = QMessageBox(window)
+                update_status_msg.setWindowTitle(f"Successfully updated to {latest_version}")
+                update_status_msg.setText("NetMesh RFC-6349 has been successfully updated. Please re-open the app")
+                update_status_msg.setStandardButtons(QMessageBox.Ok)
+                update_status_msg.exec_()
+            else:
+                update_status_msg = QMessageBox(window)
+                update_status_msg.setWindowTitle(f"Update failed")
+                update_status_msg.setText("An error occured during the update of NetMesh RFC-6349.")
+                update_status_msg.setStandardButtons(QMessageBox.Close)
+                update_status_msg.exec_()
 
             window.close()
             sys.exit()
@@ -151,6 +172,13 @@ def init_gui(application, port=0, width=800, height=600,
     print("App opened")
     
     return qtapp.exec_()
+
+
+def update_app(dialog_box: QProgressDialog, q: queue.Queue):
+    is_successful = netmesh_utils.update()
+    dialog_box.close()
+
+    q.put(is_successful)
 
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):

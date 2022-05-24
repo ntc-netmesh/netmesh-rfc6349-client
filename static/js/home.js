@@ -403,7 +403,7 @@ const chartImageUris = Object.seal({
             </option>`
           );
         }
-  
+        
         $('#btnStartTest').attr('disabled', false);
       },
       error: function (jqXHR, textStatus, errorThrown) {

@@ -46,7 +46,7 @@ def install_proj():
   additional_commands = [
     # APT-related scripts (and others) moved to 'preinst' debian installation
     # Insert python-related scripts here
-    f"cd {INSTALLED_DIRECTORY} && sudo python3 -m pip install -r requirements.txt"
+    f"cd {INSTALLED_DIRECTORY} && sudo python3 -m pip install -r requirements.txt",
     "sudo apt-get install -y python3-tk",
   ]
 
@@ -62,15 +62,13 @@ Terminal=true
 Name={netmesh_constants.APP_TITLE}
 Icon={app_name}
 Categories=Application;
-Exec=gnome-terminal -- bash -c "{' ; '.join(file_execution_commands)}";
+Exec=gnome-terminal -- bash -c "{' && '.join(file_execution_commands)}";
 """)
     f.close()
-  
-#   # Allow .desktop file to execute
-#   st = os.stat(file_path)
-#   os.chmod(file_path, st.st_mode | 0o111)
 
-  os.system("notify-send --urgency=normal --expire-time=10000 'Netmesh Update' 'Netmesh Application has been successfully built!'")
+  subprocess.Popen(['cp', 'requirements.txt', f'{MAIN_DIRECTORY}/dist/{app_name}'], stdout=subprocess.PIPE).communicate()
+
+  os.system("notify-send --urgency=normal --expire-time=10000 'NetMesh Update' 'NetMesh RFC-6349 App has been successfully built'")
 
 if __name__ == "__main__":
   install_proj()
