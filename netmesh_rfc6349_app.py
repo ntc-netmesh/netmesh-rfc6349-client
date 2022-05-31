@@ -3,7 +3,10 @@ import sys
 import os
 import subprocess
 import uuid
+import socket
+import nmap
 from importlib_metadata import files
+from pkg_resources import get_entry_map
 
 import requests
 import json
@@ -14,8 +17,10 @@ import folium
 
 import tkinter
 
-if getattr(sys, 'frozen', False):
-  import pyi_splash
+# if getattr(sys, 'frozen', False):
+#   import pyi_splash
+# else:
+#   print("walang splash. sad :(")
 
 from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
 from flask_login import LoginManager, login_user, logout_user
@@ -95,7 +100,7 @@ def report_data():
   finished_on = request.form['finishedOn']
   duration = request.form['duration']
   username = session['username']
-  methods = json.loads(request.form['methods'])
+  methods=json.loads(request.form['methods'])
   
   results = {}
   for d in methods:
@@ -131,7 +136,7 @@ def report():
   duration = request.form['duration']
   generated_on = request.form['generatedOn']
   username = session['username']
-  methods = json.loads(request.form['methods'])
+  methods=json.loads(request.form['methods'])
   
   results = {}
   for d in methods:
@@ -164,7 +169,7 @@ def report():
   # started_on = "2022-01-01 01:14:23"
   # finished_on = "2022-01-01 01:15:52"
   # duration = "1m 29s"
-  # methods = ["upload", "download"]
+  # methods=["upload", "download"]
   # generated_on = "2022-01-01 01:19:44"
   # username = "sample_user"
   # results = {
@@ -672,7 +677,7 @@ def run_process_mtu():
   server_ip = request.form['serverIP']
   network_interface = get_network_interface(mode, network_connection_type_name, network_prefix)
   
-  command_array = ['sudo', './mtu.sh', network_interface, server_ip]
+  command_array = ['pkexec', '--disable-internal-agent' , netmesh_utils.resource_path("static/client_scripts/normal_mode/mtu.sh"), network_interface, server_ip]
   output_params = [
     {'name': 'mtu', 'key': 'mtu'},
   ]
@@ -1018,7 +1023,7 @@ def get_isp():
       "error": error
     }), 500)
 
-@app.route('/get-machine-name', methods = ['GET'])
+@app.route('/get-machine-name', methods=['GET'])
 def get_machine_name():
   print("machine name")
   machine_name = ""
@@ -1033,7 +1038,7 @@ def get_machine_name():
 # ----------------------------------------------------------------
 # EXTERNAL DATA
 # ----------------------------------------------------------------
-@app.route('/get-gps-coordinates', methods = ['POST'])
+@app.route('/get-gps-coordinates', methods=['POST'])
 def get_gps_coordinates():
   print("coordinates")
   coordinates = [None, None]
@@ -1046,7 +1051,33 @@ def get_gps_coordinates():
   return Response(json.dumps(coordinates), mimetype='application/json')
 
 
-@app.route('/send-error', methods = ['POST'])
+@app.route('/get-connected-devices', methods=['POST'])
+def get_connected_devices():
+  try:
+    network_connection_type_name = request.form["networkConnectionTypeName"]
+    network_prefix = request.form["networkPrefix"]
+
+    interface = get_network_interface("normal", network_connection_type_name, network_prefix)
+    stdout, stderr = subprocess.Popen(f"ip -br addr list | grep -w {interface} | awk -F' ' '{{print $3}}'",
+                                      shell=True,
+                                      stdout=subprocess.PIPE,
+                                      stderr= subprocess.PIPE,).communicate()
+    if stderr:
+      print("Error: ", stderr.decode())
+      return None
+    
+    net_ip = stdout.decode()
+
+    ps = nmap.PortScanner()
+    results = ps.scan(net_ip, arguments='-sT -O', sudo=True)
+
+    return Response(json.dumps(results))
+  except nmap.nmap.PortScannerError as pse:
+    raise pse
+  except Exception as e:
+    raise e
+
+@app.route('/send-error', methods=['POST'])
 def send_error():
   test_server_name = request.form['testServerName']
   test_server_url = request.form['testServerUrl']
@@ -1242,15 +1273,15 @@ def open_logs_folder():
     print(stderr)
  
 def run_on_desktop():
-  if getattr(sys, 'frozen', False):
-    pyi_splash.update_text("Checking update...")
+  # if getattr(sys, 'frozen', False):
+  #   pyi_splash.update_text("Checking update...")
   
   has_update, current_version, latest_version = netmesh_utils.has_update()
   netmesh_constants.app_version = current_version
   
   
-  if getattr(sys, 'frozen', False):
-    pyi_splash.update_text("Opening the app...")
+  # if getattr(sys, 'frozen', False):
+  #   pyi_splash.update_text("Opening the app...")
   
   running_on_desktop = True
   pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,

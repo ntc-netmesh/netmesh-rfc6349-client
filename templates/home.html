@@ -61,19 +61,8 @@
             <div class="form-group mb-3">
               <label class="small form-label mb-1" for="netType">Network Connection Type*</label>
               <select class="form-select" id="netType">
-                <!-- <option value="Ethernet" selected="selected">
-                  Ethernet
-                </option>
-                <option value="Wi-Fi">Wi-Fi</option> -->
-                <!-- <option value="Broadband">Broadband</option>
-                <option value="Cable Internet">Cable Internet</option>
-                <option value="Dial-ip">Dial-up</option>
-                <option value="DSL">DSL</option>
-                <option value="Ethernet Cable">Ethernet Cable</option>
-                <option value="Fiber-optic">Fiber-optic</option>
-                <option value="Fixed Wireless">Fixed Wireless</option>
-                <option value="Others">Others</option> -->
               </select>
+              <a href="#" class="small p-1" id="btn-scan-connected-devices">Scan for connected devices</a>
               <div id="net-warning" class="alert alert-warning p-0 m-1 d-none" role="alert">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
@@ -113,13 +102,6 @@
             <div class="invalid-feedback">
               Select a test mode
             </div>
-            <!-- <div class="btn-group btn-group-vertical" role="group" aria-label="Test mode">
-              <input id="radSimultaneous" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="simultaneous" required>
-              <input id="radSimultaneous" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="simultaneous" required>
-              <label class="btn btn-sm btn-outline-primary" for="radSimultaneous" data-bs-toggle="tooltip" data-bs-placement="top" title="Simultaneous upload and download test" autocomplete="off" value="simultaneous">
-                Simultaneous
-              </label>
-            </div> -->
           </div>
           <div class="row gx-2">
             <div class="form-group col">
@@ -192,59 +174,6 @@
               </div>
             </div>
           </div>
-          <!-- <div class="row">
-            <div id="btn-group-gps">
-              <button
-                
-                type="button"
-                class="btn btn-sm btn-link p-1"
-              >
-                <div class="spinner-grow spinner-grow-sm d-none" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-                Get coordinates
-              </button>
-            </div>
-          </div> -->
-          <!-- <div class="row">
-            <div class="accordion accordion-flush p-0 m-0" id="accordionOtherDetails">
-              <div class="accordion-item">
-                <h2 class="accordion-header" id="headingOtherDetails">
-                  <button class="accordion-button collapsed text-secondary p-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOtherDetails" aria-expanded="true" aria-controls="collapseOtherDetails">
-                    Other Details
-                  </button>
-                </h2>
-                <div id="collapseOtherDetails" class="accordion-collapse collapse" aria-labelledby="headingOtherDetails" data-bs-parent="#accordionOtherDetails">
-                  <div class="accordion-body">
-                    <div class="form-group mb-3">
-                      <label class="form-label" for="cir">Firmware</label>
-                      <input
-                        type="text"
-                        id="firmware"
-                        class="form-control"
-                        required
-                      />
-                      <div class="invalid-feedback">
-                        Enter the firmware
-                      </div>
-                    </div>
-                    <div class="form-group mb-3">
-                      <label class="form-label" for="cir">Modem model</label>
-                      <input
-                        type="text"
-                        id="modem"
-                        class="form-control"
-                        required
-                      />
-                      <div class="invalid-feedback">
-                        Enter the modem model
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> -->
         </div>
         <div class="card-footer">
           <div class="d-flex bd-highlight">
@@ -258,10 +187,12 @@
     </form>
   </div>
   <div class="col-md-9 col-lg-8 col-xxl-7">
-    <!-- <div class="position-absolute top-50 start-50 translate-middle">
-      <img src="/static/images/ntc_logo.png" title="RFC-6349 Application" alt="Avatar" style="width: 360px; opacity: 12%;">
-    </div> -->
     <div id="test-measurement-card">
+      <div id="connected-devices-card" class="card bg-light">
+        <div class="card-body">
+          
+        </div>
+      </div>
       <!-- d-none -->
       <div id="measurement-card" class="card shadow mb-4 d-none">
         <div class="card-header d-flex align-items-center">
@@ -278,12 +209,6 @@
         <div class="card-body p-0">
           <ul class="list-group list-group-flush">
             <li class="list-group-item p-4">
-              <!-- <div>
-                <div class="small d-flex">
-                  <span class="text-muted text-nowrap pe-2">Started on</span>
-                  <span class="w-100">2022-01-07 19:54:19</span>
-                </div>
-              </div> -->
               <div id="measurement-processes-timeline" class="px-2">
                 <h6 class="small text-uppercase m-1">Upload test</h6>
                 <table id="normal-measurement-processes" class="table table-sm table-borderless table-hover mb-3 mx-3">
@@ -790,6 +715,64 @@
     </fieldset>
   </form>
 </div> -->
+
+<div class="modal fade" id="modalScanForConnectedDevices" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalScanForConnectedDevices" aria-hidden="true">
+  <div
+    class="modal-dialog modal-lg"
+  >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 id="connected-devices-title" class="modal-title">Scan for connected devices</h4>
+      </div>
+      <div class="modal-body">
+        <div id="scanning-devices-progress" class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div id="connected-devices-info" class="alert alert-warning d-none" role="alert">
+          <i id="connected-devices-info-icon" class="bi bi-exclamation-triangle-fill"></i>
+          <span id="connected-devices-count">
+          </span>
+          <hr>
+          <a class="btn-rescan-devices" href="#">Rescan for connected devices</a>
+        </div>
+        <div id="connected-devices-error-info" class="alert alert-warning d-none" role="alert">
+          <i class="bi bi-x-circle"></i>
+          <span id="connected-devices-error-message">
+          </span>
+          <hr>
+          <a class="btn-rescan-devices" href="#">Try again</a>
+        </div>
+        <div id="connected-devices-table-container" class="d-none">
+          <table id="connected-devices-table" class="table table-secondary table-sm">
+            <thead>
+              <tr>
+                <td></td>
+                <td>Host name</td>
+                <td>OS</td>
+                <td>OS Type</td>
+                <td>Vendor</td>
+                <td>IP Address</td>
+                <td>Open Ports</td>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="6" class="text-end">
+                  <small class="text-muted">Nmap</small>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal" aria-label="Close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal fade" id="modalSendingError" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalSendingError" aria-hidden="true">
   <form
