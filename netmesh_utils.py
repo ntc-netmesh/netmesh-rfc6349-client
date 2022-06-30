@@ -1,6 +1,9 @@
 from asyncio import subprocess
 import sys
 import os
+import shutil
+import getpass
+import pwd
 
 import subprocess
 import requests
@@ -57,29 +60,71 @@ def get_machine_name():
   
   return machine_name
 
+def get_user():
+  """Try to find the user who called sudo/pkexec."""
+  try:
+    return os.getlogin()
+  except OSError:
+    # failed in some ubuntu installations and in systemd services
+    pass
+
+  try:
+    user = os.environ['USER']
+  except KeyError:
+    # possibly a systemd service. no sudo was used
+    return getpass.getuser()
+
+  if user == 'root':
+    try:
+      return os.environ['SUDO_USER']
+    except KeyError:
+      # no sudo was used
+      pass
+
+    try:
+      pkexec_uid = int(os.environ['PKEXEC_UID'])
+      return pwd.getpwuid(pkexec_uid).pw_name
+    except KeyError:
+      # no pkexec was used
+      pass
+
+  return user
+
 # ----------------------------------------------------------------
 # UPDATER
 # ----------------------------------------------------------------
 
 def has_update():
   current_version = ""
+  latest_version = ""
+
   APP_DIR = resource_path('')
-  process = subprocess.Popen("apt-cache policy netmesh-rfc6349-app | grep 'Installed:' | awk -F': ' '{ print $2 }'", shell=True,
+
+  process = subprocess.Popen("apt-cache policy netmesh-rfc6349-app | grep 'Installed:' | awk -F': ' '{ print $2 }'",
+                          shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE)
   stdout, stderr = process.communicate()
-  if stdout:
-    current_version = stdout.decode().strip()
-    netmesh_constants.app_version = current_version
-  else:
+  
+  if stderr:
     raise Exception(stderr)
 
   r = requests.get(APP_TAG_URL)
   latest_version = r.json()['tag_name']
+
+  if stdout:
+    current_version = stdout.decode().strip()
+  else:
+    current_version = latest_version
+  
   print("latest_version: ", latest_version)
   print("current_version: ", current_version)
+
+  netmesh_constants.app_version = current_version
+
   if current_version == latest_version:
       return (False, current_version, latest_version)
+      
   return (True, current_version, latest_version)
 
 def update():

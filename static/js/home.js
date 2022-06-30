@@ -47,6 +47,7 @@ const chartImageUris = Object.seal({
     publicIP: '',
   });
 
+  let pdfReportFileName = "";
 
   let testServers = [];
   let testResults = {};
@@ -74,12 +75,12 @@ const chartImageUris = Object.seal({
   let currentProcessIndex = 0;
   
   let appState = APP_STATE.Ready;
-  
+
   let map = null;
   let mapLayer = null;
   let nominatimGetRequest = null;
   let nominatimGetRequestDelay = null;
-  
+
   // $('#net-warning').hide();
   // $('#btnGetGpsCoordinates .spinner-grow').hide();
   $('#btnStartTest').attr('disabled', true);
@@ -121,7 +122,7 @@ const chartImageUris = Object.seal({
       // scanForConnectedDevices(selectedNetType);
     });
     $('#netType').val("Ethernet").trigger('change');
-  
+
     // Render Get Location button
     $('#btnGetGpsCoordinates').on('click', function () {
       $('#btnGetGpsCoordinates, #btnStartTest').attr('disabled', true);
@@ -379,6 +380,12 @@ const chartImageUris = Object.seal({
           if (selectedServer) {
             $(this).attr('title', selectedServer.trim());
           }
+
+          if ($('#testServers option:selected').val() == "custom") {
+            $('.custom-test-server-field').removeClass('d-none');
+          } else {
+            $('.custom-test-server-field').addClass('d-none');
+          }
         });
   
         let $testServers = $('#testServers');
@@ -387,11 +394,13 @@ const chartImageUris = Object.seal({
   
         testServers = [];
         testServers = data;
-        testServers.push({
-          nickname: 'Local server ni Jean Jay :D',
-          hostname: 'http://192.168.90.20:5000',
-          ip_address: '192.168.90.20'
-        })
+        
+        
+        // testServers.push({
+        //   nickname: 'Local server ni Jean Jay :D',
+        //   hostname: 'http://192.168.90.20:5000',
+        //   ip_address: '192.168.90.20'
+        // })
   
         for (let i = 0; i < testServers.length; i++) {
           const server = testServers[i];
@@ -401,6 +410,8 @@ const chartImageUris = Object.seal({
             </option>`
           );
         }
+        $testServers.append('<option value="custom">Custom test server...</option>');
+
         
         $('#btnStartTest').attr('disabled', false);
       },
@@ -548,17 +559,27 @@ const chartImageUris = Object.seal({
     testInputs.location.lat = $('#lat').val();
     testInputs.location.lon = $('#lon').val();
 
-    
     if (!(testInputs.isr
         && testInputs.networkConnectionTypeName
         && testInputs.testServer
         && testInputs.modeName
         && testInputs.location.lat
         && testInputs.location.lon)) {
-
+          
       $('#btnStartTest .spinner-border').addClass('d-none');
       $('#btnStartTest').attr('disabled', false);
 
+      return;
+    }
+
+    let gpsSuccess = false;
+    await setGpsInfo(testInputs.location.lat, testInputs.location.lon, testInputs.location.name)
+      .then(status => {
+        gpsSuccess = true;
+      });
+
+    if (!gpsSuccess) {
+      alert("gps failed.");
       return;
     }
 
@@ -1438,8 +1459,8 @@ const chartImageUris = Object.seal({
     $('#btnSaveAsPdf').attr('disabled', true);
     $('#btnSaveAsPdf .spinner-border').removeClass('d-none');
 
-    await generateReport(testInputs, testTime, testClient, testResults);
-
+    pdfReportFileName = await generateReport(testInputs, testTime, testClient, testResults);
+  
     $('#btnSaveAsPdf').attr('disabled', false);
     $('#btnSaveAsPdf .spinner-border').addClass('d-none');
     $('#btnSaveAsPdf').addClass('d-none');
@@ -1478,7 +1499,7 @@ const chartImageUris = Object.seal({
     //   complete: function () {
     //   }
   }
-  
+
   function setManualGpsCoordinates() {
     const latManual = $('#lat_manual').val();
     const lonManual = $('#lon_manual').val();
@@ -1488,7 +1509,7 @@ const chartImageUris = Object.seal({
   
       $('#lat').val(latManual);
       $('#lon').val(lonManual).trigger('change');
-    
+
       $('#gpsManualInput').addClass("d-none");
     }
   }
@@ -1628,15 +1649,22 @@ const chartImageUris = Object.seal({
       $('#gpsInputSelection').removeClass("d-none");
     }
   }
-  
+
   function openDownloadsFolder() {
     $('#btnOpenDownloadsFolder').attr('disabled', true);
-    $.post('/open-downloads-folder', function () {
-      $('#btnOpenDownloadsFolder').attr('disabled', false);
-    });
+    
+    $.post("/open-downloads-folder",
+      {
+        fileName: pdfReportFileName
+      },
+      function(data, status){
+        alert(pdfReportFileName);
+        $('#btnOpenDownloadsFolder').attr('disabled', false);
   
-    $('#btnSaveAsPdf').removeClass('d-none');
-    $('#pdfSaved').addClass('d-none');
+        $('#btnSaveAsPdf').removeClass('d-none');
+        $('#pdfSaved').addClass('d-none');
+      }
+    );
   }
   
   function getIspInfo() {
@@ -1662,6 +1690,26 @@ const chartImageUris = Object.seal({
         url: 'get-machine-name',
         method: 'GET',
         dataType: 'json',
+        success: function (response) {
+          console.log("response", response);
+          resolve(response);
+        },
+        error: function (err) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  function setGpsInfo(lat, lon, location) {
+    return new Promise(function (resolve, reject) {
+      $.ajax({
+        url: 'set-gps-info',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          lat, lon, location
+        },
         success: function (response) {
           console.log("response", response);
           resolve(response);

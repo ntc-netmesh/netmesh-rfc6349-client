@@ -27,7 +27,7 @@ def getStreamLogger():
 
 def getFileLogger():
     print("getFileLogger")
-    LOG_FOLDER_PATH = f'{os.getcwd()}/netmesh_log_files'
+    LOG_FOLDER_PATH = '/var/log/netmesh_rfc6349_app'
     print(f"{LOG_FOLDER_PATH}")
     if not os.path.isdir(LOG_FOLDER_PATH):
         os.makedirs(LOG_FOLDER_PATH)

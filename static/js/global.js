@@ -72,17 +72,31 @@ const APP_STATE = Object.freeze({
   TestFinished: 'TestFinished',
 });
 
-
-
-// let _throughputChartImgURI = {
-//   upload: '',
-//   download: ''
-// };
-// let _transferChartImgURI = {
-//   upload: '',
-//   download: ''
-// };
-
-// let _cir, _netType, _mode, _lon, _lat;
-// let _netTypeName, _testServer;
-// let _testStartedOnText, _testFinishedOnText, _testDurationText;
+const testInputs = Object.seal({
+  isr: null,
+  testServer: null,
+  networkConnectionTypeName: null,
+  modeName: null,
+  location: {
+    lat: null,
+    lon: null,
+    name: null,
+    reverseGeoLicense: "",
+  },
+  mapImage: {
+    dataUri: null,
+    width: 0,
+    height: 0,
+  },
+  get networkConnectionType() {
+    return NETWORK_CONNECTION_TYPES[this.networkConnectionTypeName];
+  },
+  get mode() {
+    return TEST_MODES[this.modeName];
+  },
+  get coordinates() {
+    const latDirection = this.location.lat >= 0 ? "N" : "S";
+    const lonDirection = this.location.lon >= 0 ? "E" : "W";
+    return `${this.location.lat}°${latDirection}, ${this.location.lon}°${lonDirection}`;
+  },
+});

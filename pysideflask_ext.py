@@ -11,8 +11,8 @@ from PySide2.QtGui import QScreen
 
 import socket
 
-if getattr(sys, 'frozen', False):
-    import pyi_splash
+# if getattr(sys, 'frozen', False):
+#     import pyi_splash
 
 import netmesh_utils, netmesh_install, netmesh_constants
 
@@ -69,10 +69,14 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
 
 
 def init_gui(application, port=0, width=800, height=600,
-             window_title="App", icon="static/images/ntc_icon.png", argv=None, has_update=False, latest_version=netmesh_constants.app_version):
+             window_title="App", icon="static/images/ntc_icon.png", argv=None, has_update=False,
+             latest_version=netmesh_constants.app_version, download_path=""):
   
     if argv is None:
         argv = sys.argv
+    
+    if not '--no-sandbox' in argv:
+        argv.append('--no-sandbox')
 
     if port == 0:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -87,6 +91,8 @@ def init_gui(application, port=0, width=800, height=600,
     webapp = ApplicationThread(application, port)
     webapp.start()
     qtapp.aboutToQuit.connect(webapp.terminate)
+
+    print("Application level good")
 
     # Main Window Level
     window = MainGUI()
@@ -103,6 +109,8 @@ def init_gui(application, port=0, width=800, height=600,
     #Set Form's Center Location
     window.move(windowX, windowY)
 
+    print("Window level good")
+
     # WebView Level
     webView = QtWebEngineWidgets.QWebEngineView(window)
     webView.setContextMenuPolicy(Qt.PreventContextMenu)
@@ -111,6 +119,8 @@ def init_gui(application, port=0, width=800, height=600,
     
     window.setCentralWidget(webView)
 
+    print("webview level good")
+
     # WebPage Level
     page = WebPage('http://127.0.0.1:{}'.format(port))
     page.home()
@@ -118,10 +128,14 @@ def init_gui(application, port=0, width=800, height=600,
     profile = page.profile()
     profile.clearHttpCache()
     profile.clearAllVisitedLinks()
+    profile.setDownloadPath(download_path)
     profile.downloadRequested.connect(onDownloadRequested)
     
-    if getattr(sys, 'frozen', False):
-        pyi_splash.close()
+
+    print("webview level good")
+
+    # if getattr(sys, 'frozen', False):
+    #     pyi_splash.close()
     
     window.show()
     
@@ -159,16 +173,18 @@ def init_gui(application, port=0, width=800, height=600,
             window.close()
             sys.exit()
         else:
-            must_update_msg = QMessageBox(window)
-            must_update_msg.setWindowTitle("Cannot open the app")
-            must_update_msg.setText("You must update this app first before using")
-            must_update_msg.exec_()
+            webView.setPage(page)
+            # must_update_msg = QMessageBox(window)
+            # must_update_msg.setWindowTitle("Cannot open the app")
+            # must_update_msg.setText("You must update this app first before using")
+            # must_update_msg.exec_()
             
-            window.close()
-            sys.exit()
+            # window.close()
+            # sys.exit()
     else:
         webView.setPage(page)
     
+    print(netmesh_utils.resource_path("static/client_scripts/normal_mode/mtu.sh"))
     print("App opened")
     
     return qtapp.exec_()

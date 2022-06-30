@@ -4,16 +4,6 @@
 
 <title>Home</title>
 
-<link rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-  integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
-  crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-   integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
-   crossorigin=""></script>
-
-<script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
-
 <style>
   .vertical-center {
     min-height: calc(100% - 98px);
@@ -27,7 +17,7 @@
   #chart {
     width: 480px;
   }
-
+  
   #map-snippet { height: 224px; }
 </style>
 
@@ -80,6 +70,17 @@
                   <span class="placeholder placeholder-lg col-12"></span>
                 </div>
               </div>
+            </div>
+            <div class="input-group input-group-sm mb-3 custom-test-server-field d-none">
+              <span class="input-group-text">
+                <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+                  <option selected value="http">http://</option>
+                  <option value="https">https://</option>
+                </select>
+              </span>
+              <input type="text" class="form-control" placeholder="IP Address" aria-label="IP Address" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$">
+              <span class="input-group-text">:</span>
+              <input type="number" class="form-control" placeholder="Port" aria-label="Port" min="0" max="65535">
             </div>
           </div>
           <div class="row mb-3">
@@ -685,36 +686,6 @@
     </fieldset>
   </form>
 </div>
-<!-- 
-<div class="modal fade" id="modalSendError" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalSendError" aria-hidden="true">
-  <form 
-    class="modal-dialog modal-dialog-centered"
-    method="POST"
-    action="/send-error"
-    onsubmit="return false"
-    novalidate
-  >
-    <fieldset class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">Send Error</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group mb-3">
-          <label for="errorEmail" class="form-label">Enter your email address</label>
-          <input type="email" id="errorEmail" class="form-control" placeholder="Enter email">
-        </div>
-        <div class="form-group">
-          <label for="textareaErrorProblem" class="form-label">Tell us the problem you've just encountered</label>
-          <textarea rows="3" id="textareaErrorProblem" class="form-control" placeholder="What's the problem?"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-primary" type="submit">Send</button>
-      </div>
-    </fieldset>
-  </form>
-</div> -->
 
 <div class="modal fade" id="modalScanForConnectedDevices" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalScanForConnectedDevices" aria-hidden="true">
   <div
@@ -748,8 +719,8 @@
               <tr>
                 <td></td>
                 <td>Host name</td>
-                <td>OS</td>
-                <td>OS Type</td>
+                <td>OS Kernel</td>
+                <td>OS Kernel Type</td>
                 <td>Vendor</td>
                 <td>IP Address</td>
                 <td>Open Ports</td>
@@ -759,7 +730,7 @@
             </tbody>
             <tfoot>
               <tr>
-                <td colspan="6" class="text-end">
+                <td colspan="7" class="text-end">
                   <small class="text-muted">Nmap</small>
                 </td>
               </tr>
@@ -802,7 +773,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js" integrity="sha512-YcsIPGdhPK4P/uRW6/sruonlYj+Q7UHWeKfTAkBW+g83NKM+jMJFJ4iAPfSnVp7BKD4dKMHmVSvICUbE/V1sSw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.4/pdfmake.min.js" integrity="sha512-vCaf5rysVLu1/zVMefJew+IjqlQibggltPWqeo96XsdyJ4ihR3eEDV1oU60afiRXTGf8DqKUjLs2Q99HCbnjAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/global.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
