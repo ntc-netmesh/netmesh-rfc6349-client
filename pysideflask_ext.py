@@ -11,8 +11,8 @@ from PySide2.QtGui import QScreen
 
 import socket
 
-# if getattr(sys, 'frozen', False):
-#     import pyi_splash
+if getattr(sys, 'frozen', False):
+    import pyi_splash
 
 import netmesh_utils, netmesh_install, netmesh_constants
 
@@ -134,8 +134,8 @@ def init_gui(application, port=0, width=800, height=600,
 
     print("webview level good")
 
-    # if getattr(sys, 'frozen', False):
-    #     pyi_splash.close()
+    if getattr(sys, 'frozen', False):
+        pyi_splash.close()
     
     window.show()
     

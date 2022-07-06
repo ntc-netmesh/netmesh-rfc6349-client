@@ -24,7 +24,7 @@ const resultsParameters = Object.freeze({
     },
   }),
   bb: Object.freeze({
-    name: "Baseline Bandwidth (BB)",
+    name: "Bottleneck Bandwidth (BB)",
     test: resultsTestNames.BdpTest,
     description: "",
     getMeasurement: function (val) {

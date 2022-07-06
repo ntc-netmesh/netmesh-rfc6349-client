@@ -17,10 +17,8 @@ import folium
 
 import tkinter
 
-# if getattr(sys, 'frozen', False):
-#   import pyi_splash
-# else:
-#   print("walang splash. sad :(")
+if getattr(sys, 'frozen', False):
+  import pyi_splash
 
 from flask import Flask, Response, render_template, request, redirect, url_for, abort, session
 # from flask_login import LoginManager
@@ -29,7 +27,7 @@ from dotenv import load_dotenv
 
 import wrappers
 import user_auth
-import ADB
+import netmesh_location
 import log_settings
 import pysideflask_ext
 
@@ -1114,7 +1112,7 @@ def get_gps_coordinates():
   print("coordinates")
   coordinates = [None, None]
   try:
-    coordinates = ADB.getRawGpsCoordinates()
+    coordinates = netmesh_location.getRawGpsCoordinates()
   except Exception as e:
     print(e.__cause__)
     return Response(str(e), 500)
@@ -1149,7 +1147,11 @@ def get_connected_devices():
       print("Error: ", stderr.decode())
       return None
     
-    gateway_ip = stdout.decode().strip()
+    gateway_ips = stdout.decode().strip()
+    gateway_ip = ""
+    if gateway_ips:
+      gateway_ip = gateway_ips.split("\n")[0]
+      
     print(f'gateway_ip: {gateway_ip}')
 
     ps = nmap.PortScanner()
@@ -1370,17 +1372,17 @@ def open_logs_folder():
     print(stderr)
  
 def run_on_desktop():
-  # if getattr(sys, 'frozen', False):
-  #   pyi_splash.update_text("Checking update...")
+  if getattr(sys, 'frozen', False):
+    pyi_splash.update_text("Checking update...")
+    
   has_update, current_version, latest_version = netmesh_utils.has_update()
   netmesh_constants.app_version = current_version
   
-  
-  # if getattr(sys, 'frozen', False):
-  #   pyi_splash.update_text("Opening the app...")
+  if getattr(sys, 'frozen', False):
+    pyi_splash.update_text("Opening the app...")
   
   running_on_desktop = True
-  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,
+  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=960,
                            window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
                            has_update=has_update, latest_version=latest_version, download_path=get_downloads_folder_path())
 
