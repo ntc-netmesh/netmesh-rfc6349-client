@@ -1156,12 +1156,13 @@ def get_connected_devices():
 
     ps = nmap.PortScanner()
     results = ps.scan(net_ip, arguments='-sT -O', sudo=True)
-
+    print(results)
     # remove gateway from results
     scanned_ips = {k:v for k, v in results['scan'].items() if k != gateway_ip}
     print(scanned_ips)
     return Response(json.dumps({
       "nmap": results['nmap'],
+      "nmapVersion": ".".join(map(str, ps.nmap_version())),
       "scan": scanned_ips
     }))
   except nmap.nmap.PortScannerError as pse:

@@ -320,6 +320,14 @@ const chartImageUris = Object.seal({
         $('#connected-devices-table-container').removeClass('d-none');
         $('#connected-devices-title').html(`Devices connected to the ${typeName}`);
 
+        $('#nmap-version').text(data.nmapVersion);
+        $('#nmap-scan-started-on').text(data.nmap.scanstats.timestr);
+
+        const scanDuration = parseFloat(data.nmap.scanstats.elapsed);
+        const minutes = parseInt(scanDuration / 60);
+        const seconds = Math.round((scanDuration - minutes * 60) * 100) / 100;
+        $('#nmap-scan-duration').text(`${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`);
+
         const scannedDevices = Object.values(data.scan)
           .filter(sd => sd.status.state == "up"
             && sd.hostnames.filter(h => h.name != '_gateway').length);
@@ -346,8 +354,8 @@ const chartImageUris = Object.seal({
           $('#connected-devices-table tbody').append(`<tr>
             <td>${parseInt(i) + 1}</td>
             <td>${device.hostnames.filter(h => h.name).length ? device.hostnames[0].name : "<small class='text-muted'>---</small>"}</td>
-            <td>${device.osmatch.length ? device.osmatch[0].name : "<small class='text-muted'>---</small>"}</td>
-            <td>${device.osmatch.length && device.osmatch[0].osclass.length ? device.osmatch[0].osclass[0].type : "<small class='text-muted'>---</small>"}</td>
+            <td>${device.osmatch?.length ? device.osmatch[0].name : "<small class='text-muted'>---</small>"}</td>
+            <td>${device.osmatch?.length && device.osmatch[0].osclass.length ? device.osmatch[0].osclass[0].type : "<small class='text-muted'>---</small>"}</td>
             <td>${Object.keys(device.vendor).length ? Object.values(device.vendor)[0] : "<small class='text-muted'>---</small>"}</td>
             <td>${Object.keys(device.addresses).length ? device.addresses.ipv4 : "<small class='text-muted'>---</small>"}</td>
             <td>${Object.keys(device.portused).length ? device.portused.filter(p => p.state == 'open').map(p => p.portid).join(', ') : "<small class='text-muted'>---</small>"}</td>
