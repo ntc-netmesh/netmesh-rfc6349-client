@@ -1,0 +1,73 @@
+<style>
+  #map-snippet { height: 224px; }
+</style>
+
+<div class="form-group col">
+  <div id="location-name-container" class="mb-1">
+    <div class="placeholder-wave"><span class="w-100 placeholder d-none"></span></div>
+    <input type="form-control" name="location" readonly class="form-control-plaintext form-control-sm" value="---">
+  </div>
+  <div class="position-relative border">
+    <div id="map-snippet">
+    </div>
+    <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 400;">
+      <button id="btnMapClear" type="button" class="btn btn-sm btn-primary opacity-75 p-0 px-2">Clear</button>
+    </div>
+    <div id="gpsInputSelection" class="position-absolute top-50 start-50 translate-middle">
+      <div class="d-flex flex-column">
+        <button id="btnGetGpsCoordinates" type="button" class="btn btn-sm btn-primary">Get Location</button>
+        <button id="btnEnterGpsManually" type="button" class="btn btn-sm btn-link">Enter manually</button>
+      </div>
+    </div>
+    <div id="gpsManualInput" class="position-absolute top-50 translate-middle-y mx-2 d-none">
+      <div class="row gx-2">
+        <div class="form-group col">
+          <label class="small form-label mb-1" for="lat">GPS Latitude*</label>
+          <input
+            type="number"
+            step="0.0001"
+            id="lat_manual"
+            class="form-control form-control-sm"
+            autocomplete="off"
+            required
+          />
+          <div class="invalid-feedback">
+            Enter the latitude coordinate of your current location
+          </div>
+        </div>
+        <div class="form-group col">
+          <label class="small form-label mb-1" for="lon">GPS Longitude*</label>
+          <input
+            type="text"
+            id="lon_manual"
+            class="form-control form-control-sm"
+            autocomplete="off"
+            required
+          />
+          <div class="invalid-feedback">
+            Enter the longitude coordinate of your current location
+          </div>
+        </div>
+        <div class="d-flex justify-content-end m-2">
+          <button id="btnManualGpsOK" type="button" class="btn btn-sm btn-primary">OK</button>
+          <button id="btnManualGpsCancel" type="button" class="btn btn-sm btn-link">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div class="position-absolute bottom-0">
+      <div id="gpsError" class="alert alert-danger alert-dismissable fade show overflow-auto p-1 px-2 m-0 mt-2 d-none" style="max-height: 80px;" role="alert">
+        Cannot get GPS coordinates
+      </div>
+    </div>
+  </div>
+  <input type="text" id="lat" name="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
+  <input type="text" id="lon" name="lon" class="form-control form-control-sm d-none" autocomplete="off" required />
+  <div>
+    <button type="button" id="btnGpsHelp" class="btn btn-sm btn-link-secondary text-end">
+      <i class="bi bi-question-circle"></i> Help
+    </button>
+  </div>
+  <div class="invalid-feedback">
+    Invalid Location
+  </div>
+</div>

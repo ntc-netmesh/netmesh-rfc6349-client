@@ -47,6 +47,7 @@ const chartImageUris = Object.seal({
     publicIP: '',
   });
 
+  let pdfReportFileName = "";
 
   let testServers = [];
   let testResults = {};
@@ -74,12 +75,12 @@ const chartImageUris = Object.seal({
   let currentProcessIndex = 0;
   
   let appState = APP_STATE.Ready;
-  
+
   let map = null;
   let mapLayer = null;
   let nominatimGetRequest = null;
   let nominatimGetRequestDelay = null;
-  
+
   // $('#net-warning').hide();
   // $('#btnGetGpsCoordinates .spinner-grow').hide();
   $('#btnStartTest').attr('disabled', true);
@@ -93,9 +94,13 @@ const chartImageUris = Object.seal({
   // $('#measurement-failed-card').hide();
   
   $(function () {
-
     setTestServers();
     renderMap();
+
+    $('#btn-scan-connected-devices, .btn-rescan-devices').on('click', function() {
+      const selectedNetType = $('#netType').val();
+      scanForConnectedDevices(selectedNetType);
+    });
     
     // Render Network Connection Type selection
     $('#netType').html('');
@@ -114,9 +119,10 @@ const chartImageUris = Object.seal({
         $('#net-warning .message').text(`RFC-6349 methodology focuses on Ethernet-terminated services`);
         $('#net-warning').removeClass('d-none');
       }
+      // scanForConnectedDevices(selectedNetType);
     });
     $('#netType').val("Ethernet").trigger('change');
-  
+
     // Render Get Location button
     $('#btnGetGpsCoordinates').on('click', function () {
       $('#btnGetGpsCoordinates, #btnStartTest').attr('disabled', true);
@@ -287,85 +293,86 @@ const chartImageUris = Object.seal({
       // For Safari
       return message;
     };
-  
-    // $('#modalReenterPassword').modal('show');
-  
-    // $.ajax({
-    //   url: '/user-password-modal',
-    //   method: 'GET',
-    //   success: function (modalHtml) {
-    //     $('#modalContainer').html(modalHtml);
-    //   },
-    //   error: function (err) {
-    //     console.error(err);
-    //   }
-    // });
-    
-    // window.addEventListener('online', (e) => console.log(e, "you're online"));
-    // window.addEventListener('offline', (e) => {
-      
-    // });
-  
-    // renderThoughputComparisonChart();
-    // renderTransferComparisonChart();
-    // const options = getRttChartOptions("download", 9.956, 7.614);
-    // const options = getRttChartOptions("download", 7, 6.968);
-    // const options = getRttChartOptions("download", 4.815, 6.145);
-    // options.chart.width = 640;
-    // options.chart.height = 128;
-    // const chart = new ApexCharts(document.querySelector(`#download-rtt-chart`), options);
-    // chart.render().then(() => {
-    //   setTimeout(function () {
-    //     chart.dataURI({scale: 3}).then(({imgURI}) => {
-    //       chartImageUris.transferCharts['download'] = imgURI;
-    //     });
-    //     chart.destroy();
-  
-    //     options.chart.width = '100%';
-    //     const chart2 = new ApexCharts(document.querySelector(`#download-rtt-chart`), options);
-    //     chart2.render();
-    //   }, 200);
-    // });
-    // const testInputs = {
-    //   mode: 'reverse',
-    //   isr: 35,
-    //   net: "Ethernet",
-    //   serverName: 'UP Diliman Department of Computer Science Test Server',
-    //   lon: 14.9876,
-    //   lat: 121.67895
-    // };
-    // const testTime = {
-    //   startedOn: '2022-01-24 16:17:18',
-    //   finishedOn: '2022-01-24 16:19:20',
-    //   duration: '2m 02s',
-    // };
-    // const testClient = {
-    //   username: 'hardcoded_user',
-    //   ipAddress: 'hardcoded_ip_address',
-    // };
-    // const sampleResults = {
-    //   download: {
-    //     ave_rtt: 0,
-    //     bb: 42.7,
-    //     bdp: 346425,
-    //     buf_delay: 0,
-    //     mtu: 1500,
-    //     retx_bytes: 0,
-    //     rtt: 8.113,
-    //     rwnd: 43,
-    //     tcp_eff: 0,
-    //     tcp_ttr: 0.844594594595,
-    //     thpt_avg: 43.5,
-    //     thpt_ideal: 35,
-    //     transfer_avg: 10,
-    //     transfer_ideal: 11.84,
-    //     tx_bytes: 0
-    //   }
-    // };
-    // setTimeout(function () {
-    //   generateReport(testInputs, testTime, testClient, sampleResults);
-    // }, 500);
   });
+
+  function scanForConnectedDevices(typeName) {
+    $('#modalScanForConnectedDevices').modal('show');
+
+    $('#connected-devices-title').html(`Scanning connected devices to the ${typeName}...`);
+    $('#scanning-devices-progress').removeClass('d-none');
+    $('#connected-devices-table-container').addClass('d-none');
+    $('#connected-devices-table tbody').html('');
+    $('#connected-devices-info').addClass('d-none');
+    $('#connected-devices-error-info').addClass('d-none');
+
+    $.ajax({
+      url: 'get-connected-devices',
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        networkConnectionTypeName: typeName,
+        networkPrefix: NETWORK_CONNECTION_TYPES[typeName].prefix
+      },
+      // timeout: MEASUREMENT_TIMEOUT,
+      success: function (data) {
+        console.log("results", data);
+        $('#connected-devices-info').removeClass('d-none');
+        $('#connected-devices-table-container').removeClass('d-none');
+        $('#connected-devices-title').html(`Devices connected to the ${typeName}`);
+
+        $('#nmap-version').text(data.nmapVersion);
+        $('#nmap-scan-started-on').text(data.nmap.scanstats.timestr);
+
+        const scanDuration = parseFloat(data.nmap.scanstats.elapsed);
+        const minutes = parseInt(scanDuration / 60);
+        const seconds = Math.round((scanDuration - minutes * 60) * 100) / 100;
+        $('#nmap-scan-duration').text(`${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`);
+
+        const scannedDevices = Object.values(data.scan)
+          .filter(sd => sd.status.state == "up"
+            && sd.hostnames.filter(h => h.name != '_gateway').length);
+        // console.log("vendors", Object.values(scannedDevices).filter(sd => sd.status.state != "down"));
+        const numberOfScannedDevices = Object.keys(scannedDevices).length;
+
+        if (numberOfScannedDevices == 1) {
+          // $('#connected-devices-card').removeClass('border-warning').addClass('border-primary');
+          $('#connected-devices-info').removeClass('border-warning').addClass('border-primary');
+          $('#connected-devices-info').removeClass('alert-warning').addClass('alert-primary');
+          $('#connected-devices-info-icon').removeClass('bi-exclamation-triangle-fill').addClass('bi-check-circle');
+        } else {
+          // $('#connected-devices-card').removeClass('border-primary').addClass('border-warning');
+          $('#connected-devices-info').removeClass('border-primary').addClass('border-warning');
+          $('#connected-devices-info').removeClass('alert-primary').addClass('alert-warning');
+          $('#connected-devices-info-icon').removeClass('bi-check-circle').addClass('bi-exclamation-triangle-fill');
+        }
+
+        $('#connected-devices-count').html(numberOfScannedDevices == 0 ? "No devices connected to the network" : `${numberOfScannedDevices > 1 ? `<b>${numberOfScannedDevices - 1}</b>` : "No"} other ${numberOfScannedDevices - 1 == 1 ? "device" : "devices" } connected to the network`);
+        for (const [i, device] of Object.entries(scannedDevices)) {
+          console.log(device);
+          console.log(device);
+          console.log(Object.values(device.vendor));
+          $('#connected-devices-table tbody').append(`<tr>
+            <td>${parseInt(i) + 1}</td>
+            <td>${device.hostnames.filter(h => h.name).length ? device.hostnames[0].name : "<small class='text-muted'>---</small>"}</td>
+            <td>${device.osmatch?.length ? device.osmatch[0].name : "<small class='text-muted'>---</small>"}</td>
+            <td>${device.osmatch?.length && device.osmatch[0].osclass.length ? device.osmatch[0].osclass[0].type : "<small class='text-muted'>---</small>"}</td>
+            <td>${Object.keys(device.vendor).length ? Object.values(device.vendor)[0] : "<small class='text-muted'>---</small>"}</td>
+            <td>${Object.keys(device.addresses).length ? device.addresses.ipv4 : "<small class='text-muted'>---</small>"}</td>
+            <td>${Object.keys(device.portused).length ? device.portused.filter(p => p.state == 'open').map(p => p.portid).join(', ') : "<small class='text-muted'>---</small>"}</td>
+          </tr>`)
+        }
+      },
+      error: function (err) {
+        console.log(err);
+        $('#connected-devices-info').addClass('d-none');
+        $('#connected-devices-error-info').removeClass('d-none');
+        $('#connected-devices-error-message').text(err.responseJSON?.error ?? "Unknown error occured");
+      },
+      complete: function () {
+        $('#scanning-devices-progress').addClass('d-none');
+      }
+    })
+  }
   
   function setTestServers() {
     $.ajax({
@@ -381,6 +388,12 @@ const chartImageUris = Object.seal({
           if (selectedServer) {
             $(this).attr('title', selectedServer.trim());
           }
+
+          if ($('#testServers option:selected').val() == "custom") {
+            $('.custom-test-server-field').removeClass('d-none');
+          } else {
+            $('.custom-test-server-field').addClass('d-none');
+          }
         });
   
         let $testServers = $('#testServers');
@@ -389,11 +402,13 @@ const chartImageUris = Object.seal({
   
         testServers = [];
         testServers = data;
-        testServers.push({
-          nickname: 'Local server ni Jean Jay :D',
-          hostname: 'http://192.168.90.20:5000',
-          ip_address: '192.168.90.20'
-        })
+        
+        
+        // testServers.push({
+        //   nickname: 'Local server ni Jean Jay :D',
+        //   hostname: 'http://192.168.90.20:5000',
+        //   ip_address: '192.168.90.20'
+        // })
   
         for (let i = 0; i < testServers.length; i++) {
           const server = testServers[i];
@@ -403,44 +418,12 @@ const chartImageUris = Object.seal({
             </option>`
           );
         }
+        $testServers.append('<option value="custom">Custom test server...</option>');
+
         
         $('#btnStartTest').attr('disabled', false);
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        // $('#testServersPlaceholder').html(`<select class="form-select" id="testServers" required></select>
-        //   <div class="invalid-feedback">Select a test server</div>`);
-        // $('#testServers').on('change', function () {
-        //   const selectedServer = $('#testServers option:selected').text();
-        //   if (selectedServer) {
-        //     $(this).attr('title', selectedServer.trim());
-        //   }
-        // });
-  
-        // let $testServers = $('#testServers');
-        // $testServers.html('');
-        // $testServers.append('<option selected disabled value="">Select a test server...</option>');
-
-        // testServers = [
-        //   {
-        //     nickname: 'Down pa yung results server kaya hardcoded muna yung selection ng test server hahaha - ibalik sa dati yung code ah baka makalimutan haha',
-        //     hostname: 'http://202.90.158.6:12000',
-        //     ip_address: '202.90.158.6'
-        //   }
-        // ]
-  
-        // for (let i = 0; i < testServers.length; i++) {
-        //   const server = testServers[i];
-        //   $testServers.append(`
-        //     <option value="${i}"> 
-        //       ${server.nickname}
-        //     </option>`
-        //   );
-        // }
-  
-        // $('#btnStartTest').attr('disabled', false);
-
-        // return;
-
         console.log("GET get-test-servers error");
         console.log({jqXHR, textStatus, errorThrown});
         console.log(errorThrown);
@@ -584,17 +567,27 @@ const chartImageUris = Object.seal({
     testInputs.location.lat = $('#lat').val();
     testInputs.location.lon = $('#lon').val();
 
-    
     if (!(testInputs.isr
         && testInputs.networkConnectionTypeName
         && testInputs.testServer
         && testInputs.modeName
         && testInputs.location.lat
         && testInputs.location.lon)) {
-
+          
       $('#btnStartTest .spinner-border').addClass('d-none');
       $('#btnStartTest').attr('disabled', false);
 
+      return;
+    }
+
+    let gpsSuccess = false;
+    await setGpsInfo(testInputs.location.lat, testInputs.location.lon, testInputs.location.name)
+      .then(status => {
+        gpsSuccess = true;
+      });
+
+    if (!gpsSuccess) {
+      alert("gps failed.");
       return;
     }
 
@@ -639,6 +632,8 @@ const chartImageUris = Object.seal({
           // $('#machine-name').html('<i class="small text-muted">(undetected)</i>');
           console.log(errorMsg);
       });
+
+    $('#connected-devices-card').addClass('d-none');
 
     $('#btnStartTest').attr('disabled', false);
     $('#mainForm fieldset').attr('disabled', true);
@@ -1450,6 +1445,8 @@ const chartImageUris = Object.seal({
     $('#location-name-container').html('<span>---</span>');
     $('#summary-location-name').html('<i>Locating...</i>');
   
+    $('connected-devices-card').removeClass('d-none');
+
     renderMap();
     
     $('#isr').focus();
@@ -1470,8 +1467,8 @@ const chartImageUris = Object.seal({
     $('#btnSaveAsPdf').attr('disabled', true);
     $('#btnSaveAsPdf .spinner-border').removeClass('d-none');
 
-    await generateReport(testInputs, testTime, testClient, testResults);
-
+    pdfReportFileName = await generateReport(testInputs, testTime, testClient, testResults);
+  
     $('#btnSaveAsPdf').attr('disabled', false);
     $('#btnSaveAsPdf .spinner-border').addClass('d-none');
     $('#btnSaveAsPdf').addClass('d-none');
@@ -1510,7 +1507,7 @@ const chartImageUris = Object.seal({
     //   complete: function () {
     //   }
   }
-  
+
   function setManualGpsCoordinates() {
     const latManual = $('#lat_manual').val();
     const lonManual = $('#lon_manual').val();
@@ -1520,7 +1517,7 @@ const chartImageUris = Object.seal({
   
       $('#lat').val(latManual);
       $('#lon').val(lonManual).trigger('change');
-    
+
       $('#gpsManualInput').addClass("d-none");
     }
   }
@@ -1660,15 +1657,22 @@ const chartImageUris = Object.seal({
       $('#gpsInputSelection').removeClass("d-none");
     }
   }
-  
+
   function openDownloadsFolder() {
     $('#btnOpenDownloadsFolder').attr('disabled', true);
-    $.post('/open-downloads-folder', function () {
-      $('#btnOpenDownloadsFolder').attr('disabled', false);
-    });
+    
+    $.post("/open-downloads-folder",
+      {
+        fileName: pdfReportFileName
+      },
+      function(data, status){
+        alert(pdfReportFileName);
+        $('#btnOpenDownloadsFolder').attr('disabled', false);
   
-    $('#btnSaveAsPdf').removeClass('d-none');
-    $('#pdfSaved').addClass('d-none');
+        $('#btnSaveAsPdf').removeClass('d-none');
+        $('#pdfSaved').addClass('d-none');
+      }
+    );
   }
   
   function getIspInfo() {
@@ -1694,6 +1698,26 @@ const chartImageUris = Object.seal({
         url: 'get-machine-name',
         method: 'GET',
         dataType: 'json',
+        success: function (response) {
+          console.log("response", response);
+          resolve(response);
+        },
+        error: function (err) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  function setGpsInfo(lat, lon, location) {
+    return new Promise(function (resolve, reject) {
+      $.ajax({
+        url: 'set-gps-info',
+        method: 'POST',
+        dataType: 'json',
+        data: {
+          lat, lon, location
+        },
         success: function (response) {
           console.log("response", response);
           resolve(response);
@@ -1839,28 +1863,3 @@ function openLogsFolder() {
     $('#btnOpenLogsFolder').attr('disabled', false);
   });
 }
-
-// $('#modalSendingError .btn-close').click(function () {
-//   alert("ba't mo iko-close???")
-//   // $.ajax({
-//   //   url: 'send-error',
-//   //   method: 'POST',
-//   //   data: {
-//   //     email: $('#errorEmail').val(),
-//   //     // password: $('#errorEmailPassword').val(),
-//   //     problem: $('#textareaErrorProblem').val(),
-//   //     errorFileName: errorFileName
-//   //   },
-//   //   success: function (result) { 
-//   //     alert(result);
-
-//   //     // $('#modalReenterPassword').modal('hide');
-//   //   },
-//   //   error: function (err) {
-//   //     console.log(err);
-//   //     // const responseJSON = JSON.parse(err.responseText);
-//   //     // $('#modalReenterPassword .alert-danger').text(responseJSON?.error ?? "Unexpected error occured");
-//   //     // $('#modalReenterPassword .alert-danger').removeClass("d-none");
-//   //   }
-//   // });
-// });

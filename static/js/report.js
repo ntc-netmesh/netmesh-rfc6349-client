@@ -449,6 +449,8 @@ async function generateReport(testInputs, testTime, testClient, results) {
   //   const iframe = document.querySelector('#pdfPreview');
   //   iframe.src = dataUrl;
   // });
+
+  return defaultFileName;
 }
 
 async function getBase64ImageFromURLAsync(url) {

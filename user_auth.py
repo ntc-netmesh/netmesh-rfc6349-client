@@ -25,6 +25,7 @@ def login(username, password):
   
   if 'access_token' in data:
     token = data['access_token']
+    print("token", token)
     return token
   elif 'error' in data:
     raise Exception(data['error'])

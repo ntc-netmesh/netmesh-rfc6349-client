@@ -3,7 +3,10 @@ import sys
 import os
 import subprocess
 import uuid
+import socket
+import nmap
 from importlib_metadata import files
+from pkg_resources import get_entry_map
 
 import requests
 import json
@@ -17,12 +20,14 @@ import tkinter
 if getattr(sys, 'frozen', False):
   import pyi_splash
 
-from flask import Flask, Response, render_template, request, flash, redirect, url_for, abort, session
-from flask_login import LoginManager, login_user, logout_user
+from flask import Flask, Response, render_template, request, redirect, url_for, abort, session
+# from flask_login import LoginManager
+
+from dotenv import load_dotenv
 
 import wrappers
 import user_auth
-import ADB
+import netmesh_location
 import log_settings
 import pysideflask_ext
 
@@ -44,15 +49,10 @@ else:
 
 app.config['SECRET_KEY'] = os.urandom(24)
 
-app.config['MAIL_SERVER']='smtp.gmail.com'  
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'netmesh.dev@gmail.com'
-app.config['MAIL_PASSWORD'] = 'n3Tm3$sh!@#dev'
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
+load_dotenv()
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+# login_manager = LoginManager()
+# login_manager.init_app(app)
 
 # ----------------------------------------------------------------
 # PAGES
@@ -95,7 +95,7 @@ def report_data():
   finished_on = request.form['finishedOn']
   duration = request.form['duration']
   username = session['username']
-  methods = json.loads(request.form['methods'])
+  methods=json.loads(request.form['methods'])
   
   results = {}
   for d in methods:
@@ -131,7 +131,7 @@ def report():
   duration = request.form['duration']
   generated_on = request.form['generatedOn']
   username = session['username']
-  methods = json.loads(request.form['methods'])
+  methods=json.loads(request.form['methods'])
   
   results = {}
   for d in methods:
@@ -164,7 +164,7 @@ def report():
   # started_on = "2022-01-01 01:14:23"
   # finished_on = "2022-01-01 01:15:52"
   # duration = "1m 29s"
-  # methods = ["upload", "download"]
+  # methods=["upload", "download"]
   # generated_on = "2022-01-01 01:19:44"
   # username = "sample_user"
   # results = {
@@ -310,9 +310,9 @@ def logout():
   session['username'] = None
   return redirect(url_for('login_page'))
 
-@login_manager.user_loader
-def load_user():
-    return session['username']
+# @login_manager.user_loader
+# def load_user():
+#     return session['username']
     
 # @app.route('/set-test-details', methods=['POST'])
 # def setTestDetails():
@@ -360,6 +360,80 @@ def load_user():
 # ----------------------------------------------------------------
 # API
 # ----------------------------------------------------------------
+@app.route('/set-gps-info', methods=['POST'])
+def set_gps_info():
+  lat = request.form['lat']
+  lon = request.form['lon']
+  location = request.form['location']
+
+  try:
+    main_url = "http://netmesh-api.asti.dost.gov.ph"
+    api_url = f'{main_url}/api/auth/set_gps'
+    
+    json_data = {
+      "gps_lat": lat,
+      "gps_lon": lon,
+      "location": location
+    }
+
+    headers = {
+      "Authorization": "Bearer " + session['api_session_token']
+    }
+
+    print(api_url)
+    
+    r = requests.post(
+      url=api_url,
+      json=json_data,
+      headers=headers,
+    )
+    r.raise_for_status()
+    print(r.text)
+    if r.text != "success":
+      return Response(400, json.dumps(r.text))
+    else:
+      return Response(json.dumps({}))
+  except requests.exceptions.HTTPError as eh:
+    status_code = eh.response.status_code
+    
+    error = "HTTP error"
+    log_settings.log_error(error)
+    
+    if status_code == 404:
+      error = f"Cannot connect to {main_url}"
+      
+    return Response(json.dumps({
+      "error": error,
+      "message": str(eh)
+    }), status_code)
+  except requests.exceptions.ConnectionError as ece:
+    error = "Connection error"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
+      "message": str(ece)
+    }), 500)
+  except requests.exceptions.Timeout as et:
+    error = "Request timeout"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
+      "message": str(et)
+    }), 500)
+  except requests.exceptions.RequestException as e:
+    error = "Cannot get test servers"
+    log_settings.log_error(error)
+    return Response(json.dumps({
+      "error": error,
+    }), 500)
+  except Exception as e:
+    error = "Cannot get test servers"
+    log_settings.log_error(error)
+    
+    return Response(json.dumps({
+      "error": error
+    }), 500)
+
 @app.route('/get-test-servers', methods=['GET'])
 def get_test_servers():
   try:
@@ -672,7 +746,7 @@ def run_process_mtu():
   server_ip = request.form['serverIP']
   network_interface = get_network_interface(mode, network_connection_type_name, network_prefix)
   
-  command_array = ['sudo', './mtu.sh', network_interface, server_ip]
+  command_array = ['sudo', netmesh_utils.resource_path("static/client_scripts/normal_mode/mtu.sh"), network_interface, server_ip]
   output_params = [
     {'name': 'mtu', 'key': 'mtu'},
   ]
@@ -1018,7 +1092,7 @@ def get_isp():
       "error": error
     }), 500)
 
-@app.route('/get-machine-name', methods = ['GET'])
+@app.route('/get-machine-name', methods=['GET'])
 def get_machine_name():
   print("machine name")
   machine_name = ""
@@ -1033,12 +1107,12 @@ def get_machine_name():
 # ----------------------------------------------------------------
 # EXTERNAL DATA
 # ----------------------------------------------------------------
-@app.route('/get-gps-coordinates', methods = ['POST'])
+@app.route('/get-gps-coordinates', methods=['POST'])
 def get_gps_coordinates():
   print("coordinates")
   coordinates = [None, None]
   try:
-    coordinates = ADB.getRawGpsCoordinates()
+    coordinates = netmesh_location.getRawGpsCoordinates()
   except Exception as e:
     print(e.__cause__)
     return Response(str(e), 500)
@@ -1046,7 +1120,57 @@ def get_gps_coordinates():
   return Response(json.dumps(coordinates), mimetype='application/json')
 
 
-@app.route('/send-error', methods = ['POST'])
+@app.route('/get-connected-devices', methods=['POST'])
+def get_connected_devices():
+  try:
+    network_connection_type_name = request.form["networkConnectionTypeName"]
+    network_prefix = request.form["networkPrefix"]
+
+    # get network interface ip
+    interface = get_network_interface("normal", network_connection_type_name, network_prefix)
+    stdout, stderr = subprocess.Popen(f"ip -br addr list | grep -w {interface} | awk -F' ' '{{print $3}}'",
+                                      shell=True,
+                                      stdout=subprocess.PIPE,
+                                      stderr= subprocess.PIPE,).communicate()
+    if stderr:
+      print("Error: ", stderr.decode())
+      return None
+    
+    net_ip = stdout.decode()
+
+    # get gateway ip
+    stdout, stderr = subprocess.Popen(f"ip r | grep 'default via' | awk -F' ' '{{print $3}}'",
+                                      shell=True,
+                                      stdout=subprocess.PIPE,
+                                      stderr= subprocess.PIPE,).communicate()
+    if stderr:
+      print("Error: ", stderr.decode())
+      return None
+    
+    gateway_ips = stdout.decode().strip()
+    gateway_ip = ""
+    if gateway_ips:
+      gateway_ip = gateway_ips.split("\n")[0]
+      
+    print(f'gateway_ip: {gateway_ip}')
+
+    ps = nmap.PortScanner()
+    results = ps.scan(net_ip, arguments='-sT -O', sudo=True)
+    print(results)
+    # remove gateway from results
+    scanned_ips = {k:v for k, v in results['scan'].items() if k != gateway_ip}
+    print(scanned_ips)
+    return Response(json.dumps({
+      "nmap": results['nmap'],
+      "nmapVersion": ".".join(map(str, ps.nmap_version())),
+      "scan": scanned_ips
+    }))
+  except nmap.nmap.PortScannerError as pse:
+    raise pse
+  except Exception as e:
+    raise e
+
+@app.route('/send-error', methods=['POST'])
 def send_error():
   test_server_name = request.form['testServerName']
   test_server_url = request.form['testServerUrl']
@@ -1057,7 +1181,7 @@ def send_error():
     r = requests.post(
         url=main_url,
         headers={"Authorization":"Bearer "+session['api_session_token']},
-        files={'file':open(f'./netmesh_log_files/{error_file_name}.log', 'rb')}
+        files={'file':open(f'{"/var/log/netmesh_rfc6349_app"}/{error_file_name}.log', 'rb')}
       )
       
     # r = requests.post(
@@ -1218,25 +1342,32 @@ if os.name == 'nt':
       return pathptr.value
 
   FOLDERID_Download = '{374DE290-123F-4565-9164-39C4925E467B}'
-
-  @app.route('/open-downloads-folder', method=['POST'])
+  
   def get_downloads_folder():
       return _get_known_folder_path(FOLDERID_Download)
 else:
   def get_downloads_folder():
-    home = os.path.expanduser("~")
-    return os.path.join(home, "Downloads")
+    username = netmesh_utils.get_user()
+    print(username)
+    return os.path.join(os.path.expanduser(f'~{username}'), 'Downloads')
+
+def get_downloads_folder_path():
+  return get_downloads_folder()
 
 @app.route('/open-downloads-folder', methods=['POST'])
 def open_downloads_folder():
-  file_explorer_process = subprocess.Popen(['nautilus', '--browser', get_downloads_folder()] ,stdout=subprocess.PIPE, stderr= subprocess.PIPE)
+  print(get_downloads_folder())
+  file_name = request.form.get("fileName")
+  print(file_name)
+  desktop_username = netmesh_utils.get_user()
+  file_explorer_process = subprocess.Popen(['sudo', '-u', desktop_username, 'nautilus', '-s', os.path.join(get_downloads_folder(), file_name)] ,stdout=subprocess.PIPE, stderr= subprocess.PIPE)
   stdout,stderr = file_explorer_process.communicate()
   if stderr:
     print(stderr)
 
 @app.route('/open-logs-folder', methods=['POST'])
 def open_logs_folder():
-  file_explorer_process = subprocess.Popen(['nautilus', '--browser', os.getcwd() + '/netmesh_log_files'] ,stdout=subprocess.PIPE, stderr= subprocess.PIPE)
+  file_explorer_process = subprocess.Popen(['nautilus', '--browser', '/var/log/netmesh_rfc6349_app'] ,stdout=subprocess.PIPE, stderr= subprocess.PIPE)
   stdout,stderr = file_explorer_process.communicate()
   if stderr:
     print(stderr)
@@ -1244,18 +1375,17 @@ def open_logs_folder():
 def run_on_desktop():
   if getattr(sys, 'frozen', False):
     pyi_splash.update_text("Checking update...")
-  
+    
   has_update, current_version, latest_version = netmesh_utils.has_update()
   netmesh_constants.app_version = current_version
-  
   
   if getattr(sys, 'frozen', False):
     pyi_splash.update_text("Opening the app...")
   
   running_on_desktop = True
-  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=720,
+  pysideflask_ext.init_gui(application=app, port=5000, width=1280, height=960,
                            window_title=f'{netmesh_constants.APP_TITLE} ({netmesh_constants.app_version})',
-                           has_update=has_update, latest_version=latest_version)
+                           has_update=has_update, latest_version=latest_version, download_path=get_downloads_folder_path())
 
   sys.exit()
   # if netmesh_utils.has_update():
