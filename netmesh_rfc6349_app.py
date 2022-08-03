@@ -1,4 +1,5 @@
 from asyncio.log import logger
+from datetime import datetime
 import sys
 import os
 import subprocess
@@ -666,6 +667,7 @@ def get_results():
   try:
     test_server_name = request.args.get('testServerName')
     test_server_url = request.args.get('testServerUrl')
+    test_number = request.args.get('testNumber')
     
     mode = request.args.get('mode')
     method = "upload" if mode == "normal" else "download"
@@ -681,6 +683,7 @@ def get_results():
     
     return Response(json.dumps({
       "html": render_template('results.html',
+                            test_number=test_number,
                             results=json.loads(r.text),
                             method=method),
       "method": method,
@@ -734,6 +737,73 @@ def get_results():
       "error": error,
       "message": str(e)
     }), 500)
+
+@app.route('/get-test-results-template', methods=['GET'])
+def get_test_results_template():
+  try:
+    test_number = request.args.get('testNumber')
+    
+    return render_template('test_results.html',
+                            test_number=test_number)
+
+  except Exception as e:
+    error = "Unexpected error occured"
+    log_settings.log_error(error)
+    
+    return render_template('test_results.html',
+              test_number=test_number),
+
+@app.route('/get-test-summary-template', methods=['GET'])
+def get_test_summary_template():
+  try:
+    methods = json.loads(request.args.get('methods'))
+    isr = request.args.get('isr')
+    test_results = json.loads(request.args.get('testResults'))
+
+    test_summary = {}
+    for method in methods:
+      print("method", method)
+      test_summary[method] = {}
+      
+      test_started_on_unix_ms = test_results[0][method]["startedOn"]
+      test_summary[method]["test_started_on"] = datetime.fromtimestamp(test_started_on_unix_ms / 1000)
+      
+      speeds = list(map(lambda result: result[method]['results']['thpt_avg'], test_results))
+      tcp_efficiencies = list(map(lambda result: result[method]['results']['tcp_eff'], test_results))
+      buffer_delays = list(map(lambda result: result[method]['results']['buf_delay'], test_results))
+
+      print("speeds", speeds)
+      print("tcp_efficiencies", tcp_efficiencies)
+      print("buffer_delays", buffer_delays)
+
+      test_summary[method]["speed"] = {}
+      test_summary[method]["speed"]["ave"] = sum(speeds) / len(speeds)
+      test_summary[method]["speed"]["min"] = min(speeds)
+      test_summary[method]["speed"]["max"] = max(speeds)
+
+      test_summary[method]["tcp_efficiency"] = {}
+      test_summary[method]["tcp_efficiency"]["ave"] = sum(tcp_efficiencies) / len(tcp_efficiencies)
+      test_summary[method]["tcp_efficiency"]["min"] = min(tcp_efficiencies)
+      test_summary[method]["tcp_efficiency"]["max"] = max(tcp_efficiencies)
+
+      test_summary[method]["buffer_delay"] = {}
+      test_summary[method]["buffer_delay"]["ave"] = sum(buffer_delays) / len(buffer_delays)
+      test_summary[method]["buffer_delay"]["min"] = min(buffer_delays)
+      test_summary[method]["buffer_delay"]["max"] = max(buffer_delays)
+
+    print("test_summary", test_summary)
+
+    return render_template('summary_results.html',
+                            methods=methods,
+                            isr=isr,
+                            test_results=test_results,
+                            test_summary=test_summary)
+
+  except Exception as e:
+    error = "Unexpected error occured"
+    log_settings.log_error(error)
+    
+    return 'error',
 
 # ----------------------------------------------------------------
 # SCRIPTS

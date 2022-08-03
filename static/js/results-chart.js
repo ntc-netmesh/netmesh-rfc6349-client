@@ -129,15 +129,8 @@ const resultsParameters = Object.freeze({
   }),
 });
 
-const ntcBlueColor = '#0038a7';
-const ntcRedColor = '#CE1127';
-const greenColor = '#38A700';
-
-const uploadColor = '#4824FF';
-const downloadColor = '#008ca7';
-
 function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) {
-  const methodColor = method == 'upload' ? uploadColor : downloadColor;
+  const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
 
   return {
     series: [
@@ -210,14 +203,14 @@ function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) 
           strokeDashArray: 3.6,
           opacity: 0.75,
           label: {
-            borderColor: ntcBlueColor,
+            borderColor: NETMESH_COLORS.ntcBlueColor,
             orientation: 'horizontal',
             text: `ISR: ${thpt_ideal} Mbps`,
             textAnchor: 'start',
             offsetX: -23,
             offsetY: -6,
             style: {
-              color: ntcBlueColor,
+              color: NETMESH_COLORS.ntcBlueColor,
               fontSize: `${fontSize * 0.85}px`,
               fontWeight: 'bold',
               fontFamily: 'Ubuntu'
@@ -235,7 +228,7 @@ function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) 
       style: {
         fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu',
-        colors: [thpt_avg < thpt_ideal ? ntcRedColor : greenColor]
+        colors: [thpt_avg < thpt_ideal ? NETMESH_COLORS.ntcRedColor : NETMESH_COLORS.greenColor]
       },
       background: {
         enabled: true,
@@ -249,7 +242,7 @@ function getThroughputChartOptions(method, thpt_avg, thpt_ideal, fontSize = 14) 
 }
 
 function getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize = 14) {
-  const methodColor = method == 'upload' ? uploadColor : downloadColor;
+  const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
 
   return {
     series: [
@@ -264,7 +257,7 @@ function getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize 
           {
             x: 'Transfer Ideal',
             y: transfer_ideal,
-            fillColor: ntcBlueColor,
+            fillColor: NETMESH_COLORS.ntcBlueColor,
           },
         ]
       }
@@ -342,7 +335,7 @@ function getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize 
       style: {
         fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu',
-        colors: [transfer_ideal >= transfer_avg ? greenColor : ntcRedColor, ntcBlueColor]
+        colors: [transfer_ideal >= transfer_avg ? NETMESH_COLORS.greenColor : NETMESH_COLORS.ntcRedColor, NETMESH_COLORS.ntcBlueColor]
       },
       background: {
         enabled: true,
@@ -357,8 +350,8 @@ function getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize 
 
 
 function getRttChartOptions(method, ave_rtt, rtt, buf_delay, fontSize = 14) {
-  const methodColor = method == 'upload' ? uploadColor : downloadColor;
-  const aveRttColor = ave_rtt > rtt ? ntcRedColor : greenColor;
+  const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
+  const aveRttColor = ave_rtt > rtt ? NETMESH_COLORS.ntcRedColor : NETMESH_COLORS.greenColor;
 
   return {
     series: [
@@ -373,7 +366,7 @@ function getRttChartOptions(method, ave_rtt, rtt, buf_delay, fontSize = 14) {
           {
             x: "Baseline RTT",
             y: rtt,
-            fillColor: ntcBlueColor
+            fillColor: NETMESH_COLORS.ntcBlueColor
           }
         ]
       },
@@ -499,7 +492,7 @@ function getRttChartOptions(method, ave_rtt, rtt, buf_delay, fontSize = 14) {
       style: {
         fontSize: `${fontSize}px`,
         fontFamily: 'Ubuntu',
-        colors: [aveRttColor, ntcBlueColor]
+        colors: [aveRttColor, NETMESH_COLORS.ntcBlueColor]
       },
       background: {
         enabled: true,

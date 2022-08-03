@@ -1,0 +1,430 @@
+<div class="row">
+{% for method in methods %}
+  <div class="col-xl-{{ 12 // methods|count }}">
+    <div id="summary-{{ method }}-speeds-chart" class="my-2"></div>
+    <div id="summary-{{ method }}-tcp-efficiencies-chart" class="my-2"></div>
+    <div id="summary-{{ method }}-buffer-delays-chart" class="my-2"></div>
+    <div class="my-2">
+      <table class="table table-sm table-bordered">
+        <tbody>
+          <tr>
+            <td>Count</td>
+            <td colspan="2">{{ test_results|count }}</td>
+          </tr>
+          <tr>
+            <td>Test Started On</td>
+            <td colspan="2">{{ test_summary[method].test_started_on.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          </tr>
+          <tr>
+            <td rowspan="3">{{ method|title }} Speed</td>
+            <td>Average</td>
+            <td>{{'%0.2f'| format(test_summary[method].speed.ave|float) }} Mbps</td>
+          </tr>
+          <tr class="small">
+            <td>Min</td>
+            <td>{{'%0.2f'| format(test_summary[method].speed.min|float) }} Mbps</td>
+          </tr>
+          <tr class="small">
+            <td>Max</td>
+            <td>{{'%0.2f'| format(test_summary[method].speed.max|float) }} Mbps</td>
+          </tr>
+          <tr>
+            <td rowspan="3">TCP Efficiency</td>
+            <td>Average</td>
+            <td>{{'%0.2f'| format(test_summary[method].tcp_efficiency.ave|float) }}%</td>
+          </tr>
+          <tr class="small">
+            <td>Min</td>
+            <td>{{'%0.2f'| format(test_summary[method].tcp_efficiency.min|float) }}%</td>
+          </tr>
+          <tr class="small">
+            <td>Max</td>
+            <td>{{'%0.2f'| format(test_summary[method].tcp_efficiency.max|float) }}%</td>
+          </tr>
+          <tr>
+            <td rowspan="3">Buffer Delay</td>
+            <td>Average</td>
+            <td>{{'%0.2f'| format(test_summary[method].buffer_delay.ave|float) }} ms</td>
+          </tr>
+          <tr class="small">
+            <td>Min</td>
+            <td>{{'%0.2f'| format(test_summary[method].buffer_delay.min|float) }} ms</td>
+          </tr>
+          <tr class="small">
+            <td>Max</td>
+            <td>{{'%0.2f'| format(test_summary[method].buffer_delay.max|float) }} ms</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endfor %}
+</div>
+
+<script>
+  (function () {
+    const methods = JSON.parse('{{ methods | tojson|safe }}');
+    const testResults = JSON.parse('{{ test_results | tojson|safe }}');
+    const isr = '{{ isr | safe }}';
+
+    for (const method of methods) {
+      renderSpeedsChart(method, isr, testResults);
+      renderTcpEfficienciesChart(method, isr, testResults);
+      renderBufferDelaysChart(method, isr, testResults);
+    }
+
+    function renderSpeedsChart(method, isr, testResults) {
+      let speedsWithTimestamp = [];
+
+      for (const res of testResults) {
+        if (method in res) {
+          speedsWithTimestamp.push([res[method].endedOn, res[method].results.thpt_avg]);
+        }
+      }
+
+      const chartId = `#summary-${method}-speeds-chart`;
+      const options = getSpeedsChartOptions(method, speedsWithTimestamp, isr);
+      options.chart.width = 400;
+      options.chart.height = 240;
+
+      const chart = new ApexCharts(document.querySelector(chartId), options);
+      chart.render().then(() => {
+        setTimeout(function () {
+          chart.dataURI({scale: 3}).then(({imgURI}) => {
+            summaryChartImageUris.speedsChartUri[method] = imgURI;
+          });
+          chart.destroy();
+
+          options.chart.width = '100%';
+          const chart2 = new ApexCharts(document.querySelector(chartId), options);
+          chart2.render();
+        }, 500);
+      });
+    }
+    function getSpeedsChartOptions(method, speedsWithTimestamp, isr, fontSize = 14) {
+      const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
+
+      let speeds = [];
+
+      for (const speed of speedsWithTimestamp) {
+        speeds.push(speed[1]);
+      }
+
+      const maxSpeed = Math.max(...speeds);
+      const methodProperName = method[0].toUpperCase() + method.slice(1);
+
+      return {
+        series: [
+          {
+            name: `${methodProperName}`,
+            data: speedsWithTimestamp
+          }
+        ],
+        chart: {
+          animations: {
+            enabled: false,
+          },
+          height: 240,
+          type: 'line',
+          zoom: {
+            enabled: false
+          }
+        },
+        colors: [methodColor],
+        markers: {
+          size: 3,
+          strokeWidth: 1,
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'straight',
+          width: 2,
+        },
+        title: {
+          text: `${methodProperName} Speeds`,
+          align: 'center',
+          style: {
+            fontSize: `${fontSize}px`,
+            fontFamily: 'Ubuntu'
+          }
+        },
+        grid: {
+          row: {
+            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+            opacity: 0.5
+          },
+        },
+        xaxis: {
+          forceNiceScale: true,
+          type: 'datetime',
+          labels: {
+            formatter: function (val) {
+              return `${moment(val).format("HH:mm")}`;
+            }
+          }
+        },
+        yaxis: {
+          forceNiceScale: true,
+          min: 0,
+          max: Math.max(maxSpeed, isr),
+          labels: {
+            formatter: function (val, opts) {
+              return `${numeral(val).format("0.[00]")} Mbps`;
+            },
+          }
+        },
+        tooltip: {
+          enabled: true,
+          x: {
+            formatter: function (val, opts) {
+              return `${moment(val).format("YYYY-MM-DD HH:mm:ss")}`;
+            },
+          }
+        },
+        annotations: {
+          yaxis: [
+            {
+              y: isr,
+              borderColor: '#000',
+              strokeDashArray: 3.6,
+              opacity: 0.75,
+              label: {
+                borderColor: NETMESH_COLORS.ntcBlueColor,
+                orientation: 'horizontal',
+                text: `ISR: ${isr} Mbps`,
+                textAnchor: 'end',
+                // offsetX: -23,
+                // offsetY: -6,
+                style: {
+                  color: NETMESH_COLORS.ntcBlueColor,
+                  fontSize: `${fontSize * 0.85}px`,
+                  fontWeight: 'bold',
+                  fontFamily: 'Ubuntu'
+                }
+              },
+            }
+          ]
+        },
+      };
+    }
+
+    function renderTcpEfficienciesChart(method, isr, testResults) {
+      let tcpEfficienciesWithTimestamp = [];
+
+      for (const res of testResults) {
+        if (method in res) {
+          tcpEfficienciesWithTimestamp.push([res[method].endedOn, res[method].results.tcp_eff]);
+        }
+      }
+
+      const chartId = `#summary-${method}-tcp-efficiencies-chart`;
+      const options = getTcpEfficienciesChartOptions(method, tcpEfficienciesWithTimestamp);
+      options.chart.width = 400;
+      options.chart.height = 240;
+
+      const chart = new ApexCharts(document.querySelector(chartId), options);
+      chart.render().then(() => {
+        setTimeout(function () {
+          chart.dataURI({scale: 3}).then(({imgURI}) => {
+            summaryChartImageUris.tcpEfficienciesChartUri[method] = imgURI;
+          });
+          chart.destroy();
+
+          options.chart.width = '100%';
+          const chart2 = new ApexCharts(document.querySelector(chartId), options);
+          chart2.render();
+        }, 500);
+      });
+    }
+    function getTcpEfficienciesChartOptions(method, tcpEfficienciesWithTimestamp, fontSize = 14) {
+      const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
+      const methodProperName = method[0].toUpperCase() + method.slice(1);
+
+      return {
+        series: [
+          {
+            name: `TCP Efficiency (${methodProperName})`,
+            data: tcpEfficienciesWithTimestamp
+          }
+        ],
+        chart: {
+          animations: {
+            enabled: false,
+          },
+          height: 350,
+          type: 'line',
+          zoom: {
+            enabled: false
+          }
+        },
+        colors: [methodColor],
+        markers: {
+          size: 3,
+          strokeWidth: 1,
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'straight',
+          width: 2,
+        },
+        title: {
+          text: `TCP Efficiency Results (${methodProperName})`,
+          align: 'center',
+          style: {
+            fontSize: `${fontSize}px`,
+            fontFamily: 'Ubuntu'
+          }
+        },
+        grid: {
+          row: {
+            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+            opacity: 0.5
+          },
+        },
+        xaxis: {
+          type: 'datetime',
+          labels: {
+            formatter: function (val) {
+              return `${moment(val).format("HH:mm")}`;
+            }
+          }
+        },
+        yaxis: {
+          min: 0,
+          max: 100,
+          tickAmount: 4,
+          labels: {
+            formatter: function (val, opts) {
+              return `${numeral(val).format("0.[00]")}%`;
+            },
+          }
+        },
+        tooltip: {
+          enabled: true,
+          x: {
+            formatter: function (val, opts) {
+              return `${moment(val).format("YYYY-MM-DD HH:mm:ss")}`;
+            },
+          }
+        },
+      };
+    }
+
+    function renderBufferDelaysChart(method, isr, testResults) {
+      let bufferDelaysWithTimestamp = [];
+
+      for (const res of testResults) {
+        if (method in res) {
+          bufferDelaysWithTimestamp.push([res[method].endedOn, res[method].results.buf_delay]);
+        }
+      }
+
+      const chartId = `#summary-${method}-buffer-delays-chart`;
+      const options = getBufferDelaysChartOptions(method, bufferDelaysWithTimestamp);
+      options.chart.width = 400;
+      options.chart.height = 240;
+
+      const chart = new ApexCharts(document.querySelector(chartId), options);
+      chart.render().then(() => {
+        setTimeout(function () {
+          chart.dataURI({scale: 3}).then(({imgURI}) => {
+            summaryChartImageUris.bufferDelaysChartUri[method] = imgURI;
+          });
+          chart.destroy();
+
+          options.chart.width = '100%';
+          const chart2 = new ApexCharts(document.querySelector(chartId), options);
+          chart2.render();
+        }, 500);
+      });
+    }
+    function getBufferDelaysChartOptions(method, bufferDelaysWithTimestamp, fontSize = 14) {
+      const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
+      const methodProperName = method[0].toUpperCase() + method.slice(1);
+
+      let bufferDelays = [];
+      for (const bd of bufferDelaysWithTimestamp) {
+        bufferDelays.push(bd[1]);
+      }
+
+      const minBufferDelay = Math.min(...bufferDelays);
+      console.log("bufferDelays", bufferDelays);
+      console.log("minBufferDelay", minBufferDelay);
+
+      return {
+        series: [
+          {
+            name: `Buffer Delay (${methodProperName})`,
+            data: bufferDelaysWithTimestamp
+          }
+        ],
+        chart: {
+          animations: {
+            enabled: false,
+          },
+          height: 240,
+          type: 'line',
+          zoom: {
+            enabled: false
+          }
+        },
+        colors: [methodColor],
+        markers: {
+          size: 3,
+          strokeWidth: 1,
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'straight',
+          width: 2,
+        },
+        title: {
+          text: `Buffer Delay Results (${methodProperName})`,
+          align: 'center',
+          style: {
+            fontSize: `${fontSize}px`,
+            fontFamily: 'Ubuntu'
+          }
+        },
+        grid: {
+          row: {
+            // colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+            opacity: 0.5
+          },
+        },
+        xaxis: {
+          forceNiceScale: true,
+          type: 'datetime',
+          labels: {
+            formatter: function (val) {
+              return `${moment(val).format("HH:mm")}`;
+            }
+          }
+        },
+        yaxis: {
+          forceNiceScale: true,
+          min: minBufferDelay < 0 ? minBufferDelay : 0,
+          labels: {
+            formatter: function (val, opts) {
+              return `${numeral(val).format("0.[000]")} ms`;
+            },
+          }
+        },
+        tooltip: {
+          enabled: true,
+          x: {
+            formatter: function (val, opts) {
+              return `${moment(val).format("YYYY-MM-DD HH:mm:ss")}`;
+            },
+          }
+        },
+      };
+    }
+  })();
+</script>
