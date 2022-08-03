@@ -261,7 +261,10 @@ def login():
   except requests.exceptions.Timeout as te:
     error = "Connection timeout. Please try again"
   except requests.exceptions.RequestException as req:
-    error = "Cannot login\n" + str(req)
+    if str(req) in ("Incorrect username.", "Incorrect password."):
+      error = "Invalid username or password"
+    else:
+      error = str(req)
   except Exception as e:
     error = str(e)
     
@@ -284,7 +287,7 @@ def relogin():
   
   error = None
   try:
-    token = user_auth.login2(username, password)
+    token = user_auth.relogin(username, password)
     session['api_session_token'] = token
     session['username'] = username
   except requests.exceptions.ConnectionError as ce:

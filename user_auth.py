@@ -11,32 +11,38 @@ def login(username, password):
   if not username:
     raise Exception("Username required")
 
-  # global dev_hash
-  # __read_hash()
-
   credentrials = {
     "username": username,
     "password": password,
   }
 
-  r = requests.post(url=url+"/api/auth/login", json=credentrials)
-  r.raise_for_status()
-  data = r.json()
-  
-  if 'access_token' in data:
+  try:    
+    response = requests.post(url=url+"/api/auth/login", json=credentrials)
+    response.raise_for_status()
+    data = response.json()
+    
     token = data['access_token']
     print("token", token)
     return token
-  elif 'error' in data:
-    raise Exception(data['error'])
-  else:
-    raise Exception(str(data))
+  except requests.exceptions.HTTPError as e:
+    raise requests.exceptions.RequestException(response.text)
+
+
+  # print("login-data", data)
   
-  # token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MjY3ODA2NiwianRpIjoiZGNmNzQ5MjgtNzUxMy00NmE1LWI5ZjktODZlMzViMDA1OTNmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MSwibmJmIjoxNjQyNjc4MDY2LCJleHAiOjE2NDI2ODE2NjZ9.N5-z290FwJRdB1VzS_I8ZnjLWLG-QCCqmR-9zIa3s5Y"
-  # return token
+  # if 'access_token' in data:
+  #   token = data['access_token']
+  #   print("token", token)
+  #   return token
+  # elif 'error' in data:
+  #   print("Exception data error", data['error'])
+  #   raise Exception(data['error'])
+  # else:
+  #   print("Exception str data", str(data))
+  #   raise Exception(str(data))
 
 
-def login2(username, password):
+def relogin(username, password):
   if not username:
     raise Exception("Username required")
 

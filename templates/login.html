@@ -13,6 +13,10 @@
 	img.background-logo {
 		width: 200px;
 	}
+
+	div.alert-danger {
+		max-height: 82px;
+	}
 </style>
 {% endblock %}
 
@@ -37,7 +41,7 @@
 				<form id="loginForm" action="/login-submit" method="POST">
 					<div class="container p-3">
 						{% if error %}
-						<div class="alert alert-danger alert-dismissible fade show overflow-auto py-1" style="max-height: 80px;" role="alert">
+						<div class="alert alert-danger alert-dismissible fade show overflow-auto py-1" role="alert">
 							{{ error }}
 						</div>
 						{% endif %}
