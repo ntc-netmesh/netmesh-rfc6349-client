@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Log in</title>
+{{ super() }}
+<style>
+	body,
+	html {
+		height: 100%;
+		/* overflow-x: hidden !important; */
+	}
+
+	img.background-logo {
+		width: 200px;
+	}
+
+	div.alert-danger {
+		max-height: 82px;
+	}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container d-flex justify-content-center h-100">
+	<div class="align-self-center">
+		<div class="card shadow" style="width: 400px; max-width: 400px;">
+			<div class="card-body p-0">
+				<div class="pt-4">
+					<div class="p-2 row justify-content-center">
+						<img
+							src="{{url_for('static', filename='images/ntc_logo.png')}}"
+							title="NetMesh RFC-6349 Application"
+							alt="RFC-6349"
+							class="background-logo"
+						/>
+					</div>
+					<div class="p-2 row justify-content-center">
+						<span class="h2 text-center"><b>NetMesh RFC-6349 Application</b></span>
+					</div>
+				</div>
+				<form id="loginForm" action="/login-submit" method="POST">
+					<div class="container p-3">
+						{% if error %}
+						<div class="alert alert-danger alert-dismissible fade show overflow-auto py-1" role="alert">
+							{{ error }}
+						</div>
+						{% endif %}
+						<!-- <div class="alert alert-danger alert-dismissible fade show overflow-auto py-1" style="max-height: 80px;" role="alert">
+							Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque varius condimentum tempor. Proin in porta magna. Morbi condimentum tristique magna et tincidunt. Nulla eget placerat quam, vitae aliquam nulla. Nulla at auctor augue. Ut imperdiet dui id eros rutrum pharetra non ut nisl. Donec cursus faucibus elementum. Etiam in congue sapien. Integer vel lorem quis lectus faucibus elementum. Maecenas eget quam a tortor laoreet pulvinar. Ut accumsan dui in laoreet faucibus. Donec tempus efficitur efficitur. Duis nulla turpis, ullamcorper non luctus eget, tempor in lacus. Integer sit amet tortor id ante varius porttitor. Donec et lacinia mi. Proin pellentesque, nisl.
+						</div> -->
+						<div class="row p-3 py-0">
+							<div class="col">
+							<div class="col">
+								<!-- <div class="form-group">
+									<label class="form-control-static" for="uname"
+										><b>Email</b></label
+									>
+									<input
+										class="form-control has-validation mb-3"
+										type="text"
+										placeholder="Enter field tester's email"
+										name="uname"
+										id="uname"
+										value="{{ username }}"
+									/>
+									<div id="validationServerUsernameFeedback" class="invalid-feedback">
+										Enter field tester's email
+									</div>
+								</div> -->
+								<h6>Who will conduct the test?</h6>
+								<div id="logged-users" class="list-group mb-3">
+									{% for user in logged_users %}
+									<button type="button" class="list-group-item list-group-item-action" style="max-height: 64px;" data-user-email="{{ user['email'] }}"
+										{% if not 'token-info' in user %} data {% endif %}>
+										<div class="d-flex w-100 justify-content-between">
+											<span class="h6 mb-0 align-baseline text-truncate mt-1">{{ user['name'] }}</span>
+											{% if 'token_info' in user %}
+											{% if user['token_expiry_seconds'] < 60*60 %}
+											<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
+											{% elif user['token_expiry_seconds'] <= 0 %}
+											<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
+											{% endif %}
+											{% endif %}
+										</div>
+										<div class="d-flex">
+											<span class="small text-muted text-truncate">{{ user['email'] }}</span>
+										</div>
+									</button>
+									{% endfor %}
+								</div>
+								<!-- <div class="form-group mb-3">
+									<label class="form-control-static" for="psw"
+										><b>Password</b></label
+									>
+									<input
+										class="form-control has-validation"
+										type="password"
+										placeholder="Enter field tester's password"
+										name="psw"
+										id="psw"
+										value="{{ password }}"
+									/>
+								</div>
+								<div class="d-flex flex-column">
+									<button	id="btnLogIn" type="submit" class="btn btn-success mb-2">
+                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+										<span>Log in</span>
+									</button>
+								</div> -->
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+			<div class="card-footer">
+				<div class="d-flex small text-secondary">
+					<div class="">
+						{{ app_version }}
+					</div>
+					<div class="ms-auto">
+						Ubuntu {{ ubuntu_version }}
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="login-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="login-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" action="{{ url_for('users.login') }}" method="POST">
+      <div class="modal-header">
+        <h5 class="modal-title">
+					{{ user_email }}
+				</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+				<input type="text" name="user-email" hidden>
+				<div class="mb-3">
+					<label class="form-label mb-1" for="user-password">Password</label>
+					<div class="input-group input-group">
+						<input
+							id="user-password"
+							name="user-password"
+							type="password"
+							class="form-control"
+							placeholder="Enter user password"
+							required />	
+						<input
+							type="checkbox"
+							class="btn-check"
+							id="user-password-eye"
+							autocomplete="off">
+						<label
+							class="btn btn-outline-secondary"
+							for="user-password-eye">
+							<i class="bi bi-eye"></i>
+						</label>
+					</div>
+				</div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Log in</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
+<script>
+	$(function () {
+		$('#logged-users').on('click', '.list-group-item', function (ev) {
+			const userEmail = $(this).data('user-email');
+			$('#login-modal .modal-title').text(userEmail);
+			$('input[name="user-email"]').val(userEmail);
+
+			$('#login-modal').modal('show');
+		});
+
+		$('#user-password-eye').on('change', function () {
+			if (this.checked) {
+				$('#user-password').attr('type', 'text');
+			} else {
+				$('#user-password').attr('type', 'password');
+			}
+		});
+	});
+</script>
+{% endblock scripts %}
+
+{% endblock body %}

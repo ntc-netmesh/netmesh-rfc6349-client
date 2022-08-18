@@ -1,0 +1,12 @@
+<div class="text-center">
+  <i class="bi bi-check-circle text-success" style="font-size: 2rem;"></i>
+  <h5 class="card-title">This laptop is now registered</h5>
+  <p class="card-text small text-secondary">
+    <span>named as <b>{{ device_name }}</b></span>
+    <br>
+    <span>registered by <b>{{ admin_email }}</b></span>
+  </p>
+</div>
+<div class="mt-2">
+  {% include 'device_info.html' %}
+</div>

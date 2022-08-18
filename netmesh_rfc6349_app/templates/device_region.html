@@ -1,0 +1,14 @@
+<h5>What is your NTC region?</h5>
+<div class="mb-3">
+  <select name="ntc-region" class="form-select" id="ntc-region" required>
+    <option {% if not region or region|length == 0 %} selected {% endif %} disabled hidden value="">Select NTC region</option>
+    {% for r in regions %}
+      <option	{% if region == r[0] %} selected {% endif %} value="{{ r[0] }}">{{ r[1] }}</option>	
+    {% endfor %}
+  </select>
+</div>
+{% if error %}
+<div class="alert alert-danger alert-dismissible fade show overflow-auto py-1 small" role="alert">
+  {{ error }}
+</div>
+{% endif %}

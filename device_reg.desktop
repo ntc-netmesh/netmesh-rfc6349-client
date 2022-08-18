@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Terminal=true
-Name=device_registration
-Icon=utilities-terminal
-Categories=Application;
-#Exec="/home/event1/Desktop/6349_App/hash.py"
-Exec=gnome-terminal -- bash -c "cd $(dirname %k) && python3 ./hash.py";
