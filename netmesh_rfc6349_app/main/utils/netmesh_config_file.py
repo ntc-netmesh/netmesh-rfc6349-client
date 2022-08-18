@@ -56,7 +56,7 @@ class NetMeshConfigFile:
                     self._SECTION_NAME, "device_name")
             except Exception as ex:
                 print(ex)
-
+                
             return device_name
 
     class _NetMeshUsersConfig:

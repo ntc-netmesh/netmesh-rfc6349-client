@@ -18,12 +18,16 @@ def login_page():
     config = NetMeshConfigFile()
     device_config = config.load_device_config()
     users_config = config.load_users_config()
+    
+    device_name = device_config.get_device_name()
+    if not device_name:
+        return redirect(url_for('device_registration.register_device_page'))
 
     return render_template('login.html',
                            logged_users=users_config.get_logged_users(),
                            app_version=get_app_current_version(),
                            ubuntu_version=get_ubuntu_version(),
-                           device_name=device_config.get_device_name())
+                           device_name=device_name)
 
 
 @users.route('/check-user-token', methods=['POST'])

@@ -57,7 +57,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="carousel-item p-2">
+				<!-- <div class="carousel-item p-2">
 					<div class="d-flex flex-column registration-form">
 						<div id="ntc-region-selection-content">
 						</div>
@@ -67,7 +67,7 @@
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> -->
 				<div class="carousel-item p-2">
 					<div class="d-flex flex-column registration-form">
 						<div id="device-details-content">
@@ -99,7 +99,7 @@
 
 <div id="admin-credentials-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="admin-credentials-modal-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <form class="modal-content" action="{{ url_for('test_measurement.log_admin') }}" method="POST">
+    <form class="modal-content" action="{{ url_for('device_registration.log_admin') }}" method="POST">
       <div class="modal-header">
         <h5 class="modal-title">Enter admin credentials</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -161,7 +161,8 @@
 						success: function (response) {
 							$adminCredentailsModal.modal('hide');
 
-							$('#ntc-region-selection-content').html(response);
+							// $('#ntc-region-selection-content').html(response);
+							$('#device-details-content').html(response);
 
 							$registrationCarousel.carousel('next');
 						},
@@ -179,28 +180,28 @@
 					$('#admin-email').focus();
 				});
 
-				const $submitRegionButton = $('#submit-region-button');
-				$submitRegionButton.on('click', function (ev) {
-					const ntcRegions = document.getElementById('ntc-region');
+				// const $submitRegionButton = $('#submit-region-button');
+				// $submitRegionButton.on('click', function (ev) {
+				// 	const ntcRegions = document.getElementById('ntc-region');
 
-					$.ajax({
-						url: 'get-device-details-template',
-						method: 'POST',
-						dataType: 'html',
-						data: {
-							region: ntcRegions.value,
-							regionName: $('#ntc-region option:selected').text()
-						},
-						success: function (response) {
-							$('#device-details-content').html(response);
+				// 	$.ajax({
+				// 		url: 'get-device-details-template',
+				// 		method: 'POST',
+				// 		dataType: 'html',
+				// 		data: {
+				// 			region: ntcRegions.value,
+				// 			regionName: $('#ntc-region option:selected').text()
+				// 		},
+				// 		success: function (response) {
+				// 			$('#device-details-content').html(response);
 							
-							$registrationCarousel.carousel('next');
-						},
-						error: function (jqXHR, textStatus, errorThrown) {
-							$('#ntc-region-selection-content').html(jqXHR.responseText);
-						}
-					});
-				});
+				// 			$registrationCarousel.carousel('next');
+				// 		},
+				// 		error: function (jqXHR, textStatus, errorThrown) {
+				// 			$('#ntc-region-selection-content').html(jqXHR.responseText);
+				// 		}
+				// 	});
+				// });
 
 				$('#cancel-registration-button').on('click', function (ev) {
 					const willCancelRegistration = confirm("Do you want to cancel registration?");
@@ -218,7 +219,7 @@
 						method: 'POST',
 						dataType: 'html',
 						data: {
-							regionName: $('#ntc-region option:selected').text(),
+							// regionName: $('#ntc-region option:selected').text(),
 							laptopOwner: `${$('#device-owner option:selected').text()}`,
 							laptopOwnerEmail: selectedOwner.email,
 							laptopName: $('#device-name').val()
@@ -238,14 +239,19 @@
 				$('#device-confirmation-modal .modal-content').on('submit', function (ev) {
 					ev.preventDefault();
 
+					const selectedOwner = $('#device-owner').select2('data')[0];
 					$.ajax({
 						url: 'register-api',
 						method: 'POST',
 						dataType: 'html',
 						data: {
 							adminEmail: $('#admin-email').val(),
-							region: $('#ntc-region option:selected').val(),
-							deviceOwner: $('#device-owner option:selected').val(),
+							// region: $('#ntc-region option:selected').val(),
+							deviceOwnerInfo: JSON.stringify({
+								user_id: $('#device-owner option:selected').val(),
+								name: $('#device-owner option:selected').text(),
+								email: selectedOwner.email
+							}),
 							deviceName: $('#device-name').val()
 						},
 						success: function (response) {

@@ -24,7 +24,7 @@ def index_page():
     device_name = device_config.get_device_name()
     if not device_name:
         return redirect(url_for('device_registration.register_device_page'))
-
+    
     return redirect(url_for('users.login_page'))
 
 
