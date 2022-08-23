@@ -1,0 +1,749 @@
+{% extends 'nav_page.html' %}
+
+{% block head %}
+{{ super() }}
+<title>Home</title>
+
+<style>
+  .vertical-center {
+    min-height: calc(100% - 98px);
+    position: absolute;
+    left: calc(50% + 0px);
+    bottom: calc(7%);
+    display: flex;
+    align-items: center;
+  }
+
+  #chart {
+    width: 480px;
+  }
+  
+  #map-snippet { height: 224px; }
+
+  #speedtest-pills-tab {
+    top: 84px;
+  }
+</style>
+
+{% endblock %}
+
+{% block content %}
+<!-- <iframe frameborder="1" id="pdfPreview" height="800" width="960"></iframe> -->
+<div id="pills-speedtest-summary-test">
+                  
+</div>
+<div class="row justify-content-center">
+  <div class="col-md-9 col-lg-4 col-xxl-4">
+    <form
+      id="mainForm"
+      class="needs-validation"
+      novalidate
+    >
+      <fieldset class="card shadow mb-4">
+        <h5 class="card-header">Test Measurement Details</h5>
+        <div class="card-body">
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="small form-label mb-1" for="isr">Internet Subscription Rate (ISR)*</label>
+              <div class="input-group" style="width: 160px;">
+                <input type="number" id="isr" min="1" max="1000" class="form-control align-right" aria-label="Enter speed" aria-describedby="basic-addon2" required data-bind="value:replyNumber">
+                <span class="input-group-text" id="basic-addon2">Mbps</span>
+                <div class="invalid-feedback" id="isr-validation">
+                  Enter between 1 to 1000 Mbps
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="small form-label mb-1" for="netType">Network Connection Type*</label>
+              <select class="form-select" id="netType">
+              </select>
+              <a href="#" class="small p-1" id="btn-scan-connected-devices">Scan for connected devices</a>
+              <div id="net-warning" class="alert alert-warning p-0 m-1 d-none" role="alert">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
+                  <div class="small lh-1 message">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="form-group mb-3">
+              <label class="small form-label mb-1" for="testServers">Test Server*</label>
+              <div id="testServersPlaceholder">
+                <div class="placeholder-wave py-2">
+                  <span class="placeholder placeholder-lg col-12"></span>
+                </div>
+              </div>
+            </div>
+            <div class="input-group input-group-sm mb-3 custom-test-server-field d-none">
+              <span class="input-group-text">
+                <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+                  <option selected value="http">http://</option>
+                  <option value="https">https://</option>
+                </select>
+              </span>
+              <input type="text" class="form-control" placeholder="IP Address" aria-label="IP Address" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$">
+              <span class="input-group-text">:</span>
+              <input type="number" class="form-control" placeholder="Port" aria-label="Port" min="0" max="65535">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="mb-1 small form-label">Test Mode*</label>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons" role="group" aria-label="Test mode">
+              <input id="radUpload" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="normal" required>
+              <label class="btn btn-sm btn-outline-primary" for="radUpload" data-bs-toggle="tooltip" data-bs-placement="top" title="Upload test">
+                Normal
+              </label>
+              <input id="radDownload" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="reverse" required>
+              <label class="btn btn-sm btn-outline-primary" for="radDownload" data-bs-toggle="tooltip" data-bs-placement="top" title="Download test" >
+                Reverse
+              </label>
+              <input id="radBidirectional" class="btn-check" type="radio" name="radTestMode" autocomplete="off" value="bidirectional" required>
+              <label class="btn btn-sm btn-outline-primary" for="radBidirectional" data-bs-toggle="tooltip" data-bs-placement="top" title="Download test first, then upload test" autocomplete="off" value="bidirectional">
+                Bidirectional
+              </label>
+            </div>
+            <input type="radio" name="radTestMode" class="d-none" name="radio" required>
+            <div class="invalid-feedback">
+              Select a test mode
+            </div>
+          </div>
+          <div class="row gx-2">
+            <div class="form-group col">
+              <label class="small form-label mb-0" for="lat">Location</label>
+              <div id="location-name-container" class="mb-1">
+                <span>---</span>
+              </div>
+              <div class="position-relative border">
+                <div id="map-snippet">
+                </div>
+                <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 400;">
+                  <button id="btnMapClear" type="button" class="btn btn-sm btn-primary opacity-75 p-0 px-2">Clear</button>
+                </div>
+                <div id="gpsInputSelection" class="position-absolute top-50 start-50 translate-middle">
+                  <div class="d-flex flex-column">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Get Location Button">
+                      <button id="btnGetGpsCoordinates" type="button" class="btn btn-sm btn-primary">Get Location</button>
+                      <button type="button" id="btnGpsHelp" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-question-circle"></i>
+                      </button>
+                    </div>
+                    <button id="btnEnterGpsManually" type="button" class="btn btn-sm btn-link">Enter manually</button>
+                  </div>
+                </div>
+                <div id="gpsManualInput" class="position-absolute top-50 translate-middle-y mx-2 d-none">
+                  <div class="row gx-2">
+                    <div class="form-group col">
+                      <label class="small form-label mb-1" for="lat">GPS Latitude*</label>
+                      <input
+                        type="number"
+                        step="0.0001"
+                        id="lat_manual"
+                        class="form-control form-control-sm"
+                        autocomplete="off"
+                        required
+                      />
+                      <div class="invalid-feedback">
+                        Enter the latitude coordinate of your current location
+                      </div>
+                    </div>
+                    <div class="form-group col">
+                      <label class="small form-label mb-1" for="lon">GPS Longitude*</label>
+                      <input
+                        type="text"
+                        id="lon_manual"
+                        class="form-control form-control-sm"
+                        autocomplete="off"
+                        required
+                      />
+                      <div class="invalid-feedback">
+                        Enter the longitude coordinate of your current location
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end m-2">
+                      <button id="btnManualGpsOK" type="button" class="btn btn-sm btn-primary">OK</button>
+                      <button id="btnManualGpsCancel" type="button" class="btn btn-sm btn-link">Cancel</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="position-absolute bottom-0">
+                  <div id="gpsError" class="alert alert-danger alert-dismissable fade show overflow-auto p-1 px-2 m-0 mt-2 d-none" style="max-height: 80px;" role="alert">
+                    Cannot get GPS coordinates
+                  </div>
+                </div>
+              </div>
+              <input type="text" id="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
+              <input type="text" id="lon" class="form-control form-control-sm d-none" autocomplete="off" required />
+              <div class="invalid-feedback">
+                Invalid Location
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          <div class="d-flex">
+            <div class="form-group ms-0">
+              <div class="input-group" style="width: 200px;">
+                <span class="input-group-text" id="basic-addon2">Auto-repeat</span>
+                <input type="number" id="auto-repeat-count" value="1" min="1" max="30" class="form-control align-right" aria-label="Enter speed" aria-describedby="basic-addon2" required data-bind="value:replyNumber">
+              </div>
+            </div>
+            <!-- <div class="input-group ms-0">
+              Auto-repeat
+              <input id="auto-repeat-count" type="number" class="form-control form-control-sm">
+            </div> -->
+            <button id="btnStartTest" class="btn btn-primary ms-auto" type="submit" role="button">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              Start Test
+            </button>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+  <div class="col-md-9 col-lg-8 col-xxl-7">
+    <div id="test-measurement-card">
+      <!-- <div id="connected-devices-card" class="card bg-light">
+        <div class="card-body">
+          
+        </div>
+      </div> -->
+      <!-- d-none -->
+      <div id="measurement-card" class="card shadow mb-4 d-none">
+        <div class="card-header d-flex align-items-center">
+          <h5 class="mb-0 me-auto">Testing...</h5>
+          <button id="btnCancelTest" type="button" class="btn btn-sm btn-link-secondary mx-2 p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Back to Test Measurement Details">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+          <button id="btnRestartTest" type="button" class="btn btn-sm btn-link-secondary mx-2 p-0" data-bs-toggle="tooltip" data-bs-placement="top" title="Restart this test">
+            <i class="bi bi-arrow-clockwise"></i>
+          </button>
+          <button id="btnCloseTest" type="button" class="btn-close" aria-label="Close" data-bs-toggle="tooltip" data-bs-placement="top" title="Close this test">
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            <li id="test-summary" class="list-group-item px-4 py-3">
+              <h5 class="card-title text-bold">
+                Test Details
+              </h5>
+              <div class="card border-0 mt-1">
+                <div class="card-body p-1">
+                  <div class="row gy-2 gx-3">
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>Internet Subscription Rate (ISR)</small>
+                      </div>
+                      <span id="summary-isr">75 Mbps</span>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>Network Connection Type</small>
+                      </div>
+                      <span id="summary-net">Ethernet</span>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>Test server</small>
+                      </div>
+                      <span id="summary-server">ASTI COARE Test Server</span>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>Test mode</small>
+                      </div>
+                      <span id="summary-mode">Normal</span>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>Location</small>
+                      </div>
+                      <div>
+                        <div id="summary-location-name"><i>Locating...</i></div>
+                        <span class="small">(<span id="summary-coordinates"></span>)</span>
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                      <div class="text-secondary">
+                        <small>ISP</small>
+                      </div>
+                      <div id="summary-isp"></div>
+                      <span class="small">(<span id="summary-public-ip"></span>)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </li>
+            <li class="list-group-item p-3">
+              <ul class="nav nav-pills sticky-sm-top mb-3 border bg-light px-1 py-1 rounded-2" id="speedtest-pills-tab" role="tablist">
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link px-2 py-1 m-1 active" id="pills-speedtest-1-tab" data-bs-toggle="pill" data-bs-target="#pills-speedtest-1" type="button" role="tab" aria-controls="pills-speedtest-1" aria-selected="true">
+                    <div class="position-relative">
+                      <div class="position-absolute top-50 start-50 translate-middle pt-1">
+                        <div class="spinner-border spinner-border text-info" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </div>
+                      <div class="px-1">
+                        19
+                      </div>
+                    </div>
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link px-2 py-1 m-1" id="pills-speedtest-2-tab" data-bs-toggle="pill" data-bs-target="#pills-speedtest-2" type="button" role="tab" aria-controls="pills-speedtest-2" aria-selected="false">
+                    2
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link px-2 py-1 m-1" id="pills-speedtest-3-tab" data-bs-toggle="pill" data-bs-target="#pills-speedtest-3" type="button" role="tab" aria-controls="pills-speedtest-3" aria-selected="false">
+                    3
+                  </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                  <button class="nav-link px-2 py-1 m-1" id="pills-speedtest-summary-tab" data-bs-toggle="pill" data-bs-target="#pills-speedtest-summary" type="button" role="tab" aria-controls="pills-speedtest-summary" aria-selected="false">
+                    Summary
+                  </button>
+                </li>
+              </ul>
+              
+              <div id="process-error" class="pb-3">
+                <div class="border border-danger bg-light mt-1 mx-2">
+                  <div class="accordion border-0" id="accordionError">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingError">
+                        <button class="accordion-button bg-danger bg-opacity-10 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="false" aria-controls="collapseError">
+                          ${errorTitle}
+                        </button>
+                      </h2>
+                      <div id="collapseError" class="accordion-collapse collapse" aria-labelledby="headingError" data-bs-parent="#accordionError">
+                        <div class="accordion-body bg-light">
+                          <table cellpadding="2">
+                            <tbody class="card-text font-monospace small">
+                              <tr>
+                                <td>Timestamp:</td>
+                                <td>(timestamp)</td>
+                              </tr>
+                              <tr>
+                                <td>Server:</td>
+                                <td>(server_name) (ip_address)</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <div class="d-flex align-content-center mt-2">
+                            <button id="btnRestartTest" type="button" class="btn btn-sm btn-primary align-self-center ms-start" data-bs-toggle="modal" data-bs-target="#modalSendError" data-error-file-name="a">Restart this test</button>
+                            <button id="btnOpenSendErrorLog" type="button" class="btn btn-sm btn-outline-primary align-self-center ms-auto me-2" data-bs-toggle="modal" data-bs-target="#modalSendError" data-error-file-name="a">Send error</button>
+                            <a href="javascript:void(0);" id="btnOpenLogsFolder" class="btn btn-sm btn-link text-primary p-0 align-self-center ms-end" role="button" onclick="openLogsFolder()">Open logs folder</a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- <div class="card border-danger rounded-0 mt-1 mx-2">
+                  <div class="card-header bg-danger bg-opacity-10 text-danger p-3">Header</div>
+                  <div class="card-body bg-light monospace">
+                    <table cellpadding="3">
+                      <tbody class="card-text font-monospace small">
+                        <tr>
+                          <td>Timestamp:</td>
+                          <td>(timestamp)</td>
+                        </tr>
+                        <tr>
+                          <td>Server:</td>
+                          <td>(server_name) (ip_address)</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div class="border border-danger bg-light mt-1 mx-2">
+                  <div class="accordion border-0" id="accordionError">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingError">
+                        <button class="accordion-button bg-danger bg-opacity-10 text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="true" aria-controls="collapseError">
+                          ${errorTitle}
+                        </button>
+                      </h2>
+                      <div id="collapseError" class="accordion-collapse collapse show" aria-labelledby="headingError" data-bs-parent="#accordionError">
+                        <div class="accordion-body bg-light">
+                          <span class="font-monospace small">
+                            ${errorContent}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div> -->
+                <!-- <div class="border border-danger bg-light mt-1 mx-2">
+                  <div class="accordion border-0" id="accordionError">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="headingError">
+                        <button class="accordion-button bg-light text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapseError" aria-expanded="true" aria-controls="collapseError">
+                          An error occured
+                        </button>
+                      </h2>
+                      <div id="collapseError" class="accordion-collapse collapse show" aria-labelledby="headingError" data-bs-parent="#accordionError">
+                        <div class="accordion-body bg-light">
+                          <span class="font-monospace small">
+                            NotError: this is a test :D Lorem ipsum keme keme keme 48 years at ang ugmas at bakit neuro chapter sa pinkalou na keme keme tamalis intonses kasi Mike planggana ano , at bakit ang na chapter bongga sa chapter shongaers Cholo emena gushung ang ano jowabelles keme keme warla chipipay na shonget bakit kabog keme keme kasi at bakit at ang at otoko 48 years sa quality control borta lorem ipsum keme keme na ang at nang ma-kyonget ang bakit matod kabog at bakit krung-krung nakakalurky lorem ipsum keme keme keme ang chapter majubis , dites neuro Cholo at sudems conalei jupang-pang nang wrangler chipipay makyonget nang lorem ipsum keme keme at wrangler kasi kabog quality control ang ng kirara nang juts mashumers shonga-shonga Gino buya shala Mike ano ano ng sa na chipipay na na.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="mx-2 my-1 mb-2">
+                  <button class="btn btn-sm btn-primary">Restart test</button>
+                  <button class="btn btn-sm btn-secondary">Cancel test</button>
+                </div> -->
+              </div>
+              <div class="tab-content" id="speedtest-pills-tabContent">
+                <div class="tab-pane fade show active" id="pills-speedtest-1" role="tabpanel" aria-labelledby="pills-speedtest-1-tab">
+                  <ul class="list-group list-group-flush">
+                    <li class="list-group-item p-0 pb-3">
+                      <div id="measurement-processes-timeline" class="px-2">
+                        <h6 class="small text-uppercase m-1">Upload test</h6>
+                        <table id="normal-measurement-processes" class="table table-sm table-borderless table-hover mb-3 mx-3">
+                          <tbody class="align-middle">
+                            <tr>
+                              <td class="p-0">
+                                <i class="bi bi-circle text-muted"></i>
+                              </td>
+                              <td class="p-0 w-100">
+                                <span  class="text-muted mx-2">MTU</span>
+                              </td>
+                              <td class="p-0 px-4 text-end">
+                                <span class="px-2 text-nowrap text-success small">04:12:10 PM - 04:12:14 PM</span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="p-0">
+                                <i class="bi bi-circle text-muted"></i>
+                              </td>
+                              <td class="p-0 w-100">
+                                <span  class="text-muted mx-2">RTT</span>
+                              </td>
+                              <td class="p-0 px-4 text-end">
+                                <div class="d-flex justify-content-end">
+                                  <div class="progress h-100 mx-2">
+                                    <div class="px-3 progress-bar progress-bar-striped progress-bar-animated bg-dark" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                      <span class="fw-bold">
+                                        <span class="align-middle me-1">Position in QUEUE:</span>
+                                        <span id="queue-position" class="align-middle fs-6 lh-1">1</span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <!-- <h6 class="small text-uppercase m-1">Download test</h6>
+                        <table id="reverse-measurement-processes" class="table table-sm table-borderless table-hover mb-3">
+                          <tbody class="align-top">
+                            <tr>
+                              <td class="p-0 text-end">
+                                <span class="text-muted mx-3">0:00</span>
+                              </td>
+                              <td class="p-0">
+                                <i class="bi bi-circle text-muted"></i>
+                              </td>
+                              <td class="p-0 w-100">
+                                <span  class="text-muted mx-2">MTU</span>
+                              </td>
+                              <td class="p-0">
+                                <div class="progress h-auto" style="width: fit-content;">
+                                  <div class="px-2 progress-bar progress-bar-striped progress-bar-animated bg-secondary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
+                                    <span class="fw-bold">
+                                      <span class="align-middle">Position in QUEUE:&nbsp;</span>
+                                      <span id="queue-position" class="align-middle fs-6">1</span></span>
+                                  </div>
+                                </div>
+                                <i>Processing...</i>
+                                <span class="px-2 text-nowrap text-success small">04:12:10 PM - 04:12:14 PM</span>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table> -->
+                      </div>
+                    </li>
+                    <li id="test-results" class="list-group-item py-3 px-2">
+                      {% include 'test_results.html' %}
+                    </li>
+                  </ul>
+                </div>
+                <div class="tab-pane fade" id="pills-speedtest-2" role="tabpanel" aria-labelledby="pills-speedtest-2-tab">wait lang...</div>
+                <div class="tab-pane fade" id="pills-speedtest-3" role="tabpanel" aria-labelledby="pills-speedtest-3-tab">wait lang...</div>
+                <div class="tab-pane fade" id="pills-speedtest-summary" role="tabpanel" aria-labelledby="pills-speedtest-summary-tab">
+                  
+                </div>
+              </div>
+            </li>
+          </ul>
+          <!-- <div class="mb-2 mx-3">
+            <table class="row w-100">
+              <tbody id="progress-tbody">
+                <tr>
+                  <td class="align-baseline col-auto">
+                    <span class="text-muted text-sm mx-2">0:00</span>
+                  </td>
+                  <td class="align-baseline  col-auto"> 
+                    <i class="bi bi-circle text-muted"></i>
+                  </td>
+                  <td class="align-baseline">
+                    <span  class="text-muted mx-2">MTU</span>
+                    <div class="border bg-light m-0 mx-2 p-2">
+                      <span class="font-monospace small">
+                        NotError: this is a test :D
+                      </span>
+                    </div> 
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="text-muted text-sm mx-2">0:00</span>
+                  </td>
+                  <td> 
+                    <i class="bi bi-circle text-muted"></i>
+                  </td>
+                  <td>
+                    <span  class="text-muted mx-2">RTT</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="text-muted text-sm mx-2">0:00</span>
+                  </td>
+                  <td> 
+                    <i class="bi bi-circle text-muted"></i>
+                  </td>
+                  <td>
+                    <span  class="text-muted mx-2">BDP</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="text-muted text-sm mx-2">0:00</span>
+                  </td>
+                  <td> 
+                    <i class="bi bi-circle text-muted"></i>
+                  </td>
+                  <td>
+                    <span  class="text-muted mx-2">Throughtput test</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div> -->
+        </div>
+        <div class="card-footer">
+          <div class="d-flex p-2">
+            <div class="p-0">
+              <button id="btnBackToTop" class="btn btn-link p-0" role="button" type="button">Back to top</button>
+            </div>
+            <div class="ms-auto p-0 justify-content-end">
+              <button id="btnSaveAsPdf" class="btn btn-primary d-none" type="button">
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                Save as PDF
+              </button>
+              <div id="pdfSaved" class="d-none">
+                <span class="text-success text-right">Successfully saved!</span>
+                <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary p-2 mb-1" role="button">Open Downloads folder</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- <div id="measurement-results-card" class="card shadow mb-4">
+        <div class="card-body p-0">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped" role="progressbar" style="width: 10%" aria-valuenow="10" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <ul class="list-group list-group-flush">
+            
+          </ul>
+          <div class="p-3 d-flex align-items-center">
+            <div class="px-2">
+            </div>
+          </div>
+        </div>
+      </div> -->
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalGpsHelp" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-labelledby="modalGpsHelpLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content ">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalQueueLabel">How to get GPS coordinates?</h4>
+      </div>
+      <div class="modal-body">
+        <ol>
+          <li>Connect an Android phone to this laptop using a USB port</li>
+          <li>Enable 'Location' on the connceted Android phone</li>
+          <li>Enable and allow 'USB Debugging Mode' on the connected Android phone</li>
+          <li>Open and close a location app on your phone to activate the GPS</li>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal">Got it!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalGpsProblem" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalGpsProblemLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="modalQueueLabel">Cannot get GPS coordinates</h4>
+      </div>
+      <div class="modal-body">
+        <p>Make sure you...</p>
+        <ul>
+          <li>connected an Android phone to this laptop using a USB port</li>
+          <li>enabled 'Location' on the connceted Android phone</li>
+          <li>enabled and allowed 'USB Debugging Mode' on the connected Android phone</li>
+          <li>opened and closed a location app on your phone to activate the GPS</li>
+        </ul>
+        <p>Then, close this dialog, and try again.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalReenterPassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalReenterPasswordLabel" aria-hidden="true">
+  <form 
+    class="modal-dialog modal-dialog-centered"
+    method="POST"
+    action="/relogin"
+    onsubmit="return false;"
+    novalidate
+  >
+    <fieldset class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Enter Password</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="reenterPassword" class="form-label">Please enter your password as you logged in</label>
+          <input type="password" id="reenterPassword" class="form-control">
+          <div class="alert alert-danger p-1 px-2 m-0 mt-2 d-none" role="alert">
+            Invalid password
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </div>
+    </fieldset>
+  </form>
+</div>
+
+<div class="modal fade" id="modalScanForConnectedDevices" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalScanForConnectedDevices" aria-hidden="true">
+  <div
+    class="modal-dialog modal-lg"
+  >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 id="connected-devices-title" class="modal-title">Scan for connected devices</h4>
+      </div>
+      <div class="modal-body">
+        <div id="scanning-devices-progress" class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <div id="connected-devices-info" class="alert alert-warning d-none" role="alert">
+          <i id="connected-devices-info-icon" class="bi bi-exclamation-triangle-fill"></i>
+          <span id="connected-devices-count">
+          </span>
+          <hr>
+          <a class="btn-rescan-devices" href="#">Rescan for connected devices</a>
+        </div>
+        <div id="connected-devices-error-info" class="alert alert-warning d-none" role="alert">
+          <i class="bi bi-x-circle"></i>
+          <span id="connected-devices-error-message">
+          </span>
+          <hr>
+          <a class="btn-rescan-devices" href="#">Try again</a>
+        </div>
+        <div id="connected-devices-table-container" class="d-none">
+          <table id="connected-devices-table" class="table table-secondary table-sm">
+            <thead>
+              <tr>
+                <td></td>
+                <td>Host name</td>
+                <td>OS Kernel</td>
+                <td>OS Kernel Type</td>
+                <td>Vendor</td>
+                <td>IP Address</td>
+                <td>Open Ports</td>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="2" class="text-start">
+                  <small class="text-muted">Nmap <span id="nmap-version"></span></small>
+                </td>
+                <td colspan="5" class="text-end">
+                  <small class="text-muted">Scan started on <span id="nmap-scan-started-on"></span></small>
+                  <small class="text-muted">&nbsp;•&nbsp;</small>
+                  <small class="text-muted">Duration: <span id="nmap-scan-duration"></span></small>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal" aria-label="Close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalSendingError" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalSendingError" aria-hidden="true">
+  <form
+    class="modal-dialog modal-dialog-centered"
+    method="POST"
+    action="/send-error"
+    onsubmit="return false;"
+    novalidate
+  >
+    <fieldset class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Send error</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+      <!-- <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">Send</button>
+      </div> -->
+    </fieldset>
+  </form>
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='node_modules/pdfmake/build/pdfmake.min.js') }}"></script>
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock scripts %}

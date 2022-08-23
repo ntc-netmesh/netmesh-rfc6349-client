@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+
+{% block head %}
+	{{ super() }}
+	<title>Device Registration</title>
+	<style>
+		div.alert-danger {
+			max-height: 73px;
+		}
+
+		.main-content {
+			width: 480px;
+		}
+		
+		.registration-form {
+			height: 400px;
+		}
+		
+		.carousel-inner .carousel-item {
+			transition: -webkit-transform 0.3s ease;
+			transition: transform 0.3s ease;
+			transition: transform 0.3s ease, -webkit-transform 0.3s ease;
+		}
+	</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+	<div class="main-content border rounded p-4">
+		<div class="d-flex mb-3">
+			<img
+				class="me-3"
+				src="{{url_for('static', filename='images/ntc_logo.png')}}"
+				width="60"
+				height="60"
+			/>
+			<div class="fill-flex align-self-center">
+				<h4 class="mb-0">
+					RFC-6349 App
+					<br>
+					<small>Laptop Registration</small>
+				</h4>
+			</div>
+		</div>
+		<div id="carousel-registration" class="carousel slide" data-bs-ride="false" data-bs-touch="false" data-bs-interval="false" data-bs-wrap="false">
+			<div class="carousel-inner">
+				<div class="carousel-item p-2 active">
+					<div class="d-flex flex-column registration-form">
+						<div id="welcome-device-content">
+							{% include 'device_registration_welcome.html' %}
+						</div>
+						<div class="mt-auto">
+							<div class="d-flex justify-content-end">
+								<!-- <button id="already-registered-button" type="button" class="btn btn-sm btn-link me-auto">Already registered this device</button> -->
+								<button id="start-registration-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admin-credentials-modal">Start Registration</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- <div class="carousel-item p-2">
+					<div class="d-flex flex-column registration-form">
+						<div id="ntc-region-selection-content">
+						</div>
+						<div class="mt-auto">
+							<div class="d-flex justify-content-end">
+								<button id="submit-region-button" type="button" class="btn btn-primary">Continue</button>
+							</div>
+						</div>
+					</div>
+				</div> -->
+				<div class="carousel-item p-2">
+					<div class="d-flex flex-column registration-form">
+						<div id="device-details-content">
+						</div>
+						<div class="mt-auto">
+							<div class="d-flex justify-content-end">
+								<button id="cancel-registration-button" type="button" class="btn btn-sm btn-link link-danger p-0 me-auto">Cancel registration</button>
+								<button id="device-confirmation-button" type="button" class="btn btn-primary">Continue</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="carousel-item p-2">
+					<div class="d-flex flex-column registration-form">
+						<div id="device-registered-content">
+							
+						</div>
+						<div class="mt-auto">
+							<div class="d-flex justify-content-end">
+								<a id="use-rfc-button" href="/" class="btn btn-primary">Use RFC-6349 App</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="admin-credentials-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="admin-credentials-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" action="{{ url_for('device_registration.log_admin') }}" method="POST">
+      <div class="modal-header">
+        <h5 class="modal-title">Enter admin credentials</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+				{% include 'device_admin_credentials.html' %}
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Proceed</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="device-confirmation-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="device-confirmation-modal-label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" action="{{ url_for('device_registration.register_api') }}" method="POST">
+      <div class="modal-header">
+        <h5 class="modal-title">Laptop to register</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Register</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% block scripts %}
+	<script>
+		(function() {
+			$(function () {
+				const $registrationCarousel = $('#carousel-registration');
+
+				$('#admin-password-eye').on('change', function () {
+					if (this.checked) {
+						$('#admin-password').attr('type', 'text');
+					} else {
+						$('#admin-password').attr('type', 'password');
+					}
+				});
+
+				const $adminCredentailsModal = $('#admin-credentials-modal');
+				const $adminCredentailsForm = $('#admin-credentials-modal form');
+				$adminCredentailsForm.on('submit', function (ev) {
+					ev.preventDefault();
+
+					const formData = new FormData(ev.target);
+
+					$.ajax({
+						url: $adminCredentailsForm.attr('action'),
+						method: $adminCredentailsForm.attr('method'),
+						dataType: 'html',
+						data: Object.fromEntries([...formData]),
+						success: function (response) {
+							$adminCredentailsModal.modal('hide');
+
+							// $('#ntc-region-selection-content').html(response);
+							$('#device-details-content').html(response);
+
+							$registrationCarousel.carousel('next');
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							console.log({jqXHR, textStatus, errorThrown});
+							$('#admin-credentials-modal .modal-body').html(jqXHR.responseText);
+						}
+					})
+				});
+				
+				$adminCredentailsModal.on('show.bs.modal', function (ev) {
+					$adminCredentailsForm.trigger("reset");
+				});
+				$adminCredentailsModal.on('shown.bs.modal', function (ev) {
+					$('#admin-email').focus();
+				});
+
+				// const $submitRegionButton = $('#submit-region-button');
+				// $submitRegionButton.on('click', function (ev) {
+				// 	const ntcRegions = document.getElementById('ntc-region');
+
+				// 	$.ajax({
+				// 		url: 'get-device-details-template',
+				// 		method: 'POST',
+				// 		dataType: 'html',
+				// 		data: {
+				// 			region: ntcRegions.value,
+				// 			regionName: $('#ntc-region option:selected').text()
+				// 		},
+				// 		success: function (response) {
+				// 			$('#device-details-content').html(response);
+							
+				// 			$registrationCarousel.carousel('next');
+				// 		},
+				// 		error: function (jqXHR, textStatus, errorThrown) {
+				// 			$('#ntc-region-selection-content').html(jqXHR.responseText);
+				// 		}
+				// 	});
+				// });
+
+				$('#cancel-registration-button').on('click', function (ev) {
+					const willCancelRegistration = confirm("Do you want to cancel registration?");
+					if (willCancelRegistration) {
+						$registrationCarousel.carousel(0);
+						$('#device-details-content').html("");
+					}
+				});
+
+				const $deviceConfirmationModal = $('#device-confirmation-modal');
+				$('#device-confirmation-button').on('click', function (ev) {
+					const selectedOwner = $('#device-owner').select2('data')[0];
+					$.ajax({
+						url: 'device-confirmation-template',
+						method: 'POST',
+						dataType: 'html',
+						data: {
+							// regionName: $('#ntc-region option:selected').text(),
+							laptopOwner: `${$('#device-owner option:selected').text()}`,
+							laptopOwnerEmail: selectedOwner.email,
+							laptopName: $('#device-name').val()
+						},
+						success: function (response) {
+							console.log(response);
+							$deviceConfirmationModal.modal('show');
+							$('#device-confirmation-modal .modal-body').html(response);
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							console.error({jqXHR, textStatus, errorThrown});
+							// $('#ntc-region-selection-content').html(jqXHR.responseText);
+						}
+					});
+				});
+
+				$('#device-confirmation-modal .modal-content').on('submit', function (ev) {
+					ev.preventDefault();
+
+					const selectedOwner = $('#device-owner').select2('data')[0];
+					$.ajax({
+						url: 'register-api',
+						method: 'POST',
+						dataType: 'html',
+						data: {
+							adminEmail: $('#admin-email').val(),
+							// region: $('#ntc-region option:selected').val(),
+							deviceOwnerInfo: JSON.stringify({
+								user_id: $('#device-owner option:selected').val(),
+								name: $('#device-owner option:selected').text(),
+								email: selectedOwner.email
+							}),
+							deviceName: $('#device-name').val()
+						},
+						success: function (response) {
+							$deviceConfirmationModal.modal('hide');
+							
+							$('#device-registered-content').html(response);
+							
+							$registrationCarousel.carousel('next');
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							alert("eeeeeeeeeeeeenggkk!!!");
+							console.error({jqXHR, textStatus, errorThrown});
+							// $('#ntc-region-selection-content').html(jqXHR.responseText);
+						}
+					});
+				});
+			});
+		})();
+	</script>
+{% endblock scripts %}
+
+{% endblock body %}

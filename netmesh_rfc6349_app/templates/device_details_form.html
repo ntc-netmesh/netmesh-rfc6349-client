@@ -1,0 +1,90 @@
+<h4 class="mb-3">{{ region_name }}</h4>
+<h6>Who will own this laptop?</h6>
+<div class="mb-3">
+  <select
+    id="device-owner"
+    name="device-owner"
+    class="form-select"
+    required
+  >
+    <option {% if not user or user|length == 0 %} selected {% endif %} disabled hidden value=""></option>
+    {% for user in users %}
+      <option	{% if user == user.id %} selected {% endif %} value="{{ user.id }}">{{ "%s %s" | format(user.first_name, user.last_name) }}</option>	
+    {% endfor %}
+  </select>
+</div>
+<h6>What will be the name of this laptop?</h6>
+<div class="mb-3">
+  <input
+    id="device-name"
+    name="device-name"
+    type="text"
+    class="form-control"
+    placeholder="(ex. r1-user-laptop)"
+    value="{{ device_name }}"
+    required
+  />
+</div>
+
+<script>
+  (function () {
+    const data = JSON.parse('{{ users|tojson|safe }}');
+
+    const $deviceOwner = $('#device-owner');
+    const $deviceName = $('#device-name');
+    $deviceOwner.select2({
+      data: data,
+      theme: "bootstrap-5",
+      placeholder: `Select owner from ${'{{ region_name }}'}`,
+      templateSelection: formatSelection,
+      templateResult: formatSelection,
+      matcher: matchCustom
+    });
+    $deviceOwner.on('select2:select', function (ev) {
+      const data = ev.params.data;
+      const regionName = data['ntc_region'];
+      
+      const firstCharacter = regionName.charAt(0);
+      let shortRegionName = regionName;
+      if (firstCharacter && firstCharacter.toLowerCase() == firstCharacter.toUpperCase()) {
+        shortRegionName = `r${firstCharacter}`
+      }
+      $deviceName.val(`${shortRegionName.toLowerCase()}-${data['first_name'].toLowerCase()}-laptop`);
+      $deviceName.focus();
+    });
+
+
+    function formatSelection(state) {
+      if (!state.id) {
+        return state.text;
+      }
+      var $state = $(
+        `<div class="d-flex align-items-baseline">
+          <span class="me-auto">${ state.first_name } ${  state.last_name }</span>
+          <span class="small text-secondary">${ state.email }</span>
+        </div>`
+      );
+      return $state;
+    }
+
+    function matchCustom(params, data) {
+      if ($.trim(params.term) === '') {
+        return data;
+      }
+
+      if (typeof data.text === 'undefined') {
+        return null;
+      }
+
+      if (data.text.indexOf(params.term) > -1
+        || data.email?.indexOf(params.term) > -1) {
+        var modifiedData = $.extend({}, data, true);
+        modifiedData.text += ' (matched)';
+        
+        return modifiedData;
+      }
+      
+      return null;
+    }
+  })();
+</script>

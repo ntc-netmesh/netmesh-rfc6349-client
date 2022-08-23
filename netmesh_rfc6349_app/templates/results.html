@@ -1,0 +1,146 @@
+<div class="p-3">
+  <h6 class="card-title text-bold text-secondary">THROUGHPUT TEST</h6>
+  <div id="{{ method }}-isr-thpt-chart-{{ test_number }}" class="d-flex inline-block align-items-center">
+  </div>
+  <div id="{{ method }}-rtt-chart-{{ test_number }}" class="d-flex inline-block align-items-center">
+  </div>
+  <div id="{{ method }}-transfer-chart-{{ test_number }}" class="d-flex inline-block align-items-center">
+  </div>
+  <div class="mx-2">
+    <table id="{{ method }}-measurement-results-{{ test_number }}" class="table table-sm table-bordered table-hover caption-top mt-4" aria-hidden="true">
+      <tbody>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const results = JSON.parse('{{ results | tojson|safe }}');
+    const method = '{{ method | safe }}';
+    const testNumber = '{{ test_number | safe }}';
+  
+    const ntcBlueColor = '#0038a7';
+    const ntcRedColor = '#CE1127';
+    const greenColor = '#38A700';
+    
+    const uploadColor = '#4824FF';
+    const downloadColor = '#008ca7';
+    const methodColor = method == 'upload' ? uploadColor : downloadColor;
+  
+    $(`#${method}-measurement-results-${testNumber} tbody`).html('');
+    for (const [key, param] of Object.entries(resultsParameters)) {
+      const value = numeral(results[key]).value();
+  
+      let measurementText = "";
+      if (key in results) {
+        measurementText = `${param.getMeasurement(value)}`;
+      }
+  
+      let quantityHtml = `<td>
+        ${measurementText}
+      </td>`;
+      switch (key) {
+        case "tcp_ttr":
+          const relative_tcp_ttr = value < 1 ? 1 / value : value;
+          quantityHtml = `<td>
+            <div>
+              ${measurementText}<small class="text-muted ps-1">${value === 1 ? "Same as ideal" : `${numeral(relative_tcp_ttr).format('0.[000]')} times ${value < 1 ? "faster" : "slower"} than ideal`}</small>
+            </div>
+          </td>`;
+          break;
+        case "buf_delay":
+          // const absolute = Math.abs(value);
+          const decimalValue = value / 100;
+          const relative_buf_delay = decimalValue == -1 ? NaN : decimalValue >= 0 ? decimalValue : (1 / (1 + decimalValue)) - 1;
+          quantityHtml = `<td>
+            <div>
+              ${measurementText}<small class="text-muted ps-1">Average RTT is ${decimalValue === 0 ? "same as Baseline RTT" : `${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%')}`} ${decimalValue < 0 ? "faster" : "slower"} than Baseline RTT</small>
+            </div>
+          </td>`;
+          break;
+      }
+      var descriptionHtml = "";
+      if (param.description) {
+        descriptionHtml = ` <i class="bi bi-question-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="${param.description}"></i>`;
+      }
+      $(`#${method}-measurement-results-${testNumber} tbody`).append(`
+        <tr>
+          <td style="color: '${methodColor}'">${param.name} ${descriptionHtml}</td>
+          ${quantityHtml}
+        </tr>
+      `);
+    }
+    
+    $(`.${method}.card-title`).css('color', methodColor);
+  
+    renderThoughputComparisonChart(results);
+    renderRttComparisonChart(results);
+    renderTransferComparisonChart(results);
+  
+    console.log(results);
+  
+    function renderThoughputComparisonChart({thpt_avg, thpt_ideal}) {
+      const chartId = `#${method}-isr-thpt-chart-${testNumber}`;
+      const options = getThroughputChartOptions(method, thpt_avg, thpt_ideal);
+      options.chart.width = 640;
+      options.chart.height = 100;
+
+      const chart = new ApexCharts(document.querySelector(chartId), options);
+      chart.render().then(() => {
+        setTimeout(function () {
+          chart.dataURI({scale: 3}).then(({imgURI}) => {
+            chartImageUris[testNumber - 1].throughputCharts[method] = imgURI;
+          });
+          chart.destroy();
+
+          options.chart.width = '100%';
+          const chart2 = new ApexCharts(document.querySelector(chartId), options);
+          chart2.render();
+        }, 500);
+      });
+    }
+  
+    function renderTransferComparisonChart({transfer_avg, transfer_ideal}) {
+      const chartId = `#${method}-transfer-chart-${testNumber}`;
+      const options = getTransferChartOptions(method, transfer_avg, transfer_ideal);
+      options.chart.width = 640;
+      options.chart.height = 144;
+
+      const chart = new ApexCharts(document.querySelector(chartId), options);
+      chart.render().then(() => {
+        setTimeout(function () {
+          chart.dataURI({scale: 3}).then(({imgURI}) => {
+            chartImageUris[testNumber - 1].transferCharts[method] = imgURI;
+          });
+          chart.destroy();
+
+          options.chart.width = '100%';
+          const chart2 = new ApexCharts(document.querySelector(chartId), options);
+          chart2.render();
+        }, 500);
+      });
+    }
+  
+    function renderRttComparisonChart({rtt, ave_rtt, buf_delay}) {
+      const chartId = `#${method}-rtt-chart-${testNumber}`;
+      const options = getRttChartOptions(method, ave_rtt, rtt, buf_delay);
+      options.chart.width = 640;
+      options.chart.height = 144;
+
+      const chart = new ApexCharts(document.querySelector(chartId), options);
+      chart.render().then(() => {
+        setTimeout(function () {
+          chart.dataURI({scale: 3}).then(({imgURI}) => {
+            chartImageUris[testNumber - 1].rttCharts[method] = imgURI;
+          });
+          chart.destroy();
+
+          options.chart.width = '100%';
+          const chart2 = new ApexCharts(document.querySelector(chartId), options);
+          chart2.render();
+        }, 500);
+      });
+    }
+  })();
+</script>
