@@ -47,7 +47,7 @@ def get_machine_name():
     return machine_name
 
 
-def get_current_ubuntu_user():
+def get_ubuntu_home_user():
     """Try to find the user who called sudo/pkexec."""
     try:
         return os.getlogin()
@@ -119,6 +119,5 @@ if os.name == 'nt':
         return _get_known_folder_path(FOLDERID_Download)
 else:
     def get_downloads_folder_path():
-        username = get_current_ubuntu_user()
-        print(username)
+        username = get_ubuntu_home_user()
         return os.path.join(os.path.expanduser(f'~{username}'), 'Downloads')

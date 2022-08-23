@@ -4,8 +4,6 @@ import subprocess
 
 import requests
 
-from flask import current_app
-
 
 def app_resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -14,15 +12,15 @@ def app_resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
-def check_app_latest_version():
+def check_app_latest_version(app):
     current_version = ""
     latest_version = ""
 
     # APP_DIR = app_resource_path('')
 
-    r = requests.get(current_app.config['APP_LATEST_GITHUB_RELEASE_URL'])
+    r = requests.get(app.config['APP_LATEST_GITHUB_RELEASE_URL'])
     latest_version = r.json()['tag_name']
-    
+
     current_version = get_app_current_version()
     if not current_version:
         current_version = latest_version

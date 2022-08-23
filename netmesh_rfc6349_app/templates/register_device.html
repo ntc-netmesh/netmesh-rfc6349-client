@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block head %}
 	{{ super() }}
 	<title>Device Registration</title>
@@ -114,7 +115,6 @@
   </div>
 </div>
 
-
 <div id="device-confirmation-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="device-confirmation-modal-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form class="modal-content" action="{{ url_for('device_registration.register_api') }}" method="POST">
@@ -132,7 +132,6 @@
 </div>
 
 {% block scripts %}
-	<script type="text/javascript" src="{{ url_for('static', filename='js/tooltip.js') }}"></script>
 	<script>
 		(function() {
 			$(function () {

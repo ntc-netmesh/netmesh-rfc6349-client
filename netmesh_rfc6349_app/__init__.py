@@ -19,7 +19,7 @@ def create_app(config_class=Config):
                     template_folder=template_folder,
                     static_folder=static_folder)
 
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
     # from netmesh_rfc6349_app import routes
     from netmesh_rfc6349_app.device_registration.routes import device_registration

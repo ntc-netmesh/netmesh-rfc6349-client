@@ -898,7 +898,7 @@ def open_downloads_folder():
     print(laptop_info.get_downloads_folder_path())
     file_name = request.form.get("fileName")
     print(file_name)
-    desktop_username = laptop_info.get_current_ubuntu_user()
+    desktop_username = laptop_info.get_ubuntu_home_user()
     file_explorer_process = subprocess.Popen(['sudo', '-u', desktop_username, 'nautilus', '-s', os.path.join(
         laptop_info.get_downloads_folder_path(), file_name)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = file_explorer_process.communicate()

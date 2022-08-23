@@ -1,3 +1,4 @@
+import os
 import sys
 
 import netmesh_rfc6349_app.main.utils.pysideflask_ext as pysideflask_ext
@@ -16,7 +17,7 @@ def run_on_desktop():
     if getattr(sys, 'frozen', False):
         pyi_splash.update_text("Checking update...")
 
-    has_update, current_version, latest_version = check_app_latest_version()
+    has_update, current_version, latest_version = check_app_latest_version(app)
     app_version = current_version
 
     if getattr(sys, 'frozen', False):
@@ -33,7 +34,11 @@ def run_in_browser():
 
 
 if __name__ == '__main__':
-    if getattr(sys, 'frozen', False):
-        run_on_desktop()
+    user_id = os.geteuid()
+    if not user_id == 0:
+        print(f"Run this script as root :)\nRun: sudo python3 {os.path.basename(__file__)}")
     else:
-        run_in_browser()
+        if getattr(sys, 'frozen', False) or True:
+            run_on_desktop()
+        else:
+            run_in_browser()

@@ -6,11 +6,11 @@ import json
 
 import configparser
 
-from netmesh_rfc6349_app.main.utils.laptop_info import get_current_ubuntu_user
+from netmesh_rfc6349_app.main.utils.laptop_info import get_ubuntu_home_user
 
 
 class NetMeshConfigFile:
-    __CONFIG_FILE_DIRECTORY = f'/home/{get_current_ubuntu_user()}/.config/netmesh-rfc6349-app'
+    __CONFIG_FILE_DIRECTORY = f'/home/{get_ubuntu_home_user()}/.config/netmesh-rfc6349-app'
     __CONFIG_FILE_PATH = f'{__CONFIG_FILE_DIRECTORY}/nmrfc.ini'
 
     def __init__(self) -> None:
