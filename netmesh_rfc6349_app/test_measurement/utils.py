@@ -6,7 +6,7 @@ import requests
 
 from flask import Response, abort, session, jsonify, current_app
 
-from netmesh_rfc6349_app.main.utils.netmesh_installer import app_resource_path
+from netmesh_rfc6349_app import app_resource_path
 import netmesh_rfc6349_app.main.utils.log_settings as log_settings
 
 def run_process_script(mode, command_array, output_params, ave_rtt_params=None):
