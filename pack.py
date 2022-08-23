@@ -15,9 +15,10 @@ def pack():
     package_directory = f'{os.getcwd()}/{package_folder}'
     
     app_folder_name = 'netmesh-rfc6349-app'
-
+    
     version = input(f"Enter package name: {app_folder_name}_")
-    deb_package_name = f"{app_folder_name}_{version}_amd64"
+    arch = 'amd64'
+    deb_package_name = f"{app_folder_name}_{version}_{arch}"
 
     # Remove existing folder
     print(f"Removing existing folder '{package_directory}/{app_folder_name}'...", end=' ')
@@ -44,8 +45,7 @@ def pack():
         shutil.copytree(f"{package_directory}/base-deb-package", f"{package_directory}/{deb_package_name}")
         print("OK")
     except Exception as ex:
-        print("Failed to create deb package: ", ex)
-        return
+        raise ex
     
     # Move built app to the created deb folder
     print(f"Moving bundle to the deb package folder...", end=' ')
@@ -62,7 +62,8 @@ def pack():
     try:
         package_info = {
             'package_name': app_folder_name,
-            'version': version
+            'version': version,
+            'arch': arch
         }
         with open(f'{package_directory}/{deb_package_name}/DEBIAN/control', 'r+') as f:
             content = f.read()

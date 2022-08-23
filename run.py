@@ -36,9 +36,21 @@ def run_in_browser():
 if __name__ == '__main__':
     user_id = os.geteuid()
     if not user_id == 0:
-        print(f"Run this script as root :)\nRun: sudo python3 {os.path.basename(__file__)}")
+        print(
+            f"Run this script as root :)\nRun: sudo python3 {os.path.basename(__file__)}")
     else:
-        if getattr(sys, 'frozen', False) or True:
-            run_on_desktop()
+        choices = ['web', 'desktop']
+        run_on = sys.argv[1] if len(sys.argv) > 1 else ""
+        
+        if not run_on in choices:
+            if getattr(sys, 'frozen', False):
+                run_on_desktop()
+            else:
+                run_in_browser()
         else:
-            run_in_browser()
+            if run_on == 'desktop':
+                run_on_desktop()
+            else:
+                run_in_browser()
+        
+        

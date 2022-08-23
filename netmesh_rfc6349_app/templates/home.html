@@ -741,10 +741,8 @@
 
 {% block scripts %}
 {{ super() }}
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.4/pdfmake.min.js" integrity="sha512-vCaf5rysVLu1/zVMefJew+IjqlQibggltPWqeo96XsdyJ4ihR3eEDV1oU60afiRXTGf8DqKUjLs2Q99HCbnjAw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
 <script src="{{ url_for('static', filename='node_modules/pdfmake/build/pdfmake.min.js') }}"></script>
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/tooltip.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/report.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
