@@ -159,7 +159,7 @@ def init_gui(application, port=0, width=800, height=600,
                 "Updating NetMesh RFC-6349 App...", "Cancel", 0, 0)
             update_app_progress.setWindowTitle(f"Updating to {latest_version}")
             update_app_thread = threading.Thread(
-                target=update_app, args=(update_app_progress, q))
+                target=handle_update_dialog, args=(update_app_progress, q))
             update_app_thread.start()
 
             update_app_progress.exec_()
@@ -200,7 +200,7 @@ def init_gui(application, port=0, width=800, height=600,
     return qtapp.exec_()
 
 
-def update_app(dialog_box: QProgressDialog, q: queue.Queue):
+def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
     is_successful = update_app()
     dialog_box.close()
 
@@ -214,13 +214,13 @@ def onDownloadRequested(download):
 # @QtCore.Slot(QtWebEngineWidgets.QWebEngineProfile)
 
 
-def onCookieAdded(cookies):
-    cookies_list_info = []
-    for c in cookies:
-        data = {"name": bytearray(c.name()).decode(), "domain": c.domain(), "value": bytearray(c.value()).decode(),
-                "path": c.path(), "expirationDate": c.expirationDate().toString(Qt.ISODate), "secure": c.isSecure(),
-                "httponly": c.isHttpOnly()}
-        cookies_list_info.append(data)
+# def onCookieAdded(cookies):
+#     cookies_list_info = []
+#     for c in cookies:
+#         data = {"name": bytearray(c.name()).decode(), "domain": c.domain(), "value": bytearray(c.value()).decode(),
+#                 "path": c.path(), "expirationDate": c.expirationDate().toString(Qt.ISODate), "secure": c.isSecure(),
+#                 "httponly": c.isHttpOnly()}
+#         cookies_list_info.append(data)
 
-    print("Cookie as list of dictionary:")
-    print(cookies_list_info)
+#     print("Cookie as list of dictionary:")
+#     print(cookies_list_info)

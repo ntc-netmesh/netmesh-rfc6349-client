@@ -4,25 +4,22 @@ import subprocess
 
 import requests
 
-from flask import current_app
+from netmesh_rfc6349_app import app_resource_path
+
+# import pkg_resources
 
 
-def app_resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(
-        os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
-
-
-def check_app_latest_version():
+def check_app_latest_version(app):
     current_version = ""
     latest_version = ""
 
     # APP_DIR = app_resource_path('')
 
-    r = requests.get(current_app.config['APP_LATEST_GITHUB_RELEASE_URL'])
+    r = requests.get(app.config['APP_LATEST_GITHUB_RELEASE_URL'])
     latest_version = r.json()['tag_name']
-    
+    if latest_version[0] == 'v':
+        latest_version = latest_version[1:]
+
     current_version = get_app_current_version()
     if not current_version:
         current_version = latest_version
@@ -89,3 +86,7 @@ def update_app():
         raise Exception(stderr)
 
     return True
+
+# def upgrade_python_packages():
+#     packages = [dist.project_name for dist in pkg_resources.working_set if dist.project_name != 'pkg_resources']
+#     subprocess.call(f"python3 -m pip install --upgrade {' '.join(packages)}", shell=True)
