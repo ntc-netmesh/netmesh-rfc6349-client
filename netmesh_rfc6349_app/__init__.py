@@ -5,16 +5,21 @@ from flask import Flask
 
 from netmesh_rfc6349_app.config import Config
 
-from netmesh_rfc6349_app.main.utils.netmesh_installer import app_resource_path
+
+def app_resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS')
+    print("base_path", base_path)
+    return os.path.join(base_path, relative_path)
 
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     if getattr(sys, 'frozen', False):
         template_folder = app_resource_path(
-            "netmesh-rfc6349-app/templates")
+            "templates")
         static_folder = app_resource_path(
-            "netmesh-rfc6349-app/static")
+            "static")
         app = Flask(__name__,
                     template_folder=template_folder,
                     static_folder=static_folder)

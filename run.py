@@ -7,10 +7,10 @@ from netmesh_rfc6349_app import create_app
 from netmesh_rfc6349_app.main.utils.netmesh_installer import check_app_latest_version
 from netmesh_rfc6349_app.main.utils.laptop_info import get_downloads_folder_path
 
-app = create_app()
-
 
 def run_on_desktop():
+    app = create_app()
+
     if getattr(sys, 'frozen', False):
         import pyi_splash
 
@@ -30,6 +30,8 @@ def run_on_desktop():
 
 
 def run_in_browser():
+    app = create_app()
+
     app.run(debug=True)
 
 
@@ -41,7 +43,7 @@ if __name__ == '__main__':
     else:
         choices = ['web', 'desktop']
         run_on = sys.argv[1] if len(sys.argv) > 1 else ""
-        
+
         if not run_on in choices:
             if getattr(sys, 'frozen', False):
                 run_on_desktop()
@@ -52,5 +54,3 @@ if __name__ == '__main__':
                 run_on_desktop()
             else:
                 run_in_browser()
-        
-        

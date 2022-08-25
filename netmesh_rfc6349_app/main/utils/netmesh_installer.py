@@ -4,14 +4,9 @@ import subprocess
 
 import requests
 
-import pkg_resources
+from netmesh_rfc6349_app import app_resource_path
 
-
-def app_resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(
-        os.path.abspath(__file__)))
-    return os.path.join(base_path, relative_path)
+# import pkg_resources
 
 
 def check_app_latest_version(app):
@@ -92,6 +87,6 @@ def update_app():
 
     return True
 
-def upgrade_python_packages():
-    packages = [dist.project_name for dist in pkg_resources.working_set]
-    subprocess.call(f"python3 -m pip install --upgrade {' '.join(packages)}", shell=True)
+# def upgrade_python_packages():
+#     packages = [dist.project_name for dist in pkg_resources.working_set if dist.project_name != 'pkg_resources']
+#     subprocess.call(f"python3 -m pip install --upgrade {' '.join(packages)}", shell=True)

@@ -13,10 +13,11 @@ import json
 import folium
 
 from flask import Blueprint, Response, render_template, request, redirect, url_for, abort, session, jsonify, current_app
+from netmesh_rfc6349_app import app_resource_path
 
 from netmesh_rfc6349_app.test_measurement.utils import run_process_script, get_network_interface
 
-from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version, app_resource_path
+from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version
 from netmesh_rfc6349_app.main.utils import laptop_info
 
 import netmesh_rfc6349_app.main.utils.log_settings as log_settings
