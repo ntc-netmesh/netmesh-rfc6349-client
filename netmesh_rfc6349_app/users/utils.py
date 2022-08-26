@@ -3,54 +3,46 @@ import requests
 import json
 import ast
 
-from flask import session
+from flask import session, current_app
 
-TEST_SERVER_URL = "http://netmesh-api.asti.dost.gov.ph"
+from netmesh_rfc6349_app.main.utils.netmesh_config_file import NetMeshConfigFile
 
-def login(username, password):
-    if not username:
-        raise Exception("Username required")
+
+def login(email, password):
+    if not email:
+        raise Exception("Email required")
+
+    config_file = NetMeshConfigFile()
+    device_config = config_file.load_device_config()
+    device_name = device_config.get_device_name()
+
+    credentials = {
+        "email": email,
+        "password": password,
+        "client": device_name
+    }
+    
+    print("credentials", credentials)
+    req = requests.post(
+        url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/token/",
+        json=credentials)
+    req.raise_for_status()
+    data = req.json()
+
+    return data
+
+
+def relogin(email, password):
+    if not email:
+        raise Exception("Email required")
 
     credentrials = {
-        "username": username,
+        "email": email,
         "password": password,
     }
 
-    try:
-        response = requests.post(url=TEST_SERVER_URL+"/api/auth/login", json=credentrials)
-        response.raise_for_status()
-        data = response.json()
-
-        token = data['access_token']
-        print("token", token)
-        return token
-    except requests.exceptions.HTTPError as e:
-        raise requests.exceptions.RequestException(response.text)
-
-    # print("login-data", data)
-
-    # if 'access_token' in data:
-    #   token = data['access_token']
-    #   print("token", token)
-    #   return token
-    # elif 'error' in data:
-    #   print("Exception data error", data['error'])
-    #   raise Exception(data['error'])
-    # else:
-    #   print("Exception str data", str(data))
-    #   raise Exception(str(data))
-
-
-def relogin(username, password):
-    if not username:
-        raise Exception("Username required")
-
-    credentrials = {
-        "username": username,
-        "password": password,
-    }
-
-    r = requests.post(url=TEST_SERVER_URL+"/api/auth/login", json=credentrials)
+    r = requests.post(
+        url=f"{current_app.config['RESULTS_SERVER_API_URI']}/auth/login", json=credentrials)
     r.raise_for_status()
     data = r.json()
 

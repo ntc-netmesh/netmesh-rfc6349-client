@@ -15,7 +15,7 @@ def index_page():
     # if running_on_desktop == True:
     #     return "This app is already running on desktop."
 
-    if 'api_session_token' in session and session['api_session_token'] and 'username' in session and session['username']:
+    if 'api_session_token' in session and session['api_session_token'] and 'email' in session and session['email']:
         return redirect(url_for('main.home_page'))
 
     config = NetMeshConfigFile()
@@ -31,4 +31,4 @@ def index_page():
 @main.route('/home')
 @wrappers.require_api_token
 def home_page():
-    return render_template('home.html', username=session['username'], app_version=get_app_current_version())
+    return render_template('home.html', email=session['email'], app_version=get_app_current_version())

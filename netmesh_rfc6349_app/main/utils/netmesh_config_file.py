@@ -99,11 +99,19 @@ class NetMeshConfigFile:
 
             return logged_users
 
-        def add_logged_user(self, user: dict):
+        def get_logged_user(self, email):
             logged_users = self._load_logged_users()
-            logged_users.append(user)
+            
+            user: dict = next(lu for lu in logged_users if lu['email'] == email)
+            return user
 
-            self._config.set("USERS", "logged_users", json.dumps(logged_users))
+        def set_logged_user(self, user: dict):
+            logged_users = self._load_logged_users()
+            
+            users = list(filter(lambda u: u['email'] != user['email'], logged_users))
+            users.append(user)
+
+            self._config.set("USERS", "logged_users", json.dumps(users))
 
         def delete_logged_user(self, user_email: str):
             logged_users = self._load_logged_users()

@@ -119,5 +119,5 @@ if os.name == 'nt':
         return _get_known_folder_path(FOLDERID_Download)
 else:
     def get_downloads_folder_path():
-        username = get_ubuntu_home_user()
-        return os.path.join(os.path.expanduser(f'~{username}'), 'Downloads')
+        home_user = get_ubuntu_home_user()
+        return os.path.join(os.path.expanduser(f'~{home_user}'), 'Downloads')

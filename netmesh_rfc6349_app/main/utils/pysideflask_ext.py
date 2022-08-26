@@ -119,7 +119,6 @@ def init_gui(application, port=0, width=800, height=600,
 
     # WebPage Level
     page = WebPage('http://127.0.0.1:{}'.format(port))
-    page.home()
 
     profile = page.profile()
     profile.clearHttpCache()
@@ -184,7 +183,7 @@ def init_gui(application, port=0, width=800, height=600,
             window.close()
             sys.exit()
         else:
-            webView.setPage(page)
+            load_page(webView, page)
             # must_update_msg = QMessageBox(window)
             # must_update_msg.setWindowTitle("Cannot open the app")
             # must_update_msg.setText("You must update this app first before using")
@@ -193,12 +192,17 @@ def init_gui(application, port=0, width=800, height=600,
             # window.close()
             # sys.exit()
     else:
-        webView.setPage(page)
+        load_page(webView, page)
 
     print("App opened")
 
     return qtapp.exec_()
 
+def load_page(webView: QtWebEngineWidgets.QWebEngineView, page: WebPage):
+    page.home()
+    webView.setPage(page)
+    print(page.url())
+    
 
 def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
     is_successful = update_app()

@@ -68,25 +68,51 @@
 									</div>
 								</div> -->
 								<h6>Who will conduct the test?</h6>
+								<div class="list-group mb-3">
+									<div class="btn-group" role="group" aria-label="List of logged users">
+										<button type="button" class="btn list-group-item list-group-item-action" style="max-height: 64px;">
+											<div class="d-flex w-100 justify-content-between">
+												<span class="h6 mb-0 align-baseline text-truncate mt-1">Sample Name</span>
+											</div>
+											<div class="d-flex justify-content-start">
+												<span class="small text-muted text-truncate">sample.name@example.com</span>
+											</div>
+										</button>
+										<button type="button" class="btn btn-light border-top border-end border-bottom p-2 dropdown-toggle dropdown-toggle-split"  data-bs-toggle="dropdown" aria-expanded="false">
+											<span class="visually-hidden">Toggle Dropdown</span>
+										</button>
+										<ul class="dropdown-menu dropdown-menu-end">
+											<li><a class="dropdown-item disabled small" href="#">Token expires in x hours</a></li>
+											<li><a class="dropdown-item text-danger small" href="#">Remove user</a></li>
+										</ul>
+									</div>
+								</div>
 								<div id="logged-users" class="list-group mb-3">
 									{% for user in logged_users %}
 									<button type="button" class="list-group-item list-group-item-action" style="max-height: 64px;" data-user-email="{{ user['email'] }}"
 										{% if not 'token-info' in user %} data {% endif %}>
 										<div class="d-flex w-100 justify-content-between">
 											<span class="h6 mb-0 align-baseline text-truncate mt-1">{{ user['name'] }}</span>
-											{% if 'token_info' in user %}
-											{% if user['token_expiry_seconds'] < 60*60 %}
 											<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
-											{% elif user['token_expiry_seconds'] <= 0 %}
-											<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
-											{% endif %}
-											{% endif %}
 										</div>
-										<div class="d-flex">
+										<div class="d-flex justify-content-start">
+											{% if 'token_info' in user %}
+												{% if user['token_expiry_seconds'] < 60*60 %}
+												<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
+												{% elif user['token_expiry_seconds'] <= 0 %}
+												<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
+												{% endif %}
+											{% endif %}
 											<span class="small text-muted text-truncate">{{ user['email'] }}</span>
 										</div>
 									</button>
 									{% endfor %}
+								</div>
+								<div class="d-flex flex-column align-items-center">
+									<button	id="btnLogIn" type="button" class="btn btn-sm btn-link link-secondary">
+                    <!-- <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> -->
+										<span>I'm not on the list</span>
+									</button>
 								</div>
 								<!-- <div class="form-group mb-3">
 									<label class="form-control-static" for="psw"
@@ -136,7 +162,19 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-				<input type="text" name="user-email" hidden>
+				<div id="device-assignment-info" class="alert alert-info alert-dismissible fade show overflow-auto py-1" role="alert">
+					<i class="bi bi-info-circle-fill"></i>
+					<span>Make sure your admin assigned your email to this device: <strong>{{ device_name }}</strong></span>
+				</div>
+				<div class="mb-3">
+					<label class="form-label mb-1" for="user-password">Email</label>
+					<input
+						name="user-email"
+						type="text"
+						class="form-control"
+						placeholder="Enter your email"
+						required>
+				</div>
 				<div class="mb-3">
 					<label class="form-label mb-1" for="user-password">Password</label>
 					<div class="input-group input-group">
@@ -159,6 +197,9 @@
 						</label>
 					</div>
 				</div>
+				<div id="login-error" class="alert alert-danger alert-dismissible fade show overflow-auto py-1" role="alert">
+
+				</div>
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-primary">Log in</button>
@@ -172,13 +213,62 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
 <script>
 	$(function () {
+		$userEmail = $('input[name="user-email"]');
+
+		$('#login-error').hide();
+
 		$('#logged-users').on('click', '.list-group-item', function (ev) {
 			const userEmail = $(this).data('user-email');
-			$('#login-modal .modal-title').text(userEmail);
-			$('input[name="user-email"]').val(userEmail);
+			$('#login-modal .modal-title').text("Log in");
+			
+			$('#login-modal .modal-content').trigger('reset');
 
+			$userEmail.val(userEmail);
+			$userEmail.attr('disabled', true);
+
+			$('#device-assignment-info').hide();
 			$('#login-modal').modal('show');
 		});
+
+		$('#btnLogIn').on('click', function () {
+			$('#login-modal .modal-title').text("Log in");
+			
+			$userEmail.attr('disabled', false);
+			$('#login-modal .modal-content').trigger('reset');
+			$('#device-assignment-info').show();
+			$('#login-modal').modal('show');
+		});
+
+		$('#login-modal').on('shown.bs.modal', function () {
+			if ($userEmail.attr('disabled')) {
+				$('input[name="user-password"]').focus();
+			} else {
+				$userEmail.focus();
+			}
+		});
+
+		$('#login-modal .modal-content').on('submit', function (ev) {
+			ev.preventDefault();
+			$('#login-error').hide();
+
+			const form = $(this);
+			const formData = new FormData(ev.target);
+
+			$.ajax({
+				url: form.attr('action'),
+				method: form.attr('method'),
+				dataType: 'json',
+				data: Object.fromEntries([...formData]),
+				success: function (data) {
+					window.location.replace(data.goto);
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					console.log(jqXHR);
+					$('#login-error').text(jqXHR.responseJSON?.error ?? "Unexpected error occured");
+					$('#login-error').show();
+				}
+			});
+		})
 
 		$('#user-password-eye').on('change', function () {
 			if (this.checked) {

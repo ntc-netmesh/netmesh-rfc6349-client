@@ -23,7 +23,7 @@ def register_api():
         device_info.update({"user": device_owner_info['user_id']})
 
         r = requests.post(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/rfc6349/device/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/rfc6349/device/",
             headers={"Authorization": f"Token {session['admin-token']}"},
             json=device_info
         )
@@ -36,7 +36,7 @@ def register_api():
         device_config.set_device_name(device_name)
 
         users_config = config.load_users_config()
-        users_config.add_logged_user({
+        users_config.set_logged_user({
             "name": device_owner_info['name'],
             "email": device_owner_info['email'],
         })
@@ -97,7 +97,7 @@ def log_admin():
     users_response = []
     try:
         r = requests.post(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/user/token/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/token/",
             json={
                 "email": admin_email,
                 "password": admin_password,
@@ -121,7 +121,7 @@ def log_admin():
         print(session['admin-ntc-region-name'])
         
         r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/user/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/",
             params={
                 "ntc_region": ntc_region
             },
@@ -157,7 +157,7 @@ def get_device_details_template():
     regions = netmesh_location.get_philippine_regions()
     try:
         r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/user/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/",
             params={
                 "ntc_region": region
             },
