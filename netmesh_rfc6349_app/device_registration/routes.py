@@ -32,11 +32,10 @@ def register_api():
 
         config = NetMeshConfigFile()
 
-        device_config = config.load_device_config()
-        device_config.set_device_name(device_name)
+        # device_config = config.load_device_config()
+        config.device_config.set_device_name(device_name)
 
-        users_config = config.load_users_config()
-        users_config.set_logged_user({
+        config.users_config.set_logged_user({
             "name": device_owner_info['name'],
             "email": device_owner_info['email'],
         })
@@ -70,9 +69,9 @@ def register_device_page():
     session['admin-token'] = None
 
     config = NetMeshConfigFile()
-    device_config = config.load_device_config()
+    # device_config = config.load_device_config()
 
-    device_name = device_config.get_device_name()
+    device_name = config.device_config.get_device_name()
     if device_name:
         return redirect(url_for('users.login_page'))
 

@@ -19,9 +19,9 @@ def index_page():
         return redirect(url_for('main.home_page'))
 
     config = NetMeshConfigFile()
-    device_config = config.load_device_config()
+    # device_config = config.load_device_config()
 
-    device_name = device_config.get_device_name()
+    device_name = config.device_config.get_device_name()
     if not device_name:
         return redirect(url_for('device_registration.register_device_page'))
     

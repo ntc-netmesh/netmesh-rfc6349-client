@@ -13,8 +13,8 @@ def login(email, password):
         raise Exception("Email required")
 
     config_file = NetMeshConfigFile()
-    device_config = config_file.load_device_config()
-    device_name = device_config.get_device_name()
+    # device_config = config_file.load_device_config()
+    device_name = config_file.device_config.get_device_name()
 
     credentials = {
         "email": email,
@@ -31,6 +31,19 @@ def login(email, password):
 
     return data
 
+def save_logged_user(token, email, first_name, last_name, token_expiry):
+    session['api_session_token'] = token
+    session['email'] = email
+    
+    # save yung logged credentials
+    config_file = NetMeshConfigFile()
+    config_file.users_config.set_logged_user({
+        "name": f"{first_name} {last_name}",
+        "email": email,
+        "token": token,
+        "token_expiry": token_expiry
+    })
+    config_file.save()
 
 def relogin(email, password):
     if not email:
