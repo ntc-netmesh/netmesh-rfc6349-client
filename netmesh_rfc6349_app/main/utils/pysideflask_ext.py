@@ -1,4 +1,6 @@
 import os
+import subprocess
+import re
 import sys
 import threading
 import queue
@@ -78,6 +80,8 @@ def init_gui(application, port=0, width=800, height=600,
         sock.bind(('127.0.0.1', 0))
         port = sock.getsockname()[1]
         sock.close()
+
+    kill_port_process(port)
 
     print("Opening NetMesh RFC-6349 App...")
 
@@ -198,11 +202,12 @@ def init_gui(application, port=0, width=800, height=600,
 
     return qtapp.exec_()
 
+
 def load_page(webView: QtWebEngineWidgets.QWebEngineView, page: WebPage):
     page.home()
     webView.setPage(page)
     print(page.url())
-    
+
 
 def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
     is_successful = update_app()
@@ -214,6 +219,27 @@ def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):
     download.accept()
+
+
+def kill_port_process(port):
+    pids = set(get_port_pids(port))
+    print("pids", pids)
+    command = f"sudo kill -9 {' '.join([str(pid) for pid in pids])}"
+    os.system(command)
+
+
+def get_port_pids(port):
+    command = "sudo lsof -i :%s | awk '{print $2}'" % port
+    pids = subprocess.check_output(command, shell=True)
+    pids = pids.strip()
+    print("pids", pids)
+    if pids:
+        pids = re.sub(' +', ' ', pids)
+        for pid in pids.split('\n'):
+            try:
+                yield int(pid)
+            except:
+                pass
 
 # @QtCore.Slot(QtWebEngineWidgets.QWebEngineProfile)
 
