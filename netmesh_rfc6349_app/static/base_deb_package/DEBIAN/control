@@ -4,4 +4,3 @@ Architecture: $arch
 Maintainer: DOST-ASTI
 Description: This application tool serves as a framework for measured end-to-end TCP throughput in a managed IP Network. This is to be used internally by the National Telecommunications Commission (NTC)
 Pre-Depends: jq, iperf3, adb, nmap, python3-pip, python3-tk
-

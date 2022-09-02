@@ -16,8 +16,8 @@ import socket
 
 from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version, update_app
 
-if getattr(sys, 'frozen', False):
-    import pyi_splash
+# if getattr(sys, 'frozen', False):
+#     import pyi_splash
 
 
 class ApplicationThread(QtCore.QThread):
@@ -143,8 +143,8 @@ def init_gui(application, port=0, width=800, height=600,
     # print(cookie)
     # onCookieAdded(cookie_store.loadAllCookies())
 
-    if getattr(sys, 'frozen', False):
-        pyi_splash.close()
+    # if getattr(sys, 'frozen', False):
+    #     pyi_splash.close()
 
     window.show()
 
