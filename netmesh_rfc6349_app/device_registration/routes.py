@@ -1,7 +1,7 @@
 import json
 import requests
 
-from flask import Blueprint, request, render_template, redirect, url_for, session, current_app
+from flask import Blueprint, request, render_template, redirect, url_for, session, current_app, jsonify
 
 from netmesh_rfc6349_app.device_registration.utils import get_device_info
 from netmesh_rfc6349_app.main.utils import netmesh_location
@@ -17,26 +17,24 @@ def register_api():
     device_name = request.form.get('deviceName')
 
     try:
-        # raise Exception("fjwkfhwef fwefywifuwoef wfyuwifywefj ifyweofiy fgiueygf reyfyferufyuiwefy wqoefysregfesruig ye ogoiesryferurfyf goyfgrwey fyewrgf ruei")
         device_info = get_device_info()
         device_info.update({"name": device_name})
         device_info.update({"user": device_owner_info['user_id']})
 
-        r = requests.post(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/rfc6349/device/",
+        req = requests.post(
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/rfc6349/device/",
             headers={"Authorization": f"Token {session['admin-token']}"},
             json=device_info
         )
         print(device_info)
-        r.raise_for_status()
+        req.raise_for_status()
 
         config = NetMeshConfigFile()
 
-        device_config = config.load_device_config()
-        device_config.set_device_name(device_name)
+        # device_config = config.load_device_config()
+        config.device_config.set_device_name(device_name)
 
-        users_config = config.load_users_config()
-        users_config.add_logged_user({
+        config.users_config.set_logged_user({
             "name": device_owner_info['name'],
             "email": device_owner_info['email'],
         })
@@ -50,19 +48,19 @@ def register_api():
     except requests.exceptions.HTTPError as he:
         error = ""
         try:
-            error_json = json.loads(r.content)
+            error_json = json.loads(req.text)
             if "detail" in error_json:
                 error = error_json["detail"]
             else:
-                error = r.content
+                error = req.text
         except ValueError:
-            error = r.text
+            error = req.text
 
-        print(error)
+        return error, 400
     except requests.exceptions.RequestException as re:
-        print(re)
+        return req.text, 400
     except Exception as ex:
-        print(ex)
+        return req.text, 400
 
 
 @device_registration.route('/register-device')
@@ -70,9 +68,9 @@ def register_device_page():
     session['admin-token'] = None
 
     config = NetMeshConfigFile()
-    device_config = config.load_device_config()
+    # device_config = config.load_device_config()
 
-    device_name = device_config.get_device_name()
+    device_name = config.device_config.get_device_name()
     if device_name:
         return redirect(url_for('users.login_page'))
 
@@ -97,7 +95,7 @@ def log_admin():
     users_response = []
     try:
         r = requests.post(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/user/token/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/token/",
             json={
                 "email": admin_email,
                 "password": admin_password,
@@ -112,23 +110,23 @@ def log_admin():
         token = admin_response['token']
         ntc_region = admin_response['user']['ntc_region']
         ntc_regions = dict(netmesh_location.get_philippine_regions())
-        
+
         print("ntc_region", ntc_region)
 
         session['admin-token'] = token
         session['admin-ntc-region'] = ntc_region
         session['admin-ntc-region-name'] = ntc_regions[ntc_region]
         print(session['admin-ntc-region-name'])
-        
+
         r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/user/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/",
             params={
                 "ntc_region": ntc_region
             },
             headers={'Authorization': f"Token { session['admin-token'] }"}
         )
         r.raise_for_status()
-        
+
         users_response = r.json()
     except requests.exceptions.RequestException as re:
         error = "Unexpected error"
@@ -146,6 +144,7 @@ def log_admin():
 
     return render_template('device_details_form.html', region_name=session['admin-ntc-region-name'], users=users_response)
 
+
 @device_registration.route('/get-device-details-template', methods=['POST'])
 def get_device_details_template():
     region = session['admin-ntc-region']
@@ -157,7 +156,7 @@ def get_device_details_template():
     regions = netmesh_location.get_philippine_regions()
     try:
         r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URL']}/user/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/",
             params={
                 "ntc_region": region
             },
@@ -178,7 +177,7 @@ def get_device_details_template():
         except Exception as ex:
             print(ex)
             error = str(re)
-        
+
         # TODO: show error on modal admin credentials
         return render_template('device_region.html', regions=regions, error=error), 400
 

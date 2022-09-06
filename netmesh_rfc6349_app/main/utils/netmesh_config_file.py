@@ -10,7 +10,7 @@ from netmesh_rfc6349_app.main.utils.laptop_info import get_ubuntu_home_user
 
 
 class NetMeshConfigFile:
-    __CONFIG_FILE_DIRECTORY = f'/home/{get_ubuntu_home_user()}/.config/netmesh-rfc6349-app'
+    __CONFIG_FILE_DIRECTORY = '/etc/netmesh-rfc6349-app'
     __CONFIG_FILE_PATH = f'{__CONFIG_FILE_DIRECTORY}/nmrfc.ini'
 
     def __init__(self) -> None:
@@ -24,56 +24,75 @@ class NetMeshConfigFile:
 
         self._config = configparser.ConfigParser()
         self._config.read(self.__CONFIG_FILE_PATH)
+        
+        self.device_config = self.__NetMeshDeviceConfig(self._config)
+        self.users_config = self.__NetMeshUsersConfig(self._config)
 
     def save(self):
         with open(self.__CONFIG_FILE_PATH, 'w') as cf:
             self._config.write(cf)
 
-    def load_device_config(self):
-        device_config = self._NetMeshDeviceConfig(self._config)
-        return device_config
+    # def load_device_config(self):
+    #     device_config = self._NetMeshDeviceConfig(self._config)
+    #     return device_config
 
-    def load_users_config(self):
-        users_config = self._NetMeshUsersConfig(self._config)
-        return users_config
-
-    class _NetMeshDeviceConfig:
-        _SECTION_NAME = "DEVICE"
-
-        def __init__(self, config: configparser.ConfigParser) -> None:
+    # def load_users_config(self):
+    #     users_config = self._NetMeshUsersConfig(self._config)
+    #     return users_config
+     
+    
+    class __NetMeshSectionConfig:
+        def __init__(self, config: configparser.ConfigParser):
             self._config = config
+            
+        def _set_value(self, section, key, value):
+            if not section in self._config.sections():
+                self._config.add_section(section)
 
-        def set_device_name(self, device_name: str):
-            if not self._SECTION_NAME in self._config.sections():
-                self._config.add_section(self._SECTION_NAME)
-
-            self._config.set(self._SECTION_NAME, "device_name", device_name)
-
-        def get_device_name(self):
-            device_name = ""
+            self._config.set(section, key, value)
+            
+        def _get_value(self, section, key):
+            value = ""
             try:
-                device_name = self._config.get(
-                    self._SECTION_NAME, "device_name")
+                value = self._config.get(
+                    section, key)
             except Exception as ex:
                 print(ex)
                 
-            return device_name
+            return value
 
-    class _NetMeshUsersConfig:
-        _SECTION_NAME = "USERS"
+    class __NetMeshDeviceConfig(__NetMeshSectionConfig):
+        section_name = "DEVICE"
+
+        def __init__(self, config: configparser.ConfigParser):
+            self._config = config
+
+        def set_device_name(self, device_name: str):
+            self._set_value(self, "device_name", device_name)
+
+        def get_device_name(self):
+            return self._get_value(self.section_name, "device_name")
+        
+        def set_device_region(self, region: str):
+            self._set_value(self, "device_region", region)
+        
+        def get_device_region(self):
+            return self._get_value(self.section_name, "device_region")
+
+    class __NetMeshUsersConfig(__NetMeshSectionConfig):
+        section_name = "USERS"
 
         def __init__(self, config: configparser.ConfigParser):
             self._config = config
 
         def _load_logged_users(self):
-            if not self._SECTION_NAME in self._config.sections():
-                self._config.add_section(self._SECTION_NAME)
+            if not self.section_name in self._config.sections():
+                self._config.add_section(self.section_name)
                 return []
 
             logged_users_config = self._config.get(
-                self._SECTION_NAME, "logged_users")
+                self.section_name, "logged_users")
             raw_logged_users: list = json.loads(logged_users_config)
-
             return raw_logged_users
 
         def get_logged_users(self):
@@ -99,16 +118,27 @@ class NetMeshConfigFile:
 
             return logged_users
 
-        def add_logged_user(self, user: dict):
+        def get_logged_user(self, email):
             logged_users = self._load_logged_users()
-            logged_users.append(user)
+            
+            user: dict = next(lu for lu in logged_users if lu['email'] == email)
+            return user
 
-            self._config.set("USERS", "logged_users", json.dumps(logged_users))
+        def set_logged_user(self, user: dict):
+            logged_users = self._load_logged_users()
+            
+            users = list(filter(lambda u: u['email'] != user['email'], logged_users))
+            users.insert(0, user)
 
-        def delete_logged_user(self, user_email: str):
+            self._config.set("USERS", "logged_users", json.dumps(users))
+
+        def remove_logged_user(self, user_email: str):
+            
             logged_users = self._load_logged_users()
             remaining_logged_users = [
                 u for u in logged_users if u['email'] != user_email]
+            print(user_email)
+            print(remaining_logged_users)
 
             self._config.set("USERS", "logged_users",
                              json.dumps(remaining_logged_users))

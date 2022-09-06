@@ -261,7 +261,7 @@
 							$registrationCarousel.carousel('next');
 						},
 						error: function (jqXHR, textStatus, errorThrown) {
-							alert("eeeeeeeeeeeeenggkk!!!");
+							alert(`Error: ${jqXHR.responseText}`);
 							console.error({jqXHR, textStatus, errorThrown});
 							// $('#ntc-region-selection-content').html(jqXHR.responseText);
 						}

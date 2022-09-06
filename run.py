@@ -3,7 +3,7 @@ import sys
 
 import netmesh_rfc6349_app.main.utils.pysideflask_ext as pysideflask_ext
 
-from netmesh_rfc6349_app import create_app
+from netmesh_rfc6349_app import create_app, has_pyi_splash
 from netmesh_rfc6349_app.main.utils.netmesh_installer import check_app_latest_version
 from netmesh_rfc6349_app.main.utils.laptop_info import get_downloads_folder_path
 
@@ -11,16 +11,17 @@ from netmesh_rfc6349_app.main.utils.laptop_info import get_downloads_folder_path
 def run_on_desktop():
     app = create_app()
 
-    if getattr(sys, 'frozen', False):
+    if has_pyi_splash():
+        print("Opening splash...")
         import pyi_splash
 
-    if getattr(sys, 'frozen', False):
+    if has_pyi_splash():
         pyi_splash.update_text("Checking update...")
 
     has_update, current_version, latest_version = check_app_latest_version(app)
     app_version = current_version
 
-    if getattr(sys, 'frozen', False):
+    if has_pyi_splash():
         pyi_splash.update_text("Opening the app...")
 
     pysideflask_ext.init_gui(application=app, port=5000, width=1440, height=900,

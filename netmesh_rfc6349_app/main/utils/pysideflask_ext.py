@@ -1,4 +1,6 @@
 import os
+import subprocess
+import re
 import sys
 import threading
 import queue
@@ -12,9 +14,10 @@ from PySide2.QtGui import QScreen
 
 import socket
 
+from netmesh_rfc6349_app import has_pyi_splash
 from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version, update_app
 
-if getattr(sys, 'frozen', False):
+if has_pyi_splash():
     import pyi_splash
 
 
@@ -79,6 +82,8 @@ def init_gui(application, port=0, width=800, height=600,
         port = sock.getsockname()[1]
         sock.close()
 
+    kill_port_process(port)
+
     print("Opening NetMesh RFC-6349 App...")
 
     # Application Level
@@ -119,7 +124,6 @@ def init_gui(application, port=0, width=800, height=600,
 
     # WebPage Level
     page = WebPage('http://127.0.0.1:{}'.format(port))
-    page.home()
 
     profile = page.profile()
     profile.clearHttpCache()
@@ -139,8 +143,9 @@ def init_gui(application, port=0, width=800, height=600,
     # sleep(10)
     # print(cookie)
     # onCookieAdded(cookie_store.loadAllCookies())
-
-    if getattr(sys, 'frozen', False):
+    
+    if has_pyi_splash():
+        print("Closing splash...")
         pyi_splash.close()
 
     window.show()
@@ -184,7 +189,7 @@ def init_gui(application, port=0, width=800, height=600,
             window.close()
             sys.exit()
         else:
-            webView.setPage(page)
+            load_page(webView, page)
             # must_update_msg = QMessageBox(window)
             # must_update_msg.setWindowTitle("Cannot open the app")
             # must_update_msg.setText("You must update this app first before using")
@@ -193,11 +198,17 @@ def init_gui(application, port=0, width=800, height=600,
             # window.close()
             # sys.exit()
     else:
-        webView.setPage(page)
+        load_page(webView, page)
 
     print("App opened")
 
     return qtapp.exec_()
+
+
+def load_page(webView: QtWebEngineWidgets.QWebEngineView, page: WebPage):
+    page.home()
+    webView.setPage(page)
+    print(page.url())
 
 
 def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
@@ -210,6 +221,27 @@ def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
 @QtCore.Slot(QtWebEngineWidgets.QWebEngineDownloadItem)
 def onDownloadRequested(download):
     download.accept()
+
+
+def kill_port_process(port):
+    pids = set(get_port_pids(port))
+    print("pids", pids)
+    if pids:
+        command = f"sudo kill -9 {' '.join([str(pid) for pid in pids])}"
+        os.system(command)
+
+
+def get_port_pids(port):
+    command = "sudo lsof -i :%s | awk '{print $2}'" % port
+    pids = subprocess.check_output(command, shell=True)
+    pids = pids.decode().strip()
+    if pids:
+        pids = re.sub(' +', ' ', pids)
+        for pid in pids.split('\n'):
+            try:
+                yield int(pid)
+            except:
+                pass
 
 # @QtCore.Slot(QtWebEngineWidgets.QWebEngineProfile)
 

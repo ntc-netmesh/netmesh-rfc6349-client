@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 
 {% block head %}
-<title>Log in</title>
 {{ super() }}
+<title>Log in</title>
 <style>
 	body,
 	html {
@@ -11,7 +11,7 @@
 	}
 
 	img.background-logo {
-		width: 200px;
+		width: 180px;
 	}
 
 	div.alert-danger {
@@ -29,13 +29,13 @@
 					<div class="p-2 row justify-content-center">
 						<img
 							src="{{url_for('static', filename='images/ntc_logo.png')}}"
-							title="NetMesh RFC-6349 Application"
+							title="NetMesh RFC-6349 App"
 							alt="RFC-6349"
 							class="background-logo"
 						/>
 					</div>
 					<div class="p-2 row justify-content-center">
-						<span class="h2 text-center"><b>NetMesh RFC-6349 Application</b></span>
+						<span class="h3 text-center"><b>NetMesh<br>RFC-6349 App</b></span>
 					</div>
 				</div>
 				<form id="loginForm" action="/login-submit" method="POST">
@@ -68,25 +68,45 @@
 									</div>
 								</div> -->
 								<h6>Who will conduct the test?</h6>
-								<div id="logged-users" class="list-group mb-3">
+								<div id="logged-users" class="mb-3 overflow-auto" style="height: 144px;">
 									{% for user in logged_users %}
-									<button type="button" class="list-group-item list-group-item-action" style="max-height: 64px;" data-user-email="{{ user['email'] }}"
-										{% if not 'token-info' in user %} data {% endif %}>
-										<div class="d-flex w-100 justify-content-between">
-											<span class="h6 mb-0 align-baseline text-truncate mt-1">{{ user['name'] }}</span>
-											{% if 'token_info' in user %}
-											{% if user['token_expiry_seconds'] < 60*60 %}
-											<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
-											{% elif user['token_expiry_seconds'] <= 0 %}
-											<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
-											{% endif %}
-											{% endif %}
-										</div>
-										<div class="d-flex">
-											<span class="small text-muted text-truncate">{{ user['email'] }}</span>
-										</div>
-									</button>
+									<div class="btn-group w-100 mb-1">
+										<button type="button" class="btn btn-user btn-light w-100 border-top border-bottom border-start" style="max-height: 64px;" data-user-email="{{ user['email'] }}">
+											<div class="d-flex justify-content-between">
+												<span class="h6 mb-0 align-baseline text-truncate mt-1">{{ user['name'] }}</span>
+											</div>
+											<div class="d-flex justify-content-start">
+												<span class="small">
+												{% if 'token' in user %}
+													{% if user['token_expiry_seconds'] < 60*60 %}
+													<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
+													{% elif user['token_expiry_seconds'] <= 0 %}
+													<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
+													{% else %}
+													<i class="bi bi-circle-fill text-primary align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token is active"></i>
+													{% endif %}
+												{% else %}
+													<i class="bi bi-circle-fill text-secondary align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="User is new"></i>
+												{% endif %}
+												</span>
+												<span class="small text-muted text-truncate ms-1">{{ user['email'] }}</span>
+											</div>
+										</button>
+										<button class="btn btn-light border-top border-end border-bottom dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+											<span class="visually-hidden">Toggle Dropdown</span>
+										</button>
+										<ul class="dropdown-menu dropdown-menu-end">
+											<li><a class="dropdown-item dropdown-item-token-info disabled small" href="#" data-user-email="{{ user['email'] }}">Token expires in x hours</a></li>
+											<li><a class="dropdown-item dropdown-item-remove-user text-danger small" href="#" data-user-email="{{ user['email'] }}">Remove user</a></li>
+										</ul>
+									</div>
 									{% endfor %}
+								</div>
+								<div class="d-flex flex-column align-items-center">
+									<button	id="btnLogIn" type="button" class="btn btn-sm btn-link link-secondary">
+                    <!-- <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> -->
+										<span>I'm not on the list</span>
+									</button>
 								</div>
 								<!-- <div class="form-group mb-3">
 									<label class="form-control-static" for="psw"
@@ -136,7 +156,20 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-				<input type="text" name="user-email" hidden>
+				<div id="device-assignment-info" class="alert alert-info alert-dismissible fade show overflow-auto py-1" role="alert">
+					<i class="bi bi-info-circle-fill"></i>
+					<span>Make sure your admin assigned your email to this device: <strong>{{ device_name }}</strong></span>
+				</div>
+				<div class="mb-3">
+					<label class="form-label mb-1" for="user-email">Email</label>
+					<input
+						id="user-email"
+						name="user-email"
+						type="email"
+						class="form-control"
+						placeholder="Enter your email"
+						required>
+				</div>
 				<div class="mb-3">
 					<label class="form-label mb-1" for="user-password">Password</label>
 					<div class="input-group input-group">
@@ -159,6 +192,9 @@
 						</label>
 					</div>
 				</div>
+				<div id="login-error" class="alert alert-danger alert-dismissible fade show overflow-auto py-1" role="alert">
+
+				</div>
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-primary">Log in</button>
@@ -172,13 +208,114 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/login.js') }}"></script>
 <script>
 	$(function () {
-		$('#logged-users').on('click', '.list-group-item', function (ev) {
-			const userEmail = $(this).data('user-email');
-			$('#login-modal .modal-title').text(userEmail);
-			$('input[name="user-email"]').val(userEmail);
+		$userEmail = $('input[name="user-email"]');
 
+		const dropdownElementList = document.querySelectorAll('.dropdown-toggle');
+		const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl, {
+			reference: 'parent'
+		}));
+
+		$('#login-error').hide();
+
+		$('#logged-users').on('click', '.btn-user', function (ev) {
+			const userEmail = $(this).data('user-email');
+			function showLogIn() {
+				$('#login-modal .modal-title').text("Log in");
+				$('#login-modal .modal-content').trigger('reset');
+
+				$userEmail.val(userEmail);
+				$userEmail.attr('disabled', true);
+
+				$('#login-modal').modal('show');
+				$('#device-assignment-info').hide();
+			}
+			$.ajax({
+				url: 'check-user-token',
+				method: 'POST',
+				data: {
+					'email': userEmail,
+				},
+				dataType: 'json',
+				success: function (data) {
+					console.log(data);
+					if (data.url) {
+						window.location.replace(data.url);
+					} else {
+						showLogIn();
+					}
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					$('#login-error').html(jqXHR.responseJSON.info);
+					$('#login-error').show();
+					showLogIn();
+				}
+			});
+		});
+
+		$('#logged-users').on('click', '.dropdown-item-remove-user', function (ev) {
+			const userEmail = $(this).data('user-email');
+			const confirmRemove = confirm(`Remove ${userEmail}?`);
+			if (confirmRemove) {
+				$.ajax({
+					url: 'refresh-logged-users',
+					method: 'POST',
+					data: {
+						'email': userEmail,
+					},
+					success: function (data) {
+						window.location.replace(data.url);
+					},
+					error: function (jqXHR, textStatus, errorThrown) {
+						console.log({jqXHR, textStatus, errorThrown});
+					}
+				});
+			}
+		});
+
+		$('#btnLogIn').on('click', function () {
+			$('#login-modal .modal-title').text("Log in");
+			
+			$userEmail.attr('disabled', false);
+			$('#login-modal .modal-content').trigger('reset');
+			$('#device-assignment-info').show();
 			$('#login-modal').modal('show');
 		});
+
+		$('#login-modal').on('shown.bs.modal', function () {
+			if ($userEmail.attr('disabled')) {
+				$('input[name="user-password"]').focus();
+			} else {
+				$userEmail.focus();
+			}
+		});
+
+		$('#login-modal .modal-content').on('submit', function (ev) {
+			ev.preventDefault();
+			$('#login-error').hide();
+
+			const form = $(this);
+			const formData = new FormData(ev.target);
+			console.log(Object.fromEntries([...formData]));
+
+
+			$.ajax({
+				url: form.attr('action'),
+				method: form.attr('method'),
+				dataType: 'json',
+				data: {
+					"user-email": $userEmail.val(),
+					"user-password": $('#user-password').val()
+				},
+				success: function (data) {
+					window.location.replace(data.goto);
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					console.log(jqXHR);
+					$('#login-error').text(jqXHR.responseJSON?.error ?? "Unexpected error occured");
+					$('#login-error').show();
+				}
+			});
+		})
 
 		$('#user-password-eye').on('change', function () {
 			if (this.checked) {

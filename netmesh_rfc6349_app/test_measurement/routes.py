@@ -34,7 +34,7 @@ def report_data():
     started_on = request.form['startedOn']
     finished_on = request.form['finishedOn']
     duration = request.form['duration']
-    username = session['username']
+    username = session['email']
     methods = json.loads(request.form['methods'])
 
     results = {}
@@ -71,7 +71,7 @@ def report():
     finished_on = request.form['finishedOn']
     duration = request.form['duration']
     generated_on = request.form['generatedOn']
-    username = session['username']
+    username = session['email']
     methods = json.loads(request.form['methods'])
 
     results = {}
@@ -249,7 +249,7 @@ def get_test_servers():
 def process():
     try:
         json_data = {
-            "username": session['username']
+            "username": session['email']
         }
         headers = {
             "Authorization": "Bearer " + session['api_session_token']
@@ -439,7 +439,7 @@ def get_results():
 
         # #SEND RESULTS TO NEW API
         # r = requests.get(
-        #   url=f"{RESULTS_SERVER_API_URL}/result"
+        #   url=f"{RESULTS_SERVER_API_URI}/result"
         # )
 
         return Response(json.dumps({
@@ -899,8 +899,8 @@ def open_downloads_folder():
     print(laptop_info.get_downloads_folder_path())
     file_name = request.form.get("fileName")
     print(file_name)
-    desktop_username = laptop_info.get_ubuntu_home_user()
-    file_explorer_process = subprocess.Popen(['sudo', '-u', desktop_username, 'nautilus', '-s', os.path.join(
+    desktop_home_user = laptop_info.get_ubuntu_home_user()
+    file_explorer_process = subprocess.Popen(['sudo', '-u', desktop_home_user, 'nautilus', '-s', os.path.join(
         laptop_info.get_downloads_folder_path(), file_name)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = file_explorer_process.communicate()
     if stderr:

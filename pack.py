@@ -1,6 +1,7 @@
 import os
 import subprocess
 import shutil
+from time import sleep
 
 from string import Template
 
@@ -25,6 +26,7 @@ def pack():
     # Remove existing folder
     print(
         f"Removing existing folder '{package_directory}/{app_folder_name}'...", end=' ')
+    sleep(0.3)
     try:
         shutil.rmtree(f'{package_directory}/{app_folder_name}')
         print("OK")
@@ -33,6 +35,7 @@ def pack():
 
     # Run pyinstaller
     print(f"Creating bundle for {Config.APP_TITLE}...", end=' ')
+    sleep(0.3)
     chown_deb_folder = f'pyinstaller run.py -n "{app_name}" --onefile --clean --splash {main_folder}/static/images/rfc_splash_screen.png  --add-data "{main_folder}/templates:templates" --add-data "{main_folder}/static:static"'
     chown_deb_folder_process = subprocess.Popen(
         chown_deb_folder, stdout=subprocess.PIPE, shell=True)
@@ -44,6 +47,7 @@ def pack():
 
     # Create deb folder
     print(f"Creating deb package folder '{deb_package_name}'...", end=' ')
+    sleep(0.3)
     try:
         shutil.copytree(f"{main_folder}/static/base_deb_package",
                         f"{package_directory}/{deb_package_name}")
@@ -51,37 +55,39 @@ def pack():
     except Exception as ex:
         raise ex
 
-    # Create app folder
-    print(f"Creating app folder '{deb_package_name}'...", end=' ')
-    try:
-        os.makedirs(
-            f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
-        print("OK")
-    except Exception as ex:
-        raise ex
+    # # Create app folder
+    # print(f"Creating app folder '{deb_package_name}'...", end=' ')
+    # try:
+    #     os.makedirs(
+    #         f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
+    #     print("OK")
+    # except Exception as ex:
+    #     raise ex
 
     # Move built app to the created deb folder
-    print(f"Moving bundle to the app folder...", end=' ')
+    print(f"Moving bundle to the bin folder...", end=' ')
+    sleep(0.3)
     try:
         shutil.move(f"{package_directory}/{app_name}",
-                    f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
+                    f"{package_directory}/{deb_package_name}/usr/bin")
         print("OK")
     except Exception as ex:
         print("Failed to move bundle: ", ex)
         return
 
-    # Copy requirements.txt
-    print(f"Copying 'requirements.txt'...", end=' ')
-    try:
-        shutil.copy(f"./requirements.txt",
-                    f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
-        print("OK")
-    except Exception as ex:
-        print("Failed to move bundle: ", ex)
-        return
+    # # Copy requirements.txt
+    # print(f"Copying 'requirements.txt'...", end=' ')
+    # try:
+    #     shutil.copy(f"./requirements.txt",
+    #                 f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
+    #     print("OK")
+    # except Exception as ex:
+    #     print("Failed to move bundle: ", ex)
+    #     return
 
     # Update DEBIAN/control file
     print(f"Updating DEBIAN/control file...", end=' ')
+    sleep(0.3)
     try:
         package_info = {
             'package_name': app_folder_name,
@@ -103,6 +109,7 @@ def pack():
 
     # Build deb file
     print(f"Building the .deb file...", end=' ')
+    sleep(0.3)
     chown_deb_folder = f"dpkg --build {package_directory}/{deb_package_name}"
     chown_deb_folder_process = subprocess.Popen(
         chown_deb_folder, stdout=subprocess.PIPE, shell=True)
@@ -115,6 +122,7 @@ def pack():
 
     # Change owner to home user
     print(f"Changing owner to home user...", end=' ')
+    sleep(0.3)
     owner = get_ubuntu_home_user()
     try:
         shutil.chown(f"{package_directory}/{deb_package_name}.deb", user=owner)
