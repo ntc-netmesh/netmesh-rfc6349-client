@@ -14,10 +14,11 @@ from PySide2.QtGui import QScreen
 
 import socket
 
+from netmesh_rfc6349_app import has_pyi_splash
 from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version, update_app
 
-# if getattr(sys, 'frozen', False):
-#     import pyi_splash
+if has_pyi_splash():
+    import pyi_splash
 
 
 class ApplicationThread(QtCore.QThread):
@@ -142,9 +143,10 @@ def init_gui(application, port=0, width=800, height=600,
     # sleep(10)
     # print(cookie)
     # onCookieAdded(cookie_store.loadAllCookies())
-
-    # if getattr(sys, 'frozen', False):
-    #     pyi_splash.close()
+    
+    if has_pyi_splash():
+        print("Closing splash...")
+        pyi_splash.close()
 
     window.show()
 
@@ -224,15 +226,15 @@ def onDownloadRequested(download):
 def kill_port_process(port):
     pids = set(get_port_pids(port))
     print("pids", pids)
-    command = f"sudo kill -9 {' '.join([str(pid) for pid in pids])}"
-    os.system(command)
+    if pids:
+        command = f"sudo kill -9 {' '.join([str(pid) for pid in pids])}"
+        os.system(command)
 
 
 def get_port_pids(port):
     command = "sudo lsof -i :%s | awk '{print $2}'" % port
     pids = subprocess.check_output(command, shell=True)
-    pids = pids.strip()
-    print("pids", pids)
+    pids = pids.decode().strip()
     if pids:
         pids = re.sub(' +', ' ', pids)
         for pid in pids.split('\n'):

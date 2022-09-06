@@ -38,3 +38,6 @@ def create_app(config_class=Config):
     app.register_blueprint(main)
 
     return app
+
+def has_pyi_splash():
+    return getattr(sys, 'frozen', False)
