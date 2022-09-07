@@ -31,6 +31,19 @@ def pack():
         print("OK")
     except Exception as ex:
         print("Note: ", ex)
+        
+        
+    # Install python3-tk
+    print(f"Installing python3-tk", end=' ')
+    sleep(0.3)
+    command = f'sudo apt install python3-tk'
+    command_process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, shell=True)
+    stdout, stderr = command_process.communicate()
+    if stderr:
+        print(f"Failed to install python3-tk: ", stderr)
+        return
+    print("OK")
 
     # Run pyinstaller
     print(f"Creating bundle for {Config.APP_TITLE}...", end=' ')
