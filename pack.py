@@ -68,14 +68,14 @@ def pack():
     except Exception as ex:
         raise ex
 
-    # # Create app folder
-    # print(f"Creating app folder '{deb_package_name}'...", end=' ')
-    # try:
-    #     os.makedirs(
-    #         f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
-    #     print("OK")
-    # except Exception as ex:
-    #     raise ex
+    # Create bin folder
+    print(f"Creating bin folder...", end=' ')
+    try:
+        os.makedirs(
+            f"{package_directory}/{deb_package_name}/usr/bin")
+        print("OK")
+    except Exception as ex:
+        raise ex
 
     # Move built app to the created deb folder
     print(f"Moving bundle to the bin folder...", end=' ')
