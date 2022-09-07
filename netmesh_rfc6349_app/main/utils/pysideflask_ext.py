@@ -188,8 +188,8 @@ def init_gui(application, port=0, width=800, height=600,
 
             window.close()
             sys.exit()
-        else:
-            load_page(webView, page)
+        # else:
+            # load_page(webView, page)
             # must_update_msg = QMessageBox(window)
             # must_update_msg.setWindowTitle("Cannot open the app")
             # must_update_msg.setText("You must update this app first before using")
@@ -197,8 +197,8 @@ def init_gui(application, port=0, width=800, height=600,
 
             # window.close()
             # sys.exit()
-    else:
-        load_page(webView, page)
+    # else:
+    load_page(webView, page)
 
     print("App opened")
 

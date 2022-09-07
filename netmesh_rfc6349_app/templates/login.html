@@ -96,7 +96,7 @@
 											<span class="visually-hidden">Toggle Dropdown</span>
 										</button>
 										<ul class="dropdown-menu dropdown-menu-end">
-											<li><a class="dropdown-item dropdown-item-token-info disabled small" href="#" data-user-email="{{ user['email'] }}">Token expires in x hours</a></li>
+											<!-- <li><a class="dropdown-item dropdown-item-token-info disabled small" href="#" data-user-email="{{ user['email'] }}">Token expires in x hours</a></li> -->
 											<li><a class="dropdown-item dropdown-item-remove-user text-danger small" href="#" data-user-email="{{ user['email'] }}">Remove user</a></li>
 										</ul>
 									</div>
@@ -219,6 +219,7 @@
 
 		$('#logged-users').on('click', '.btn-user', function (ev) {
 			const userEmail = $(this).data('user-email');
+			
 			function showLogIn() {
 				$('#login-modal .modal-title').text("Log in");
 				$('#login-modal .modal-content').trigger('reset');
@@ -226,30 +227,12 @@
 				$userEmail.val(userEmail);
 				$userEmail.attr('disabled', true);
 
-				$('#login-modal').modal('show');
 				$('#device-assignment-info').hide();
+
+				$('#login-modal').modal('show');
 			}
-			$.ajax({
-				url: 'check-user-token',
-				method: 'POST',
-				data: {
-					'email': userEmail,
-				},
-				dataType: 'json',
-				success: function (data) {
-					console.log(data);
-					if (data.url) {
-						window.location.replace(data.url);
-					} else {
-						showLogIn();
-					}
-				},
-				error: function (jqXHR, textStatus, errorThrown) {
-					$('#login-error').html(jqXHR.responseJSON.info);
-					$('#login-error').show();
-					showLogIn();
-				}
-			});
+			
+			showLogIn();
 		});
 
 		$('#logged-users').on('click', '.dropdown-item-remove-user', function (ev) {
