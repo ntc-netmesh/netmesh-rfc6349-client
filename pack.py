@@ -68,7 +68,7 @@ def pack():
     print(f"Moving bundle to the bin folder...", end=' ')
     sleep(0.3)
     try:
-        shutil.move(f"{package_directory}/{deb_package_name}",
+        shutil.move(f"{package_directory}/{Config.APP_NAME}",
                     f"{package_directory}/{deb_package_name}/{Config.APP_DIRECTORY_PATH}")
         print("OK")
     except Exception as ex:
