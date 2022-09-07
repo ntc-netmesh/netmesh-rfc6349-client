@@ -128,6 +128,7 @@ def init_gui(application, port=0, width=800, height=600,
     profile = page.profile()
     profile.clearHttpCache()
     profile.clearAllVisitedLinks()
+    
     profile.setDownloadPath(download_path)
     profile.downloadRequested.connect(onDownloadRequested)
 
@@ -208,7 +209,7 @@ def init_gui(application, port=0, width=800, height=600,
 def load_page(webView: QtWebEngineWidgets.QWebEngineView, page: WebPage):
     page.home()
     webView.setPage(page)
-    print(page.url())
+    print("page url: ", page.url())
 
 
 def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):
