@@ -29,7 +29,7 @@
 					<div class="p-2 row justify-content-center">
 						<img
 							src="{{url_for('static', filename='images/ntc_logo.png')}}"
-							title="NetMesh RFC-6349 App"
+							title="{{ config['APP_TITLE'] }}"
 							alt="RFC-6349"
 							class="background-logo"
 						/>
@@ -78,10 +78,10 @@
 											<div class="d-flex justify-content-start">
 												<span class="small">
 												{% if 'token' in user %}
-													{% if user['token_expiry_seconds'] < 60*60 %}
-													<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
-													{% elif user['token_expiry_seconds'] <= 0 %}
+													{% if user['token_expiry_seconds'] <= 0 %}
 													<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
+													{% elif user['token_expiry_seconds'] < 60*60 %}
+													<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
 													{% else %}
 													<i class="bi bi-circle-fill text-primary align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token is active"></i>
 													{% endif %}
@@ -279,6 +279,8 @@
 			$('#login-modal .modal-content').trigger('reset');
 			$('#device-assignment-info').show();
 			$('#login-modal').modal('show');
+
+			$('#login-error').hide();
 		});
 
 		$('#login-modal').on('shown.bs.modal', function () {

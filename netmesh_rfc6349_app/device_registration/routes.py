@@ -55,12 +55,13 @@ def register_api():
                 error = req.text
         except ValueError:
             error = req.text
-
+        print(req.text)
         return error, 400
     except requests.exceptions.RequestException as re:
+        print(req.text)
         return req.text, 400
     except Exception as ex:
-        return req.text, 400
+        return ex, 400
 
 
 @device_registration.route('/register-device')
