@@ -49,10 +49,11 @@ shiboken2==5.15.2.1
 six==1.16.0
 sniffio==1.2.0
 sortedcontainers==2.4.0
+tk==0.1.0
 toml==0.10.2
 trio==0.21.0
 trio-websocket==0.9.2
-typing_extensions==4.3.0
+typing-extensions==4.3.0
 urllib3==1.26.12
 Werkzeug==2.2.2
 wsproto==1.1.0
