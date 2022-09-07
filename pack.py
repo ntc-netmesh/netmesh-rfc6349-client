@@ -82,7 +82,7 @@ def pack():
     sleep(0.3)
     try:
         shutil.move(f"{package_directory}/{Config.APP_NAME}",
-                    f"{package_directory}/{deb_package_name}/{Config.APP_DIRECTORY_PATH}/{Config.APP_NAME}")
+                    f"{package_directory}/{deb_package_name}/{Config.APP_DIRECTORY_PATH}/")
         print("OK")
     except Exception as ex:
         print("Failed to move bundle: ", ex)
