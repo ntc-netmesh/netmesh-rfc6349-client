@@ -15,4 +15,4 @@
 ## Create installer for Ubuntu 20.04 desktop (for release/production)
 1. Install tkinter: `sudo apt install python3-tk`
 2. Open a terminal, and make sure you are in the project folder (i.e. /var/git/netmesh-rfc6349-client)
-3. Run `sudo python3 pack.py`, then enter the version number. The deb package will be created on ./dist folder
+3. Run `sudo python3 pack.py -v <version_number (current branch name if empty)>`. The deb package will be created on ./dist folder

@@ -1,9 +1,13 @@
 import os
+import sys
 import subprocess
 import shutil
+
 from time import sleep
+import argparse
 
 from string import Template
+from pygit2 import Repository
 
 from netmesh_rfc6349_app.config import Config
 from netmesh_rfc6349_app.main.utils.laptop_info import get_ubuntu_home_user
@@ -18,9 +22,15 @@ def pack():
 
     app_folder_name = 'netmesh-rfc6349-app'
 
-    version = input(f"Enter package name: {app_folder_name}_")
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--version', '-v', type=str, required=True, nargs='?', const='')
+    args = parser.parse_args()
+    
+    branch_name = Repository('.').head.shorthand
+    version = args.version or branch_name
     arch = 'amd64'
     deb_package_name = f"{app_folder_name}_{version}_{arch}"
+    print("deb_package_name:", deb_package_name)
 
     # Remove existing folder
     print(
@@ -31,19 +41,6 @@ def pack():
         print("OK")
     except Exception as ex:
         print("Note: ", ex)
-        
-        
-    # # Install python3-tk
-    # print(f"Installing python3-tk", end=' ')
-    # sleep(0.3)
-    # command = f'sudo apt install python3-tk'
-    # command_process = subprocess.Popen(
-    #     command, stdout=subprocess.PIPE, shell=True)
-    # stdout, stderr = command_process.communicate()
-    # if stderr:
-    #     print(f"Failed to install python3-tk: ", stderr)
-    #     return
-    # print("OK")
 
     # Run pyinstaller
     print(f"Creating bundle for {Config.APP_TITLE}...", end=' ')
