@@ -205,6 +205,16 @@ def device_confirmation_template():
                            device_info=get_device_info())
 
 
+@device_registration.route('/reset-registration', methods=['POST'])
+def reset_registration():
+    ini = NetMeshConfigFile()
+    try:
+        ini.delete()
+        return jsonify(), 200
+    except Exception as ex:
+        return jsonify(error=str(ex)), 400
+
+
 @device_registration.route('/device-details', methods=['GET'])
 def device_details():
     return render_template('device_details_form.html', users=[

@@ -107,6 +107,9 @@
                     <!-- <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> -->
 										<span>I'm not on the list</span>
 									</button>
+									<button	id="btnResetRegistration" type="button" class="btn btn-sm btn-link link-danger p-0 mt-2">
+										<span class="small">Reset registration (NOT FOR PRODUCTION)</span>
+									</button>
 								</div>
 								<!-- <div class="form-group mb-3">
 									<label class="form-control-static" for="psw"
@@ -264,6 +267,23 @@
 			$('#login-modal').modal('show');
 
 			$('#login-error').hide();
+		});
+
+		$('#btnResetRegistration').on('click', function (ev) {
+			const confirmReset = confirm("Are you sure?");
+			if (confirmReset) {
+				$.ajax({
+					url: 'reset-registration',
+					method: 'POST',
+					dataType: 'json',
+					success: function (data) {
+						alert("Registration has been reset");
+						window.location.reload();
+					}, error: function (jqXHR, textStatus, errorThrown) {
+						alert(`ERROR: ${jqXHR.responseJSON.error}`);
+					}
+				});
+			}
 		});
 
 		$('#login-modal').on('shown.bs.modal', function () {

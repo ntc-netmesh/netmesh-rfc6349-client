@@ -32,6 +32,9 @@ class NetMeshConfigFile:
     def save(self):
         with open(self.__CONFIG_FILE_PATH, 'w') as cf:
             self._config.write(cf)
+    
+    def delete(self):
+        os.remove(self.__CONFIG_FILE_PATH)
 
     class __NetMeshSectionConfig:
         def __init__(self, config: configparser.ConfigParser):
