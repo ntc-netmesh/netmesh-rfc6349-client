@@ -21,6 +21,7 @@ class NetMeshConfigFile:
         if not os.path.isfile(self.__CONFIG_FILE_PATH):
             with open(self.__CONFIG_FILE_PATH, 'x') as cf:
                 cf.close()
+            os.chmod(self.__CONFIG_FILE_PATH, 600)
 
         self._config = configparser.ConfigParser()
         self._config.read(self.__CONFIG_FILE_PATH)
