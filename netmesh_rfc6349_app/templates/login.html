@@ -29,7 +29,7 @@
 					<div class="p-2 row justify-content-center">
 						<img
 							src="{{url_for('static', filename='images/ntc_logo.png')}}"
-							title="NetMesh RFC-6349 App"
+							title="{{ config['APP_TITLE'] }}"
 							alt="RFC-6349"
 							class="background-logo"
 						/>
@@ -78,10 +78,10 @@
 											<div class="d-flex justify-content-start">
 												<span class="small">
 												{% if 'token' in user %}
-													{% if user['token_expiry_seconds'] < 60*60 %}
-													<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
-													{% elif user['token_expiry_seconds'] <= 0 %}
+													{% if user['token_expiry_seconds'] <= 0 %}
 													<i class="bi bi-exclamation-triangle-fill text-danger align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user has expired"></i>
+													{% elif user['token_expiry_seconds'] < 60*60 %}
+													<i class="bi bi-exclamation-triangle-fill text-warning align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token of this user will expire in less than 1 hour"></i>
 													{% else %}
 													<i class="bi bi-circle-fill text-primary align-baseline" data-bs-toggle="tooltip" data-bs-placement="top" title="Token is active"></i>
 													{% endif %}
@@ -96,7 +96,7 @@
 											<span class="visually-hidden">Toggle Dropdown</span>
 										</button>
 										<ul class="dropdown-menu dropdown-menu-end">
-											<li><a class="dropdown-item dropdown-item-token-info disabled small" href="#" data-user-email="{{ user['email'] }}">Token expires in x hours</a></li>
+											<!-- <li><a class="dropdown-item dropdown-item-token-info disabled small" href="#" data-user-email="{{ user['email'] }}">Token expires in x hours</a></li> -->
 											<li><a class="dropdown-item dropdown-item-remove-user text-danger small" href="#" data-user-email="{{ user['email'] }}">Remove user</a></li>
 										</ul>
 									</div>
@@ -106,6 +106,9 @@
 									<button	id="btnLogIn" type="button" class="btn btn-sm btn-link link-secondary">
                     <!-- <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span> -->
 										<span>I'm not on the list</span>
+									</button>
+									<button	id="btnResetRegistration" type="button" class="btn btn-sm btn-link link-danger p-0 mt-2">
+										<span class="small">Reset registration (NOT FOR PRODUCTION)</span>
 									</button>
 								</div>
 								<!-- <div class="form-group mb-3">
@@ -219,6 +222,7 @@
 
 		$('#logged-users').on('click', '.btn-user', function (ev) {
 			const userEmail = $(this).data('user-email');
+			
 			function showLogIn() {
 				$('#login-modal .modal-title').text("Log in");
 				$('#login-modal .modal-content').trigger('reset');
@@ -226,30 +230,12 @@
 				$userEmail.val(userEmail);
 				$userEmail.attr('disabled', true);
 
-				$('#login-modal').modal('show');
 				$('#device-assignment-info').hide();
+
+				$('#login-modal').modal('show');
 			}
-			$.ajax({
-				url: 'check-user-token',
-				method: 'POST',
-				data: {
-					'email': userEmail,
-				},
-				dataType: 'json',
-				success: function (data) {
-					console.log(data);
-					if (data.url) {
-						window.location.replace(data.url);
-					} else {
-						showLogIn();
-					}
-				},
-				error: function (jqXHR, textStatus, errorThrown) {
-					$('#login-error').html(jqXHR.responseJSON.info);
-					$('#login-error').show();
-					showLogIn();
-				}
-			});
+			
+			showLogIn();
 		});
 
 		$('#logged-users').on('click', '.dropdown-item-remove-user', function (ev) {
@@ -279,6 +265,25 @@
 			$('#login-modal .modal-content').trigger('reset');
 			$('#device-assignment-info').show();
 			$('#login-modal').modal('show');
+
+			$('#login-error').hide();
+		});
+
+		$('#btnResetRegistration').on('click', function (ev) {
+			const confirmReset = confirm("Are you sure?");
+			if (confirmReset) {
+				$.ajax({
+					url: 'reset-registration',
+					method: 'POST',
+					dataType: 'json',
+					success: function (data) {
+						alert("Registration has been reset");
+						window.location.reload();
+					}, error: function (jqXHR, textStatus, errorThrown) {
+						alert(`ERROR: ${jqXHR.responseJSON.error}`);
+					}
+				});
+			}
 		});
 
 		$('#login-modal').on('shown.bs.modal', function () {

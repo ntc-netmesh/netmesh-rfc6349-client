@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Terminal=false
-Name=NetMesh RFC-6349 App
+Name=$app_title
 Icon=netmesh-rfc6349-app
-Categories=Application;
-Exec=bash -c "pkexec /usr/bin/netmesh-rfc6349-app";
+Categories=Application
+Exec=bash -c "pkexec $app_path"

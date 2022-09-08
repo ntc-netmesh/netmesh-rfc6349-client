@@ -84,7 +84,7 @@ def init_gui(application, port=0, width=800, height=600,
 
     kill_port_process(port)
 
-    print("Opening NetMesh RFC-6349 App...")
+    print(f"Opening {application.config['APP_TITLE']}")
 
     # Application Level
     qtapp = QtWidgets.QApplication(argv)
@@ -128,6 +128,7 @@ def init_gui(application, port=0, width=800, height=600,
     profile = page.profile()
     profile.clearHttpCache()
     profile.clearAllVisitedLinks()
+    
     profile.setDownloadPath(download_path)
     profile.downloadRequested.connect(onDownloadRequested)
 
@@ -161,7 +162,7 @@ def init_gui(application, port=0, width=800, height=600,
             q = queue.Queue()
 
             update_app_progress = QProgressDialog(
-                "Updating NetMesh RFC-6349 App...", "Cancel", 0, 0)
+                f"Updating {application['APP_TITLE']}...", "Cancel", 0, 0)
             update_app_progress.setWindowTitle(f"Updating to {latest_version}")
             update_app_thread = threading.Thread(
                 target=handle_update_dialog, args=(update_app_progress, q))
@@ -188,8 +189,8 @@ def init_gui(application, port=0, width=800, height=600,
 
             window.close()
             sys.exit()
-        else:
-            load_page(webView, page)
+        # else:
+            # load_page(webView, page)
             # must_update_msg = QMessageBox(window)
             # must_update_msg.setWindowTitle("Cannot open the app")
             # must_update_msg.setText("You must update this app first before using")
@@ -197,8 +198,8 @@ def init_gui(application, port=0, width=800, height=600,
 
             # window.close()
             # sys.exit()
-    else:
-        load_page(webView, page)
+    # else:
+    load_page(webView, page)
 
     print("App opened")
 
@@ -208,7 +209,7 @@ def init_gui(application, port=0, width=800, height=600,
 def load_page(webView: QtWebEngineWidgets.QWebEngineView, page: WebPage):
     page.home()
     webView.setPage(page)
-    print(page.url())
+    print("page url: ", page.url())
 
 
 def handle_update_dialog(dialog_box: QProgressDialog, q: queue.Queue):

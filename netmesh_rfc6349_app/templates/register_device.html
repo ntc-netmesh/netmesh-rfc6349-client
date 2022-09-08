@@ -37,7 +37,7 @@
 			/>
 			<div class="fill-flex align-self-center">
 				<h4 class="mb-0">
-					RFC-6349 App
+					{{ config['APP_TITLE'] }}
 					<br>
 					<small>Laptop Registration</small>
 				</h4>
@@ -88,7 +88,7 @@
 						</div>
 						<div class="mt-auto">
 							<div class="d-flex justify-content-end">
-								<a id="use-rfc-button" href="/" class="btn btn-primary">Use RFC-6349 App</a>
+								<a id="use-rfc-button" href="/" class="btn btn-primary">Use {{ config['APP_TITLE'] }}</a>
 							</div>
 						</div>
 					</div>
@@ -115,7 +115,7 @@
   </div>
 </div>
 
-<div id="device-confirmation-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="device-confirmation-modal-label" aria-hidden="true">
+<div id="device-confirmation-modal" class="modal" tabindex="-1" data-bs-keyboard="true" data-bs-backdrop="static" aria-labelledby="device-confirmation-modal-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form class="modal-content" action="{{ url_for('device_registration.register_api') }}" method="POST">
       <div class="modal-header">
@@ -242,7 +242,7 @@
 					$.ajax({
 						url: 'register-api',
 						method: 'POST',
-						dataType: 'html',
+						dataType: 'json',
 						data: {
 							adminEmail: $('#admin-email').val(),
 							// region: $('#ntc-region option:selected').val(),
@@ -256,7 +256,7 @@
 						success: function (response) {
 							$deviceConfirmationModal.modal('hide');
 							
-							$('#device-registered-content').html(response);
+							$('#device-registered-content').html(response.html);
 							
 							$registrationCarousel.carousel('next');
 						},

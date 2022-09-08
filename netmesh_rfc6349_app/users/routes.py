@@ -58,13 +58,17 @@ def check_user_token():
         except requests.exceptions.RequestException as re:
             error = ''
             try:
-                error = req.json()
+                error_json = req.json()
+                if "detail" in error_json:
+                    error = error_json["detail"]
+                else:
+                    error = json.dumps(error_json)
             except Exception as ex:
                 error = re.response.text
                 
             return jsonify(url=None, info=error), re.response.status_code
     else:
-        return jsonify(url=None, info=''), 200
+        return jsonify(url=None, info='User not logged in yet'), 200
 
 
 @users.route('/login-submit', methods=['POST'])

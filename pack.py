@@ -16,7 +16,6 @@ def pack():
     package_folder = 'dist'
     package_directory = f'{os.getcwd()}/{package_folder}'
 
-    app_name = "netmesh-rfc6349-app"
     app_folder_name = 'netmesh-rfc6349-app'
 
     version = input(f"Enter package name: {app_folder_name}_")
@@ -32,11 +31,25 @@ def pack():
         print("OK")
     except Exception as ex:
         print("Note: ", ex)
+        
+        
+    # # Install python3-tk
+    # print(f"Installing python3-tk", end=' ')
+    # sleep(0.3)
+    # command = f'sudo apt install python3-tk'
+    # command_process = subprocess.Popen(
+    #     command, stdout=subprocess.PIPE, shell=True)
+    # stdout, stderr = command_process.communicate()
+    # if stderr:
+    #     print(f"Failed to install python3-tk: ", stderr)
+    #     return
+    # print("OK")
 
     # Run pyinstaller
     print(f"Creating bundle for {Config.APP_TITLE}...", end=' ')
     sleep(0.3)
-    chown_deb_folder = f'pyinstaller run.py -n "{app_name}" --onefile --clean --splash {main_folder}/static/images/rfc_splash_screen.png  --add-data "{main_folder}/templates:templates" --add-data "{main_folder}/static:static"'
+    chown_deb_folder = f'pyinstaller run.py -n "{Config.APP_NAME}" --onefile --clean --splash {main_folder}/static/images/rfc_splash_screen.png  --add-data "{main_folder}/templates:templates" --add-data "{main_folder}/static:static"'
+    # chown_deb_folder = f"pyinstaller {Config.APP_NAME}.spec"
     chown_deb_folder_process = subprocess.Popen(
         chown_deb_folder, stdout=subprocess.PIPE, shell=True)
     stdout, stderr = chown_deb_folder_process.communicate()
@@ -55,21 +68,21 @@ def pack():
     except Exception as ex:
         raise ex
 
-    # # Create app folder
-    # print(f"Creating app folder '{deb_package_name}'...", end=' ')
-    # try:
-    #     os.makedirs(
-    #         f"{package_directory}/{deb_package_name}/usr/bin/{app_folder_name}")
-    #     print("OK")
-    # except Exception as ex:
-    #     raise ex
+    # Create bin folder
+    print(f"Creating bin folder...", end=' ')
+    try:
+        os.makedirs(
+            f"{package_directory}/{deb_package_name}/usr/bin")
+        print("OK")
+    except Exception as ex:
+        raise ex
 
     # Move built app to the created deb folder
     print(f"Moving bundle to the bin folder...", end=' ')
     sleep(0.3)
     try:
-        shutil.move(f"{package_directory}/{app_name}",
-                    f"{package_directory}/{deb_package_name}/usr/bin")
+        shutil.move(f"{package_directory}/{Config.APP_NAME}",
+                    f"{package_directory}/{deb_package_name}/{Config.APP_DIRECTORY_PATH}/")
         print("OK")
     except Exception as ex:
         print("Failed to move bundle: ", ex)
@@ -105,6 +118,48 @@ def pack():
         print("OK")
     except Exception as ex:
         print("Failed to update DEBIAN/control file: ", ex)
+        return
+    
+    # Update policy file
+    print(f"Updating .desktop file...", end=' ')
+    sleep(0.3)
+    try:
+        config = {
+            'app_title': Config.APP_TITLE,
+            'app_path': Config.APP_PATH
+        }
+        with open(f'{package_directory}/{deb_package_name}/usr/share/applications/netmesh-rfc6349-app.desktop', 'r+') as f:
+            content = f.read()
+            template = Template(content)
+            updated_content = template.substitute(**config)
+
+            f.seek(0)
+            f.write(updated_content)
+            f.truncate()
+        print("OK")
+    except Exception as ex:
+        print("Failed to update .desktop file: ", ex)
+        return
+    
+    # Update policy file
+    print(f"Updating policy file...", end=' ')
+    sleep(0.3)
+    try:
+        config = {
+            'app_title': Config.APP_TITLE,
+            'app_path': Config.APP_PATH
+        }
+        with open(f'{package_directory}/{deb_package_name}/usr/share/polkit-1/actions/net.pregi.netmesh.policy', 'r+') as f:
+            content = f.read()
+            template = Template(content)
+            updated_content = template.substitute(**config)
+
+            f.seek(0)
+            f.write(updated_content)
+            f.truncate()
+        print("OK")
+    except Exception as ex:
+        print("Failed to update policy file: ", ex)
         return
 
     # Build deb file

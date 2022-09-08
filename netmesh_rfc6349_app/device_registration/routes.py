@@ -33,6 +33,7 @@ def register_api():
 
         # device_config = config.load_device_config()
         config.device_config.set_device_name(device_name)
+        config.device_config.set_device_region(session['admin-ntc-region'])
 
         config.users_config.set_logged_user({
             "name": device_owner_info['name'],
@@ -40,11 +41,15 @@ def register_api():
         })
 
         config.save()
+        
+        session['admin-token'] = None
+        session['admin-ntc-region'] = None
+        session['admin-ntc-region-name'] = None
 
-        return render_template('device_registration_done.html',
+        return jsonify(html=render_template('device_registration_done.html',
                                device_name=device_name,
                                admin_email=admin_email,
-                               device_info=get_device_info())
+                               device_info=get_device_info())), 200
     except requests.exceptions.HTTPError as he:
         error = ""
         try:
@@ -55,12 +60,12 @@ def register_api():
                 error = req.text
         except ValueError:
             error = req.text
-
-        return error, 400
+            
+        return jsonify(error=error), 400
     except requests.exceptions.RequestException as re:
-        return req.text, 400
+        return jsonify(error=req.text), 400
     except Exception as ex:
-        return req.text, 400
+        return jsonify(error=str(ex)), 400
 
 
 @device_registration.route('/register-device')
@@ -71,7 +76,8 @@ def register_device_page():
     # device_config = config.load_device_config()
 
     device_name = config.device_config.get_device_name()
-    if device_name:
+    region = config.device_config.get_device_region()
+    if device_name and region:
         return redirect(url_for('users.login_page'))
 
     return render_template('register_device.html',
@@ -197,6 +203,16 @@ def device_confirmation_template():
                            laptop_name=laptop_name,
                            laptop_owner_email=laptop_owner_email,
                            device_info=get_device_info())
+
+
+@device_registration.route('/reset-registration', methods=['POST'])
+def reset_registration():
+    ini = NetMeshConfigFile()
+    try:
+        ini.delete()
+        return jsonify(), 200
+    except Exception as ex:
+        return jsonify(error=str(ex)), 400
 
 
 @device_registration.route('/device-details', methods=['GET'])

@@ -21,36 +21,31 @@ class NetMeshConfigFile:
         if not os.path.isfile(self.__CONFIG_FILE_PATH):
             with open(self.__CONFIG_FILE_PATH, 'x') as cf:
                 cf.close()
+            os.chmod(self.__CONFIG_FILE_PATH, 600)
 
         self._config = configparser.ConfigParser()
         self._config.read(self.__CONFIG_FILE_PATH)
-        
+
         self.device_config = self.__NetMeshDeviceConfig(self._config)
         self.users_config = self.__NetMeshUsersConfig(self._config)
 
     def save(self):
         with open(self.__CONFIG_FILE_PATH, 'w') as cf:
             self._config.write(cf)
-
-    # def load_device_config(self):
-    #     device_config = self._NetMeshDeviceConfig(self._config)
-    #     return device_config
-
-    # def load_users_config(self):
-    #     users_config = self._NetMeshUsersConfig(self._config)
-    #     return users_config
-     
     
+    def delete(self):
+        os.remove(self.__CONFIG_FILE_PATH)
+
     class __NetMeshSectionConfig:
         def __init__(self, config: configparser.ConfigParser):
             self._config = config
-            
+
         def _set_value(self, section, key, value):
             if not section in self._config.sections():
                 self._config.add_section(section)
 
             self._config.set(section, key, value)
-            
+
         def _get_value(self, section, key):
             value = ""
             try:
@@ -58,7 +53,7 @@ class NetMeshConfigFile:
                     section, key)
             except Exception as ex:
                 print(ex)
-                
+
             return value
 
     class __NetMeshDeviceConfig(__NetMeshSectionConfig):
@@ -68,14 +63,14 @@ class NetMeshConfigFile:
             self._config = config
 
         def set_device_name(self, device_name: str):
-            self._set_value(self, "device_name", device_name)
+            self._set_value(self.section_name, "device_name", device_name)
 
         def get_device_name(self):
             return self._get_value(self.section_name, "device_name")
-        
+
         def set_device_region(self, region: str):
-            self._set_value(self, "device_region", region)
-        
+            self._set_value(self.section_name, "device_region", region)
+
         def get_device_region(self):
             return self._get_value(self.section_name, "device_region")
 
@@ -120,20 +115,22 @@ class NetMeshConfigFile:
 
         def get_logged_user(self, email):
             logged_users = self._load_logged_users()
-            
-            user: dict = next(lu for lu in logged_users if lu['email'] == email)
+
+            user: dict = next(
+                lu for lu in logged_users if lu['email'] == email)
             return user
 
         def set_logged_user(self, user: dict):
             logged_users = self._load_logged_users()
-            
-            users = list(filter(lambda u: u['email'] != user['email'], logged_users))
+
+            users = list(
+                filter(lambda u: u['email'] != user['email'], logged_users))
             users.insert(0, user)
 
             self._config.set("USERS", "logged_users", json.dumps(users))
 
         def remove_logged_user(self, user_email: str):
-            
+
             logged_users = self._load_logged_users()
             remaining_logged_users = [
                 u for u in logged_users if u['email'] != user_email]
