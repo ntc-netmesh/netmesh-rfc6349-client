@@ -33,7 +33,7 @@ def run_on_desktop():
 def run_in_browser():
     app = create_app()
 
-    app.run()
+    app.run(debug=True)
 
 
 if __name__ == '__main__':
