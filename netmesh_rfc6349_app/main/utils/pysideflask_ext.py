@@ -26,7 +26,7 @@ class ApplicationThread(QtCore.QThread):
         super(ApplicationThread, self).__init__()
         self.application = application
         self.port = port
-
+        
     def __del__(self):
         self.wait()
 
