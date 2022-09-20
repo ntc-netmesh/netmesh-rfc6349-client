@@ -14,6 +14,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000")} bytes`
     },
+    getRsMeasurementValue: function (val) {
+      return val;
+    }
   }),
   rtt: Object.freeze({
     name: "Round-trip Time (RTT)",
@@ -22,6 +25,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} ms`
     },
+    getRsMeasurementValue: function (val) {
+      return val / 1000;
+    }
   }),
   bb: Object.freeze({
     name: "Bottleneck Bandwidth (BB)",
@@ -30,6 +36,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
+    getRsMeasurementValue: function (val) {
+      return val * 1_000_000 / 8;
+    }
   }),
   bdp: Object.freeze({
     name: "Bandwidth Delay Product (BDP)",
@@ -38,6 +47,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000")} bytes`
     },
+    getRsMeasurementValue: function (val) {
+      return val * 8;
+    }
   }),
   rwnd: Object.freeze({
     name: "Receiver Window (RWND)",
@@ -46,6 +58,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} KBytes`
     },
+    getRsMeasurementValue: function (val) {
+      return val * 1000;
+    }
   }),
   thpt_avg: Object.freeze({
     name: "Throughput Average",
@@ -54,6 +69,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
+    getRsMeasurementValue: function (val) {
+      return val * 1_000_000;
+    }
   }),
   thpt_ideal: Object.freeze({
     name: "Throughput Ideal",
@@ -62,6 +80,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[00]")} Mbits/sec`
     },
+    getRsMeasurementValue: function (val) {
+      return val * 1_000_000;
+    }
   }),
   tx_bytes: Object.freeze({
     name: "Transmitted Bytes",
@@ -70,14 +91,20 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} MBytes`
     },
+    getRsMeasurementValue: function (val) {
+      return val / 1000;
+    }
   }),
   retx_bytes: Object.freeze({
     name: "Retransmitted Bytes",
     test: resultsTestNames.ThroughputTest,
     description: "",
     getMeasurement: function (val) {
-      return `${numeral(val / 1000000).format("0,000.[000]")} MBytes`
+      return `${numeral(val / 1_000_000).format("0,000.[000]")} MBytes`
     },
+    getRsMeasurementValue: function (val) {
+      return val;
+    }
   }),
   ave_rtt: Object.freeze({
     name: "Average RTT",
@@ -86,6 +113,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} ms`
     },
+    getRsMeasurementValue: function (val) {
+      return val / 1000;
+    }
   }),
   transfer_avg: Object.freeze({
     name: "Transfer Average",
@@ -94,6 +124,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} sec`
     },
+    getRsMeasurementValue: function (val) {
+      return val;
+    }
   }),
   transfer_ideal: Object.freeze({
     name: "Transfer Ideal",
@@ -102,6 +135,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.[000]")} sec`
     },
+    getRsMeasurementValue: function (val) {
+      return val;
+    }
   }),
   tcp_ttr: Object.freeze({
     name: "TCP Transfer Time Ratio",
@@ -110,6 +146,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0,000.000")}`
     },
+    getRsMeasurementValue: function (val) {
+      return val;
+    }
   }),
   tcp_eff: Object.freeze({
     name: "TCP Efficiency",
@@ -118,6 +157,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0.00")}%`
     },
+    getRsMeasurementValue: function (val) {
+      return val / 100;
+    }
   }),
   buf_delay: Object.freeze({
     name: "Buffer Delay",
@@ -126,6 +168,9 @@ const resultsParameters = Object.freeze({
     getMeasurement: function (val) {
       return `${numeral(val).format("0.[00]")}%`
     },
+    getRsMeasurementValue: function (val) {
+      return val / 100;
+    }
   }),
 });
 

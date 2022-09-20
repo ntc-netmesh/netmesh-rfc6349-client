@@ -77,7 +77,7 @@ const summaryChartImageUris = Object.seal({
     retx_bytes: null,
   };
 
-  let postThoughputScriptData = {};
+  // let postThoughputScriptData = {};
   
   let measurementTimes = {
     upload: [],
@@ -438,16 +438,17 @@ const summaryChartImageUris = Object.seal({
         testServers = data;
         
         
-        // testServers.push({
-        //   nickname: 'Local server ni Jean Jay :D',
-        //   hostname: 'http://192.168.90.20:5000',
-        //   ip_address: '192.168.90.20'
-        // })
+        testServers.push({
+          id: 0,
+          nickname: 'Local server ko :D',
+          hostname: 'http://0.0.0.0:8000',
+          ip_address: '0.0.0.0'
+        })
   
         for (let i = 0; i < testServers.length; i++) {
           const server = testServers[i];
           $testServers.append(`
-            <option value="${i}"> 
+            <option value="${server.id}"> 
               ${server.nickname}
             </option>`
           );
@@ -595,8 +596,8 @@ const summaryChartImageUris = Object.seal({
     testInputs.isr = $('#isr').val();
     testInputs.networkConnectionTypeName = $('#netType').val();
     
-    const testServerIndex = $('#testServers').val();
-    testInputs.testServer = testServers[testServerIndex];
+    const testServerId = $('#testServers').val();
+    testInputs.testServer = testServers.find(ts => ts.id == testServerId);
     
     testInputs.modeName = $('input[name="radTestMode"]:checked').val();
     testInputs.location.lat = $('#lat').val();
@@ -620,16 +621,16 @@ const summaryChartImageUris = Object.seal({
       return;
     }
 
-    let gpsSuccess = false;
-    await setGpsInfo(testInputs.location.lat, testInputs.location.lon, testInputs.location.name)
-      .then(status => {
-        gpsSuccess = true;
-      });
+    // let gpsSuccess = false;
+    // await setGpsInfo(testInputs.location.lat, testInputs.location.lon, testInputs.location.name)
+    //   .then(status => {
+    //     gpsSuccess = true;
+    //   });
 
-    if (!gpsSuccess) {
-      alert("gps failed.");
-      return;
-    }
+    // if (!gpsSuccess) {
+    //   alert("gps failed.");
+    //   return;
+    // }
 
     getIspInfo()
       .then(({isp, publicIP}) => {
@@ -986,6 +987,73 @@ const summaryChartImageUris = Object.seal({
     const testMethod = TEST_METHODS[methodName];
     currentTestDirection = methodName;
     currentProcessIndex = 0;
+
+    const markAsDone = (process) => {
+      console.table(measurementTimes);
+      measurementTimes[methodName][currentProcessIndex][1] = Date.now();
+
+      const startedOn = moment(measurementTimes[methodName][currentProcessIndex][0]);
+      const endedOn = moment(measurementTimes[methodName][currentProcessIndex][1]);
+
+      $(`#${testMethod.name}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
+
+      $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(process.label);
+      $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).addClass("text-success");
+
+      $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
+        <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${startedOn.format('HH:mm:ss.SSS')} - ${endedOn.format('HH:mm:ss.SSS')}">
+          ${startedOn.format('hh:mm:ss a')} - ${endedOn.format('hh:mm:ss a')}
+        </span>
+      `);
+
+      testResults[autoRepeatIndex][methodName][`${process.processId}Duration`] = measurementTimes[methodName][currentProcessIndex];
+
+      console.log(`Done ${process.label}\n`);
+
+      // if (testResults.length == autoRepeatIndex) {
+      //   const oResult = {};
+      //   oResult[testMethod.name] = {}
+      //   testResults.push(oResult);
+      //   console.log(testResults);
+      // } else {
+      //   testResults[autoRepeatIndex][testMethod.name] = {};
+      // }
+      // testResults[autoRepeatIndex][testMethod.name]['startTime'] = 'st';
+      // testResults[autoRepeatIndex][testMethod.name]['endTime'] = 'et';
+      // testResults[autoRepeatIndex][testMethod.name][`${process.processId}Duration`] = [measurementTimes[methodName][currentProcessIndex][0], measurementTimes[methodName][currentProcessIndex][1]];
+
+      currentProcessIndex++;
+    }
+
+    const connectToServer = (process) => {
+      return new Promise(function (resolve, reject) {
+        measurementTimes[methodName].push([Date.now(), null]);
+
+        $.ajax({
+          url: 'connect-to-test-server',
+          method: 'POST',
+          data: {
+            testServerName: testServer.nickname,
+            testServerUrl: testServer.hostname,
+            mode: testMethod.mode,
+            serverId: testServer.id == 0 ? 1 : testServer.id
+          },
+          dataType: 'json',
+          timeout: MEASUREMENT_TIMEOUT,
+          success: function (data) {
+            console.log(data);
+
+            markAsDone(process);
+            resolve(data);
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            console.log("connect-to-server error");
+            console.log({jqXHR, textStatus, errorThrown});
+            reject(jqXHR);
+          }
+        });
+      });
+    };
   
     const executeProcess = (process) => {
       console.log({ process });
@@ -1122,25 +1190,28 @@ const summaryChartImageUris = Object.seal({
           }
         }
         return new Promise((resolve, reject) => {
-          let processScriptData = {};
+          let processScriptData = scriptData;
 
-          if (process.processId == "analysis") {
-            // processScriptData = {
-            //   mode: testMethod.mode,
-            //   rtt: requiredGetParamaters.rtt
-            // };
-            postThoughputScriptData = Object.assign(postThoughputScriptData, scriptData);
-            processScriptData = postThoughputScriptData;
-          } else if (process.processId == "thpt") {
-            postThoughputScriptData = scriptData;
-            resolve();
-            return;
-          }
-          else {
-            processScriptData = scriptData;
-          }
+          // if (process.processId == "analysis") {
+          //   // processScriptData = {
+          //   //   mode: testMethod.mode,
+          //   //   rtt: requiredGetParamaters.rtt
+          //   // };
+          //   postThoughputScriptData = Object.assign(postThoughputScriptData, scriptData);
+          //   processScriptData = postThoughputScriptData;
+          // } else if (process.processId == "thpt") {
+          //   postThoughputScriptData = scriptData;
+          //   resolve();
+          //   return;
+          // }
+          // else {
+          //   processScriptData = scriptData;
+          // }
+
+          // processScriptData = scriptData
+
           console.log({processScriptData});
-          console.log({postThoughputScriptData});
+          // console.log({postThoughputScriptData});
           
           $.ajax({
             url: 'process',
@@ -1208,39 +1279,7 @@ const summaryChartImageUris = Object.seal({
             return postProcess(scriptData);
           })
           .then(() => {
-            measurementTimes[methodName][currentProcessIndex][1] = Date.now();
-
-            const startedOn = moment(measurementTimes[methodName][currentProcessIndex][0]);
-            const endedOn = moment(measurementTimes[methodName][currentProcessIndex][1]);
-
-            $(`#${testMethod.name}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
-  
-            $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(process.label);
-            $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).addClass("text-success");
-  
-            $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
-              <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${startedOn.format('HH:mm:ss.SSS')} - ${endedOn.format('HH:mm:ss.SSS')}">
-                ${startedOn.format('hh:mm:ss a')} - ${endedOn.format('hh:mm:ss a')}
-              </span>
-            `);
-
-            testResults[autoRepeatIndex][methodName][`${process.processId}Duration`] = measurementTimes[methodName][currentProcessIndex];
-  
-            console.log(`Done ${process.label}\n`);
-
-            // if (testResults.length == autoRepeatIndex) {
-            //   const oResult = {};
-            //   oResult[testMethod.name] = {}
-            //   testResults.push(oResult);
-            //   console.log(testResults);
-            // } else {
-            //   testResults[autoRepeatIndex][testMethod.name] = {};
-            // }
-            // testResults[autoRepeatIndex][testMethod.name]['startTime'] = 'st';
-            // testResults[autoRepeatIndex][testMethod.name]['endTime'] = 'et';
-            // testResults[autoRepeatIndex][testMethod.name][`${process.processId}Duration`] = [measurementTimes[methodName][currentProcessIndex][0], measurementTimes[methodName][currentProcessIndex][1]];
-
-            currentProcessIndex++;
+            markAsDone(process);
   
             resolve();
           })
@@ -1252,39 +1291,72 @@ const summaryChartImageUris = Object.seal({
   
     const getTestResults = function () {
       return new Promise(function (resolve, reject) {
-        setTimeout(function () {
+
+        setTimeout(() => {
           $.ajax({
-            url: 'get-results',
-            method: "GET",
+            url: 'finish-test',
+            method: 'POST',
             data: {
               testServerName: testServer.nickname,
               testServerUrl: testServer.hostname,
               mode: testMethod.mode,
-              testNumber: autoRepeatIndex + 1
             },
             dataType: 'json',
             timeout: MEASUREMENT_TIMEOUT,
             success: function (response) {
-              console.log(testResults);
+              console.log({response});
+              // console.log(testResults);
               testResults[autoRepeatIndex][response.method]['results'] = response.results;
-              
+
               resolve(response.html);
             },
             error: function (jqXHR, textStatus, errorThrown) {
-              console.log('GET get-results error');
-              console.log({jqXHR, textStatus, errorThrown});
               reject(jqXHR);
             }
           });
-        }, 500);
+        }, 1000);
+        // setTimeout(function () {
+        //   $.ajax({
+        //     url: 'get-results',
+        //     method: "GET",
+        //     data: {
+        //       testServerName: testServer.nickname,
+        //       testServerUrl: testServer.hostname,
+        //       mode: testMethod.mode,
+        //       testNumber: autoRepeatIndex + 1
+        //     },
+        //     dataType: 'json',
+        //     timeout: MEASUREMENT_TIMEOUT,
+        //     success: function (response) {
+        //       console.log(testResults);
+        //       testResults[autoRepeatIndex][response.method]['results'] = response.results;
+              
+        //       resolve(response.html);
+        //     },
+        //     error: function (jqXHR, textStatus, errorThrown) {
+        //       console.log('GET get-results error');
+        //       console.log({jqXHR, textStatus, errorThrown});
+        //       reject(jqXHR);
+        //     }
+        //   });
+        // }, 500);
       });
     }
   
     const executeAllProcesses = async () => {
-      postThoughputScriptData = {};
+      // postThoughputScriptData = {};
       return new Promise((resolve, reject) => {
         MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
+          console.log("a", {previousPromise, nextProcess});
           await previousPromise;
+
+          if (['verify-test'].includes(nextProcess.processId)) {
+            return connectToServer(nextProcess);
+          }
+
+          if (['finish-test'].includes(nextProcess.processId)) {
+            return;
+          }
           
           return executeProcess(nextProcess);
         }, Promise.resolve())
@@ -1754,25 +1826,25 @@ const summaryChartImageUris = Object.seal({
     });
   }
 
-  function setGpsInfo(lat, lon, location) {
-    return new Promise(function (resolve, reject) {
-      $.ajax({
-        url: 'set-gps-info',
-        method: 'POST',
-        dataType: 'json',
-        data: {
-          lat, lon, location
-        },
-        success: function (response) {
-          console.log("response", response);
-          resolve(response);
-        },
-        error: function (err) {
-          reject(err);
-        }
-      });
-    });
-  }
+  // function setGpsInfo(lat, lon, location) {
+  //   return new Promise(function (resolve, reject) {
+  //     $.ajax({
+  //       url: 'set-gps-info',
+  //       method: 'POST',
+  //       dataType: 'json',
+  //       data: {
+  //         lat, lon, location
+  //       },
+  //       success: function (response) {
+  //         console.log("response", response);
+  //         resolve(response);
+  //       },
+  //       error: function (err) {
+  //         reject(err);
+  //       }
+  //     });
+  //   });
+  // }
   
   function passwordModal() {
     return new Promise(function (resolve, reject) {

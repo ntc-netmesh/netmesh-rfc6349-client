@@ -88,7 +88,7 @@ def login():
                                data['user']['last_name'],
                                data['expiry'])
         
-        return {"goto": url_for('main.home_page')}, 200
+        return jsonify(goto=url_for('main.home_page')), 200
     except requests.exceptions.ConnectionError as ex:
         return jsonify(error="Connection error. Please check your Internet connection"), 400
     except requests.exceptions.Timeout as ex:

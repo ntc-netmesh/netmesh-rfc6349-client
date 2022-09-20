@@ -192,8 +192,8 @@ def set_gps_info():
 @test_measurement.route('/get-test-servers', methods=['GET'])
 def get_test_servers():
     try:
-        main_url = "https://netmesh.pregi.net"
-        test_servers_url = f'{main_url}/api/servers/'
+        main_url = current_app.config['RESULTS_SERVER_API_URI']
+        test_servers_url = f"{main_url}/server/"
         r = requests.get(
             url=test_servers_url,
         )
@@ -244,6 +244,79 @@ def get_test_servers():
             "error": error
         }), 500)
 
+@test_measurement.route('/connect-to-test-server', methods=['POST'])
+def connect_to_test_server():
+    try:
+        test_server_name = request.form.get('testServerName')
+        test_server_url = request.form.get('testServerUrl')
+        mode = request.form.get('mode')
+        server_id = request.form.get('serverId')
+        
+        json_data = {
+            "server_id": server_id,
+            "email": session['email'],
+            "mode": mode
+        }
+        headers = {
+            "Authorization": "Bearer " + session['api_session_token']
+        }
+        
+        r = requests.post(
+            url=f'{test_server_url}/api/auth/verify-test',
+            json=json_data,
+            headers=headers,
+        )
+        r.raise_for_status()
+        return r.text, 200
+    except requests.exceptions.HTTPError as eh:
+        status_code = eh.response.status_code
+
+        error = f"Cannot connect to server"
+
+        if status_code == 401:
+            error_json = json.loads(r.text)
+            if "msg" in error_json:
+                error = error_json["msg"]
+        elif status_code == 404:
+            error = f"Cannot connect to {test_server_name}"
+
+        log_settings.log_error(str(eh))
+        return Response(json.dumps({
+            "error": error,
+            "message": str(eh)
+        }), status_code)
+    except requests.exceptions.ConnectionError as ece:
+        error = "Connection error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(ece)
+        }), 500)
+    except requests.exceptions.Timeout as et:
+        error = "Request timeout"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(et)
+        }), 500)
+    except requests.exceptions.RequestException as e:
+        error = "Unexpected error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(e)
+        }), 500)
+    except Exception as e:
+        error = "Unexpected error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(e)
+        }), 500)
 
 @test_measurement.route('/process', methods=['GET', 'POST'])
 def process():
@@ -264,8 +337,8 @@ def process():
             process_id = request.form['processId']
             api_url = f'{test_server_url}/api/{mode}/{process_id}'
 
-            if process_id == "analysis":
-                api_url = f'{test_server_url}/api/{mode}/thpt'
+            # if process_id == "analysis":
+            # api_url = f'{test_server_url}/api/{mode}/analysis'
 
             print(api_url)
 
@@ -417,6 +490,37 @@ def check_status():
             "message": str(e)
         }), 500)
 
+@test_measurement.route('/finish-test', methods=['POST'])
+def finish_test():
+    try:
+        test_server_name = request.form.get('testServerName')
+        test_server_url = request.form.get('testServerUrl')
+        mode = request.form.get('mode')
+        test_number = 1
+        
+        api_url = f'{test_server_url}/api/{mode}/finish-test'
+        
+        req = requests.post(
+            url=api_url,
+            headers={"Authorization": "Bearer "+session['api_session_token']}
+        )
+        
+        req.raise_for_status()
+        
+        res = req.json()
+        method = "download" if mode == "reverse" else "upload"
+        
+        res.update({
+            'method': method,
+            'html': render_template('results.html',
+                                    test_number=test_number,
+                                    results=res['results'],
+                                    method=method)
+        })
+        return json.dumps(res), 200
+    except requests.RequestException as ex:
+        print(ex)
+        return jsonify(error=str(ex)), 500
 
 @test_measurement.route('/get-results', methods=['GET'])
 def get_results():
@@ -621,6 +725,8 @@ def run_process_bdp():
     port = request.form['port']
 
     command_array = ['sudo', './bb.sh', rtt, server_ip, port, mode]
+    
+    print(command_array)
     output_params = [
         {'name': 'bb', 'key': 'bb'},
         {'name': 'bdp', 'key': 'bdp'},

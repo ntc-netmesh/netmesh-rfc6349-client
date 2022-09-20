@@ -45,7 +45,7 @@
           const relative_tcp_ttr = value < 1 ? 1 / value : value;
           quantityHtml = `<td>
             <div>
-              ${measurementText}<small class="text-muted ps-1">${value === 1 ? "Same as ideal" : `${numeral(relative_tcp_ttr).format('0.[000]')} times ${value < 1 ? "faster" : "slower"} than ideal`}</small>
+              ${measurementText}<small class="text-muted ps-1">${value === 1 ? "Same as ideal" : (`${numeral(relative_tcp_ttr).format('0.[000]')} times ${value < 1 ? "faster" : "slower"} than ideal`)}</small>
             </div>
           </td>`;
           break;
@@ -55,7 +55,7 @@
           const relative_buf_delay = decimalValue == -1 ? NaN : decimalValue >= 0 ? decimalValue : (1 / (1 + decimalValue)) - 1;
           quantityHtml = `<td>
             <div>
-              ${measurementText}<small class="text-muted ps-1">Average RTT is ${decimalValue === 0 ? "same as Baseline RTT" : `${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%')}`} ${decimalValue < 0 ? "faster" : "slower"} than Baseline RTT</small>
+              ${measurementText}<small class="text-muted ps-1">Average RTT is ${decimalValue === 0 ? "same as Baseline RTT" : (`${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%')}`)} ${decimalValue < 0 ? "faster" : "slower"} than Baseline RTT</small>
             </div>
           </td>`;
           break;
