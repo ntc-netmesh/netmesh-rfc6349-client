@@ -32,14 +32,14 @@ const TEST_MODES = Object.freeze({
   })
 });
 
-const NETWORK_CONNECTION_TYPES = Object.freeze({
-  "Ethernet": Object.freeze({
-    prefix: "enx"
-  }),
-  "Wi-Fi": Object.freeze({
-    prefix: "wlp"
-  }),
-});
+// const NETWORK_CONNECTION_TYPES = Object.freeze({
+//   "Ethernet": Object.freeze({
+//     prefix: "enx"
+//   }),
+//   "Wi-Fi": Object.freeze({
+//     prefix: "wlp"
+//   }),
+// });
 
 const MEASUREMENT_PROCESSES = Object.freeze([
   Object.freeze({
@@ -78,34 +78,34 @@ const APP_STATE = Object.freeze({
   TestFinished: 'TestFinished',
 });
 
-const testInputs = Object.seal({
-  isr: null,
-  testServer: null,
-  networkConnectionTypeName: null,
-  modeName: null,
-  location: {
-    lat: null,
-    lon: null,
-    name: null,
-    reverseGeoLicense: "",
-  },
-  mapImage: {
-    dataUri: null,
-    width: 0,
-    height: 0,
-  },
-  get networkConnectionType() {
-    return NETWORK_CONNECTION_TYPES[this.networkConnectionTypeName];
-  },
-  get mode() {
-    return TEST_MODES[this.modeName];
-  },
-  get coordinates() {
-    const latDirection = this.location.lat >= 0 ? "N" : "S";
-    const lonDirection = this.location.lon >= 0 ? "E" : "W";
-    return `${this.location.lat}°${latDirection}, ${this.location.lon}°${lonDirection}`;
-  },
-});
+// const testInputs = Object.seal({
+//   isr: null,
+//   testServer: null,
+//   ethernetName: null,
+//   modeName: null,
+//   location: {
+//     lat: null,
+//     lon: null,
+//     name: null,
+//     reverseGeoLicense: "",
+//   },
+//   mapImage: {
+//     dataUri: null,
+//     width: 0,
+//     height: 0,
+//   },
+//   get networkConnectionTypeName() {
+//     return "Ethernet";
+//   },
+//   get mode() {
+//     return TEST_MODES[this.modeName];
+//   },
+//   get coordinates() {
+//     const latDirection = this.location.lat >= 0 ? "N" : "S";
+//     const lonDirection = this.location.lon >= 0 ? "E" : "W";
+//     return `${this.location.lat}°${latDirection}, ${this.location.lon}°${lonDirection}`;
+//   },
+// });
 
 const NETMESH_COLORS = Object.freeze({
   ntcBlueColor: '#0038a7',
@@ -144,7 +144,7 @@ const TR = [
         "ave_rtt": 1.359,
         "bb": 711,
         "bdp": 550811,
-        "buf_delay": 75.42274428811152,
+        "buf_del": 75.42274428811152,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -191,7 +191,7 @@ const TR = [
         "ave_rtt": 0.941,
         "bb": 357,
         "bdp": 262466,
-        "buf_delay": 27.992383025027202,
+        "buf_del": 27.992383025027202,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -240,7 +240,7 @@ const TR = [
         "ave_rtt": 1.366,
         "bb": 801,
         "bdp": 645525,
-        "buf_delay": 69.49993795756299,
+        "buf_del": 69.49993795756299,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -287,7 +287,7 @@ const TR = [
         "ave_rtt": 0.938,
         "bb": 373,
         "bdp": 279488,
-        "buf_delay": 25.18350460429734,
+        "buf_del": 25.18350460429734,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -336,7 +336,7 @@ const TR = [
         "ave_rtt": 1.359,
         "bb": 829,
         "bdp": 674391,
-        "buf_delay": 67.0559311616472,
+        "buf_del": 67.0559311616472,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -383,7 +383,7 @@ const TR = [
         "ave_rtt": 0.949,
         "bb": 365,
         "bdp": 295358,
-        "buf_delay": 17.276322293623323,
+        "buf_del": 17.276322293623323,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -432,7 +432,7 @@ const TR = [
         "ave_rtt": 1.296,
         "bb": 773,
         "bdp": 643290,
-        "buf_delay": 55.731795241528474,
+        "buf_del": 55.731795241528474,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -479,7 +479,7 @@ const TR = [
         "ave_rtt": 0.932,
         "bb": 364,
         "bdp": 278605,
-        "buf_delay": 21.766396655343623,
+        "buf_del": 21.766396655343623,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -528,7 +528,7 @@ const TR = [
         "ave_rtt": 1.41,
         "bb": 746,
         "bdp": 602395,
-        "buf_delay": 74.61300309597523,
+        "buf_del": 74.61300309597523,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -575,7 +575,7 @@ const TR = [
         "ave_rtt": 0.958,
         "bb": 352,
         "bdp": 286035,
-        "buf_delay": 17.89318237755353,
+        "buf_del": 17.89318237755353,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -624,7 +624,7 @@ const TR = [
         "ave_rtt": 1.39,
         "bb": 782,
         "bdp": 563352,
-        "buf_delay": 92.94836202109936,
+        "buf_del": 92.94836202109936,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -671,7 +671,7 @@ const TR = [
         "ave_rtt": 0.955,
         "bb": 368,
         "bdp": 244131,
-        "buf_delay": 43.95538136870666,
+        "buf_del": 43.95538136870666,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -720,7 +720,7 @@ const TR = [
         "ave_rtt": 1.361,
         "bb": 787,
         "bdp": 589069,
-        "buf_delay": 81.83032732130927,
+        "buf_del": 81.83032732130927,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -767,7 +767,7 @@ const TR = [
         "ave_rtt": 0.92,
         "bb": 367,
         "bdp": 275045,
-        "buf_delay": 22.757671020116252,
+        "buf_del": 22.757671020116252,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -816,7 +816,7 @@ const TR = [
         "ave_rtt": 1.369,
         "bb": 764,
         "bdp": 601497,
-        "buf_delay": 73.88543122062747,
+        "buf_del": 73.88543122062747,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -863,7 +863,7 @@ const TR = [
         "ave_rtt": 0.934,
         "bb": 365,
         "bdp": 277619,
-        "buf_delay": 22.7977912174599,
+        "buf_del": 22.7977912174599,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -912,7 +912,7 @@ const TR = [
         "ave_rtt": 1.366,
         "bb": 762,
         "bdp": 612648,
-        "buf_delay": 69.90049751243781,
+        "buf_del": 69.90049751243781,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -959,7 +959,7 @@ const TR = [
         "ave_rtt": 0.932,
         "bb": 358,
         "bdp": 262879,
-        "buf_delay": 26.92360070815744,
+        "buf_del": 26.92360070815744,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1008,7 +1008,7 @@ const TR = [
         "ave_rtt": 1.414,
         "bb": 807,
         "bdp": 631074,
-        "buf_delay": 80.81841432225062,
+        "buf_del": 80.81841432225062,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1055,7 +1055,7 @@ const TR = [
         "ave_rtt": 0.893,
         "bb": 361,
         "bdp": 288114,
-        "buf_delay": 11.890740508708179,
+        "buf_del": 11.890740508708179,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1104,7 +1104,7 @@ const TR = [
         "ave_rtt": 1.451,
         "bb": 771,
         "bdp": 559283,
-        "buf_delay": 100.02757099531291,
+        "buf_del": 100.02757099531291,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1151,7 +1151,7 @@ const TR = [
         "ave_rtt": 0.935,
         "bb": 359,
         "bdp": 281994,
-        "buf_delay": 19.03246339910886,
+        "buf_del": 19.03246339910886,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1200,7 +1200,7 @@ const TR = [
         "ave_rtt": 1.27,
         "bb": 764,
         "bdp": 613797,
-        "buf_delay": 58.07816778690565,
+        "buf_del": 58.07816778690565,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1247,7 +1247,7 @@ const TR = [
         "ave_rtt": 0.923,
         "bb": 364,
         "bdp": 265574,
-        "buf_delay": 26.507675438596497,
+        "buf_del": 26.507675438596497,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1296,7 +1296,7 @@ const TR = [
         "ave_rtt": 1.295,
         "bb": 810,
         "bdp": 516942,
-        "buf_delay": 102.9144468818552,
+        "buf_del": 102.9144468818552,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1343,7 +1343,7 @@ const TR = [
         "ave_rtt": 0.99,
         "bb": 369,
         "bdp": 276122,
-        "buf_delay": 32.29987972738207,
+        "buf_del": 32.29987972738207,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1392,7 +1392,7 @@ const TR = [
         "ave_rtt": 1.374,
         "bb": 759,
         "bdp": 554297,
-        "buf_delay": 88.14185950979052,
+        "buf_del": 88.14185950979052,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1439,7 +1439,7 @@ const TR = [
         "ave_rtt": 0.937,
         "bb": 358,
         "bdp": 283500,
-        "buf_delay": 18.323020583406997,
+        "buf_del": 18.323020583406997,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1488,7 +1488,7 @@ const TR = [
         "ave_rtt": 1.465,
         "bb": 763,
         "bdp": 695169,
-        "buf_delay": 60.79464383711996,
+        "buf_del": 60.79464383711996,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1535,7 +1535,7 @@ const TR = [
         "ave_rtt": 0.937,
         "bb": 364,
         "bdp": 295640,
-        "buf_delay": 15.365673479438563,
+        "buf_del": 15.365673479438563,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1584,7 +1584,7 @@ const TR = [
         "ave_rtt": 1.374,
         "bb": 765,
         "bdp": 632501,
-        "buf_delay": 66.18287373004355,
+        "buf_del": 66.18287373004355,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1631,7 +1631,7 @@ const TR = [
         "ave_rtt": 0.948,
         "bb": 369,
         "bdp": 274203,
-        "buf_delay": 27.573677836092042,
+        "buf_del": 27.573677836092042,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1680,7 +1680,7 @@ const TR = [
         "ave_rtt": 1.418,
         "bb": 801,
         "bdp": 569190,
-        "buf_delay": 99.54967632986208,
+        "buf_del": 99.54967632986208,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1727,7 +1727,7 @@ const TR = [
         "ave_rtt": 0.979,
         "bb": 377,
         "bdp": 320563,
-        "buf_delay": 15.135834411384222,
+        "buf_del": 15.135834411384222,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1776,7 +1776,7 @@ const TR = [
         "ave_rtt": 1.408,
         "bb": 754,
         "bdp": 871247,
-        "buf_delay": 21.85201211596711,
+        "buf_del": 21.85201211596711,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1823,7 +1823,7 @@ const TR = [
         "ave_rtt": 0.924,
         "bb": 368,
         "bdp": 299993,
-        "buf_delay": 13.34641805691855,
+        "buf_del": 13.34641805691855,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1872,7 +1872,7 @@ const TR = [
         "ave_rtt": 1.358,
         "bb": 780,
         "bdp": 617682,
-        "buf_delay": 71.48629877509786,
+        "buf_del": 71.48629877509786,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,
@@ -1919,7 +1919,7 @@ const TR = [
         "ave_rtt": 0.977,
         "bb": 370,
         "bdp": 337699,
-        "buf_delay": 7.045031226032654,
+        "buf_del": 7.045031226032654,
         "gps_lat": 14.1,
         "gps_lon": 121.1,
         "id": 95,

@@ -164,5 +164,6 @@ def logout():
 
     session['api_session_token'] = None
     session['email'] = None
+    session['name'] = None
     
     return redirect(url_for('users.login_page'))

@@ -23,6 +23,13 @@
   #speedtest-pills-tab {
     top: 84px;
   }
+
+  .main-form-col  {
+    min-width: 400px;
+  }
+  .test-results-col  {
+    min-width: 480px;
+  }
 </style>
 
 {% endblock %}
@@ -30,13 +37,12 @@
 {% block content %}
 <!-- <iframe frameborder="1" id="pdfPreview" height="800" width="960"></iframe> -->
 <div id="pills-speedtest-summary-test">
-                  
+  
 </div>
-<div class="row justify-content-center">
-  <div class="col-md-9 col-lg-4 col-xxl-4">
+<div class="row">
+  <div class="main-form-col col-md-9 col-lg-4 col-xxl-4">
     <form
       id="mainForm"
-      class="needs-validation"
       novalidate
     >
       <fieldset class="card shadow mb-4">
@@ -45,7 +51,8 @@
           <div class="row">
             <div class="form-group mb-3">
               <label class="small form-label mb-1" for="isr">Internet Subscription Rate (ISR)*</label>
-              <div class="input-group" style="width: 160px;">
+              <div class="input-group" style="width: 240px;">
+                <span class="input-group-text" id="basic-addon2">Up to</span>
                 <input type="number" id="isr" min="1" max="1000" class="form-control align-right" aria-label="Enter speed" aria-describedby="basic-addon2" required data-bind="value:replyNumber">
                 <span class="input-group-text" id="basic-addon2">Mbps</span>
                 <div class="invalid-feedback" id="isr-validation">
@@ -56,7 +63,10 @@
           </div>
           <div class="row">
             <div class="form-group mb-3">
-              <label class="small form-label mb-1" for="netType">Network Connection Type*</label>
+              <div class="d-flex">
+                <label class="small form-label mb-1" for="netType">Ethernet Connection*</label>
+                <a href="#" class="btn-refresh-networks ms-auto small">Refresh</a>
+              </div>
               <select class="form-select" id="netType">
               </select>
               <a href="#" class="small p-1" id="btn-scan-connected-devices">Scan for connected devices</a>
@@ -78,18 +88,22 @@
                 </div>
               </div>
             </div>
-            <div class="input-group input-group-sm mb-3 custom-test-server-field d-none">
-              <span class="input-group-text">
-                <select class="form-select form-select-sm" aria-label=".form-select-sm example">
+            <div class="input-group input-group-sm has-validation mb-3 custom-test-server-field d-none">
+              <span class="input-group-text p-0">
+                <select id="custom-server-protocol" class="form-select form-select-sm" aria-label=".form-select-sm example">
                   <option selected value="http">http://</option>
                   <option value="https">https://</option>
                 </select>
               </span>
-              <input type="text" class="form-control" placeholder="IP Address" aria-label="IP Address" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$">
+              <input id="custom-server-ip-address" type="text" class="form-control" placeholder="IP Address" aria-label="IP Address" minlength="7" maxlength="15" size="15" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$">
               <span class="input-group-text">:</span>
-              <input type="number" class="form-control" placeholder="Port" aria-label="Port" min="0" max="65535">
+              <input id="custom-server-port" type="number" class="form-control" placeholder="Port (optional)" aria-label="Port" min="1" max="65535">
+              <div id="validation-custom-server-feedback" class="invalid-feedback">
+                Invalid custom server
+              </div>
             </div>
           </div>
+
           <div class="row mb-3">
             <label class="mb-1 small form-label">Test Mode*</label>
             <div class="btn-group btn-group-toggle" data-toggle="buttons" role="group" aria-label="Test mode">
@@ -106,7 +120,7 @@
                 Bidirectional
               </label>
             </div>
-            <input type="radio" name="radTestMode" class="d-none" name="radio" required>
+            <input type="radio" class="d-none" name="radTestModeHidden" required>
             <div class="invalid-feedback">
               Select a test mode
             </div>
@@ -146,9 +160,9 @@
                         autocomplete="off"
                         required
                       />
-                      <div class="invalid-feedback">
+                      <!-- <div class="invalid-feedback">
                         Enter the latitude coordinate of your current location
-                      </div>
+                      </div> -->
                     </div>
                     <div class="form-group col">
                       <label class="small form-label mb-1" for="lon">GPS Longitude*</label>
@@ -159,9 +173,9 @@
                         autocomplete="off"
                         required
                       />
-                      <div class="invalid-feedback">
+                      <!-- <div class="invalid-feedback">
                         Enter the longitude coordinate of your current location
-                      </div>
+                      </div> -->
                     </div>
                     <div class="d-flex justify-content-end m-2">
                       <button id="btnManualGpsOK" type="button" class="btn btn-sm btn-primary">OK</button>
@@ -175,8 +189,8 @@
                   </div>
                 </div>
               </div>
-              <input type="text" id="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
-              <input type="text" id="lon" class="form-control form-control-sm d-none" autocomplete="off" required />
+              <input type="text" name="coordinates" id="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
+              <input type="text" name="coordinates" id="lon" class="form-control form-control-sm d-none" autocomplete="off" required />
               <div class="invalid-feedback">
                 Invalid Location
               </div>
@@ -204,7 +218,7 @@
       </fieldset>
     </form>
   </div>
-  <div class="col-md-9 col-lg-8 col-xxl-7">
+  <div class="test-results-col col-md-9 col-lg col-xxl-8">
     <div id="test-measurement-card">
       <!-- <div id="connected-devices-card" class="card bg-light">
         <div class="card-body">
@@ -271,7 +285,7 @@
                         <small>ISP</small>
                       </div>
                       <div id="summary-isp"></div>
-                      <span class="small">(<span id="summary-public-ip"></span>)</span>
+                      <span class="small"><span id="summary-public-ip"></span></span>
                     </div>
                   </div>
                 </div>
@@ -606,7 +620,7 @@
       <div class="modal-body">
         <p>Make sure you...</p>
         <ul>
-          <li>connected an Android phone to this laptop using a USB port</li>
+          <li>connected an Android phone to this laptop using a USB data port</li>
           <li>enabled 'Location' on the connceted Android phone</li>
           <li>enabled and allowed 'USB Debugging Mode' on the connected Android phone</li>
           <li>opened and closed a location app on your phone to activate the GPS</li>

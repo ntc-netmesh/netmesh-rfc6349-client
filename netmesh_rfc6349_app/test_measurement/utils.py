@@ -1,8 +1,12 @@
 import math
+from socket import AddressFamily
 import subprocess
 
 import json
 import requests
+
+import psutil
+import netifaces
 
 from flask import Response, abort, session, jsonify, current_app
 
@@ -174,7 +178,7 @@ def run_process_script(mode, command_array, output_params, ave_rtt_params=None):
         }), 400))
 
 
-def get_network_interface(mode, network_connection_type_name, network_prefix):
+def get_network_interface(network_connection_type_name, network_prefix):
     process = subprocess.Popen(['./network_interface.sh'],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
@@ -199,3 +203,36 @@ def get_network_interface(mode, network_connection_type_name, network_prefix):
             "error": error,
             "message": stderr.decode()
         }), 500))
+        
+def get_ethernet_connections():
+    addresses = psutil.net_if_addrs()
+    stats = psutil.net_if_stats()
+    
+    connection_types = {
+        "en": "Ethernet",
+        "wl": "Wi-Fi"
+    }
+    
+    ethernets = []
+    for intface, addr_list in addresses.items():
+        if any(getattr(addr, 'address').startswith("169.254") for addr in addr_list):
+            continue
+        elif intface in stats and (intface.startswith('en') or intface.startswith("wl")) and getattr(stats[intface], "isup"):
+            ip_address = next(map(lambda a: a.address, filter(lambda n: n.family == AddressFamily.AF_INET, addresses[intface])), None)
+            if not ip_address:
+                continue
+            ethernets.append({
+                "name": intface,
+                "type": connection_types[intface[0:2]] if intface[0:2] in connection_types.keys() else "Network",
+                "ip_address": ip_address
+            })
+    
+    return ethernets
+
+
+def get_default_gateway():
+    gateways = netifaces.gateways()
+    if not gateways or not 'default' in gateways or not netifaces.AF_INET in gateways['default']:
+        return None
+
+    return gateways['default'][netifaces.AF_INET][0]

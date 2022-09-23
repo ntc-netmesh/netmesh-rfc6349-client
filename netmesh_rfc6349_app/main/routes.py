@@ -31,4 +31,4 @@ def index_page():
 @main.route('/home')
 @wrappers.require_api_token
 def home_page():
-    return render_template('home.html', email=session['email'], app_version=get_app_current_version())
+    return render_template('home.html', email=session['email'], full_name=session['name'], app_version=get_app_current_version())

@@ -161,7 +161,7 @@ const resultsParameters = Object.freeze({
       return val / 100;
     }
   }),
-  buf_delay: Object.freeze({
+  buf_del: Object.freeze({
     name: "Buffer Delay",
     test: resultsTestNames.ThroughputAnalysis,
     description: "",
@@ -394,7 +394,7 @@ function getTransferChartOptions(method, transfer_avg, transfer_ideal, fontSize 
 }
 
 
-function getRttChartOptions(method, ave_rtt, rtt, buf_delay, fontSize = 14) {
+function getRttChartOptions(method, ave_rtt, rtt, buf_del, fontSize = 14) {
   const methodColor = method == 'upload' ? NETMESH_COLORS.uploadColor : NETMESH_COLORS.downloadColor;
   const aveRttColor = ave_rtt > rtt ? NETMESH_COLORS.ntcRedColor : NETMESH_COLORS.greenColor;
 
@@ -485,7 +485,7 @@ function getRttChartOptions(method, ave_rtt, rtt, buf_delay, fontSize = 14) {
           label: {
             borderColor: aveRttColor,
             orientation: 'horizontal',
-            text: `Buffer Delay: ${numeral(buf_delay).format("0.[00]")}%`,
+            text: `Buffer Delay: ${numeral(buf_del).format("0.[00]")}%`,
             // text: 'aaa',
             textAnchor: 'middle',
             offsetX: 0,

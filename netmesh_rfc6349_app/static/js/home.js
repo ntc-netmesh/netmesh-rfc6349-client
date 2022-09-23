@@ -10,7 +10,8 @@ const summaryChartImageUris = Object.seal({
   const testInputs = Object.seal({
     isr: null,
     testServer: null,
-    networkConnectionTypeName: null,
+    // networkConnectionTypeName: null,
+    ethernetName: null,
     modeName: null,
     location: {
       lat: null,
@@ -23,9 +24,10 @@ const summaryChartImageUris = Object.seal({
       width: 0,
       height: 0,
     },
-    get networkConnectionType() {
-      return NETWORK_CONNECTION_TYPES[this.networkConnectionTypeName];
-    },
+    networkConnectionTypeName: "Network",
+    // get networkConnectionType() {
+    //   return NETWORK_CONNECTION_TYPES[this.networkConnectionTypeName];
+    // },
     get mode() {
       return TEST_MODES[this.modeName];
     },
@@ -50,7 +52,8 @@ const summaryChartImageUris = Object.seal({
   });
 
   const testClient = Object.seal({
-    username: $('#loggedUsername').text(),
+    email: '',
+    fullName: '',
     machineName: '',
     isp: '',
     publicIP: '',
@@ -62,7 +65,27 @@ const summaryChartImageUris = Object.seal({
 
   let autoRepeatIndex = 0;
   let selectedTestNumber = 0;
-  let currentTestDuration = 0;
+  let currentTestDuration = Object.seal({
+    /**
+     * @param {number} val
+     */
+    totalSeconds: 0,
+    get time() {
+      const minutes = parseInt(this.totalSeconds / 60);
+      const seconds = Math.floor((this.totalSeconds - minutes * 60) * 100) / 100;
+      
+      return {minutes, seconds};
+    },
+    get timeColon() {
+      return `${numeral(this.time.minutes).format("0")}:${numeral(this.time.seconds).format("00")}`;
+    },
+    get timeText() {
+      return `${numeral(this.time.minutes).format("0")}m ${numeral(this.time.seconds).format("00")}s`;
+    },
+    reset() {
+      this.totalSeconds = 0;
+    }
+  });
   let testResults = [];
   
   let requiredGetParamaters = {
@@ -106,56 +129,44 @@ const summaryChartImageUris = Object.seal({
   // $('#measurement-failed-card').hide();
   
   $(async function () {
-
-    // try {
-    //   const response = await $.ajax({
-    //     url: 'get-test-summary-template',
-    //     method: 'GET',
-    //     data: {
-    //       methods: JSON.stringify(["download", "upload"]),
-    //       isr: 500,
-    //       testResults: JSON.stringify(TR),
-    //     },
-    //     dataType: 'json',
-    //   });
-
-    //   $(`#pills-speedtest-summary-test`).html(response.html);
+    testClient.fullName = document.getElementById('loggedUserFullName').innerText.trim();
+    testClient.email = document.getElementById('loggedUserEmail').innerText;
     
-    //   setTimeout(function () {
-    //     generateTestExecutionSummaryReport(["download", "upload"], TR, summaryChartImageUris);
-    //   }, 3000);
-    // } catch (ex) {
-    //   $(`#pills-speedtest-summary-test`).html(`error: ${ex}`);
-    // }
 
     setTestServers();
+    setEthernets();
     renderMap();
 
+    console.table(testClient);
+
     $('#btn-scan-connected-devices, .btn-rescan-devices').on('click', function() {
-      const selectedNetType = $('#netType').val();
+      const selectedNetType = `${$('#netType option:selected').data('type')} ${$('#netType').val()}`;
       scanForConnectedDevices(selectedNetType);
+    });
+
+    $('.btn-refresh-networks').on('click', function() {
+      setEthernets();
     });
     
     // Render Network Connection Type selection
-    $('#netType').html('');
-    for (const netType of Object.keys(NETWORK_CONNECTION_TYPES)) {
-      $('#netType').append(`
-        <option value="${netType}" ${netType == "Ethernet" ? "selected" : ""}> 
-          ${netType}
-        </option>`
-      );
-    }
-    $('#netType').on('change', function () {
-      const selectedNetType = $(this).val();
-      if (selectedNetType === "Ethernet") {
-        $('#net-warning').addClass('d-none');
-      } else {
-        $('#net-warning .message').text(`RFC-6349 methodology focuses on Ethernet-terminated services`);
-        $('#net-warning').removeClass('d-none');
-      }
-      // scanForConnectedDevices(selectedNetType);
-    });
-    $('#netType').val("Ethernet").trigger('change');
+    // for (const netType of Object.keys(NETWORK_CONNECTION_TYPES)) {
+    //   $('#netType').append(`
+    //     <option value="${netType}" ${netType == "Ethernet" ? "selected" : ""}> 
+    //       ${netType}
+    //     </option>`
+    //   );
+    // }
+    // $('#netType').on('change', function () {
+    //   const selectedNetType = $(this).val();
+    //   if (selectedNetType === "Ethernet") {
+    //     $('#net-warning').addClass('d-none');
+    //   } else {
+    //     $('#net-warning .message').text(`RFC-6349 methodology focuses on Ethernet-terminated services`);
+    //     $('#net-warning').removeClass('d-none');
+    //   }
+    //   // scanForConnectedDevices(selectedNetType);
+    // });
+    // $('#netType').val("Ethernet").trigger('change');
 
     // Render Get Location button
     $('#btnGetGpsCoordinates').on('click', function () {
@@ -258,14 +269,15 @@ const summaryChartImageUris = Object.seal({
   
     // Set on click: Close Test button
     $('#btnCloseTest').click(async function () {
-      $('#modalReenterPassword .modal-title').text('Conduct New Test');
-      $('#modalReenterPassword .btn').text('Submit');
+      // $('#modalReenterPassword .modal-title').text('Conduct New Test');
+      // $('#modalReenterPassword .btn').text('Submit');
   
-      await passwordModal().then(() => {
-        closeTest();
-      }).catch((e) => {
-        console.log("baka nga error", e);
-      });
+      // await passwordModal().then(() => {
+      //   closeTest();
+      // }).catch((e) => {
+      //   console.log("baka nga error", e);
+      // });
+      closeTest();
     });
   
     // Set on click: Back to Top button
@@ -344,9 +356,12 @@ const summaryChartImageUris = Object.seal({
       method: 'POST',
       dataType: 'json',
       data: {
-        networkConnectionTypeName: typeName,
-        networkPrefix: NETWORK_CONNECTION_TYPES[typeName].prefix
+        ethernetIP: $('#netType').val()
       },
+      // data: {
+      //   networkConnectionTypeName: typeName,
+      //   networkPrefix: NETWORK_CONNECTION_TYPES[typeName].prefix
+      // },
       // timeout: MEASUREMENT_TIMEOUT,
       success: function (data) {
         console.log("results", data);
@@ -425,6 +440,7 @@ const summaryChartImageUris = Object.seal({
 
           if ($('#testServers option:selected').val() == "custom") {
             $('.custom-test-server-field').removeClass('d-none');
+            $('#custom-server-protocol').focus();
           } else {
             $('.custom-test-server-field').addClass('d-none');
           }
@@ -435,15 +451,24 @@ const summaryChartImageUris = Object.seal({
         $testServers.append('<option selected disabled value="">Select a test server...</option>');
   
         testServers = [];
-        testServers = data;
+        testServers = data.map(function (server) {
+          let hostname = server.hostname;
+          const lastChar = hostname.slice(-1);
+          console.log(lastChar);
+          if (lastChar === '/') {
+            hostname = hostname.slice(0, -1);
+          }
+          server.hostname = hostname;
+          return server;
+        });
         
         
-        testServers.push({
-          id: 0,
-          nickname: 'Local server ko :D',
-          hostname: 'http://0.0.0.0:8000',
-          ip_address: '0.0.0.0'
-        })
+        // testServers.push({
+        //   id: 0,
+        //   nickname: 'Local server ko :D',
+        //   hostname: 'http://202.90.158.6',
+        //   ip_address: '202.90.158.6'
+        // })
   
         for (let i = 0; i < testServers.length; i++) {
           const server = testServers[i];
@@ -474,6 +499,27 @@ const summaryChartImageUris = Object.seal({
           <p class="small mb-0">${errorContent}</p>
           <button id="btnReloadTestServers" class="btn btn-sm btn-link text-primary p-0" type="button" role="button">Reload test servers</button>
         </div>`);
+      }
+    });
+  }
+
+  function setEthernets() {
+    $('#netType').html('');
+    $.ajax({
+      url: 'get-ethernets',
+      method: 'GET',
+      dataType: 'json',
+      success: function (ethernets) {
+        for (const ethernet of ethernets) {
+          $('#netType').append(`
+            <option value="${ethernet.ip_address}" data-name="${ethernet.name}" data-type="${ethernet.type}"> 
+              ${ethernet.type} ${ethernet.ip_address}
+            </option>`
+          );
+        }
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        console.error({jqXHR, textStatus, errorThrown})
       }
     });
   }
@@ -510,7 +556,7 @@ const summaryChartImageUris = Object.seal({
         $measurementTimeline.append(`
           <tr>
             <td class="p-0 d-flex inline-block" style="min-width: 56px;">
-              <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration : ""}</span>
+              <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration.timeColon : ""}</span>
             </td>
             <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0">
               <i class="bi bi-circle text-muted"></i>
@@ -576,13 +622,7 @@ const summaryChartImageUris = Object.seal({
   
   async function startTest() {
     appState = APP_STATE.Testing;
-  
-    $('#btnStartTest').attr('disabled', true);
-    $('#btnStartTest .spinner-border').removeClass('d-none');
-  
-    $('#btnSaveAsPdf').removeClass('d-none');
-    $('#pdfSaved').addClass('d-none');
-  
+
     // const isr = $('#isr').val();
     // const netTypeName = $('#netType').val();
     
@@ -593,33 +633,117 @@ const summaryChartImageUris = Object.seal({
     // const lon = $('#lon').val();
     // const lat = $('#lat').val();
 
+    // testInputs.networkConnectionTypeName = $('#netType').val();
+
     testInputs.isr = $('#isr').val();
-    testInputs.networkConnectionTypeName = $('#netType').val();
-    
-    const testServerId = $('#testServers').val();
-    testInputs.testServer = testServers.find(ts => ts.id == testServerId);
-    
+    testInputs.ethernetName = $('#netType option:selected').data('name');
+    testInputs.networkConnectionTypeName = $('#netType option:selected').data('type');
     testInputs.modeName = $('input[name="radTestMode"]:checked').val();
     testInputs.location.lat = $('#lat').val();
     testInputs.location.lon = $('#lon').val();
 
+    $('#btnStartTest').attr('disabled', true);
+    $('#btnStartTest .spinner-border').removeClass('d-none');
+  
+    $('#btnSaveAsPdf').removeClass('d-none');
+    $('#pdfSaved').addClass('d-none');
+
     const autoRepeatCount = parseInt(Math.max($('#auto-repeat-count').val(), 1));
     autoRepeatIndex = 0;
 
-    if (!(testInputs.isr
-        && testInputs.networkConnectionTypeName
-        && testInputs.testServer
-        && testInputs.modeName
-        && testInputs.location.lat
-        && testInputs.location.lon
-        && (testInputs.isr >= 1 && testInputs.isr <= 1000)
-        && (autoRepeatCount >= 1 && autoRepeatCount <= 30))) {
-          
+    if (testInputs.isr && testInputs.isr >= 1 && testInputs.isr <= 1000) {
+      $('#isr').removeClass('is-invalid');
+    } else {
+      $('#isr').addClass('is-invalid');
+    }
+
+    if (testInputs.ethernetName) {
+      $('#netType').removeClass('is-invalid');
+    } else {
+      $('#netType').addClass('is-invalid');
+    }
+
+    const testServerId = $('#testServers').val();
+    if (testServerId == "custom") {
+      const customServerProtocol = $('#custom-server-protocol').val();
+      const customServerIPAddress = $('#custom-server-ip-address').val();
+      const customServerPort = $('#custom-server-port').val();
+
+      let invalidCustomServerFeebacks = [];
+
+      if (!/^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/.test(customServerIPAddress)) {
+        $('#custom-server-ip-address').addClass('is-invalid');
+        $('#custom-server-ip-address').focus();
+        invalidCustomServerFeebacks.push('Invalid IP Address');
+      } else {
+        $('#custom-server-ip-address').removeClass('is-invalid');
+      }
+
+      if (customServerPort) {
+        $('#custom-server-port').attr('required', true);
+      } else {
+        $('#custom-server-port').removeAttr('required');
+      }
+
+      const minPort = 1;
+      const maxPort = 65535;
+      if (customServerPort && (customServerPort < minPort || customServerPort > maxPort)) {
+        $('#custom-server-port').addClass('is-invalid');
+        $('#custom-server-port').focus();
+        invalidCustomServerFeebacks.push(`Enter port between ${minPort} and ${maxPort} or leave it blank`);
+      } else {
+        $('#custom-server-port').removeClass('is-invalid');
+      }
+
+      if (invalidCustomServerFeebacks) {
+        $('#validation-custom-server-feedback').text(invalidCustomServerFeebacks.join('; '));
+      }
+
+      const url = `${customServerProtocol}://${[customServerIPAddress, customServerPort].filter(Boolean).join(':')}`;
+      testInputs.testServer = {
+        id: 0,
+        nickname: `Custom (${url})`,
+        hostname: url,
+        ip_address: customServerIPAddress
+      }
+    } else {
+      $('#custom-server-ip-address').removeClass('is-invalid');
+      $('#custom-server-port').removeClass('is-invalid');
+
+      testInputs.testServer = testServers.find(ts => ts.id == testServerId);
+    }
+
+    if (testInputs.testServer) {
+      $('#testServers').removeClass('is-invalid');
+    } else {
+      $('#testServers').addClass('is-invalid');
+    }
+
+    if (testInputs.modeName) {
+      $('input[name="radTestModeHidden"]').removeClass('is-invalid');
+    } else {
+      $('input[name="radTestModeHidden"]').addClass('is-invalid');
+    }
+    
+    if (testInputs.location.lat && testInputs.location.lon
+      && testInputs.location.lat >= -90 && testInputs.location.lat <= 90
+      && testInputs.location.lon >= -180 && testInputs.location.lon <= 180)  {
+        $('input[name="coordinates"]').removeClass('is-invalid');
+    } else {
+      $('input[name="coordinates"]').addClass('is-invalid');
+    }
+    
+    const canStartTest = $('#mainForm').find('.is-invalid')?.length === 0;
+
+    if (!canStartTest) {
       $('#btnStartTest .spinner-border').addClass('d-none');
       $('#btnStartTest').attr('disabled', false);
 
       return;
     }
+
+    $('#custom-server-ip-address').removeClass('is-invalid');
+    $('#custom-server-port').removeClass('is-invalid');
 
     // let gpsSuccess = false;
     // await setGpsInfo(testInputs.location.lat, testInputs.location.lon, testInputs.location.name)
@@ -638,7 +762,7 @@ const summaryChartImageUris = Object.seal({
         testClient.publicIP = publicIP;
 
         $('#summary-isp').text(`${testClient.isp}`);
-        $('#summary-public-ip').text(`${testClient.publicIP}`);
+        $('#summary-public-ip').text(`(${testClient.publicIP})`);
       })
       .catch(ex => {
         testClient.isp = "";
@@ -651,7 +775,7 @@ const summaryChartImageUris = Object.seal({
         }
 
         $('#summary-isp').html('<i class="small text-muted">(undetected)</i>');
-        $('#summary-public-ip').html('<i class="small text-muted">(undetected)</i>');
+        $('#summary-public-ip').html('<i class="small text-muted"></i>');
         console.log(errorMsg);
       });
 
@@ -755,7 +879,7 @@ const summaryChartImageUris = Object.seal({
     
     testResults = [];
     testSessionTime.startedOn = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-
+    
     while (autoRepeatIndex < autoRepeatCount + 1) {
       const testNumber = autoRepeatIndex + 1;
 
@@ -821,22 +945,19 @@ const summaryChartImageUris = Object.seal({
         download: []
       };
       
-      createMeasurementProcessesTable(testInputs.mode.methods, testNumber);
-      
+      currentTestDuration.reset();
       const startTime = Date.now();
       const timerInterval = setInterval(function () {
-        const elapsedSeconds = (Date.now() - startTime) / 1000.0;
-        const minutes = parseInt(elapsedSeconds / 60);
-        const seconds = parseInt(elapsedSeconds) % 60;
-
-        currentTestDuration = `${numeral(minutes).format("0")}m ${numeral(seconds).format("00")}s`;
+        currentTestDuration.totalSeconds = (Date.now() - startTime) / 1000.0;
 
         $(`#${currentTestDirection}-process-time-${currentProcessIndex}-test-${autoRepeatIndex + 1}`)
-          .text(`${numeral(minutes).format("0")}:${numeral(seconds).format("00")}`);
+          .text(currentTestDuration.timeColon);
       }, 100);
 
       $(`#summary-test-started-on-${testNumber}`).text(moment(startTime).format('YYYY-MM-DD HH:mm:ss'));
 
+      createMeasurementProcessesTable(testInputs.mode.methods, testNumber);
+      
       if (testInputs.mode.name === "normal" || testInputs.mode.name === "reverse") {
         let methodName = testInputs.mode.methods[0];
         testResults.push({
@@ -980,7 +1101,7 @@ const summaryChartImageUris = Object.seal({
     const finishedOnText = moment(lastMeasurementTime).format('YYYY-MM-DD HH:mm:ss');
 
     $(`#summary-test-finished-on-${testNumber}`).html(finishedOnText);
-    $(`#summary-test-duration-${testNumber}`).html(currentTestDuration);
+    $(`#summary-test-duration-${testNumber}`).html(currentTestDuration.timeText);
   }
   
   function executeMeasurements(testServer, methodName) {
@@ -998,7 +1119,7 @@ const summaryChartImageUris = Object.seal({
       $(`#${testMethod.name}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="bi bi-check-circle-fill text-success"></i>');
 
       $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(process.label);
-      $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).addClass("text-success");
+      $(`#${testMethod.name}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).removeClass("text-muted").addClass("text-success");
 
       $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
         <span class="px-2 text-nowrap text-success small" data-bs-toggle="tooltip" data-bs-placement="top" title="${startedOn.format('HH:mm:ss.SSS')} - ${endedOn.format('HH:mm:ss.SSS')}">
@@ -1009,18 +1130,6 @@ const summaryChartImageUris = Object.seal({
       testResults[autoRepeatIndex][methodName][`${process.processId}Duration`] = measurementTimes[methodName][currentProcessIndex];
 
       console.log(`Done ${process.label}\n`);
-
-      // if (testResults.length == autoRepeatIndex) {
-      //   const oResult = {};
-      //   oResult[testMethod.name] = {}
-      //   testResults.push(oResult);
-      //   console.log(testResults);
-      // } else {
-      //   testResults[autoRepeatIndex][testMethod.name] = {};
-      // }
-      // testResults[autoRepeatIndex][testMethod.name]['startTime'] = 'st';
-      // testResults[autoRepeatIndex][testMethod.name]['endTime'] = 'et';
-      // testResults[autoRepeatIndex][testMethod.name][`${process.processId}Duration`] = [measurementTimes[methodName][currentProcessIndex][0], measurementTimes[methodName][currentProcessIndex][1]];
 
       currentProcessIndex++;
     }
@@ -1033,6 +1142,8 @@ const summaryChartImageUris = Object.seal({
           url: 'connect-to-test-server',
           method: 'POST',
           data: {
+            lat: testInputs.location.lat,
+            lon: testInputs.location.lon,
             testServerName: testServer.nickname,
             testServerUrl: testServer.hostname,
             mode: testMethod.mode,
@@ -1062,7 +1173,7 @@ const summaryChartImageUris = Object.seal({
       const getProcessInfo = (processId) => {
         console.log({ processId });
   
-        const directExecutions = ['mtu', 'rtt', 'analysis'];
+        const directExecutions = ['mtu', 'rtt', 'analysis', 'finish-test'];
         return new Promise(function (resolve, reject) {
           if (directExecutions.includes(processId)) {
             resolve();
@@ -1289,9 +1400,9 @@ const summaryChartImageUris = Object.seal({
       });
     };
   
-    const getTestResults = function () {
+    const getTestResults = function (process) {
       return new Promise(function (resolve, reject) {
-
+        measurementTimes[methodName].push([Date.now(), null]);
         setTimeout(() => {
           $.ajax({
             url: 'finish-test',
@@ -1307,6 +1418,8 @@ const summaryChartImageUris = Object.seal({
               console.log({response});
               // console.log(testResults);
               testResults[autoRepeatIndex][response.method]['results'] = response.results;
+              
+              markAsDone(process);
 
               resolve(response.html);
             },
@@ -1355,14 +1468,11 @@ const summaryChartImageUris = Object.seal({
           }
 
           if (['finish-test'].includes(nextProcess.processId)) {
-            return;
+            return getTestResults(nextProcess);
           }
           
           return executeProcess(nextProcess);
         }, Promise.resolve())
-          .then(() => {
-            return getTestResults();
-          })
           .then(results => {
             resolve(results);
           })
@@ -1401,9 +1511,10 @@ const summaryChartImageUris = Object.seal({
       case "rtt":
         data = {
           mode: testMethod.mode,
-          networkConnectionTypeName: testInputs.networkConnectionTypeName,
-          networkPrefix: testInputs.networkConnectionType.prefix,
+          // networkConnectionTypeName: testInputs.networkConnectionTypeName,
+          // networkPrefix: testInputs.networkConnectionType.prefix,
           serverIP: testInputs.testServer.ip_address,
+          ethernetName: testInputs.ethernetName
         }
         break;
       case "bdp":
@@ -1509,7 +1620,7 @@ const summaryChartImageUris = Object.seal({
     testSessionTime.finishedOn = now.format('YYYY-MM-DD HH:mm:ss');
 
     $(`#summary-test-finished-on-${testNumber}`).html(`<span class="text-secondary">${testSessionTime.finishedOn}</span>`);
-    $(`#summary-test-duration-${testNumber}`).html(`<span class="text-secondary">${currentTestDuration}</span>`);
+    $(`#summary-test-duration-${testNumber}`).html(`<span class="text-secondary">${currentTestDuration.timeText}</span>`);
   
     $(`#process-error`).html(`
       <div class="border border-danger bg-light mt-1 mx-2">
@@ -1629,14 +1740,20 @@ const summaryChartImageUris = Object.seal({
   function setManualGpsCoordinates() {
     const latManual = $('#lat_manual').val();
     const lonManual = $('#lon_manual').val();
+    
+    if ((latManual && lonManual)
+        && (!isNaN(latManual) && !isNaN(lonManual))
+        && latManual >= -90 && latManual <= 90
+        && lonManual >= -180 && lonManual <= 180) {
   
-    if ((latManual && lonManual) &&
-      (!isNaN(latManual) && !isNaN(lonManual))) {
-  
+      $('input[name="coordinates"]').removeClass('is-invalid');
+
       $('#lat').val(latManual);
       $('#lon').val(lonManual).trigger('change');
 
       $('#gpsManualInput').addClass("d-none");
+    } else {
+      $('input[name="coordinates"]').addClass('is-invalid');
     }
   }
   
