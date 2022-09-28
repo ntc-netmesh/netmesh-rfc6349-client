@@ -741,6 +741,7 @@
 
 {% block scripts %}
 {{ super() }}
+<script src="{{ url_for('static', filename='node_modules/socket.io/client-dist/socket.io.min.js') }}"></script>
 <script src="{{ url_for('static', filename='node_modules/pdfmake/build/pdfmake.min.js') }}"></script>
 
 <script type="text/javascript" src="{{ url_for('static', filename='js/results-chart.js') }}"></script>

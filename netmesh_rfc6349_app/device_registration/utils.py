@@ -20,7 +20,13 @@ def get_device_info():
                                stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
     if stdout:
-        device_info.update(json.loads(stdout.decode().strip()))
+        output = stdout.decode().strip()
+        output_json = json.loads(output)
+        for key, value in output_json.items():
+            if value is None:
+                output_json[key] = ""
+        
+        device_info.update(output_json)
     else:
         raise Exception(stderr)
 

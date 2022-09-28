@@ -12,8 +12,8 @@ import json
 
 import folium
 
-from flask import Blueprint, Response, render_template, request, redirect, url_for, abort, session, jsonify, current_app
-from netmesh_rfc6349_app import app_resource_path
+from flask import Blueprint, Response, render_template, request, redirect, url_for, abort, session, jsonify, current_app, g
+from netmesh_rfc6349_app import app_resource_path, localSocket
 
 from netmesh_rfc6349_app.test_measurement.utils import run_process_script, get_network_interface
 
@@ -26,6 +26,9 @@ import netmesh_rfc6349_app.main.utils.netmesh_location as netmesh_location
 
 test_measurement = Blueprint('test_measurement', __name__)
 
+@localSocket.on('connected')
+def on_connected(data):
+    print("gumagana siya", data)
 
 @test_measurement.route('/report-data', methods=['POST'])
 def report_data():
@@ -244,6 +247,85 @@ def get_test_servers():
             "error": error
         }), 500)
 
+@test_measurement.route('/connect-to-test-server', methods=['POST'])
+def connect_to_test_server():
+    try:
+        test_server_name = request.form.get('testServerName')
+        test_server_url = request.form.get('testServerUrl')
+        mode = request.form.get('mode')
+        server_id = request.form.get('serverId')
+        lat = request.form.get('lat')
+        lon = request.form.get('lon')
+        
+        print("email",  session['email'])
+        
+        json_data = {
+            "server_id": server_id,
+            "lat": lat,
+            "lon": lon,
+            "email": session['email'],
+            "mode": mode
+        }
+        headers = {
+            "Authorization": "Bearer " + session['api_session_token']
+        }
+        
+        r = requests.post(
+            url=f'{test_server_url}/api/auth/verify-test',
+            json=json_data,
+            headers=headers,
+        )
+        r.raise_for_status()
+        return r.text, 200
+    except requests.exceptions.HTTPError as eh:
+        status_code = eh.response.status_code
+
+        error = f"Cannot connect to server"
+
+        if status_code == 401:
+            error_json = json.loads(r.text)
+            if "msg" in error_json:
+                error = error_json["msg"]
+        elif status_code == 404:
+            error = f"Cannot connect to {test_server_name}"
+
+        log_settings.log_error(str(eh))
+        return Response(json.dumps({
+            "error": error,
+            "message": str(eh)
+        }), status_code)
+    except requests.exceptions.ConnectionError as ece:
+        error = "Connection error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(ece)
+        }), 500)
+    except requests.exceptions.Timeout as et:
+        error = "Request timeout"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(et)
+        }), 500)
+    except requests.exceptions.RequestException as e:
+        error = "Unexpected error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(e)
+        }), 500)
+    except Exception as e:
+        error = "Unexpected error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(e)
+        }), 500)
 
 @test_measurement.route('/process', methods=['GET', 'POST'])
 def process():

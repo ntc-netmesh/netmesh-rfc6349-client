@@ -7,6 +7,12 @@ const summaryChartImageUris = Object.seal({
 });
 
 (function () {
+  const socket = io('/');
+
+  socket.on('connect', function() {
+    socket.emit('connected', {data: 'I\'m connected!'});
+  });
+
   const testInputs = Object.seal({
     isr: null,
     testServer: null,
@@ -1062,7 +1068,7 @@ const summaryChartImageUris = Object.seal({
       const checkQueue = (jobId, port) => checkStatus(jobId).then(status => {
         console.log({status});
         if (Number.isInteger(status)) {
-          const queuePlacement = parseInt(status) + 1;
+          const queuePlacement = parseInt(status);
           if (!isLooped) {
             $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html(`
               <div class="d-flex justify-content-end">
