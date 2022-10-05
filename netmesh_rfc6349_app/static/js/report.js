@@ -144,17 +144,17 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
             case "tcp_ttr":
               const relative_tcp_ttr = value < 1 ? 1 / value : value;
               quantityText.push({
-                text: "  " + `${value === 1 ? "Same as ideal" : `${numeral(relative_tcp_ttr).format('0.[000]')} times ${value < 1 ? "faster" : "slower"} than ideal`}`,
+                text: "  " + `${value === 1 ? "Same as ideal" : (`${numeral(relative_tcp_ttr).format('0.[000]')} times ${value < 1 ? "faster" : "slower"} than ideal`)}`,
                 fontSize: 8,
                 color: '#808080',
               });
               break;
-            case "buf_delay":
+            case "buf_del":
               const decimalValue = value / 100;
               console.log("decimalValue", decimalValue);
               const relative_buf_delay = decimalValue == -1 ? NaN : decimalValue >= 0 ? decimalValue : (1 / (1 + decimalValue)) - 1;
               quantityText.push({
-                text: "  " + `Average RTT is ${decimalValue === 0 ? "same as Baseline RTT" : `${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%')} ${decimalValue < 0 ? "faster" : "slower"} than RTT`}`,
+                text: "  " + `Average RTT is ${decimalValue === 0 ? "same as" : (`${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%')} ${decimalValue < 0 ? "faster than" : "slower than"} Baseline RTT`)}`,
                 fontSize: 8,
                 color: '#808080',
                 margin: [8, 0, 0, 0]
@@ -380,15 +380,15 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
         widths: [150, '*'],
         body: [
           [
-            'Performed by:',
+            'Conducted by:',
             {
               text: [
-                `${testClient.username}`,
-                // {
-                //   text: testClient.userId,
-                //   color: 'gray',
-                //   fontSize: 9
-                // }
+                `${testClient.fullName} `,
+                {
+                  text: testClient.email,
+                  color: 'gray',
+                  fontSize: 9,
+                }
               ]
             },
           ],
@@ -519,7 +519,7 @@ function generateTestExecutionSummaryReport(methods, results, summaryChartImageU
     const averageTcpEfficiency = tcpEfficiencies.reduce((total, speed) => total + speed, 0) / tcpEfficiencies.length;
 
     const bufferDelays = results.map((result) => {
-      return result[method].results.buf_delay
+      return result[method].results.buf_del
     });
     const averageBufferDelay = bufferDelays.reduce((total, speed) => total + speed, 0) / bufferDelays.length;
 

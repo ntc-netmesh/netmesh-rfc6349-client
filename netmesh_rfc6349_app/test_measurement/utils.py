@@ -1,8 +1,12 @@
 import math
+from socket import AddressFamily
 import subprocess
 
 import json
 import requests
+
+import psutil
+import netifaces
 
 from flask import Response, abort, session, jsonify, current_app
 
@@ -174,7 +178,7 @@ def run_process_script(mode, command_array, output_params, ave_rtt_params=None):
         }), 400))
 
 
-def get_network_interface(mode, network_connection_type_name, network_prefix):
+def get_network_interface(network_connection_type_name, network_prefix):
     process = subprocess.Popen(['./network_interface.sh'],
                                stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE,
@@ -206,7 +210,6 @@ def get_ethernet_connections():
     
     connection_types = {
         "en": "Ethernet",
-        "eth": "Ethernet",
         "wl": "Wi-Fi"
     }
     
@@ -214,13 +217,13 @@ def get_ethernet_connections():
     for intface, addr_list in addresses.items():
         if any(getattr(addr, 'address').startswith("169.254") for addr in addr_list):
             continue
-        elif intface in stats and any(intface.startswith(ct) for ct in connection_types.keys()) and getattr(stats[intface], "isup"):
+        elif intface in stats and (intface.startswith('en') or intface.startswith("wl")) and getattr(stats[intface], "isup"):
             ip_address = next(map(lambda a: a.address, filter(lambda n: n.family == AddressFamily.AF_INET, addresses[intface])), None)
             if not ip_address:
                 continue
             ethernets.append({
                 "name": intface,
-                "type": next(map(lambda c: connection_types[c], filter(lambda ct: intface.startswith(ct), connection_types.keys())), "Network"),
+                "type": connection_types[intface[0:2]] if intface[0:2] in connection_types.keys() else "Network",
                 "ip_address": ip_address
             })
     

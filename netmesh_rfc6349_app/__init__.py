@@ -10,9 +10,12 @@ localSocket = SocketIO()
 
 def app_resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
-    base_path = getattr(sys, '_MEIPASS')
-    print("base_path", base_path)
-    return os.path.join(base_path, relative_path)
+    if getattr(sys, 'frozen', False):
+        base_path = getattr(sys, '_MEIPASS')
+        print("base_path", base_path)
+        return os.path.join(base_path, relative_path)
+    
+    return relative_path
 
 
 def create_app(config_class=Config):
