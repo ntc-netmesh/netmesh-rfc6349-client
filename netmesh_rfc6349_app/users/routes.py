@@ -73,6 +73,8 @@ def check_user_token():
 
 @users.route('/login-submit', methods=['POST'])
 def login():
+    session.permanent = True
+    
     user_email = request.form.get("user-email")
     password = request.form.get("user-password")
 

@@ -2,12 +2,20 @@
 // INITIALIZE pdfMake
 // ----------------------------------------------------------------
 
+// pdfMake.fonts = {
+//   Ubuntu: {
+//     normal: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-Regular.ttf',
+//     bold: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-Bold.ttf',
+//     italics: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-Italic.ttf',
+//     bolditalics: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-BoldItalic.ttf'
+//   }
+// };
 pdfMake.fonts = {
   Ubuntu: {
-    normal: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-Regular.ttf',
-    bold: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-Bold.ttf',
-    italics: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-Italic.ttf',
-    bolditalics: 'http://127.0.0.1:5000/static/fonts/Ubuntu/Ubuntu-BoldItalic.ttf'
+    normal: 'Ubuntu-Regular.ttf',
+    bold: 'Ubuntu-Bold.ttf',
+    italics: 'Ubuntu-Italic.ttf',
+    bolditalics: 'Ubuntu-BoldItalic.ttf'
   }
 };
 pdfMake.tableLayouts = {

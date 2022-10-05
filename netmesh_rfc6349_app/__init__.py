@@ -1,3 +1,4 @@
+from datetime import timedelta
 import os
 import sys
 
@@ -5,8 +6,6 @@ from flask import Flask
 from flask_socketio import SocketIO
 
 from netmesh_rfc6349_app.config import Config
-
-localSocket = SocketIO()
 
 def app_resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
@@ -28,7 +27,8 @@ def create_app(config_class=Config):
         app = Flask(__name__,
                     template_folder=template_folder,
                     static_folder=static_folder)
-
+        
+    app.permanent_session_lifetime = timedelta(days=100)
     app.config.from_object(config_class)
 
     # from netmesh_rfc6349_app import routes
@@ -41,8 +41,6 @@ def create_app(config_class=Config):
     app.register_blueprint(users)
     app.register_blueprint(test_measurement)
     app.register_blueprint(main)
-    
-    localSocket.init_app(app)
 
     return app
 

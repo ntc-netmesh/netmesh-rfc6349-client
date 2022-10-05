@@ -27,10 +27,6 @@ import netmesh_rfc6349_app.main.utils.netmesh_location as netmesh_location
 
 test_measurement = Blueprint('test_measurement', __name__)
 
-@localSocket.on('connected')
-def on_connected(data):
-    print("gumagana siya", data)
-
 @test_measurement.route('/report-data', methods=['POST'])
 def report_data():
     server_name = request.form['serverName']
@@ -329,6 +325,7 @@ def connect_to_test_server():
 @test_measurement.route('/process', methods=['GET', 'POST'])
 def process():
     try:
+        print(session)
         json_data = {
             "username": session['email']
         }

@@ -7,12 +7,6 @@ const summaryChartImageUris = Object.seal({
 });
 
 (function () {
-  const socket = io('/');
-
-  socket.on('connect', function() {
-    socket.emit('connected', {data: 'I\'m connected!'});
-  });
-
   const testInputs = Object.seal({
     isr: null,
     testServer: null,
@@ -1231,6 +1225,7 @@ const summaryChartImageUris = Object.seal({
             timeout: MEASUREMENT_TIMEOUT,
             success: function (data) {
               setTimeout(function () {
+                console.log("yeahhhhh", data);
                 resolve(data);
               }, statusCheckingInterval);
             },
@@ -1245,17 +1240,19 @@ const summaryChartImageUris = Object.seal({
   
       let isLooped = false;
       const checkQueue = (jobId, port) => checkStatus(jobId).then(status => {
-        console.log({status});
-        if (Number.isInteger(status)) {
-          const queuePlacement = parseInt(status);
+        if (status == "started") {
+          isLooped = false;
+          return Promise.resolve({port, jobId});
+        } else {
+          const queuePlacement = Number.isInteger(status) ? parseInt(status) + 1 : "...";
           if (!isLooped) {
-            $(`#${testMethod.name}-process-status-label-${currentProcessIndex}`).html(`
+            $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
               <div class="d-flex justify-content-end">
                 <div class="progress h-100 mx-2">
                   <div class="px-3 progress-bar progress-bar-striped progress-bar-animated bg-dark" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100">
                     <span class="fw-bold">
                       <span class="align-middle me-1">Position in QUEUE:</span>
-                      <span id="queue-position-${currentProcessIndex}" class="align-middle fs-6 lh-sm">${queuePlacement}</span>
+                      <span id="queue-position-${currentProcessIndex}-test-${autoRepeatIndex + 1}" class="align-middle fs-6 lh-sm">${queuePlacement}</span>
                     </span>
                   </div>
                 </div>
@@ -1264,13 +1261,9 @@ const summaryChartImageUris = Object.seal({
             isLooped = true;
           }
           else {
-            $(`#queue-position-${currentProcessIndex}`).text(`${queuePlacement}`);
+            $(`#queue-position-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).text(`${queuePlacement}`);
           }
           return checkQueue(jobId, port);
-        }
-        else {
-          isLooped = false;
-          return Promise.resolve({port, jobId});
         }
       });
   
