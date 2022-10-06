@@ -162,7 +162,7 @@ def init_gui(application, port=0, width=800, height=600,
             q = queue.Queue()
 
             update_app_progress = QProgressDialog(
-                f"Updating {application['APP_TITLE']}...", "Cancel", 0, 0)
+                f"Updating {application.config['APP_TITLE']}...", "Cancel", 0, 0)
             update_app_progress.setWindowTitle(f"Updating to {latest_version}")
             update_app_thread = threading.Thread(
                 target=handle_update_dialog, args=(update_app_progress, q))
