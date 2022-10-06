@@ -43,22 +43,21 @@ if __name__ == '__main__':
         print(
             f"Run this script as root :)\nRun: sudo python3 {os.path.basename(__file__)}")
     else:
-        choices = ['web', 'desktop']
-        run_on = sys.argv[1] if len(sys.argv) > 1 else ""
-        
         parser = argparse.ArgumentParser()
+        parser.add_argument('--desktop', '-d', type=str, required=False, nargs='?', const='desktop')
         parser.add_argument('--port', '-p', type=int, required=False, nargs='?', const='')
         args = parser.parse_args()
         
+        desktop = args.desktop or 'web'
         port = args.port or 5000
 
-        if not run_on in choices:
+        if not desktop:
             if getattr(sys, 'frozen', False):
                 run_on_desktop()
             else:
                 run_in_browser(port)
         else:
-            if run_on == 'desktop':
+            if desktop == 'desktop':
                 run_on_desktop()
             else:
-                run_in_browser()
+                run_in_browser(port)

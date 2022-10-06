@@ -149,9 +149,9 @@ def init_gui(application, port=0, width=800, height=600,
         print("Closing splash...")
         pyi_splash.close()
 
-    window.show()
-
     if has_update:
+        window.show()
+        
         msg = QMessageBox(window)
         msg.setWindowTitle(f"Update to {latest_version}")
         msg.setText("Do you want to update this app?")
@@ -200,6 +200,8 @@ def init_gui(application, port=0, width=800, height=600,
             # sys.exit()
     # else:
     load_page(webView, page)
+    
+    window.show()
 
     print("App opened")
 
