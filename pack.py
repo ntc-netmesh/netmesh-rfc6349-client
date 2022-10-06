@@ -23,7 +23,7 @@ def pack():
     app_folder_name = 'netmesh-rfc6349-app'
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--version', '-v', type=str, required=True, nargs='?', const='')
+    parser.add_argument('--version', '-v', type=str, required=False, nargs='?', const='')
     args = parser.parse_args()
     
     branch_name = Repository('.').head.shorthand
