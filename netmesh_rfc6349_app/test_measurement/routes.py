@@ -12,10 +12,11 @@ import json
 
 import folium
 
-from flask import Blueprint, Response, render_template, request, redirect, url_for, abort, session, jsonify, current_app
+from flask import Blueprint, Response, render_template, request, redirect, url_for, abort, session, jsonify, current_app, g
 from netmesh_rfc6349_app import app_resource_path
 
-from netmesh_rfc6349_app.test_measurement.utils import run_process_script, get_network_interface
+
+from netmesh_rfc6349_app.test_measurement.utils import run_process_script, get_ethernet_connections, get_default_gateway
 
 from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version
 from netmesh_rfc6349_app.main.utils import laptop_info
@@ -25,7 +26,6 @@ import netmesh_rfc6349_app.main.utils.log_settings as log_settings
 import netmesh_rfc6349_app.main.utils.netmesh_location as netmesh_location
 
 test_measurement = Blueprint('test_measurement', __name__)
-
 
 @test_measurement.route('/report-data', methods=['POST'])
 def report_data():
@@ -192,8 +192,8 @@ def set_gps_info():
 @test_measurement.route('/get-test-servers', methods=['GET'])
 def get_test_servers():
     try:
-        main_url = "https://netmesh.pregi.net"
-        test_servers_url = f'{main_url}/api/servers/'
+        main_url = current_app.config['RESULTS_SERVER_API_URI']
+        test_servers_url = f"{main_url}/server/"
         r = requests.get(
             url=test_servers_url,
         )
@@ -244,10 +244,88 @@ def get_test_servers():
             "error": error
         }), 500)
 
+@test_measurement.route('/connect-to-test-server', methods=['POST'])
+def connect_to_test_server():
+    try:
+        test_server_name = request.form.get('testServerName')
+        test_server_url = request.form.get('testServerUrl')
+        mode = request.form.get('mode')
+        server_id = request.form.get('serverId')
+        lat = request.form.get('lat')
+        lon = request.form.get('lon')
+        
+        json_data = {
+            "server_id": server_id,
+            "lat": lat,
+            "lon": lon,
+            "email": session['email'],
+            "mode": mode
+        }
+        headers = {
+            "Authorization": "Bearer " + session['api_session_token']
+        }
+        
+        r = requests.post(
+            url=f'{test_server_url}/api/auth/verify-test',
+            json=json_data,
+            headers=headers,
+        )
+        r.raise_for_status()
+        return r.text, 200
+    except requests.exceptions.HTTPError as eh:
+        status_code = eh.response.status_code
+
+        error = f"Cannot connect to server"
+
+        if status_code == 401:
+            error_json = json.loads(r.text)
+            if "msg" in error_json:
+                error = error_json["msg"]
+        elif status_code == 404:
+            error = f"Cannot connect to {test_server_name}"
+
+        log_settings.log_error(str(eh))
+        return Response(json.dumps({
+            "error": error,
+            "message": str(eh)
+        }), status_code)
+    except requests.exceptions.ConnectionError as ece:
+        error = "Connection error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(ece)
+        }), 500)
+    except requests.exceptions.Timeout as et:
+        error = "Request timeout"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(et)
+        }), 500)
+    except requests.exceptions.RequestException as e:
+        error = "Unexpected error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(e)
+        }), 500)
+    except Exception as e:
+        error = "Unexpected error"
+
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(e)
+        }), 500)
 
 @test_measurement.route('/process', methods=['GET', 'POST'])
 def process():
     try:
+        print(session)
         json_data = {
             "username": session['email']
         }
@@ -264,8 +342,8 @@ def process():
             process_id = request.form['processId']
             api_url = f'{test_server_url}/api/{mode}/{process_id}'
 
-            if process_id == "analysis":
-                api_url = f'{test_server_url}/api/{mode}/thpt'
+            # if process_id == "analysis":
+            # api_url = f'{test_server_url}/api/{mode}/analysis'
 
             print(api_url)
 
@@ -417,6 +495,37 @@ def check_status():
             "message": str(e)
         }), 500)
 
+@test_measurement.route('/finish-test', methods=['POST'])
+def finish_test():
+    try:
+        test_server_name = request.form.get('testServerName')
+        test_server_url = request.form.get('testServerUrl')
+        mode = request.form.get('mode')
+        test_number = 1
+        
+        api_url = f'{test_server_url}/api/{mode}/finish-test'
+        
+        req = requests.post(
+            url=api_url,
+            headers={"Authorization": "Bearer "+session['api_session_token']}
+        )
+        
+        req.raise_for_status()
+        
+        res = req.json()
+        method = "download" if mode == "reverse" else "upload"
+        
+        res.update({
+            'method': method,
+            'html': render_template('results.html',
+                                    test_number=test_number,
+                                    results=res['results'],
+                                    method=method)
+        })
+        return json.dumps(res), 200
+    except requests.RequestException as ex:
+        print(ex)
+        return jsonify(error=str(ex)), 500
 
 @test_measurement.route('/get-results', methods=['GET'])
 def get_results():
@@ -534,7 +643,7 @@ def get_test_summary_template():
             tcp_efficiencies = list(
                 map(lambda result: result[method]['results']['tcp_eff'], test_results))
             buffer_delays = list(
-                map(lambda result: result[method]['results']['buf_delay'], test_results))
+                map(lambda result: result[method]['results']['buf_del'], test_results))
 
             print("speeds", speeds)
             print("tcp_efficiencies", tcp_efficiencies)
@@ -581,14 +690,15 @@ def get_test_summary_template():
 @test_measurement.route('/run-process-mtu', methods=['POST'])
 def run_process_mtu():
     mode = request.form['mode']
-    network_connection_type_name = request.form['networkConnectionTypeName']
-    network_prefix = request.form['networkPrefix']
+    # network_connection_type_name = request.form['networkConnectionTypeName']
+    # network_prefix = request.form['networkPrefix']
     server_ip = request.form['serverIP']
-    network_interface = get_network_interface(
-        mode, network_connection_type_name, network_prefix)
+    # network_interface = get_network_interface(
+    #     mode, network_connection_type_name, network_prefix)
+    ethernet_name = request.form['ethernetName']
 
     command_array = ['sudo', app_resource_path(
-        f"{current_app.static_folder}/client_scripts/normal_mode/mtu.sh"), network_interface, server_ip]
+        f"{current_app.static_folder}/client_scripts/normal_mode/mtu.sh"), ethernet_name, server_ip]
     output_params = [
         {'name': 'mtu', 'key': 'mtu'},
     ]
@@ -599,13 +709,14 @@ def run_process_mtu():
 @test_measurement.route('/run-process-rtt', methods=['POST'])
 def run_process_rtt():
     mode = request.form['mode']
-    network_connection_type_name = request.form['networkConnectionTypeName']
-    network_prefix = request.form['networkPrefix']
+    # network_connection_type_name = request.form['networkConnectionTypeName']
+    # network_prefix = request.form['networkPrefix']
     server_ip = request.form['serverIP']
-    network_interface = get_network_interface(
-        mode, network_connection_type_name, network_prefix)
+    # network_interface = get_network_interface(
+    #     mode, network_connection_type_name, network_prefix)
+    ethernet_name = request.form['ethernetName']
 
-    command_array = ['sudo', './rtt.sh', network_interface, server_ip]
+    command_array = ['sudo', './rtt.sh', ethernet_name, server_ip]
     output_params = [
         {'name': 'rtt', 'key': 'rtt'},
     ]
@@ -621,6 +732,8 @@ def run_process_bdp():
     port = request.form['port']
 
     command_array = ['sudo', './bb.sh', rtt, server_ip, port, mode]
+    
+    print(command_array)
     output_params = [
         {'name': 'bb', 'key': 'bb'},
         {'name': 'bdp', 'key': 'bdp'},
@@ -764,7 +877,9 @@ def get_machine_name():
 # ----------------------------------------------------------------
 # EXTERNAL DATA
 # ----------------------------------------------------------------
-
+@test_measurement.route('/get-ethernets', methods=['GET'])
+def get_ethernets():
+    return json.dumps(get_ethernet_connections()), 200
 
 @test_measurement.route('/get-gps-coordinates', methods=['POST'])
 def get_gps_coordinates():
@@ -782,40 +897,18 @@ def get_gps_coordinates():
 @test_measurement.route('/get-connected-devices', methods=['POST'])
 def get_connected_devices():
     try:
-        network_connection_type_name = request.form["networkConnectionTypeName"]
-        network_prefix = request.form["networkPrefix"]
+        # network_connection_type_name = request.form["networkConnectionTypeName"]
+        # network_prefix = request.form["networkPrefix"]
 
         # get network interface ip
-        interface = get_network_interface(
-            "normal", network_connection_type_name, network_prefix)
-        stdout, stderr = subprocess.Popen(f"ip -br addr list | grep -w {interface} | awk -F' ' '{{print $3}}'",
-                                          shell=True,
-                                          stdout=subprocess.PIPE,
-                                          stderr=subprocess.PIPE,).communicate()
-        if stderr:
-            print("Error: ", stderr.decode())
-            return None
+        ethernet_ip = request.form["ethernetIP"]
 
-        net_ip = stdout.decode()
-
-        # get gateway ip
-        stdout, stderr = subprocess.Popen(f"ip r | grep 'default via' | awk -F' ' '{{print $3}}'",
-                                          shell=True,
-                                          stdout=subprocess.PIPE,
-                                          stderr=subprocess.PIPE,).communicate()
-        if stderr:
-            print("Error: ", stderr.decode())
-            return None
-
-        gateway_ips = stdout.decode().strip()
-        gateway_ip = ""
-        if gateway_ips:
-            gateway_ip = gateway_ips.split("\n")[0]
+        gateway_ip = get_default_gateway()
 
         print(f'gateway_ip: {gateway_ip}')
 
         ps = nmap.PortScanner()
-        results = ps.scan(net_ip, arguments='-sT -O', sudo=True)
+        results = ps.scan(ethernet_ip, arguments='-sT -O', sudo=True)
         print(results)
         # remove gateway from results
         scanned_ips = {k: v for k,

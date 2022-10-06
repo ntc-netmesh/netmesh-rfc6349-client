@@ -68,7 +68,7 @@ else
   exit 1;
 fi
 
-OUT=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --format m --bandwidth 100M --json \
+OUT=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --format m --json \
   | jq '.end | { "bytes" : .sum_sent.bytes, "thpt" : .sum_sent.bits_per_second, "retx": .sum_sent.retransmits } + { "mean_rtt" : .streams[].sender.mean_rtt }') 
 
 AVE_THPT=$(echo $OUT | jq '.thpt/1000000')

@@ -34,6 +34,7 @@ def login(email, password):
 def save_logged_user(token, email, first_name, last_name, token_expiry):
     session['api_session_token'] = token
     session['email'] = email
+    session['name'] = f'{first_name} {last_name}'
     
     # save yung logged credentials
     config_file = NetMeshConfigFile()

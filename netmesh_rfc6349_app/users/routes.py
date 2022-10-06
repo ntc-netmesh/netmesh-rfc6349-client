@@ -73,6 +73,8 @@ def check_user_token():
 
 @users.route('/login-submit', methods=['POST'])
 def login():
+    session.permanent = True
+    
     user_email = request.form.get("user-email")
     password = request.form.get("user-password")
 
@@ -88,7 +90,7 @@ def login():
                                data['user']['last_name'],
                                data['expiry'])
         
-        return {"goto": url_for('main.home_page')}, 200
+        return jsonify(goto=url_for('main.home_page')), 200
     except requests.exceptions.ConnectionError as ex:
         return jsonify(error="Connection error. Please check your Internet connection"), 400
     except requests.exceptions.Timeout as ex:
@@ -164,5 +166,6 @@ def logout():
 
     session['api_session_token'] = None
     session['email'] = None
+    session['name'] = None
     
     return redirect(url_for('users.login_page'))

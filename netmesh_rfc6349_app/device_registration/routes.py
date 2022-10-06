@@ -50,7 +50,8 @@ def register_api():
                                device_name=device_name,
                                admin_email=admin_email,
                                device_info=get_device_info())), 200
-    except requests.exceptions.HTTPError as he:
+    except requests.exceptions.HTTPError as ex:
+        print("http", ex.response.text)
         error = ""
         try:
             error_json = json.loads(req.text)
@@ -62,9 +63,11 @@ def register_api():
             error = req.text
             
         return jsonify(error=error), 400
-    except requests.exceptions.RequestException as re:
+    except requests.exceptions.RequestException as ex:
+        print(ex)
         return jsonify(error=req.text), 400
     except Exception as ex:
+        print("ex", ex)
         return jsonify(error=str(ex)), 400
 
 
