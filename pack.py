@@ -45,7 +45,7 @@ def pack():
     # Run pyinstaller
     print(f"Creating bundle for {Config.APP_TITLE}...", end=' ')
     sleep(0.3)
-    chown_deb_folder = f'pyinstaller run.py -n "{Config.APP_NAME}" --onefile --clean --splash {main_folder}/static/images/rfc_splash_screen.png  --add-data "{main_folder}/templates:templates" --add-data "{main_folder}/static:static"'
+    chown_deb_folder = f'pyinstaller run.py -n "{Config.APP_NAME}" --clean --onefile --splash {main_folder}/static/images/rfc_splash_screen.png  --add-data "{main_folder}/templates:templates" --add-data "{main_folder}/static:static"'
     # chown_deb_folder = f"pyinstaller {Config.APP_NAME}.spec"
     chown_deb_folder_process = subprocess.Popen(
         chown_deb_folder, stdout=subprocess.PIPE, shell=True)

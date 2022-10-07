@@ -12,6 +12,20 @@
     ```
 4. Go back to the project folder (i.e. /var/git/netmesh-rfc6349-client)
 
+## Use Python virtual environment
+1. Create the virtual environment folder (.venv) in the root of this project folder
+    ```bash
+    python3 -m venv .venv
+    ```
+2. Activate the virtual environment
+    ```bash
+    source .venv/bin/activate
+    ```
+3. Install requirements
+    ```bash
+    python3 -m pip install -r requirements.txt
+    ```
+
 ## Run via browser (for development)
 1. Install requirements
     ```bash
