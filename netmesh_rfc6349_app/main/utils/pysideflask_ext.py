@@ -204,6 +204,8 @@ def init_gui(application, port=0, width=800, height=600,
         # else:
         window.has_update = False
         
+        sleep(1)
+        
         load_page(webView, page)
 
         print("App opened")
