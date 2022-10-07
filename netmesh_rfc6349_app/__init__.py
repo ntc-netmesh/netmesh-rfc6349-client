@@ -3,7 +3,6 @@ import os
 import sys
 
 from flask import Flask
-from flask_socketio import SocketIO
 
 from netmesh_rfc6349_app.config import Config
 

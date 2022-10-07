@@ -202,7 +202,12 @@
 				</div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Log in</button>
+        <button id="login-submit" type="submit" class="btn btn-primary">
+					<div class="spinner-border spinner-border-sm" role="status" hidden>
+						<span class="visually-hidden">Loading...</span>
+					</div>
+					Log in
+				</button>
       </div>
     </form>
   </div>
@@ -290,6 +295,7 @@
 
 		$('#login-modal').on('shown.bs.modal', function () {
 			if ($userEmail.attr('disabled')) {
+				$('#user-password-eye').val(false).trigger('change');
 				$('input[name="user-password"]').focus();
 			} else {
 				$userEmail.focus();
@@ -304,6 +310,8 @@
 			const formData = new FormData(ev.target);
 			console.log(Object.fromEntries([...formData]));
 
+			$('#login-modal input,button').prop("disabled", true);
+			$('#login-submit .spinner-border').prop('hidden', false);
 
 			$.ajax({
 				url: form.attr('action'),
@@ -314,12 +322,20 @@
 					"user-password": $('#user-password').val()
 				},
 				success: function (data) {
+					window.onbeforeunload = function () {
+						$('#login-modal input,button').prop("disabled", false);
+						$('#login-submit .spinner-border').prop('hidden', true);
+					}
 					window.location.replace(data.goto);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 					console.log(jqXHR);
 					$('#login-error').text(jqXHR.responseJSON?.error ?? "Unexpected error occured");
 					$('#login-error').show();
+				},
+				complete: function(jqXHR, textStatus) {
+					$('#login-modal input,button').prop("disabled", false);
+					$('#login-submit .spinner-border').prop('hidden', true);
 				}
 			});
 		})

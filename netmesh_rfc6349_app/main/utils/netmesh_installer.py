@@ -51,7 +51,7 @@ def get_app_current_version():
 
 
 def update_app():
-    APP_DIR = app_resource_path('')
+    APP_DIR = '.local/bin/'
 
     print("Updating to the latest version...")
     RSYNC_URL = "netmesh-rsync@netmesh-api.asti.dost.gov.ph::netmesh-latest-deb-release"

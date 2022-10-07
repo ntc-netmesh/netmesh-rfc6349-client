@@ -501,7 +501,7 @@ def finish_test():
         test_server_name = request.form.get('testServerName')
         test_server_url = request.form.get('testServerUrl')
         mode = request.form.get('mode')
-        test_number = 1
+        test_number = request.form.get('testNumber')
         
         api_url = f'{test_server_url}/api/{mode}/finish-test'
         
