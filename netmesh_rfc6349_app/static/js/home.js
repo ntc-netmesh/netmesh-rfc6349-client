@@ -43,9 +43,9 @@ const summaryChartImageUris = Object.seal({
     startedOn: '',
     finishedOn: '',
     get totalDuration() {
-      const elapsedSeconds = moment(this.finishedOn).diff(moment(this.startedOn), 'seconds');
-      const minutes = parseInt(elapsedSeconds / 60);
-      const seconds = parseInt(elapsedSeconds) % 60;
+      const elapsedSeconds = parseFloat(moment(this.finishedOn).diff(moment(this.startedOn), 'seconds'));
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
 
       return `${numeral(minutes).format("0")}:${numeral(seconds).format("00")}`;
     }
@@ -71,8 +71,8 @@ const summaryChartImageUris = Object.seal({
      */
     totalSeconds: 0,
     get time() {
-      const minutes = parseInt(this.totalSeconds / 60);
-      const seconds = Math.floor((this.totalSeconds - minutes * 60) * 100) / 100;
+      const minutes = Math.floor(this.totalSeconds / 60);
+      const seconds = Math.floor(this.totalSeconds % 60);
       
       return {minutes, seconds};
     },
@@ -1410,6 +1410,7 @@ const summaryChartImageUris = Object.seal({
               testServerName: testServer.nickname,
               testServerUrl: testServer.hostname,
               mode: testMethod.mode,
+              testNumber: autoRepeatIndex + 1
             },
             dataType: 'json',
             timeout: MEASUREMENT_TIMEOUT,

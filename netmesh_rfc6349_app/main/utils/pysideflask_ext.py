@@ -69,143 +69,151 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
 def init_gui(application, port=0, width=800, height=600,
              window_title="App", icon="static/images/ntc_icon.png", argv=None, has_update=False,
              latest_version=get_app_current_version(), download_path=""):
-
-    if argv is None:
-        argv = sys.argv
-
-    if not '--no-sandbox' in argv:
-        argv.append('--no-sandbox')
-
-    if port == 0:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('127.0.0.1', 0))
-        port = sock.getsockname()[1]
-        sock.close()
-
-    kill_port_process(port)
-
-    print(f"Opening {application.config['APP_TITLE']}")
-
-    # Application Level
-    qtapp = QtWidgets.QApplication(argv)
-    webapp = ApplicationThread(application, port)
-    webapp.start()
-    qtapp.aboutToQuit.connect(webapp.terminate)
-
-    print("Application level good")
-
-    # Main Window Level
-    window = MainGUI()
-    window.has_update = has_update
-    window.resize(width, height)
-    window.setWindowTitle(window_title)
-    window.setWindowIcon(QtGui.QIcon(icon))
-    # Get Screen geometry
-    screen_size = QScreen.availableGeometry(
-        QtWidgets.QApplication.primaryScreen())
-    # Set X Position Center
-    windowX = (screen_size.width() - window.width()) / 2
-    # Set Y Position Center
-    windowY = (screen_size.height() - window.height()) / 2
-    # Set Form's Center Location
-    window.move(windowX, windowY)
-
-    print("Window level good")
-
-    # WebView Level
-    webView = QtWebEngineWidgets.QWebEngineView(window)
-    webView.setContextMenuPolicy(Qt.PreventContextMenu)
-    webView.setAcceptDrops(False)
-    webView.setMinimumSize(800, 600)
-
-    window.setCentralWidget(webView)
-
-    print("webview level good")
-
-    # WebPage Level
-    page = WebPage('http://127.0.0.1:{}'.format(port))
-
-    profile = page.profile()
-    profile.clearHttpCache()
-    profile.clearAllVisitedLinks()
     
-    profile.setDownloadPath(download_path)
-    profile.downloadRequested.connect(onDownloadRequested)
+    try:
+        if argv is None:
+            argv = sys.argv
 
-    # cookie_store = profile.cookieStore()
-    # cookie_store.cookieAdded.connect(onCookieAdded)
+        if not '--no-sandbox' in argv:
+            argv.append('--no-sandbox')
 
-    # cookie = QtNetwork.QNetworkCookie()
-    # cookie.setName("device_name".encode())
-    # cookie.setValue("albert-laptop".encode())
-    # cookie_store.connect(self, )
-    # cookie_store.setCookie(QtNetwork.QNetworkCookie(cookie))
+        if port == 0:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.bind(('127.0.0.1', 0))
+            port = sock.getsockname()[1]
+            sock.close()
 
-    # sleep(10)
-    # print(cookie)
-    # onCookieAdded(cookie_store.loadAllCookies())
-    
-    if has_pyi_splash():
-        print("Closing splash...")
-        pyi_splash.close()
+        kill_port_process(port)
 
-    if has_update:
-        window.show()
+        print(f"Opening {application.config['APP_TITLE']}")
+
+        # Application Level
+        qtapp = QtWidgets.QApplication(argv)
+        webapp = ApplicationThread(application, port)
+        webapp.start()
+        qtapp.aboutToQuit.connect(webapp.terminate)
+        application.secret_key = os.urandom(24)
+
+        print("Application level good")
+
+        # Main Window Level
+        window = MainGUI()
+        window.has_update = has_update
+        window.resize(width, height)
+        window.setWindowTitle(window_title)
+        window.setWindowIcon(QtGui.QIcon(icon))
+        # Get Screen geometry
+        screen_size = QScreen.availableGeometry(
+            QtWidgets.QApplication.primaryScreen())
+        # Set X Position Center
+        windowX = (screen_size.width() - window.width()) / 2
+        # Set Y Position Center
+        windowY = (screen_size.height() - window.height()) / 2
+        # Set Form's Center Location
+        window.move(windowX, windowY)
+
+        print("Window level good")
+
+        # WebView Level
+        webView = QtWebEngineWidgets.QWebEngineView(None)
+        webView.setContextMenuPolicy(Qt.PreventContextMenu)
+        webView.setAcceptDrops(False)
+        webView.setMinimumSize(800, 600)
+
+        window.setCentralWidget(webView)
+
+        print("webview level good")
+
+        # WebPage Level
+        page = WebPage('http://127.0.0.1:{}'.format(port))
+
+        profile = page.profile()
+        profile.clearHttpCache()
+        profile.clearAllVisitedLinks()
         
-        msg = QMessageBox(window)
-        msg.setWindowTitle(f"Update to {latest_version}")
-        msg.setText("Do you want to update this app?")
-        msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        profile.setDownloadPath(download_path)
+        profile.downloadRequested.connect(onDownloadRequested)
 
-        reply = msg.exec_()
-        if reply == QtWidgets.QMessageBox.Yes:
-            q = queue.Queue()
+        # cookie_store = profile.cookieStore()
+        # cookie_store.cookieAdded.connect(onCookieAdded)
 
-            update_app_progress = QProgressDialog(
-                f"Updating {application['APP_TITLE']}...", "Cancel", 0, 0)
-            update_app_progress.setWindowTitle(f"Updating to {latest_version}")
-            update_app_thread = threading.Thread(
-                target=handle_update_dialog, args=(update_app_progress, q))
-            update_app_thread.start()
+        # cookie = QtNetwork.QNetworkCookie()
+        # cookie.setName("device_name".encode())
+        # cookie.setValue("albert-laptop".encode())
+        # cookie_store.connect(self, )
+        # cookie_store.setCookie(QtNetwork.QNetworkCookie(cookie))
 
-            update_app_progress.exec_()
+        # sleep(10)
+        # print(cookie)
+        # onCookieAdded(cookie_store.loadAllCookies())
+        
+        if has_pyi_splash():
+            print("Closing splash...")
+            pyi_splash.close()
+            
+            
+        window.show()
+            
+        if has_update:
+            msg = QMessageBox(window)
+            msg.setWindowTitle(f"Update to {latest_version}")
+            msg.setText("Do you want to update this app?")
+            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
 
-            is_successful = q.get()
-            if is_successful:
-                update_status_msg = QMessageBox(window)
-                update_status_msg.setWindowTitle(
-                    f"Successfully updated to {latest_version}")
-                update_status_msg.setText(
-                    "NetMesh RFC-6349 has been successfully updated. Please re-open the app")
-                update_status_msg.setStandardButtons(QMessageBox.Ok)
-                update_status_msg.exec_()
-            else:
-                update_status_msg = QMessageBox(window)
-                update_status_msg.setWindowTitle(f"Update failed")
-                update_status_msg.setText(
-                    "An error occured during the update of NetMesh RFC-6349.")
-                update_status_msg.setStandardButtons(QMessageBox.Close)
-                update_status_msg.exec_()
+            reply = msg.exec_()
+            if reply == QtWidgets.QMessageBox.Yes:
+                q = queue.Queue()
 
-            window.close()
-            sys.exit()
+                update_app_progress = QProgressDialog(
+                    f"Updating {application.config['APP_TITLE']}...", "Cancel", 0, 0)
+                update_app_progress.setWindowTitle(f"Updating to {latest_version}")
+                update_app_thread = threading.Thread(
+                    target=handle_update_dialog, args=(update_app_progress, q))
+                update_app_thread.start()
+
+                update_app_progress.exec_()
+
+                is_successful = q.get()
+                if is_successful:
+                    update_status_msg = QMessageBox(window)
+                    update_status_msg.setWindowTitle(
+                        f"Successfully updated to {latest_version}")
+                    update_status_msg.setText(
+                        "NetMesh RFC-6349 has been successfully updated. Please re-open the app")
+                    update_status_msg.setStandardButtons(QMessageBox.Ok)
+                    update_status_msg.exec_()
+                else:
+                    update_status_msg = QMessageBox(window)
+                    update_status_msg.setWindowTitle(f"Update failed")
+                    update_status_msg.setText(
+                        "An error occured during the update of NetMesh RFC-6349.")
+                    update_status_msg.setStandardButtons(QMessageBox.Close)
+                    update_status_msg.exec_()
+
+                window.close()
+                sys.exit()
+            # else:
+                # load_page(webView, page)
+                # must_update_msg = QMessageBox(window)
+                # must_update_msg.setWindowTitle("Cannot open the app")
+                # must_update_msg.setText("You must update this app first before using")
+                # must_update_msg.exec_()
+
+                # window.close()
+                # sys.exit()
         # else:
-            # load_page(webView, page)
-            # must_update_msg = QMessageBox(window)
-            # must_update_msg.setWindowTitle("Cannot open the app")
-            # must_update_msg.setText("You must update this app first before using")
-            # must_update_msg.exec_()
+        window.has_update = False
+        
+        load_page(webView, page)
 
-            # window.close()
-            # sys.exit()
-    # else:
-    load_page(webView, page)
-    
-    window.show()
+        print("App opened")
 
-    print("App opened")
-
-    return qtapp.exec_()
+        return qtapp.exec_()
+    except Exception as ex:
+        error = str(ex)
+        print(error)
+        
+        QMessageBox.information(None, "Error", error)
 
 
 def load_page(webView: QtWebEngineWidgets.QWebEngineView, page: WebPage):

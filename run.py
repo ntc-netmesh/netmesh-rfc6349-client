@@ -48,16 +48,15 @@ if __name__ == '__main__':
         parser.add_argument('--port', '-p', type=int, required=False, nargs='?', const='')
         args = parser.parse_args()
         
-        desktop = args.desktop or 'web'
         port = args.port or 5000
 
-        if not desktop:
+        if not args.desktop:
             if getattr(sys, 'frozen', False):
                 run_on_desktop()
             else:
                 run_in_browser(port)
         else:
-            if desktop == 'desktop':
+            if args.desktop == 'desktop':
                 run_on_desktop()
             else:
                 run_in_browser(port)
