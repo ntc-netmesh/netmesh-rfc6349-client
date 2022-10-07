@@ -204,7 +204,8 @@ def init_gui(application, port=0, width=800, height=600,
         # else:
         window.has_update = False
         
-        sleep(1)
+        web_view_delay_ms = 100
+        sleep(web_view_delay_ms / 1000)
         
         load_page(webView, page)
 
