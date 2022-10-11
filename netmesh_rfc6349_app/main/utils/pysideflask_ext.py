@@ -92,7 +92,6 @@ def init_gui(application, port=0, width=800, height=600,
         webapp = ApplicationThread(application, port)
         webapp.start()
         qtapp.aboutToQuit.connect(webapp.terminate)
-        application.secret_key = os.urandom(24)
 
         print("Application level good")
 

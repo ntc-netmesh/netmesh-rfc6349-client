@@ -317,28 +317,61 @@ const summaryChartImageUris = Object.seal({
           });
       }, false);
     })();
+
+    function logOut() {
+      $.ajax({
+        url: 'logout',
+        method: 'GET',
+        dataType: 'html',
+        success: function (url) {
+          window.location.replace(url);
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log(jqXHR);
+        }
+      })
+    }
+
+    $('#btnLogOut').click(function (e) {
+      if (appState == APP_STATE.Testing) {
+        $('#modalLogOut .modal-title').text("Ongoing test");
+        $('#modalLogOut .message').text("The current test is still executing. Results may not be saved. Do you still want to log out?");
+        $('#modalLogOut').modal('show');
+      } else {
+        logOut();
+      }
+    });
+
+    $('#modalLogOut .btn-outline-secondary').click(function () {
+      logOut();
+    });
+
+    // window.onbeforeunload = (event) => {
+    //   event.preventDefault();
+    //   return event.returnValue = "Are you sure you want to exit?";
+    // };
   
     // Prompt when window is being reloaded
-    window.onbeforeunload = function (e) {
-      console.log("onbeforeunload");
-      e = e || window.event;
+    // window.onbeforeunload = function (e) {
+    //   console.log("onbeforeunload");
+    //   e = e || window.event;
   
-      let message = "Close this app?";
-      switch (appState) {
-        case APP_STATE.Testing:
-          message = "Test is ongoing.\n\nClose this app anyway?"
-          break;
-      }
+    //   let message = "Close this app?";
+    //   switch (appState) {
+    //     case APP_STATE.Testing:
+    //       message = "Test is ongoing.\n\nClose this app anyway?"
+    //       break;
+    //   }
   
-      // For IE and Firefox prior to version 4
-      if (e) {
-        e.returnValue = message;
-      }
+    //   // For IE and Firefox prior to version 4
+    //   if (e) {
+    //     e.returnValue = message;
+    //   }
   
-      console.log(message);
-      // For Safari
-      return message;
-    };
+    //   console.log(message);
+    //   // For Safari
+    //   return message;
+    // };
   });
 
   function scanForConnectedDevices(typeName) {
@@ -369,17 +402,22 @@ const summaryChartImageUris = Object.seal({
         $('#connected-devices-table-container').removeClass('d-none');
         $('#connected-devices-title').html(`Devices connected to the ${typeName}`);
 
-        $('#nmap-version').text(data.nmapVersion);
-        $('#nmap-scan-started-on').text(data.nmap.scanstats.timestr);
+        $('#nmap-version').text(data.stats.version);
+        $('#nmap-scan-started-on').text(data.stats.startstr);
 
-        const scanDuration = parseFloat(data.nmap.scanstats.elapsed);
+        const scanDuration = parseFloat(data.runtime.elapsed);
         const minutes = parseInt(scanDuration / 60);
         const seconds = Math.round((scanDuration - minutes * 60) * 100) / 100;
         $('#nmap-scan-duration').text(`${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`);
 
-        const scannedDevices = Object.values(data.scan)
-          .filter(sd => sd.status.state == "up"
-            && sd.hostnames.filter(h => h.name != '_gateway').length);
+        const scannedDevices = Object.assign(...Object.keys(data.scanned_ips)
+          .filter(key => data.scanned_ips[key].hostname.filter(h => h.name === '_gateway').length === 0)
+            .map(key => ({
+              [key]: data.scanned_ips[key]
+            })
+          )
+        );
+        console.log(scannedDevices);
         // console.log("vendors", Object.values(scannedDevices).filter(sd => sd.status.state != "down"));
         const numberOfScannedDevices = Object.keys(scannedDevices).length;
 
@@ -396,18 +434,18 @@ const summaryChartImageUris = Object.seal({
         }
 
         $('#connected-devices-count').html(numberOfScannedDevices == 0 ? "No devices connected to the network" : `${numberOfScannedDevices > 1 ? `<b>${numberOfScannedDevices - 1}</b>` : "No"} other ${numberOfScannedDevices - 1 == 1 ? "device" : "devices" } connected to the network`);
-        for (const [i, device] of Object.entries(scannedDevices)) {
+        let counter = 0;
+        for (const [ip, device] of Object.entries(scannedDevices)) {
           console.log(device);
-          console.log(device);
-          console.log(Object.values(device.vendor));
+          counter++;
           $('#connected-devices-table tbody').append(`<tr>
-            <td>${parseInt(i) + 1}</td>
-            <td>${device.hostnames.filter(h => h.name).length ? device.hostnames[0].name : "<small class='text-muted'>---</small>"}</td>
+            <td>${counter}</td>
+            <td>${device.hostname.filter(h => h.name).length ? device.hostname[0].name : "<small class='text-muted'>---</small>"}</td>
             <td>${device.osmatch?.length ? device.osmatch[0].name : "<small class='text-muted'>---</small>"}</td>
-            <td>${device.osmatch?.length && device.osmatch[0].osclass.length ? device.osmatch[0].osclass[0].type : "<small class='text-muted'>---</small>"}</td>
-            <td>${Object.keys(device.vendor).length ? Object.values(device.vendor)[0] : "<small class='text-muted'>---</small>"}</td>
-            <td>${Object.keys(device.addresses).length ? device.addresses.ipv4 : "<small class='text-muted'>---</small>"}</td>
-            <td>${Object.keys(device.portused).length ? device.portused.filter(p => p.state == 'open').map(p => p.portid).join(', ') : "<small class='text-muted'>---</small>"}</td>
+            <td>${device.osmatch?.length ? device.osmatch[0].osclass.type : "<small class='text-muted'>---</small>"}</td>
+            <td>${device.osmatch?.length ? device.osmatch[0].osclass.vendor : "<small class='text-muted'>---</small>"}</td>
+            <td>${ip}</td>
+            <td>${Object.keys(device.ports).length ? device.ports.filter(p => p.state == 'open').map(p => p.portid).join(', ') : "<small class='text-muted'>---</small>"}</td>
           </tr>`)
         }
       },
@@ -1698,6 +1736,7 @@ const summaryChartImageUris = Object.seal({
   
     $("#mainForm").trigger('reset');
     $('#mainForm').removeClass('was-validated');
+    $('.custom-test-server-field').addClass('d-none');
   
     $('#measurement-card').addClass('d-none');
     // $('#measurement-failed-card').hide();
@@ -1707,7 +1746,7 @@ const summaryChartImageUris = Object.seal({
     $('#location-name-container').html('<span>---</span>');
     $('#summary-location-name').html('<i>Locating...</i>');
   
-    $('connected-devices-card').removeClass('d-none');
+    $('#connected-devices-card').removeClass('d-none');
 
     renderMap();
     

@@ -13,7 +13,6 @@ def login(email, password):
         raise Exception("Email required")
 
     config_file = NetMeshConfigFile()
-    # device_config = config_file.load_device_config()
     device_name = config_file.device_config.get_device_name()
 
     credentials = {
@@ -22,7 +21,6 @@ def login(email, password):
         "client": device_name
     }
     
-    print("credentials", credentials)
     req = requests.post(
         url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/token/",
         json=credentials)

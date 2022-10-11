@@ -213,6 +213,26 @@
 				const $deviceConfirmationModal = $('#device-confirmation-modal');
 				$('#device-confirmation-button').on('click', function (ev) {
 					const selectedOwner = $('#device-owner').select2('data')[0];
+					console.log("selectedOwner", selectedOwner);
+
+					if (selectedOwner.id) {
+						document.getElementById('device-owner').classList.remove('is-invalid');
+					} else {
+						document.getElementById('device-owner').classList.add('is-invalid');
+					}
+
+					const laptopName = $('#device-name').val();
+					if (laptopName) {
+						document.getElementById('device-name').classList.remove('is-invalid');
+					} else {
+						document.getElementById('device-name').classList.add('is-invalid');
+					}
+
+					const isValid = document.getElementsByClassName('is-invalid').length === 0;
+					if (!isValid) {
+						return;
+					}
+
 					$.ajax({
 						url: 'device-confirmation-template',
 						method: 'POST',
@@ -221,7 +241,7 @@
 							// regionName: $('#ntc-region option:selected').text(),
 							laptopOwner: `${$('#device-owner option:selected').text()}`,
 							laptopOwnerEmail: selectedOwner.email,
-							laptopName: $('#device-name').val()
+							laptopName: laptopName
 						},
 						success: function (response) {
 							console.log(response);

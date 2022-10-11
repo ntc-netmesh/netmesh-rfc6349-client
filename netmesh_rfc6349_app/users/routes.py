@@ -100,6 +100,8 @@ def login():
         try:
             error_content = ex.response.content
             error_json = json.loads(error_content)
+            if ex.response.status_code == 400:
+                return jsonify(error="Invalid email or password"), 400
             if error_json and "non_field_errors" in error_json:
                 return jsonify(error=error_json["non_field_errors"]), 400
             else:
@@ -168,4 +170,5 @@ def logout():
     session['email'] = None
     session['name'] = None
     
-    return redirect(url_for('users.login_page'))
+    # return redirect(url_for('users.login_page'))
+    return url_for('users.login_page')

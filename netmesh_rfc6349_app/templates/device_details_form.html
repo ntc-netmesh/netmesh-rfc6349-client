@@ -1,4 +1,7 @@
-<h4 class="mb-3">{{ region_name }}</h4>
+<h4 class="mb-0">
+  {{ region_name }}
+</h4>
+<div class="mb-3"></div>
 <h6>Who will own this laptop?</h6>
 <div class="mb-3">
   <select
@@ -12,6 +15,9 @@
       <option	{% if user == user.id %} selected {% endif %} value="{{ user.id }}">{{ "%s %s" | format(user.first_name, user.last_name) }}</option>	
     {% endfor %}
   </select>
+  <div class="invalid-feedback">
+    Select the owner
+  </div>
 </div>
 <h6>What will be the name of this laptop?</h6>
 <div class="mb-3">
@@ -24,6 +30,9 @@
     value="{{ device_name }}"
     required
   />
+  <div class="invalid-feedback" id="device-name-validation">
+    Please enter the name of this laptop
+  </div>
 </div>
 
 <script>

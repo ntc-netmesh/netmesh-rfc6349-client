@@ -11,7 +11,8 @@ from netmesh_rfc6349_app.main.utils.laptop_info import get_downloads_folder_path
 
 def run_on_desktop():
     app = create_app()
-
+    app.secret_key = os.urandom(24)
+    
     if has_pyi_splash():
         print("Opening splash...")
         import pyi_splash
@@ -34,6 +35,7 @@ def run_on_desktop():
 def run_in_browser(port):
     app = create_app()
 
+    app.secret_key = 'for-testing-purposes-only'
     app.run(debug=True, port=port)
 
 

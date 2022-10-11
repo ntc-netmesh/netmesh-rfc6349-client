@@ -5,7 +5,7 @@ import os
 import subprocess
 import uuid
 import socket
-import nmap
+import nmap3
 
 import requests
 import json
@@ -906,23 +906,30 @@ def get_connected_devices():
         gateway_ip = get_default_gateway()
 
         print(f'gateway_ip: {gateway_ip}')
-
-        ps = nmap.PortScanner()
-        results = ps.scan(ethernet_ip, arguments='-sT -O', sudo=True)
+        
+        nmap = nmap3.Nmap()
+        # ps = nmap3.PortScanner()
+        # results = ps.scan(ethernet_ip, arguments='-sT -O', sudo=True)
+        results = nmap.nmap_os_detection(f'{ethernet_ip}/24', "-sT -O")
+        runtime = results.pop("runtime")
+        stats = results.pop("stats")
         print(results)
+        #
         # remove gateway from results
         scanned_ips = {k: v for k,
-                       v in results['scan'].items() if k != gateway_ip}
+                       v in results.items() if k != gateway_ip}
         print(scanned_ips)
         return Response(json.dumps({
-            "nmap": results['nmap'],
-            "nmapVersion": ".".join(map(str, ps.nmap_version())),
-            "scan": scanned_ips
+            "scanned_ips": scanned_ips,
+            "runtime": runtime,
+            "stats": stats
         }))
-    except nmap.nmap.PortScannerError as pse:
-        raise pse
-    except Exception as e:
-        raise e
+    except nmap3.NmapExecutionError as ex:
+        print("nmap3", ex)
+        raise ex
+    except Exception as ex:
+        print(ex)
+        raise ex
 
 
 @test_measurement.route('/send-error', methods=['POST'])

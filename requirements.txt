@@ -9,9 +9,9 @@ importlib-metadata==5.0.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
 MarkupSafe==2.1.1
-nmap==0.0.1
 numpy==1.23.3
 PySide2==5.15.2.1
+python3-nmap==1.5.4
 requests==2.28.1
 shiboken2==5.15.2.1
 urllib3==1.26.12

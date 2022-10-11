@@ -19,7 +19,7 @@ def register_api():
     try:
         device_info = get_device_info()
         device_info.update({"name": device_name})
-        device_info.update({"user": device_owner_info['user_id']})
+        device_info.update({"owner": device_owner_info['user_id']})
 
         req = requests.post(
             url=f"{current_app.config['RESULTS_SERVER_API_URI']}/rfc6349/device/",
@@ -53,6 +53,7 @@ def register_api():
     except requests.exceptions.HTTPError as ex:
         print("http", ex.response.text)
         error = ""
+        print(ex.response.status_code)
         try:
             error_json = json.loads(req.text)
             if "detail" in error_json:
@@ -128,7 +129,7 @@ def log_admin():
         print(session['admin-ntc-region-name'])
 
         r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/manage/",
             params={
                 "ntc_region": ntc_region
             },
@@ -137,21 +138,27 @@ def log_admin():
         r.raise_for_status()
 
         users_response = r.json()
-    except requests.exceptions.RequestException as re:
+    except requests.exceptions.RequestException as ex:
         error = "Unexpected error"
         try:
             error_json = json.loads(r.content)
-            if "non_field_errors" in error_json:
+            if ex.response.status_code == 400:
+                error = "Invalid email or password"
+            elif "non_field_errors" in error_json:
                 error = error_json["non_field_errors"]
             else:
                 error = r.content
-        except Exception as ex:
-            print(ex)
-            error = str(re)
+        except Exception as ex2:
+            print(ex2)
+            error = str(ex2)
 
         return render_template('device_admin_credentials.html', error=error), 400
 
     return render_template('device_details_form.html', region_name=session['admin-ntc-region-name'], users=users_response)
+
+@device_registration.route('/aa')
+def aa():
+    return render_template('device_details_form.html', users={}, region_name='region')
 
 
 @device_registration.route('/get-device-details-template', methods=['POST'])
@@ -165,7 +172,7 @@ def get_device_details_template():
     regions = netmesh_location.get_philippine_regions()
     try:
         r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/",
+            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/manage/",
             params={
                 "ntc_region": region
             },
@@ -218,42 +225,42 @@ def reset_registration():
         return jsonify(error=str(ex)), 400
 
 
-@device_registration.route('/device-details', methods=['GET'])
-def device_details():
-    return render_template('device_details_form.html', users=[
-        {
-            "ntc_region": "3",
-            "id": 1_000_001,
-            "email": "romano.bourgeois@example.com",
-            "first_name": "Romano",
-            "last_name": "Bourgeois"
-        },
-        {
-            "ntc_region": "3",
-            "id": 1_000_002,
-            "email": "peyton.vasquez@example.com",
-            "first_name": "Peyton",
-            "last_name": "Vasquez"
-        },
-        {
-            "ntc_region": "3",
-            "id": 1_000_003,
-            "email": "gavin.cole@example.com",
-            "first_name": "Gavin",
-            "last_name": "Cole"
-        },
-        {
-            "ntc_region": "3",
-            "id": 1_000_004,
-            "email": "audrey.tucker@example.com",
-            "first_name": "Audrey",
-            "last_name": "Tucker"
-        },
-        {
-            "ntc_region": "3",
-            "id": 1_000_005,
-            "email": "jill.pearson@example.com",
-            "first_name": "Jill",
-            "last_name": "Pearson"
-        }
-    ])
+# @device_registration.route('/device-details', methods=['GET'])
+# def device_details():
+#     return render_template('device_details_form.html', users=[
+#         {
+#             "ntc_region": "3",
+#             "id": 1_000_001,
+#             "email": "romano.bourgeois@example.com",
+#             "first_name": "Romano",
+#             "last_name": "Bourgeois"
+#         },
+#         {
+#             "ntc_region": "3",
+#             "id": 1_000_002,
+#             "email": "peyton.vasquez@example.com",
+#             "first_name": "Peyton",
+#             "last_name": "Vasquez"
+#         },
+#         {
+#             "ntc_region": "3",
+#             "id": 1_000_003,
+#             "email": "gavin.cole@example.com",
+#             "first_name": "Gavin",
+#             "last_name": "Cole"
+#         },
+#         {
+#             "ntc_region": "3",
+#             "id": 1_000_004,
+#             "email": "audrey.tucker@example.com",
+#             "first_name": "Audrey",
+#             "last_name": "Tucker"
+#         },
+#         {
+#             "ntc_region": "3",
+#             "id": 1_000_005,
+#             "email": "jill.pearson@example.com",
+#             "first_name": "Jill",
+#             "last_name": "Pearson"
+#         }
+#     ])
