@@ -191,7 +191,8 @@ const summaryChartImageUris = Object.seal({
         },
         error: function (err) {
           console.log(err.responseText);
-          $('#gpsError').text(err.responseText);
+          $('#gpsError').show();
+          $('#gpsError .message').text(err.responseText);
           $('#gpsError').removeClass("d-none");
         },
         complete: function () {
@@ -200,6 +201,10 @@ const summaryChartImageUris = Object.seal({
         }
       })
     });
+
+    $('#gpsError .btn-close').click(function () {
+      $('#gpsError').hide();
+    })
 
     // Set on click: Show Location Help button
     $('#btnGpsHelp').on('click', function () {
@@ -957,10 +962,24 @@ const summaryChartImageUris = Object.seal({
         </ul>
       `);
 
+      
+
       $(`#test-executing-indicator-${testNumber}`).removeClass('d-none');
       $(`#pills-speedtest-${testNumber}-tab`).removeClass('disabled');
-      $(`#pills-speedtest-${testNumber}-tab`).addClass('active');
-      $(`#pills-speedtest-${testNumber}`).addClass('show active');
+      // check if other tab is selected and last test is not selected
+      const selectedTab = $('#speedtest-pills-tab .nav-link.active').first();
+      console.log(selectedTab.length > 0);
+      if (selectedTab.length > 0) {
+        const id = selectedTab.attr('id');
+        const tnum = id.split('-')[2];
+        if (testNumber - 1 == tnum) {
+          $(`#pills-speedtest-${testNumber}-tab`).addClass('active');
+          $(`#pills-speedtest-${testNumber}`).addClass('show active');
+        }
+      } else {
+        $(`#pills-speedtest-${testNumber}-tab`).addClass('active');
+        $(`#pills-speedtest-${testNumber}`).addClass('show active');
+      }
 
       try {
         const response = await $.ajax({
@@ -1103,8 +1122,16 @@ const summaryChartImageUris = Object.seal({
 
     if (autoRepeatCount > 1) {
       $(`#pills-speedtest-summary-tab`).removeClass('disabled');
-      $(`#pills-speedtest-summary-tab`).addClass('active');
-      $(`#pills-speedtest-summary`).addClass('show active');
+
+      const selectedTab = $('#speedtest-pills-tab .nav-link.active').first();
+      if (selectedTab.length > 0) {
+        const id = selectedTab.attr('id');
+        const tnum = id.split('-')[2];
+        if (tnum === autoRepeatCount) {
+          $(`#pills-speedtest-summary-tab`).addClass('active');
+          $(`#pills-speedtest-summary`).addClass('show active');
+        }
+      }
   
       try {
         const response = await $.ajax({
