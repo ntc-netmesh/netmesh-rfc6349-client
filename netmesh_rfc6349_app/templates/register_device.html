@@ -31,7 +31,7 @@
 		<div class="d-flex mb-3">
 			<img
 				class="me-3"
-				src="{{url_for('static', filename='images/ntc_logo.png')}}"
+				src="{{url_for('static', filename='images/netmesh-icon.png')}}"
 				width="60"
 				height="60"
 			/>
@@ -53,7 +53,7 @@
 						<div class="mt-auto">
 							<div class="d-flex justify-content-end">
 								<!-- <button id="already-registered-button" type="button" class="btn btn-sm btn-link me-auto">Already registered this device</button> -->
-								<button id="start-registration-button" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admin-credentials-modal">Start Registration</button>
+								<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#admin-credentials-modal">Start Registration</button>
 							</div>
 						</div>
 					</div>
@@ -75,8 +75,21 @@
 						</div>
 						<div class="mt-auto">
 							<div class="d-flex justify-content-end">
-								<button id="cancel-registration-button" type="button" class="btn btn-sm btn-link link-danger p-0 me-auto">Cancel registration</button>
-								<button id="device-confirmation-button" type="button" class="btn btn-primary">Continue</button>
+								<!-- <button type="button" class="btn btn-sm btn-link link-danger p-0 me-auto">Cancel registration</button> -->
+								<div class="me-auto">
+									<button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="bi bi-three-dots-vertical"></i>
+										Options
+									</button>
+									<ul class="dropdown-menu">
+										<li>
+											<a id="cancel-registration-button" href="#" class="dropdown-item small">
+												<span class="text-danger">Cancel registration</span>
+											</a>
+										</li>
+									</ul>
+								</div>
+								<button id="device-confirmation-button" type="button" class="btn btn-primary" disabled="true">Continue</button>
 							</div>
 						</div>
 					</div>
@@ -109,7 +122,12 @@
 				{% include 'device_admin_credentials.html' %}
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary">Proceed</button>
+        <button type="submit" class="btn btn-primary">
+					<div class="spinner-border spinner-border-sm" role="status" hidden>
+						<span class="visually-hidden">Loading...</span>
+					</div>
+					Proceed
+				</button>
       </div>
     </form>
   </div>
@@ -137,14 +155,7 @@
 			$(function () {
 				const $registrationCarousel = $('#carousel-registration');
 
-				$('#admin-password-eye').on('change', function () {
-					if (this.checked) {
-						$('#admin-password').attr('type', 'text');
-					} else {
-						$('#admin-password').attr('type', 'password');
-					}
-				});
-
+				let adminCredentailsAjax;
 				const $adminCredentailsModal = $('#admin-credentials-modal');
 				const $adminCredentailsForm = $('#admin-credentials-modal form');
 				$adminCredentailsForm.on('submit', function (ev) {
@@ -152,32 +163,43 @@
 
 					const formData = new FormData(ev.target);
 
-					$.ajax({
+					$('.alert').remove();
+					$('#admin-credentials-modal input, #admin-credentials-modal button:not(.btn-close)').attr('disabled', true);
+					$('#admin-credentials-modal button .spinner-border').attr('hidden', false);
+
+					adminCredentailsAjax = $.ajax({
 						url: $adminCredentailsForm.attr('action'),
 						method: $adminCredentailsForm.attr('method'),
 						dataType: 'html',
 						data: Object.fromEntries([...formData]),
 						success: function (response) {
-							$adminCredentailsModal.modal('hide');
-
-							// $('#ntc-region-selection-content').html(response);
 							$('#device-details-content').html(response);
 
 							$registrationCarousel.carousel('next');
+							$adminCredentailsModal.modal('hide');
 						},
 						error: function (jqXHR, textStatus, errorThrown) {
 							console.log({jqXHR, textStatus, errorThrown});
 							$('#admin-credentials-modal .modal-body').html(jqXHR.responseText);
+						},
+						complete: function (jqXHR, textStatus) {
+							$('#admin-credentials-modal input, #admin-credentials-modal button:not(.btn-close)').attr('disabled', false);
+							$('#admin-credentials-modal button .spinner-border').attr('hidden', true);
 						}
 					})
 				});
 				
 				$adminCredentailsModal.on('show.bs.modal', function (ev) {
+					$('.alert').remove();
 					$adminCredentailsForm.trigger("reset");
 				});
 				$adminCredentailsModal.on('shown.bs.modal', function (ev) {
 					$('#admin-email').focus();
 				});
+				$('#admin-credentials-modal .btn-close').on('click', function () {
+					adminCredentailsAjax?.abort();
+				})
+
 
 				// const $submitRegionButton = $('#submit-region-button');
 				// $submitRegionButton.on('click', function (ev) {
@@ -205,6 +227,8 @@
 				$('#cancel-registration-button').on('click', function (ev) {
 					const willCancelRegistration = confirm("Do you want to cancel registration?");
 					if (willCancelRegistration) {
+						// $('#admin-credentials-modal .modal-body').load('device_admin_credentials.html');
+
 						$registrationCarousel.carousel(0);
 						$('#device-details-content').html("");
 					}

@@ -2,18 +2,16 @@
 
 {% block head %}
 {{ super() }}
-<style>
-	
-</style>
 {% endblock %}
 
 {% block body %}
 {{ super() }}
+
 <nav class="navbar navbar-expand-sm navbar-light bg-light sticky-top shadow-sm">
 	<div class="container">
 		<div class="navbar-brand">
 			<img
-				src="{{url_for('static', filename='images/ntc_logo.png')}}"
+				src="{{url_for('static', filename='images/netmesh-icon.webp')}}"
 				title="{{ config['APP_TITLE'] }}"
 				alt="Avatar"
 				style="width: 48px"
@@ -38,35 +36,6 @@
 		</button>
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-				<!-- <li class="nav-item">
-					<a class="nav-link btn active" aria-current="page" href="#">Home</a>
-				</li> -->
-				<!-- <li class="nav-item">
-            <button class="nav-link btn btn-link" onclick="showSettingsModal()">Test a process</button>
-          </li> -->
-				<!-- <li class="nav-item">
-					<a
-						class="nav-link btn"
-						aria-current="page"
-						target="_blank"
-						href="https://netmesh.pregi.net/web/speedtest/"
-						>Web speedtest</a
-					>
-				</li> -->
-				<!-- <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Settings
-            </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled">Disabled</a>
-          </li> -->
 			</ul>
 			<div class="navbar-text">
 				<div class="btn-group">
@@ -77,15 +46,12 @@
 					<ul class="dropdown-menu dropdown-menu-sm-end">
 						<li>
 							<a id="loggedUserEmail" class="dropdown-item disabled small">{{ email }}</a>
-							<a href="#" id="btnLogOut" class="dropdown-item" role="button">Log out</a>
+						</li>
+						<li>
+							<button id="btnLogOut" type="button" class="dropdown-item">Log out</button>
 						</li>
 					</ul>
 				</div>
-					<!--
-						<span id="region-name" class="text-muted">---</span> -->
-				<!-- <a href="{{ url_for('users.logout') }}" class="btn btn-link text-primary p-0" role="button">
-					Log out
-				</a> -->
 			</div>
 		</div>
 	</div>

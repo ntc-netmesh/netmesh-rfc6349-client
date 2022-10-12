@@ -4,30 +4,93 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link rel="preload" as="image" href="../static/images/netmesh-icon.webp">
+    <link rel="preload" as="image" href="../static/images/netmesh-logo.webp">
+    <style>
+      .loading-page {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
 
-    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js') }}"></script>
+      body {
+        overflow: hidden;
+      }
+
+      @keyframes fade {
+        from {
+          visibility: collapse;
+          opacity: 0;
+        }
+        to {
+          visibility: visible;
+          opacity: 1;
+        }
+      }
+      .fade-out {
+        animation: fade reverse 200ms ease-out forwards;
+      }
+
+      @keyframes glow {
+        from {
+          filter: brightness(1) opacity(1)
+        }
+        to {
+          filter: brightness(1.33) opacity(0.33)
+        }
+      }
+      .glow {
+        animation: glow 750ms ease-in-out infinite alternate;
+      }
+    </style>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css') }}">
-    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/select2/dist/css/select2.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css') }}">
-    <script src="{{ url_for('static', filename='node_modules/select2/dist/js/select2.min.js') }}"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css') }}">
-    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js') }}"></script>
-    <script src="{{ url_for('static', filename='node_modules/leaflet-image/leaflet-image.js') }}"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/apexcharts/dist/apexcharts.css') }}" />
-    <script src="{{ url_for('static', filename='node_modules/apexcharts/dist/apexcharts.min.js') }}"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
   {% endblock %}
 
   {% block body %}
 
+  <div id="loading-page" class="loading-page bg-body">
+    <img src="../static/images/netmesh-icon.webp" class="glow" width="144" height="auto" />
+  </div>
+  
   {% block scripts %}
+    <script>
+      (function () {
+        window.onload = function () {
+          document.getElementById('loading-page')?.classList.add('fade-out');
+          document.body.style.overflow = 'auto';
+        }
+      })();
+    </script>
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='node_modules/select2/dist/js/select2.min.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/leaflet-image/leaflet-image.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='node_modules/apexcharts/dist/apexcharts.min.js') }}"></script>
+    
     <script src="{{ url_for('static', filename='node_modules/moment/min/moment.min.js') }}"></script>
     <script src="{{ url_for('static', filename='node_modules/numeral/min/numeral.min.js') }}"></script>
 

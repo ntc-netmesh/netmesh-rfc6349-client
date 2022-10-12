@@ -39,6 +39,7 @@
 <div id="pills-speedtest-summary-test">
   
 </div>
+
 <div class="row">
   <div class="main-form-col col-md-9 col-lg-4 col-xxl-4">
     <form
@@ -65,11 +66,11 @@
             <div class="form-group mb-3">
               <div class="d-flex">
                 <label class="small form-label mb-1" for="netType">Ethernet Connection*</label>
-                <a href="#" class="btn-refresh-networks ms-auto small">Refresh</a>
+                <button type="button" class="btn btn-sm btn-link ms-auto p-0 small btn-refresh-networks">Refresh</button>
               </div>
               <select class="form-select" id="netType">
               </select>
-              <a href="#" class="small p-1" id="btn-scan-connected-devices">Scan for connected devices</a>
+              <button type="button" class="btn btn-sm btn-link small p-0" id="btn-scan-connected-devices">Scan for connected devices</button>
               <div id="net-warning" class="alert alert-warning p-0 m-1 d-none" role="alert">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
@@ -646,6 +647,16 @@
       <div class="modal-footer">
         <button class="btn btn-primary" type="button" data-bs-dismiss="modal">Cancel</button>
         <button class="btn btn-outline-secondary" type="button">Log out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal modal-sm" id="modalLoggingOut" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="modalLoggingOutLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <span class="h4">Logging out...</span>
       </div>
     </div>
   </div>

@@ -133,6 +133,7 @@ const summaryChartImageUris = Object.seal({
     testClient.email = document.getElementById('loggedUserEmail').innerText;
     
 
+
     setTestServers();
     setEthernets();
     renderMap();
@@ -319,6 +320,9 @@ const summaryChartImageUris = Object.seal({
     })();
 
     function logOut() {
+      $('#modalLogOut').modal('hide');
+      $('#modalLoggingOut').modal('show');
+
       $.ajax({
         url: 'logout',
         method: 'GET',
@@ -336,6 +340,7 @@ const summaryChartImageUris = Object.seal({
       if (appState == APP_STATE.Testing) {
         $('#modalLogOut .modal-title').text("Ongoing test");
         $('#modalLogOut .message').text("The current test is still executing. Results may not be saved. Do you still want to log out?");
+        $('#modalLogOut .btn-primary').text('Keep testing');
         $('#modalLogOut').modal('show');
       } else {
         logOut();

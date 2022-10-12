@@ -261,7 +261,7 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
   // LAYOUT REPORT
   // ----------------------------------------------------------------
 
-  const ntcLogoData = await getBase64ImageFromURLAsync('static/images/ntc_logo.png');
+  const ntcLogoData = await getBase64ImageFromURLAsync('static/images/ntc-logo.webp');
 
   const pageMarginInches = 0.5;
   const pageMarginPixels = pageMarginInches * 72;

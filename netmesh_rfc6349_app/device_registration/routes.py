@@ -156,10 +156,6 @@ def log_admin():
 
     return render_template('device_details_form.html', region_name=session['admin-ntc-region-name'], users=users_response)
 
-@device_registration.route('/aa')
-def aa():
-    return render_template('device_details_form.html', users={}, region_name='region')
-
 
 @device_registration.route('/get-device-details-template', methods=['POST'])
 def get_device_details_template():

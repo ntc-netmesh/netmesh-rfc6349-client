@@ -28,19 +28,34 @@
     class="form-control"
     placeholder="(ex. r1-user-laptop)"
     value="{{ device_name }}"
-    required
+    requiredf
   />
+  <div id="deviceNameLoading" class="form-text" hidden="true">
+    <div class="spinner-border spinner-border-sm" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <span>Checking device name...</span>
+  </div>
   <div class="invalid-feedback" id="device-name-validation">
     Please enter the name of this laptop
   </div>
+  <div class="valid-feedback">
+    Laptop name is available
+  </div>
 </div>
+
 
 <script>
   (function () {
+    const session = JSON.parse('{{session|tojson}}');
     const data = JSON.parse('{{ users|tojson|safe }}');
 
     const $deviceOwner = $('#device-owner');
     const $deviceName = $('#device-name');
+
+    let isDeviceOwnerValid = false;
+    let isDeviceNameValid = false;
+
     $deviceOwner.select2({
       data: data,
       theme: "bootstrap-5",
@@ -49,6 +64,7 @@
       templateResult: formatSelection,
       matcher: matchCustom
     });
+
     $deviceOwner.on('select2:select', function (ev) {
       const data = ev.params.data;
       const regionName = data['ntc_region'];
@@ -60,8 +76,77 @@
       }
       $deviceName.val(`${shortRegionName.toLowerCase()}-${data['first_name'].toLowerCase()}-laptop`);
       $deviceName.focus();
+
+      isDeviceOwnerValid = true;
+      setLaptopNameChecker();
+      $deviceOwner.addClass('is-valid');
     });
 
+    let typingTimer;
+    let laptopCheckerAjax;
+    let doneTypingInterval = 300;
+
+    const setLaptopNameChecker = () => {
+      isDeviceNameValid = false;
+      setContinueButtonStatus();
+
+      laptopCheckerAjax?.abort();
+      clearTimeout(typingTimer);
+
+      $deviceName.removeClass('is-invalid').removeClass('is-valid');
+
+      const enteredLaptopName = $deviceName.val();
+      if (enteredLaptopName) {
+        $('#deviceNameLoading').attr('hidden', false);
+        typingTimer = setTimeout(checkLaptopName, doneTypingInterval);
+      } else {
+        $('#deviceNameLoading').attr('hidden', true);
+
+        isDeviceNameValid = false;
+        setContinueButtonStatus();
+      }
+    }
+    
+    const checkLaptopName = () => {
+      const enteredLaptopName = $deviceName.val();
+
+      laptopCheckerAjax = $.ajax({
+        url: 'http://202.90.159.48/api/rfc6349/device/',
+        dataType: 'json',
+        headers: {
+          Authorization: `Token ${session['admin-token']}`
+        },
+        data: {
+          check_name: enteredLaptopName,
+        },
+        success: function (response) {
+          $deviceName.removeClass('is-invalid').addClass('is-valid');
+
+          isDeviceNameValid = true;
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          console.log(jqXHR.responseJSON);
+          const error = jqXHR.responseJSON?.detail ?? jqXHR.responseText ?? "Unexpected error occured";
+          $('#device-name-validation').text(error);
+          $deviceName.removeClass('is-valid').addClass('is-invalid');
+
+          isDeviceNameValid = false;
+        },
+        complete: function (jqXHR, textStatus) {
+          $('#deviceNameLoading').attr('hidden', true);
+          setContinueButtonStatus();
+        }
+      })
+    }
+
+    const setContinueButtonStatus = () => {
+      $('#device-confirmation-button').attr('disabled', !(isDeviceNameValid && isDeviceOwnerValid))
+    }
+    
+    $deviceName.on('input', setLaptopNameChecker);
+    $deviceName.on('keydown', function () {
+      clearTimeout(typingTimer);
+    });
 
     function formatSelection(state) {
       if (!state.id) {

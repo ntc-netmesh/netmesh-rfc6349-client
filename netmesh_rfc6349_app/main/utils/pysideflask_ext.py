@@ -67,7 +67,7 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
 
 
 def init_gui(application, port=0, width=800, height=600,
-             window_title="App", icon="static/images/ntc_icon.png", argv=None, has_update=False,
+             window_title="App", icon="static/images/netmesh-icon.webp", argv=None, has_update=False,
              latest_version=get_app_current_version(), download_path=""):
     
     try:

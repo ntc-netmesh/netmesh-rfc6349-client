@@ -11,7 +11,7 @@
 	}
 
 	img.background-logo {
-		width: 180px;
+		width: 168px;
 	}
 
 	div.alert-danger {
@@ -28,14 +28,14 @@
 				<div class="pt-4">
 					<div class="p-2 row justify-content-center">
 						<img
-							src="{{url_for('static', filename='images/ntc_logo.png')}}"
+							src="{{url_for('static', filename='images/netmesh-logo.webp')}}"
 							title="{{ config['APP_TITLE'] }}"
 							alt="RFC-6349"
 							class="background-logo"
 						/>
 					</div>
 					<div class="p-2 row justify-content-center">
-						<span class="h3 text-center"><b>NetMesh<br>RFC-6349 App</b></span>
+						<span class="h2 text-center"><b>RFC-6349 App</b></span>
 					</div>
 				</div>
 				<form id="loginForm" action="/login-submit" method="POST">
@@ -172,7 +172,7 @@
 						name="user-email"
 						type="email"
 						class="form-control"
-						placeholder="Enter your email"
+						placeholder="Enter registered email from '{{ device_name }}'"
 						required>
 				</div>
 				<div class="mb-3">
@@ -183,7 +183,7 @@
 							name="user-password"
 							type="password"
 							class="form-control"
-							placeholder="Enter user password"
+							placeholder="Enter password"
 							required />	
 						<input
 							type="checkbox"
@@ -224,6 +224,8 @@
 		const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl, {
 			reference: 'parent'
 		}));
+
+		let loginAjax;
 
 		$('#login-error').hide();
 
@@ -297,6 +299,7 @@
 			if ($userEmail.attr('disabled')) {
 				$('#user-password-eye').val(false).trigger('change');
 				$('input[name="user-password"]').focus();
+				$('#login-error').hide();
 			} else {
 				$userEmail.focus();
 			}
@@ -310,10 +313,10 @@
 			const formData = new FormData(ev.target);
 			console.log(Object.fromEntries([...formData]));
 
-			$('#login-modal input,button').prop("disabled", true);
+			$('#login-modal input, #login-modal button:not(.btn-close)').prop("disabled", true);
 			$('#login-submit .spinner-border').prop('hidden', false);
 
-			$.ajax({
+			loginAjax = $.ajax({
 				url: form.attr('action'),
 				method: form.attr('method'),
 				dataType: 'json',
@@ -322,23 +325,30 @@
 					"user-password": $('#user-password').val()
 				},
 				success: function (data) {
-					window.onbeforeunload = function () {
-						$('#login-modal input,button').prop("disabled", false);
-						$('#login-submit .spinner-border').prop('hidden', true);
-					}
+					$('#login-modal .btn-close').prop('disabled', true);
 					window.location.replace(data.goto);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
 					console.log(jqXHR);
+					if (jqXHR.statusText === "abort") {
+						return;
+					}
+					
 					$('#login-error').text(jqXHR.responseJSON?.error ?? "Unexpected error occured");
 					$('#login-error').show();
+					
+					$('#login-modal input, #login-modal button:not(.btn-close)').prop("disabled", false);
+					$('#login-submit .spinner-border').prop('hidden', true);
 				},
 				complete: function(jqXHR, textStatus) {
-					$('#login-modal input,button').prop("disabled", false);
-					$('#login-submit .spinner-border').prop('hidden', true);
+					
 				}
 			});
-		})
+		});
+
+		$('#login-modal .btn-close').on('click', function () {
+			loginAjax?.abort();
+		});
 
 		$('#user-password-eye').on('change', function () {
 			if (this.checked) {
