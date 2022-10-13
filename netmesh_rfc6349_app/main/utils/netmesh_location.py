@@ -3,17 +3,28 @@ import json
 import re
 
 def getRawGpsCoordinates():
-    process = subprocess.Popen("""adb shell dumpsys location | grep "last location=" | awk -F'=Location' '{print $2}' | grep -Po "(?<=\[).*?(?<=\])" | jq -R 'split(" ")|{mode:.[0], latitude:.[1]|split(",")[0], longitude:.[1]|split(",")[1]}' | jq -s 'limit(1;.[])'""",
-        stdout=subprocess.PIPE, stderr= subprocess.PIPE, shell=True)
-    stdout,stderr = process.communicate()
+    location_commands = [
+        # Works on Android 12
+        """adb shell dumpsys location | grep "last location=" | awk -F'=Location' '{print $2}' | grep -Po "(?<=\[).*?(?<=\])" | jq -R 'split(" ")|{mode:.[0], latitude:.[1]|split(",")[0], longitude:.[1]|split(",")[1]}' | jq -s 'limit(1;.[])'""",
+        # Works on Android 10
+        """adb shell dumpsys location | grep Location\\\\[network | awk -F'Location\\\\[network' '{print $2}' | awk -F' ' 'NR==1{print $1}' | jq -R 'split(",")|{latitude:.[0], longitude:.[1]}'"""
+    ]
+    
+    gps_json = None
+    stderr = None
+    for lc in location_commands:
+        process = subprocess.Popen(lc, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
-    if not stdout:
+        stdout,stderr = process.communicate()
+        if stdout:
+            gps_json = json.loads(stdout)
+            break
+
+    if gps_json is None:
         if stderr:
             raise Exception(stderr.decode())
         else:
             raise Exception("Error: No GPS coordinates detected")
-
-    gps_json = json.loads(stdout)
     
     if 'latitude' in gps_json and 'longitude' in gps_json:
         return [gps_json['latitude'], gps_json['longitude']]
