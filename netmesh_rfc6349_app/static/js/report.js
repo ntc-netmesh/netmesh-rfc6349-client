@@ -286,10 +286,10 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
             lineHeight: 1.15,
             bold: true
           },
-          // {
-          //   text: "Address",
-          //   lineHeight: 1.15,
-          // }
+          {
+            text: testClient.officeAddress,
+            lineHeight: 1.15,
+          }
         ]
       ],
       columnGap: 10,

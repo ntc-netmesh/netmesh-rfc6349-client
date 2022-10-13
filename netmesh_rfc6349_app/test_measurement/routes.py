@@ -63,6 +63,64 @@ def report_data():
         "results": results,
     })
 
+@test_measurement.route('/get-ntc-office-address')
+def get_ntc_office_address():
+    try:
+        main_url = current_app.config['RESULTS_SERVER_API_URI']
+        office_addresses_url = f"{main_url}/nro/office/"
+        r = requests.get(
+            url=office_addresses_url,
+            headers={
+                "Authorization": f"Token {session['api_session_token']}"
+            }
+        )
+        r.raise_for_status()
+        # local_test_servers = list(filter(lambda x: (x['type'] == "local"), json.loads(r.text)))
+        office_addresses = json.loads(r.content)
+        print(office_addresses)
+        # print("test_servers")
+        # print(test_servers)
+        return Response(json.dumps(office_addresses[0]) if len(office_addresses) > 0 else {})
+    except requests.exceptions.HTTPError as eh:
+        status_code = eh.response.status_code
+
+        error = "HTTP error"
+        log_settings.log_error(error)
+
+        if status_code == 404:
+            error = f"Cannot connect to {main_url}"
+
+        return Response(json.dumps({
+            "error": error,
+            "message": str(eh)
+        }), status_code)
+    except requests.exceptions.ConnectionError as ece:
+        error = "Connection error"
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(ece)
+        }), 500)
+    except requests.exceptions.Timeout as et:
+        error = "Request timeout"
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+            "message": str(et)
+        }), 500)
+    except requests.exceptions.RequestException as e:
+        error = "Cannot get office address"
+        log_settings.log_error(error)
+        return Response(json.dumps({
+            "error": error,
+        }), 500)
+    except Exception as e:
+        error = "Cannot get office address"
+        log_settings.log_error(error)
+
+        return Response(json.dumps({
+            "error": error
+        }), 500)
 
 @test_measurement.route('/report', methods=['POST'])
 def report():

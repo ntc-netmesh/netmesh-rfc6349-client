@@ -54,6 +54,7 @@ const summaryChartImageUris = Object.seal({
   const testClient = Object.seal({
     email: '',
     fullName: '',
+    officeAddress: '',
     machineName: '',
     isp: '',
     publicIP: '',
@@ -127,13 +128,11 @@ const summaryChartImageUris = Object.seal({
   // $('#measurement-card').hide();
   
   // $('#measurement-failed-card').hide();
-  
+
   $(async function () {
     testClient.fullName = document.getElementById('loggedUserFullName').innerText.trim();
     testClient.email = document.getElementById('loggedUserEmail').innerText;
     
-
-
     setTestServers();
     setEthernets();
     renderMap();
@@ -1773,6 +1772,15 @@ const summaryChartImageUris = Object.seal({
   async function saveAsPdf() {
     $('#btnSaveAsPdf').attr('disabled', true);
     $('#btnSaveAsPdf .spinner-border').removeClass('d-none');
+
+    const response = await fetch('get-ntc-office-address');
+    
+    if (response.ok) {
+      const json = await response.json();
+      if (json) {
+        testClient.officeAddress = json.address;
+      }
+    }
 
     pdfReportFileName = await generateReport(testInputs, testSessionTime, testClient, testResults, summaryChartImageUris);
   
