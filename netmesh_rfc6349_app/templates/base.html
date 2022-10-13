@@ -52,17 +52,28 @@
       }
     </style>
 
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap-icons/font/bootstrap-icons.css') }}">
 
+    <script src="{{ url_for('static', filename='node_modules/select2/dist/js/select2.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/select2/dist/css/select2.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css') }}">
 
+    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/leaflet-image/leaflet-image.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.css') }}">
 
+    <script src="{{ url_for('static', filename='node_modules/apexcharts/dist/apexcharts.min.js') }}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/apexcharts/dist/apexcharts.css') }}" />
-
+    
+    <script src="{{ url_for('static', filename='node_modules/moment/min/moment.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/numeral/min/numeral.min.js') }}"></script>
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+
   {% endblock %}
 
   {% block body %}
@@ -72,6 +83,9 @@
   </div>
   
   {% block scripts %}
+    <script type="text/javascript" src="{{ url_for('static', filename='js/global.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/tooltip.js') }}"></script>
+
     <script>
       (function () {
         window.onload = function () {
@@ -80,22 +94,6 @@
         }
       })();
     </script>
-    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js') }}"></script>
-
-    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
-    
-    <script src="{{ url_for('static', filename='node_modules/select2/dist/js/select2.min.js') }}"></script>
-    
-    <script src="{{ url_for('static', filename='node_modules/leaflet/dist/leaflet.js') }}"></script>
-    <script src="{{ url_for('static', filename='node_modules/leaflet-image/leaflet-image.js') }}"></script>
-    
-    <script src="{{ url_for('static', filename='node_modules/apexcharts/dist/apexcharts.min.js') }}"></script>
-    
-    <script src="{{ url_for('static', filename='node_modules/moment/min/moment.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='node_modules/numeral/min/numeral.min.js') }}"></script>
-
-    <script type="text/javascript" src="{{ url_for('static', filename='js/global.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='js/tooltip.js') }}"></script>
   {% endblock scripts %}
 
   {% endblock body %}

@@ -217,7 +217,7 @@ def get_ethernet_connections():
     for intface, addr_list in addresses.items():
         if any(getattr(addr, 'address').startswith("169.254") for addr in addr_list):
             continue
-        elif intface in stats and (intface.startswith('en') or intface.startswith("wl")) and getattr(stats[intface], "isup"):
+        elif intface in stats and any([intface.startswith(ct) for ct in connection_types.keys()]) and getattr(stats[intface], "isup"):
             ip_address = next(map(lambda a: a.address, filter(lambda n: n.family == AddressFamily.AF_INET, addresses[intface])), None)
             if not ip_address:
                 continue

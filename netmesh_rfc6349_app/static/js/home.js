@@ -691,7 +691,8 @@ const summaryChartImageUris = Object.seal({
     $('#btnSaveAsPdf').removeClass('d-none');
     $('#pdfSaved').addClass('d-none');
 
-    const autoRepeatCount = parseInt(Math.max($('#auto-repeat-count').val(), 1));
+    const autoRepeatCount = Math.max(parseInt($('#auto-repeat-count').val()), 1);
+    $('#auto-repeat-count').val(autoRepeatCount);
     autoRepeatIndex = 0;
 
     if (testInputs.isr && testInputs.isr >= 1 && testInputs.isr <= 1000) {
