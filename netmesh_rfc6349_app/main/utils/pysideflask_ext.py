@@ -97,7 +97,8 @@ def init_gui(application, port=0, width=800, height=600,
 
         # Main Window Level
         window = MainGUI()
-        window.has_update = has_update
+        # window.has_update = has_update
+        window.has_update = False
         window.resize(width, height)
         window.setWindowTitle(window_title)
         window.setWindowIcon(QtGui.QIcon(icon))
@@ -153,55 +154,55 @@ def init_gui(application, port=0, width=800, height=600,
             
         window.show()
             
-        if has_update:
-            msg = QMessageBox(window)
-            msg.setWindowTitle(f"Update to {latest_version}")
-            msg.setText("Do you want to update this app?")
-            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        # if has_update:
+        #     msg = QMessageBox(window)
+        #     msg.setWindowTitle(f"Update to {latest_version}")
+        #     msg.setText("Do you want to update this app?")
+        #     msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
 
-            reply = msg.exec_()
-            if reply == QtWidgets.QMessageBox.Yes:
-                q = queue.Queue()
+        #     reply = msg.exec_()
+        #     if reply == QtWidgets.QMessageBox.Yes:
+        #         q = queue.Queue()
 
-                update_app_progress = QProgressDialog(
-                    f"Updating {application.config['APP_TITLE']}...", "Cancel", 0, 0)
-                update_app_progress.setWindowTitle(f"Updating to {latest_version}")
-                update_app_thread = threading.Thread(
-                    target=handle_update_dialog, args=(update_app_progress, q))
-                update_app_thread.start()
+        #         update_app_progress = QProgressDialog(
+        #             f"Updating {application.config['APP_TITLE']}...", "Cancel", 0, 0)
+        #         update_app_progress.setWindowTitle(f"Updating to {latest_version}")
+        #         update_app_thread = threading.Thread(
+        #             target=handle_update_dialog, args=(update_app_progress, q))
+        #         update_app_thread.start()
 
-                update_app_progress.exec_()
+        #         update_app_progress.exec_()
 
-                is_successful = q.get()
-                if is_successful:
-                    update_status_msg = QMessageBox(window)
-                    update_status_msg.setWindowTitle(
-                        f"Successfully updated to {latest_version}")
-                    update_status_msg.setText(
-                        "NetMesh RFC-6349 has been successfully updated. Please re-open the app")
-                    update_status_msg.setStandardButtons(QMessageBox.Ok)
-                    update_status_msg.exec_()
-                else:
-                    update_status_msg = QMessageBox(window)
-                    update_status_msg.setWindowTitle(f"Update failed")
-                    update_status_msg.setText(
-                        "An error occured during the update of NetMesh RFC-6349.")
-                    update_status_msg.setStandardButtons(QMessageBox.Close)
-                    update_status_msg.exec_()
+        #         is_successful = q.get()
+        #         if is_successful:
+        #             update_status_msg = QMessageBox(window)
+        #             update_status_msg.setWindowTitle(
+        #                 f"Successfully updated to {latest_version}")
+        #             update_status_msg.setText(
+        #                 "NetMesh RFC-6349 has been successfully updated. Please re-open the app")
+        #             update_status_msg.setStandardButtons(QMessageBox.Ok)
+        #             update_status_msg.exec_()
+        #         else:
+        #             update_status_msg = QMessageBox(window)
+        #             update_status_msg.setWindowTitle(f"Update failed")
+        #             update_status_msg.setText(
+        #                 "An error occured during the update of NetMesh RFC-6349.")
+        #             update_status_msg.setStandardButtons(QMessageBox.Close)
+        #             update_status_msg.exec_()
 
-                window.close()
-                sys.exit()
-            # else:
-                # load_page(webView, page)
-                # must_update_msg = QMessageBox(window)
-                # must_update_msg.setWindowTitle("Cannot open the app")
-                # must_update_msg.setText("You must update this app first before using")
-                # must_update_msg.exec_()
+        #         window.close()
+        #         sys.exit()
+        #     # else:
+        #         # load_page(webView, page)
+        #         # must_update_msg = QMessageBox(window)
+        #         # must_update_msg.setWindowTitle("Cannot open the app")
+        #         # must_update_msg.setText("You must update this app first before using")
+        #         # must_update_msg.exec_()
 
-                # window.close()
-                # sys.exit()
-        # else:
-        window.has_update = False
+        #         # window.close()
+        #         # sys.exit()
+        # # else:
+        # window.has_update = False
         
         web_view_delay_ms = 100
         sleep(web_view_delay_ms / 1000)
