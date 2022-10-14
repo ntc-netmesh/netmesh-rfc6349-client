@@ -94,33 +94,33 @@ def get_ntc_office_address():
             "error": error,
             "message": str(eh)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = "Cannot get office address"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-        }), 500)
-    except Exception as e:
+        }), ex.response.status_code)
+    except Exception as ex:
         error = "Cannot get office address"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
 
         return Response(json.dumps({
             "error": error
-        }), 500)
+        }), 400)
 
 @test_measurement.route('/report', methods=['POST'])
 def report():
@@ -256,10 +256,16 @@ def get_test_servers():
             url=test_servers_url,
         )
         r.raise_for_status()
+        
         # local_test_servers = list(filter(lambda x: (x['type'] == "local"), json.loads(r.text)))
         test_servers = json.loads(r.text)
-        # print("test_servers")
-        # print(test_servers)
+        if current_app.config['FLASK_DEBUG'] == 1:
+            test_servers.append({
+                "id": "custom",
+                "hostname": "Custom",
+                "nickname": "Custom test server..."
+            })
+            
         return Response(json.dumps(test_servers))
     except requests.exceptions.HTTPError as eh:
         status_code = eh.response.status_code
@@ -274,33 +280,33 @@ def get_test_servers():
             "error": error,
             "message": str(eh)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = "Cannot get test servers"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-        }), 500)
-    except Exception as e:
+        }), ex.response.status_code)
+    except Exception as ex:
         error = "Cannot get test servers"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
 
         return Response(json.dumps({
             "error": error
-        }), 500)
+        }), 400)
 
 @test_measurement.route('/connect-to-test-server', methods=['POST'])
 def connect_to_test_server():
@@ -330,8 +336,8 @@ def connect_to_test_server():
         )
         r.raise_for_status()
         return r.text, 200
-    except requests.exceptions.HTTPError as eh:
-        status_code = eh.response.status_code
+    except requests.exceptions.HTTPError as ex:
+        status_code = ex.response.status_code
 
         error = f"Cannot connect to server"
 
@@ -342,43 +348,43 @@ def connect_to_test_server():
         elif status_code == 404:
             error = f"Cannot connect to {test_server_name}"
 
-        log_settings.log_error(str(eh))
+        log_settings.log_error(str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(eh)
+            "message": str(ex)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = "Unexpected error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
-    except Exception as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except Exception as ex:
         error = "Unexpected error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
+            "message": str(ex)
+        }), 400)
 
 @test_measurement.route('/process', methods=['GET', 'POST'])
 def process():
@@ -439,8 +445,8 @@ def process():
             )
             r.raise_for_status()
             return Response(r.text)
-    except requests.exceptions.HTTPError as eh:
-        status_code = eh.response.status_code
+    except requests.exceptions.HTTPError as ex:
+        status_code = ex.response.status_code
 
         error = f"Cannot proceed to {process_id} test" if request.method == 'GET' else f"Cannot send test measurements"
 
@@ -451,43 +457,43 @@ def process():
         elif status_code == 404:
             error = f"Cannot connect to {test_server_name}"
 
-        log_settings.log_error(str(eh))
+        log_settings.log_error(str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(eh)
+            "message": str(ex)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = "Unexpected error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
-    except Exception as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except Exception as ex:
         error = "Unexpected error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
+            "message": str(ex)
+        }), 400)
 
 
 @test_measurement.route('/check-status', methods=['GET'])
@@ -508,50 +514,50 @@ def check_status():
         )
         r.raise_for_status()
         return Response(r.text)
-    except requests.exceptions.HTTPError as eh:
-        status_code = eh.response.status_code
+    except requests.exceptions.HTTPError as ex:
+        status_code = ex.response.status_code
         error = "HTTP error"
 
         if status_code == 404:
             error = f"Cannot connect to {test_server_name}"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(eh)
+            "message": str(ex)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as er:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = f"Cannot check the queue status of {measurement_test_name}"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(er)
-        }), 500)
-    except Exception as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except Exception as ex:
         error = f"Cannot check the queue status of {measurement_test_name}"
 
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
+            "message": str(ex)
+        }), 400)
 
 @test_measurement.route('/finish-test', methods=['POST'])
 def finish_test():
@@ -583,7 +589,7 @@ def finish_test():
         return json.dumps(res), 200
     except requests.RequestException as ex:
         print(ex)
-        return jsonify(error=str(ex)), 500
+        return jsonify(error=str(ex)), 400
 
 @test_measurement.route('/get-results', methods=['GET'])
 def get_results():
@@ -630,38 +636,38 @@ def get_results():
             "error": error,
             "message": str(eh)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
 
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = f"Cannot get the test results"
 
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
-    except Exception as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except Exception as ex:
         error = f"Cannot get the test results"
 
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(e)
-        }), 500)
+            "message": str(ex)
+        }), 400)
 
 
 @test_measurement.route('/get-test-results-template', methods=['GET'])
@@ -891,33 +897,33 @@ def get_isp():
             "error": error,
             "message": str(eh)
         }), status_code)
-    except requests.exceptions.ConnectionError as ece:
+    except requests.exceptions.ConnectionError as ex:
         error = "Connection error"
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(ece)
-        }), 500)
-    except requests.exceptions.Timeout as et:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.Timeout as ex:
         error = "Request timeout"
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
-            "message": str(et)
-        }), 500)
-    except requests.exceptions.RequestException as e:
+            "message": str(ex)
+        }), ex.response.status_code)
+    except requests.exceptions.RequestException as ex:
         error = "Cannot get ISP"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
-        }), 500)
-    except Exception as e:
+        }), ex.response.status_code)
+    except Exception as ex:
         error = "Cannot get ISP"
-        log_settings.log_error(error)
+        log_settings.log_error(error + " " + str(ex))
 
         return Response(json.dumps({
             "error": error
-        }), 500)
+        }), 400)
 
 
 @test_measurement.route('/get-machine-name', methods=['GET'])
@@ -928,7 +934,7 @@ def get_machine_name():
         machine_name = laptop_info.get_machine_name()
     except Exception as e:
         print(e.__cause__)
-        return Response(str(e), 500)
+        return Response(str(e), 400)
 
     return Response(machine_name)
 
@@ -947,7 +953,7 @@ def get_gps_coordinates():
         coordinates = netmesh_location.getRawGpsCoordinates()
     except Exception as e:
         print(e.__cause__)
-        return Response(str(e), 500)
+        return Response(str(e), 400)
 
     return Response(json.dumps(coordinates), mimetype='application/json')
 

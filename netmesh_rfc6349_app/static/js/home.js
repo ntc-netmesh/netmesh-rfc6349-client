@@ -65,7 +65,6 @@ const summaryChartImageUris = Object.seal({
   let testServers = [];
 
   let autoRepeatIndex = 0;
-  let selectedTestNumber = 0;
   let currentTestDuration = Object.seal({
     /**
      * @param {number} val
@@ -240,7 +239,7 @@ const summaryChartImageUris = Object.seal({
     // Set on submit: Test Input form
     $('#mainForm').submit(async function (e) {
       e.preventDefault();
-      return await startTest();
+      return await startTest(0);
     });
   
     // Set on click: Close Test button
@@ -264,7 +263,7 @@ const summaryChartImageUris = Object.seal({
       $(`#process-error`).html('');
       // $('#measurement-failed-card').hide();
 
-      await startTest();
+      await startTest(0);
     });
   
     // Set on click: Close Test button
@@ -350,28 +349,72 @@ const summaryChartImageUris = Object.seal({
       logOut();
     });
 
+    $('#process-error').on('click', '.btn-send-error', function () {
+      let sendingErrorAjax = null;
+
+      $('#modalSendingError').on('hide.bs.modal', function () {
+        sendingErrorAjax?.abort();
+        $('#modalSendingError').off('hide.bs.modal');
+      });
+
+      $('#modalSendingError .modal-body').html(`<div class="progress">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>`);
+
+      $('#modalSendingError').modal('show');
+
+      $('#modalSendingError .modal-title').html("Sending error...");
+
+      const errorFileName = $('#process-error .btn-send-error').data('error-file-name');
+      sendingErrorAjax = $.ajax({
+        url: 'send-error',
+        method: 'POST',
+        data: {
+          testServerName: testInputs.testServer.nickname,
+          testServerUrl: testInputs.testServer.hostname,
+          errorFileName: errorFileName
+        },
+        success: function (result) {
+          // alert(result);
+          console.log("na-send");
+          $('#modalSendingError .modal-title').html("Success");
+          $('#modalSendingError .modal-body').html(`Error log "${errorFileName}.txt" was sent successfully.`);
+        },
+        error: function (err) {
+          console.log(err);
+          $('#modalSendingError .modal-title').html("Failed");
+          // $('#modalSendingError .modal-title').html("Send error");
+          $('#modalSendingError .modal-body').html("Cannot send error log");
+        }
+      });
+    });
+
+    $('#process-error').on('click', 'button.btn-restart-test', function () {
+      startTest(autoRepeatIndex);
+    });
+
     // window.onbeforeunload = (event) => {
     //   event.preventDefault();
     //   return event.returnValue = "Are you sure you want to exit?";
     // };
-  
+
     // Prompt when window is being reloaded
     // window.onbeforeunload = function (e) {
     //   console.log("onbeforeunload");
     //   e = e || window.event;
-  
+
     //   let message = "Close this app?";
     //   switch (appState) {
     //     case APP_STATE.Testing:
     //       message = "Test is ongoing.\n\nClose this app anyway?"
     //       break;
     //   }
-  
+
     //   // For IE and Firefox prior to version 4
     //   if (e) {
     //     e.returnValue = message;
     //   }
-  
+
     //   console.log(message);
     //   // For Safari
     //   return message;
@@ -520,7 +563,7 @@ const summaryChartImageUris = Object.seal({
             </option>`
           );
         }
-        $testServers.append('<option value="custom">Custom test server...</option>');
+        // $testServers.append('<option value="custom">Custom test server...</option>');
 
         
         $('#btnStartTest').attr('disabled', false);
@@ -662,7 +705,7 @@ const summaryChartImageUris = Object.seal({
     `);
   }
   
-  async function startTest() {
+  async function startTest(currentAutoRepeatIndex) {
     appState = APP_STATE.Testing;
 
     // const isr = $('#isr').val();
@@ -692,7 +735,7 @@ const summaryChartImageUris = Object.seal({
 
     const autoRepeatCount = Math.max(parseInt($('#auto-repeat-count').val()), 1);
     $('#auto-repeat-count').val(autoRepeatCount);
-    autoRepeatIndex = 0;
+    autoRepeatIndex = currentAutoRepeatIndex;
 
     if (testInputs.isr && testInputs.isr >= 1 && testInputs.isr <= 1000) {
       $('#isr').removeClass('is-invalid');
@@ -856,21 +899,18 @@ const summaryChartImageUris = Object.seal({
 
     $("#measurement-card .card-header h5").text(`Testing ${testInputs.mode.titleCase} mode...`);
 
-    $('#measurement-card').removeClass('d-none');
     $('#btnCancelTest').addClass('d-none');
     $('#btnRestartTest').addClass('d-none');
     $('#btnCloseTest').addClass('d-none');
-    $('#btnBackToTop').removeClass('d-none');
     $('#btnSaveAsPdf').addClass('d-none');
+    $('#measurement-card').removeClass('d-none');
+    $('#btnBackToTop').removeClass('d-none');
 
     $('#mapOptions').addClass("d-none");
 
-    // alert(autoRepeatCount);
-
-    $('#speedtest-pills-tab').html('');
-    $('#speedtest-pills-tabContent').html('');
-
     $('#btnStartTest .spinner-border').addClass('d-none');
+
+    // alert(autoRepeatCount);
 
     if (autoRepeatCount > 1) {
       $('#speedtest-pills-tab').removeClass('d-none');
@@ -878,7 +918,18 @@ const summaryChartImageUris = Object.seal({
       $('#speedtest-pills-tab').addClass('d-none');
     }
 
-    for (let i = 0; i < autoRepeatCount + 1; i++) {
+    for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
+      // todo: auto resume test if nag-fail
+    }
+
+    if (autoRepeatIndex == 0) {
+      $('#speedtest-pills-tab').html('');
+      $('#speedtest-pills-tabContent').html('');
+    } else {
+      $(`#test-tab-${testNumber}`)
+    }
+
+    for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
       if (i == autoRepeatCount && autoRepeatCount == 1) {
         break;
       }
@@ -889,8 +940,8 @@ const summaryChartImageUris = Object.seal({
       }
 
       $('#speedtest-pills-tab').append(`
-        <li class="nav-item" role="presentation">
-          <button class="nav-link disabled px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == 1 ? "true" : "false" }">
+        <li id="test-tab-${testNumber}" class="nav-item" role="presentation">
+          <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
             <div class="position-relative">
               <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
                 <div class="spinner-border spinner-border text-info" role="status">
@@ -922,7 +973,8 @@ const summaryChartImageUris = Object.seal({
     
     testResults = [];
     testSessionTime.startedOn = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-    
+
+    let isFailed = false;
     while (autoRepeatIndex < autoRepeatCount + 1) {
       const testNumber = autoRepeatIndex + 1;
 
@@ -1010,7 +1062,6 @@ const summaryChartImageUris = Object.seal({
           }
         });
 
-        let isFailed = false;
         await executeMeasurements(testInputs.testServer, methodName)
           .then(resultsHtml =>  {
             appState = APP_STATE.TestFinished;
@@ -1054,7 +1105,6 @@ const summaryChartImageUris = Object.seal({
           }
         });
         
-        let isFailed = false;
         await executeMeasurements(testInputs.testServer, currentMethodName)
           .then(async (resultsHtml) => {
             const measurementLength = measurementTimes[currentMethodName].length;
@@ -1106,7 +1156,7 @@ const summaryChartImageUris = Object.seal({
       }
     }
 
-    if (autoRepeatCount > 1) {
+    if (!isFailed && autoRepeatCount > 1) {
       $(`#pills-speedtest-summary-tab`).removeClass('disabled');
       $(`#pills-speedtest-summary-tab`).addClass('active');
       $(`#pills-speedtest-summary`).addClass('show active');
@@ -1132,6 +1182,8 @@ const summaryChartImageUris = Object.seal({
       } catch (ex) {
         $(`#pills-speedtest-summary`).html(`error: ${ex.toString()}`);
       }
+    } else {
+      $(`#test-executing-indicator-${autoRepeatIndex + 1}`).addClass('d-none');
     }
   
     return false;
@@ -1704,7 +1756,7 @@ const summaryChartImageUris = Object.seal({
     `);
   
     for (const dName of testMode.methods) {
-      $(`#${dName}-test-results-status`).html('<i class="bi bi-x-octagon text-danger"></i>');
+      $(`#${dName}-test-results-status-${testNumber}`).html('<i class="bi bi-x-octagon text-danger"></i>');
     }
   
     for (const [key, _] of Object.entries(resultsParameters)) {
@@ -1718,7 +1770,7 @@ const summaryChartImageUris = Object.seal({
       $('#modalReenterPassword .btn').text('Start Test');
   
       await passwordModal().then(async () => {
-        await startTest();
+        await startTest(autoRepeatIndex);
       }).catch(() => {
       });
     }
@@ -1766,7 +1818,7 @@ const summaryChartImageUris = Object.seal({
   
     $('#measurement-card').addClass('d-none');
     
-    startTest();
+    startTest(0);
   }
   
   async function saveAsPdf() {
@@ -2086,50 +2138,6 @@ const summaryChartImageUris = Object.seal({
       }
     });
   }
-
-  $('#process-error').on('click', '.btn-send-error', function () {
-    let sendingErrorAjax = null;
-
-    $('#modalSendingError').on('hide.bs.modal', function () {
-      sendingErrorAjax?.abort();
-      $('#modalSendingError').off('hide.bs.modal');
-    });
-
-    $('#modalSendingError .modal-body').html(`<div class="progress">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>`);
-
-    $('#modalSendingError').modal('show');
-
-    $('#modalSendingError .modal-title').html("Sending error...");
-
-    const errorFileName = $('#process-error .btn-send-error').data('error-file-name');
-    sendingErrorAjax = $.ajax({
-      url: 'send-error',
-      method: 'POST',
-      data: {
-        testServerName: testInputs.testServer.nickname,
-        testServerUrl: testInputs.testServer.hostname,
-        errorFileName: errorFileName
-      },
-      success: function (result) {
-        // alert(result);
-        console.log("na-send");
-        $('#modalSendingError .modal-title').html("Success");
-        $('#modalSendingError .modal-body').html(`Error log "${errorFileName}.txt" was sent successfully.`);
-      },
-      error: function (err) {
-        console.log(err);
-        $('#modalSendingError .modal-title').html("Failed");
-        // $('#modalSendingError .modal-title').html("Send error");
-        $('#modalSendingError .modal-body').html("Cannot send error log");
-      }
-    });
-  });
-
-  $('#process-error').on('click', '.btn-restart-test', function () {
-    startTest();
-  })
 })();
 
 function tryAgain() {
@@ -2143,7 +2151,7 @@ async function passwordBeforeStartTest() {
   $('#modalReenterPassword .btn').text('Start Test');
 
   await passwordModal().then(() => {
-    startTest();
+    startTest(0);
   }).catch(() => {
   });
 }

@@ -210,9 +210,12 @@ def get_ethernet_connections():
     
     connection_types = {
         "en": "Ethernet",
-        "wl": "Wi-Fi"
     }
-    
+    if current_app.config['FLASK_DEBUG'] == 1:
+        connection_types.update({
+            "wl": "Wi-Fi"
+        })
+        
     ethernets = []
     for intface, addr_list in addresses.items():
         if any(getattr(addr, 'address').startswith("169.254") for addr in addr_list):
