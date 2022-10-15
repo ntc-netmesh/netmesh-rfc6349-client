@@ -7,8 +7,8 @@ class Config:
     PERMANENT_SESSION_LIFETIME = timedelta(days=100)
     # SECRET_KEY = 'H3kur3WoOqAt3yFIOqTwXog4'
     # SECRET_KEY = b64encode(os.urandom(24)).decode('utf-8')
-    RESULTS_SERVER_API_URI = "http://202.90.159.48/api"
-    # RESULTS_SERVER_API_URI = "https://netmesh.pregi.net/portal/api"
+    # RESULTS_SERVER_API_URI = "http://202.90.159.48/api"
+    RESULTS_SERVER_API_URI = "https://netmesh.pregi.net/portal/api"
     APP_LATEST_GITHUB_RELEASE_URL = "https://api.github.com/repos/ntc-netmesh/netmesh-rfc6349-client/releases/latest"
     APP_TITLE = "NetMesh RFC-6349 App"
     APP_NAME = "netmesh-rfc6349-app"
