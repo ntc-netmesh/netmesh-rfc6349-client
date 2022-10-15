@@ -100,14 +100,14 @@ def get_ntc_office_address():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 503)
     except requests.exceptions.Timeout as ex:
         error = "Request timeout"
         log_settings.log_error(error + " " + str(ex))
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 408)
     except requests.exceptions.RequestException as ex:
         error = "Cannot get office address"
         log_settings.log_error(error + " " + str(ex))
@@ -286,14 +286,14 @@ def get_test_servers():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 503)
     except requests.exceptions.Timeout as ex:
         error = "Request timeout"
         log_settings.log_error(error)
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 408)
     except requests.exceptions.RequestException as ex:
         error = "Cannot get test servers"
         log_settings.log_error(error + " " + str(ex))
@@ -360,7 +360,7 @@ def connect_to_test_server():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 503)
     except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
@@ -368,7 +368,7 @@ def connect_to_test_server():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 408)
     except requests.exceptions.RequestException as ex:
         error = "Unexpected error"
 
@@ -469,7 +469,7 @@ def process():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 503)
     except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
@@ -477,7 +477,7 @@ def process():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 408)
     except requests.exceptions.RequestException as ex:
         error = "Unexpected error"
 
@@ -533,7 +533,7 @@ def check_status():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 503)
     except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
@@ -541,7 +541,7 @@ def check_status():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 408)
     except requests.exceptions.RequestException as ex:
         error = f"Cannot check the queue status of {measurement_test_name}"
 
@@ -643,7 +643,7 @@ def get_results():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 503)
     except requests.exceptions.Timeout as ex:
         error = "Request timeout"
 
@@ -651,7 +651,7 @@ def get_results():
         return Response(json.dumps({
             "error": error,
             "message": str(ex)
-        }), ex.response.status_code)
+        }), 408)
     except requests.exceptions.RequestException as ex:
         error = f"Cannot get the test results"
 
@@ -686,12 +686,12 @@ def get_test_results_template():
                                test_number=test_number),
 
 
-@test_measurement.route('/get-test-summary-template', methods=['GET'])
+@test_measurement.route('/get-test-summary-template', methods=['POST'])
 def get_test_summary_template():
     try:
-        methods = json.loads(request.args.get('methods'))
-        isr = request.args.get('isr')
-        test_results = json.loads(request.args.get('testResults'))
+        methods = json.loads(request.form.get('methods'))
+        isr = request.form.get('isr')
+        test_results = json.loads(request.form.get('testResults'))
 
         test_summary = {}
         for method in methods:
@@ -885,46 +885,11 @@ def get_isp():
             "isp": isp,
             "publicIP": public_ip
         }))
-    except requests.exceptions.HTTPError as eh:
-        status_code = eh.response.status_code
-
-        error = "HTTP error"
-        if status_code == 404:
-            error = f"Cannot connect to {main_url}"
-
-        log_settings.log_error(error)
+    except:
         return Response(json.dumps({
-            "error": error,
-            "message": str(eh)
-        }), status_code)
-    except requests.exceptions.ConnectionError as ex:
-        error = "Connection error"
-        log_settings.log_error(error)
-        return Response(json.dumps({
-            "error": error,
-            "message": str(ex)
-        }), ex.response.status_code)
-    except requests.exceptions.Timeout as ex:
-        error = "Request timeout"
-        log_settings.log_error(error)
-        return Response(json.dumps({
-            "error": error,
-            "message": str(ex)
-        }), ex.response.status_code)
-    except requests.exceptions.RequestException as ex:
-        error = "Cannot get ISP"
-        log_settings.log_error(error + " " + str(ex))
-        return Response(json.dumps({
-            "error": error,
-        }), ex.response.status_code)
-    except Exception as ex:
-        error = "Cannot get ISP"
-        log_settings.log_error(error + " " + str(ex))
-
-        return Response(json.dumps({
-            "error": error
-        }), 400)
-
+            "isp": None,
+            "publicIP": None
+        }))
 
 @test_measurement.route('/get-machine-name', methods=['GET'])
 def get_machine_name():

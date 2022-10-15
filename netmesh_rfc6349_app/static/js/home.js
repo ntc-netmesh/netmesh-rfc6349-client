@@ -243,7 +243,7 @@ const summaryChartImageUris = Object.seal({
     });
   
     // Set on click: Close Test button
-    $('#btnCancelTest').click(function () {
+    $('.btn-close-test').click(function () {
       appState = APP_STATE.Ready;
 
       // TODO: clear error html after clicking this
@@ -254,10 +254,11 @@ const summaryChartImageUris = Object.seal({
       // $('#measurement-failed-card').hide();
 
       $('#net-warning').addClass('d-none');
+      $('#btnMapClear').removeClass('d-none');
     });
   
     // Set on click: Close Test button
-    $('#btnRestartTest').click(async function () {
+    $('.btn-repeat-test').click(async function () {
       // TODO: clear error html after clicking this
       // TODO: change try again to "RESTART test"
       $(`#process-error`).html('');
@@ -267,7 +268,7 @@ const summaryChartImageUris = Object.seal({
     });
   
     // Set on click: Close Test button
-    $('#btnCloseTest').click(async function () {
+    $('.btn-clear-test').click(async function () {
       // $('#modalReenterPassword .modal-title').text('Conduct New Test');
       // $('#modalReenterPassword .btn').text('Submit');
   
@@ -276,7 +277,7 @@ const summaryChartImageUris = Object.seal({
       // }).catch((e) => {
       //   console.log("baka nga error", e);
       // });
-      closeTest();
+      clearTest();
     });
   
     // Set on click: Back to Top button
@@ -389,8 +390,8 @@ const summaryChartImageUris = Object.seal({
       });
     });
 
-    $('#process-error').on('click', 'button.btn-restart-test', function () {
-      startTest(autoRepeatIndex);
+    $('#process-error').on('click', 'button.btn-restart-test', async function () {
+      await startTestExecution(autoRepeatIndex);
     });
 
     // window.onbeforeunload = (event) => {
@@ -422,9 +423,13 @@ const summaryChartImageUris = Object.seal({
   });
 
   function scanForConnectedDevices(typeName) {
+    if (!$('#netType').val()) {
+      return;
+    }
+    
     $('#modalScanForConnectedDevices').modal('show');
 
-    $('#connected-devices-title').html(`Scanning connected devices to the ${typeName}...`);
+    $('#connected-devices-title').html(`Scanning connected devices to ${typeName}...`);
     $('#scanning-devices-progress').removeClass('d-none');
     $('#connected-devices-table-container').addClass('d-none');
     $('#connected-devices-table tbody').html('');
@@ -445,9 +450,11 @@ const summaryChartImageUris = Object.seal({
       // timeout: MEASUREMENT_TIMEOUT,
       success: function (data) {
         console.log("results", data);
+        const scannedIPsCount = Object.keys(data.scanned_ips).length;
+
         $('#connected-devices-info').removeClass('d-none');
         $('#connected-devices-table-container').removeClass('d-none');
-        $('#connected-devices-title').html(`Devices connected to the ${typeName}`);
+        $('#connected-devices-title').html(scannedIPsCount === 0 ? "" : `Devices connected to ${typeName}`);
 
         $('#nmap-version').text(data.stats.version);
         $('#nmap-scan-started-on').text(data.stats.startstr);
@@ -457,7 +464,7 @@ const summaryChartImageUris = Object.seal({
         const seconds = Math.round((scanDuration - minutes * 60) * 100) / 100;
         $('#nmap-scan-duration').text(`${minutes > 0 ? `${minutes}m ` : ""}${seconds}s`);
 
-        const scannedDevices = Object.assign(...Object.keys(data.scanned_ips)
+        const scannedDevices = scannedIPsCount === 0 ? {} : Object.assign(...Object.keys(data.scanned_ips)
           .filter(key => data.scanned_ips[key].hostname.filter(h => h.name === '_gateway').length === 0)
             .map(key => ({
               [key]: data.scanned_ips[key]
@@ -584,6 +591,13 @@ const summaryChartImageUris = Object.seal({
           <p class="small mb-0">${errorContent}</p>
           <button id="btnReloadTestServers" class="btn btn-sm btn-link text-primary p-0" type="button" role="button">Reload test servers</button>
         </div>`);
+
+        $('#testServersPlaceholder').on('click', '#btnReloadTestServers', function () {
+          $('#testServersPlaceholder').html(`<div class="placeholder-wave">
+            <span class="placeholder col-12"></span>
+          </div>`);
+          setTestServers();
+        });
       }
     });
   }
@@ -608,13 +622,6 @@ const summaryChartImageUris = Object.seal({
       }
     });
   }
-  
-  $('#testServersPlaceholder').on('click', '#btnReloadTestServers', function () {
-    $('#testServersPlaceholder').html(`<div class="placeholder-wave">
-      <span class="placeholder col-12"></span>
-    </div>`);
-    setTestServers();
-  });
   
   function createMeasurementProcessesTable(methods, testNumber) {
     
@@ -705,7 +712,7 @@ const summaryChartImageUris = Object.seal({
     `);
   }
   
-  async function startTest(currentAutoRepeatIndex) {
+  async function startTest() {
     appState = APP_STATE.Testing;
 
     // const isr = $('#isr').val();
@@ -732,10 +739,6 @@ const summaryChartImageUris = Object.seal({
   
     $('#btnSaveAsPdf').removeClass('d-none');
     $('#pdfSaved').addClass('d-none');
-
-    const autoRepeatCount = Math.max(parseInt($('#auto-repeat-count').val()), 1);
-    $('#auto-repeat-count').val(autoRepeatCount);
-    autoRepeatIndex = currentAutoRepeatIndex;
 
     if (testInputs.isr && testInputs.isr >= 1 && testInputs.isr <= 1000) {
       $('#isr').removeClass('is-invalid');
@@ -846,9 +849,18 @@ const summaryChartImageUris = Object.seal({
       .then(({isp, publicIP}) => {
         testClient.isp = isp;
         testClient.publicIP = publicIP;
+        
+        if (isp) {
+          $('#summary-isp').text(`${testClient.isp}`);
+        } else {
+          $('#summary-isp').html('<i class="small text-muted">(undetected)</i>');
+        }
 
-        $('#summary-isp').text(`${testClient.isp}`);
-        $('#summary-public-ip').text(`(${testClient.publicIP})`);
+        if (publicIP) {
+          $('#summary-public-ip').text(`(${testClient.publicIP})`);
+        } else {
+          $('#summary-public-ip').html('');
+        }
       })
       .catch(ex => {
         testClient.isp = "";
@@ -861,10 +873,10 @@ const summaryChartImageUris = Object.seal({
         }
 
         $('#summary-isp').html('<i class="small text-muted">(undetected)</i>');
-        $('#summary-public-ip').html('<i class="small text-muted"></i>');
+        $('#summary-public-ip').html('');
         console.log(errorMsg);
       });
-
+      
       getMachineName()
         .then((machineName) => {
           testClient.machineName = machineName;
@@ -897,11 +909,6 @@ const summaryChartImageUris = Object.seal({
     $('#summary-mode').text(testInputs.mode.titleCase);
     $('#summary-coordinates').text(`${testInputs.coordinates}`);
 
-    $("#measurement-card .card-header h5").text(`Testing ${testInputs.mode.titleCase} mode...`);
-
-    $('#btnCancelTest').addClass('d-none');
-    $('#btnRestartTest').addClass('d-none');
-    $('#btnCloseTest').addClass('d-none');
     $('#btnSaveAsPdf').addClass('d-none');
     $('#measurement-card').removeClass('d-none');
     $('#btnBackToTop').removeClass('d-none');
@@ -912,67 +919,136 @@ const summaryChartImageUris = Object.seal({
 
     // alert(autoRepeatCount);
 
+    testResults = [];
+    testSessionTime.startedOn = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+
+    return await startTestExecution(0);
+  }
+
+  async function startTestExecution(currentAutoRepeatIndex) {
+    $("#measurement-card .card-header h5").text(`Testing ${testInputs.mode.titleCase} mode...`);
+
+    // $('#btnCancelTest').addClass('d-none');
+    // $('#btnRestartTest').addClass('d-none');
+    // $('#btnCloseTest').addClass('d-none');
+    $('.test-complete-options').addClass('d-none');
+
+    const autoRepeatCount = Math.min(30, Math.max(parseInt($('#auto-repeat-count').val()), 1));
+    $('#auto-repeat-count').val(autoRepeatCount);
+
+    autoRepeatIndex = currentAutoRepeatIndex;
+
     if (autoRepeatCount > 1) {
       $('#speedtest-pills-tab').removeClass('d-none');
     } else {
       $('#speedtest-pills-tab').addClass('d-none');
     }
 
-    for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
-      // todo: auto resume test if nag-fail
-    }
-
     if (autoRepeatIndex == 0) {
       $('#speedtest-pills-tab').html('');
       $('#speedtest-pills-tabContent').html('');
-    } else {
-      $(`#test-tab-${testNumber}`)
-    }
 
+      for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
+        if (i == autoRepeatCount && autoRepeatCount == 1) {
+          break;
+        }
+
+        let testNumber = i + 1;
+        if (testNumber > autoRepeatCount) {
+          testNumber = "summary"
+        }
+        $('#speedtest-pills-tab').append(`
+          <li class="nav-item" role="presentation">
+            <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
+              <div class="position-relative">
+                <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
+                  <div class="spinner-border spinner-border text-info" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+                <div class="px-1">
+                  ${testNumber == "summary" ? "Summary" : testNumber}
+                </div>
+              </div>
+            </button>
+          </li>
+        `);
+        $('#speedtest-pills-tabContent').append(`
+          <div class="tab-pane fade" id="pills-speedtest-${testNumber}" role="tabpanel" aria-labelledby="pills-speedtest-${testNumber}-tab">
+          </div>
+        `);
+      }
+    }
+    
     for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
       if (i == autoRepeatCount && autoRepeatCount == 1) {
         break;
       }
-      
+
       let testNumber = i + 1;
       if (testNumber > autoRepeatCount) {
         testNumber = "summary"
       }
 
-      $('#speedtest-pills-tab').append(`
-        <li id="test-tab-${testNumber}" class="nav-item" role="presentation">
-          <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
-            <div class="position-relative">
-              <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
-                <div class="spinner-border spinner-border text-info" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              </div>
-              <div class="px-1">
-                ${testNumber == "summary" ? "Summary" : testNumber}
-              </div>
-            </div>
-          </button>
-        </li>
-      `);
+      $(`#pills-speedtest-${testNumber}`).html('');
 
-      $('#speedtest-pills-tabContent').append(`
-        <div class="tab-pane fade" id="pills-speedtest-${testNumber}" role="tabpanel" aria-labelledby="pills-speedtest-${testNumber}-tab">
-        </div>
-      `);
+      // $(`#test-tab-${testNumber}`).append(`
+      //   <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
+      //     <div class="position-relative">
+      //       <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
+      //         <div class="spinner-border spinner-border text-info" role="status">
+      //           <span class="visually-hidden">Loading...</span>
+      //         </div>
+      //       </div>
+      //       <div class="px-1">
+      //         ${testNumber == "summary" ? "Summary" : testNumber}
+      //       </div>
+      //     </div>
+      //   </button>
+      // `);
     }
 
-    $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function(event) {
-      const selected = $(event.target).data("test-number");
-      if (isNaN(selected)) {
-        selectedTestNumber = 0;
-      } else {
-        selectedTestNumber = parseInt(selected);
-      }
-    });
-    
-    testResults = [];
-    testSessionTime.startedOn = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    // for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
+    //   if (i == autoRepeatCount && autoRepeatCount == 1) {
+    //     break;
+    //   }
+      
+    //   let testNumber = i + 1;
+    //   if (testNumber > autoRepeatCount) {
+    //     testNumber = "summary"
+    //   }
+
+    //   $('#speedtest-pills-tab').append(`
+    //     <li id="test-tab-${testNumber}" class="nav-item" role="presentation">
+    //       <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
+    //         <div class="position-relative">
+    //           <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
+    //             <div class="spinner-border spinner-border text-info" role="status">
+    //               <span class="visually-hidden">Loading...</span>
+    //             </div>
+    //           </div>
+    //           <div class="px-1">
+    //             ${testNumber == "summary" ? "Summary" : testNumber}
+    //           </div>
+    //         </div>
+    //       </button>
+    //     </li>
+    //   `);
+
+    //   $('#speedtest-pills-tabContent').append(`
+    //     <div class="tab-pane fade" id="pills-speedtest-${testNumber}" role="tabpanel" aria-labelledby="pills-speedtest-${testNumber}-tab">
+    //     </div>
+    //   `);
+    // }
+
+    // $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function(event) {
+    //   const selected = $(event.target).data("test-number");
+    //   if (isNaN(selected)) {
+    //     selectedTestNumber = 0;
+    //   } else {
+    //     selectedTestNumber = parseInt(selected);
+    //   }
+    // });
 
     let isFailed = false;
     while (autoRepeatIndex < autoRepeatCount + 1) {
@@ -992,18 +1068,22 @@ const summaryChartImageUris = Object.seal({
 
         $('#btnBackToTop').addClass('d-none');
         $('#btnSaveAsPdf').removeClass('d-none');
-        $('#btnCloseTest').removeClass('d-none');
+        // $('#btnCloseTest').removeClass('d-none');
+        $('#test-success-options').removeClass('d-none');
+        $('#test-failed-options').addClass('d-none');
 
         break;
       }
 
-      chartImageUris.push(Object.seal({
-        throughputCharts: {},
-        transferCharts: {},
-        rttCharts: {}
-      }));
+      if (chartImageUris.length == autoRepeatIndex) {
+        chartImageUris.push(Object.seal({
+          throughputCharts: {},
+          transferCharts: {},
+          rttCharts: {}
+        }));
+      }
 
-      $(`#pills-speedtest-${testNumber}`).append(`
+      $(`#pills-speedtest-${testNumber}`).html(`
         <ul class="list-group list-group-flush">
           <li class="list-group-item p-0 pb-3">
             <div id="measurement-processes-timeline-${testNumber}" class="px-2">
@@ -1031,10 +1111,9 @@ const summaryChartImageUris = Object.seal({
 
         $(`#test-results-${testNumber}`).html(response);
       } catch (ex) {
-        $(`#test-results-${testNumber}`).html(`error: ${ex}`);
+        $(`#test-results-${testNumber}`).html('');
       }
 
-      // TODO: FIX BUG SA PILLS TAB: KAPAG TINITIGNAN YUNG PREVIOUS TEST, PERO LUMIPAT NA SA NEXT TEST NUMBER YUNG EXECUTION
       measurementTimes = {
         upload: [],
         download: []
@@ -1055,12 +1134,14 @@ const summaryChartImageUris = Object.seal({
       
       if (testInputs.mode.name === "normal" || testInputs.mode.name === "reverse") {
         let methodName = testInputs.mode.methods[0];
-        testResults.push({
-          [methodName]: {
-            startedOn: Date.now(),
-            endedOn: null
-          }
-        });
+        if (testResults.length == autoRepeatIndex) {
+          testResults.push({
+            [methodName]: {
+              startedOn: Date.now(),
+              endedOn: null
+            }
+          });
+        }
 
         await executeMeasurements(testInputs.testServer, methodName)
           .then(resultsHtml =>  {
@@ -1098,12 +1179,14 @@ const summaryChartImageUris = Object.seal({
         let directionIndex = 0;
         let currentMethodName = testInputs.mode.methods[directionIndex];
 
-        testResults.push({
-          [currentMethodName]: {
-            startedOn: Date.now(),
-            endedOn: null
-          }
-        });
+        if (testResults.length == autoRepeatIndex) {
+          testResults.push({
+            [currentMethodName]: {
+              startedOn: Date.now(),
+              endedOn: null
+            }
+          });
+        }
         
         await executeMeasurements(testInputs.testServer, currentMethodName)
           .then(async (resultsHtml) => {
@@ -1164,7 +1247,7 @@ const summaryChartImageUris = Object.seal({
       try {
         const response = await $.ajax({
           url: 'get-test-summary-template',
-          method: 'GET',
+          method: 'POST',
           data: {
             methods: JSON.stringify(testInputs.mode.methods),
             isr: testInputs.isr,
@@ -1188,7 +1271,7 @@ const summaryChartImageUris = Object.seal({
   
     return false;
   }
-  
+
   function setTestFinishTimes(methodName, testNumber) {
     const measurementLength = measurementTimes[methodName].length;
     const lastMeasurementTime = measurementTimes[methodName][measurementLength - 1][1];
@@ -1199,13 +1282,15 @@ const summaryChartImageUris = Object.seal({
     $(`#summary-test-duration-${testNumber}`).html(currentTestDuration.timeText);
   }
   
-  function executeMeasurements(testServer, methodName) {
+  async function executeMeasurements(testServer, methodName) {
+    console.log("autoRepeatIndex", autoRepeatIndex);
     const testMethod = TEST_METHODS[methodName];
     currentTestDirection = methodName;
     currentProcessIndex = 0;
 
     const markAsDone = (process) => {
-      console.table(measurementTimes);
+      console.log("testResults", testResults);
+      console.log("chartImageUris", chartImageUris)
       measurementTimes[methodName][currentProcessIndex][1] = Date.now();
 
       const startedOn = moment(measurementTimes[methodName][currentProcessIndex][0]);
@@ -1229,7 +1314,7 @@ const summaryChartImageUris = Object.seal({
       currentProcessIndex++;
     }
 
-    const connectToServer = (process) => {
+    const connectToServer = async (process) => {
       return new Promise(function (resolve, reject) {
         measurementTimes[methodName].push([Date.now(), null]);
 
@@ -1261,19 +1346,24 @@ const summaryChartImageUris = Object.seal({
       });
     };
   
-    const executeProcess = (process) => {
+    const executeProcess = async (process) =>  {
       console.log({ process });
       console.log(`Current process: ${process.processId} - ${testServer.hostname}/api/${testMethod.mode}/${process.processId}`);
   
-      const getProcessInfo = (processId) => {
+      const getProcessInfo = async (processId) => {
         console.log({ processId });
   
         const directExecutions = ['mtu', 'rtt', 'analysis', 'finish-test'];
-        return new Promise(function (resolve, reject) {
+        return new Promise(async function (resolve, reject) {
           if (directExecutions.includes(processId)) {
             resolve();
             return;
           }
+
+          // const processResponse = await fetch('process', {
+          //   method: 'GET',
+
+          // });
   
           $.ajax({
             url: 'process',
@@ -1299,7 +1389,7 @@ const summaryChartImageUris = Object.seal({
         });
       };
   
-      const checkStatus = (jobId) => {
+      const checkStatus = async (jobId) => {
         const statusCheckingInterval = 2.5 /*seconds*/ * 1000;
         return new Promise((resolve, reject) => {
           if (jobId == null) {
@@ -1334,7 +1424,7 @@ const summaryChartImageUris = Object.seal({
       }
   
       let isLooped = false;
-      const checkQueue = (jobId, port) => checkStatus(jobId).then(status => {
+      const checkQueue = async (jobId, port) => checkStatus(jobId).then(status => {
         if (status == "started") {
           isLooped = false;
           return Promise.resolve({port, jobId});
@@ -1362,7 +1452,7 @@ const summaryChartImageUris = Object.seal({
         }
       });
   
-      const runScriptProcess = (processId, port, jobId) => {
+      const runScriptProcess = async (processId, port, jobId) => {
         return new Promise(function (resolve, reject) {
           $.ajax({
             url: `run-process-${processId}`,
@@ -1382,7 +1472,7 @@ const summaryChartImageUris = Object.seal({
         });
       }
   
-      const postProcess = (scriptData) => {
+      const postProcess = async (scriptData) => {
         console.log({ scriptData });
         for (const key of Object.keys(scriptData)) {
           console.log({ key, requiredGetParamaters });
@@ -1463,7 +1553,7 @@ const summaryChartImageUris = Object.seal({
           })
           .then(response => {
             measurementTimes[methodName].push([Date.now(), null]);
-  
+
             $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="small text-primary text-nowrap">Measuring...</i>');
             $(`#${testMethod.name}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
               <div class="spinner-grow spinner-grow-sm text-primary" role="status">
@@ -1494,7 +1584,7 @@ const summaryChartImageUris = Object.seal({
       });
     };
   
-    const getTestResults = function (process) {
+    const getTestResults = async function (process) {
       return new Promise(function (resolve, reject) {
         measurementTimes[methodName].push([Date.now(), null]);
         setTimeout(() => {
@@ -1551,33 +1641,52 @@ const summaryChartImageUris = Object.seal({
       });
     }
   
-    const executeAllProcesses = async () => {
-      // postThoughputScriptData = {};
-      return new Promise((resolve, reject) => {
-        MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
-          console.log("a", {previousPromise, nextProcess});
-          await previousPromise;
+    // const executeAllProcesses = async () => {
+    //   // postThoughputScriptData = {};
+    //   return new Promise((resolve, reject) => {
+    //     MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
+    //       await previousPromise;
 
-          if (['verify-test'].includes(nextProcess.processId)) {
-            return connectToServer(nextProcess);
-          }
+    //       if (['verify-test'].includes(nextProcess.processId)) {
+    //         return connectToServer(nextProcess);
+    //       }
 
-          if (['finish-test'].includes(nextProcess.processId)) {
-            return getTestResults(nextProcess);
-          }
+    //       if (['finish-test'].includes(nextProcess.processId)) {
+    //         return getTestResults(nextProcess);
+    //       }
           
-          return executeProcess(nextProcess);
-        }, Promise.resolve())
-          .then(results => {
-            resolve(results);
-          })
-          .catch(err => {
-            reject(err);
-          });
-      })
-    }
+    //       return executeProcess(nextProcess);
+    //     }, Promise.resolve())
+    //       .then(results => {
+    //         resolve(results);
+    //       })
+    //       .catch(err => {
+    //         reject(err);
+    //       });
+    //   })
+    // }
   
-    return executeAllProcesses();
+    return new Promise((resolve, reject) => {
+      MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
+        await previousPromise;
+
+        if (['verify-test'].includes(nextProcess.processId)) {
+          return connectToServer(nextProcess);
+        }
+
+        if (['finish-test'].includes(nextProcess.processId)) {
+          return getTestResults(nextProcess);
+        }
+        
+        return executeProcess(nextProcess);
+      }, Promise.resolve())
+        .then(results => {
+          resolve(results);
+        })
+        .catch(err => {
+          reject(err);
+        });
+    })
   }
   
   function getRequiredGetParameters(processId, testMethod) {
@@ -1681,6 +1790,7 @@ const summaryChartImageUris = Object.seal({
       errorContent = err.statusText;
     } else if (err.readyState == 4) {
       console.log("err.readyState", err);
+      
       const errorJson = err.responseJSON ?? JSON.parse(err.responseText);
       if ("error" in errorJson) {
         errorTitle = errorJson.error;
@@ -1706,8 +1816,11 @@ const summaryChartImageUris = Object.seal({
         </button>
       `;
     } else {
-      $('#btnCancelTest').removeClass('d-none');
-      $('#btnRestartTest').removeClass('d-none');
+      // $('#btnCancelTest').removeClass('d-none');
+      // $('#btnRestartTest').removeClass('d-none');
+
+      $('#test-failed-options').removeClass('d-none');
+      $('#test-success-options').addClass('d-none');
     }
     
     const now = moment();
@@ -1717,6 +1830,7 @@ const summaryChartImageUris = Object.seal({
     $(`#summary-test-finished-on-${testNumber}`).html(`<span class="text-secondary">${testSessionTime.finishedOn}</span>`);
     $(`#summary-test-duration-${testNumber}`).html(`<span class="text-secondary">${currentTestDuration.timeText}</span>`);
   
+    const autoRepeatCount = $('#auto-repeat-count').val();
     $(`#process-error`).html(`
       <div class="border border-danger bg-light mt-1 mx-2">
         <div class="accordion border-0" id="accordionError">
@@ -1726,7 +1840,7 @@ const summaryChartImageUris = Object.seal({
                 ${errorTitle}
               </button>
             </h2>
-            <div id="collapseError" class="accordion-collapse collapse" aria-labelledby="headingError" data-bs-parent="#accordionError">
+            <div id="collapseError" class="accordion-collapse" aria-labelledby="headingError" data-bs-parent="#accordionError">
               <div class="accordion-body bg-light">
                 <table cellpadding="2">
                   <tbody class="card-text font-monospace small">
@@ -1741,9 +1855,8 @@ const summaryChartImageUris = Object.seal({
                   </tbody>
                 </table>
                 <div class="d-flex align-content-center mt-2">
-                  <button type="button" class="btn-restart-test btn btn-sm btn-primary align-self-center ms-start">Restart this test</button>
-                  <button type="button" class="btn-send-error btn btn-sm btn-outline-primary align-self-center ms-auto me-2" data-error-file-name="${errorFileName}">Send error</button>
-                  <a href="javascript:void(0);" id="btnOpenLogsFolder" class="btn btn-sm btn-link text-primary p-0 align-self-center ms-end" role="button" onclick="openLogsFolder()">Open logs folder</a>
+                  <button type="button" class="btn-restart-test btn btn-sm btn-primary align-self-center ms-start">${autoRepeatCount == 1 ? "Restart Test" : `Restart Test #${testNumber}`}</button>
+                  <a href="javascript:void(0);" id="btnOpenLogsFolder" class="btn btn-sm btn-link text-primary p-0 align-self-center ms-auto" role="button" onclick="openLogsFolder()">Open logs folder</a>
                 </div>
               </div>
             </div>
@@ -1754,6 +1867,7 @@ const summaryChartImageUris = Object.seal({
         ${errorButtonsHtml}
       </div>
     `);
+    // <button type="button" class="btn-send-error btn btn-sm btn-outline-primary align-self-center ms-auto me-2" data-error-file-name="${errorFileName}">Send error</button>
   
     for (const dName of testMode.methods) {
       $(`#${dName}-test-results-status-${testNumber}`).html('<i class="bi bi-x-octagon text-danger"></i>');
@@ -1782,7 +1896,7 @@ const summaryChartImageUris = Object.seal({
     }, 200);
   }
   
-  function closeTest() {
+  function clearTest() {
     autoRepeatIndex = 0;
     testResults = [];
     appState = APP_STATE.Ready;
