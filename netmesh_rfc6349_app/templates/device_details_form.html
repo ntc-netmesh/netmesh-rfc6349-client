@@ -15,11 +15,15 @@
       <option	{% if user == user.id %} selected {% endif %} value="{{ user.id }}">{{ "%s %s" | format(user.first_name, user.last_name) }}</option>	
     {% endfor %}
   </select>
-  <div class="invalid-feedback">
+  <div class="invalid-feedback text-break">
     Select the owner
   </div>
 </div>
-<h6>What will be the name of this laptop?</h6>
+<h6 class="d-flex justify-content-between">
+  <span>
+    What will be the name of this laptop?
+  </span>
+  <small id="laptop-name-counter" class="text-muted"></small></h6>
 <div class="mb-3">
   <input
     id="device-name"
@@ -36,10 +40,10 @@
     </div>
     <span>Checking device name...</span>
   </div>
-  <div class="invalid-feedback" id="device-name-validation">
+  <div class="invalid-feedback text-break" id="device-name-validation">
     Please enter the name of this laptop
   </div>
-  <div class="valid-feedback">
+  <div class="valid-feedback text-break" id="device-name-validation-valid">
     Laptop name is available
   </div>
 </div>
@@ -47,11 +51,15 @@
 
 <script>
   (function () {
+    const RESULTS_SERVER_API_URI = JSON.parse('{{config["RESULTS_SERVER_API_URI"]|tojson}}');
     const session = JSON.parse('{{session|tojson}}');
     const data = JSON.parse('{{ users|tojson|safe }}');
 
     const $deviceOwner = $('#device-owner');
     const $deviceName = $('#device-name');
+
+    const laptopNameMaxLength = 100;
+    $('#laptop-name-counter').text(`0/${laptopNameMaxLength}`);
 
     let isDeviceOwnerValid = false;
     let isDeviceNameValid = false;
@@ -67,7 +75,8 @@
 
     $deviceOwner.on('select2:select', function (ev) {
       const data = ev.params.data;
-      const regionName = data['ntc_region'];
+      console.log(data);
+      const regionName = data['nro']['region'];
       
       const firstCharacter = regionName.charAt(0);
       let shortRegionName = regionName;
@@ -84,7 +93,7 @@
 
     let typingTimer;
     let laptopCheckerAjax;
-    let doneTypingInterval = 300;
+    let doneTypingInterval = 750;
 
     const setLaptopNameChecker = () => {
       isDeviceNameValid = false;
@@ -95,33 +104,50 @@
 
       $deviceName.removeClass('is-invalid').removeClass('is-valid');
 
-      const enteredLaptopName = $deviceName.val();
-      if (enteredLaptopName) {
-        $('#deviceNameLoading').attr('hidden', false);
-        typingTimer = setTimeout(checkLaptopName, doneTypingInterval);
-      } else {
-        $('#deviceNameLoading').attr('hidden', true);
+      const enteredLaptopName = $deviceName.val().trim();
+      let isValid = true;
 
+      $('#laptop-name-counter').text(`${enteredLaptopName.length}/${laptopNameMaxLength}`);
+
+      if (!enteredLaptopName) {
+        isValid = false;
+      }
+      else if (enteredLaptopName.length > laptopNameMaxLength) {
+        $('#device-name-validation').text("Laptop name too long");
+        $deviceName.addClass('is-invalid');
+        isValid = false;
+      }
+      else if (!/^[A-Za-z0-9À-ÿ_\-]+$/.test(enteredLaptopName)) {
+        $('#device-name-validation').text("Invalid laptop name");
+        $deviceName.addClass('is-invalid');
+        isValid = false;
+      }
+      
+      if (!isValid) {
+        $('#deviceNameLoading').attr('hidden', true);
+        
         isDeviceNameValid = false;
         setContinueButtonStatus();
+      } else {
+        $('#deviceNameLoading').attr('hidden', false);
+        typingTimer = setTimeout(() => checkLaptopName(enteredLaptopName), doneTypingInterval);
       }
     }
     
-    const checkLaptopName = () => {
-      const enteredLaptopName = $deviceName.val();
-
+    const checkLaptopName = (laptopName) => {
       laptopCheckerAjax = $.ajax({
-        // url: 'http://202.90.159.48/api/rfc6349/device/',
-        url: 'https://netmesh.pregi.net/portal/api/rfc6349/device/',
+        url: `${RESULTS_SERVER_API_URI}/rfc6349/device/`,
         dataType: 'json',
         headers: {
           Authorization: `Token ${session['admin-token']}`
         },
         data: {
-          check_name: enteredLaptopName,
+          check_name: laptopName,
         },
         success: function (response) {
           $deviceName.removeClass('is-invalid').addClass('is-valid');
+          $('#device-name-validation-valid').html(`<b>${laptopName}</b> is available`);
+          $('#device-name').data('name', laptopName);
 
           isDeviceNameValid = true;
         },
@@ -155,7 +181,7 @@
       }
       var $state = $(
         `<div class="d-flex align-items-baseline">
-          <span class="me-auto">${ state.first_name } ${  state.last_name }</span>
+          <span class="me-auto">${ state.first_name } ${ state.last_name }</span>
           <span class="small text-secondary">${ state.email }</span>
         </div>`
       );
@@ -171,8 +197,10 @@
         return null;
       }
 
-      if (data.text.indexOf(params.term) > -1
-        || data.email?.indexOf(params.term) > -1) {
+      const term = params.term?.toLowerCase();
+
+      if (data.text.toLowerCase().indexOf(term) > -1
+        || data.email?.toLowerCase().indexOf(term) > -1) {
         var modifiedData = $.extend({}, data, true);
         modifiedData.text += ' (matched)';
         

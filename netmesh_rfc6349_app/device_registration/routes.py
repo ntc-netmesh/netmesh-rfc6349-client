@@ -1,4 +1,5 @@
 import json
+import re
 import requests
 
 from flask import Blueprint, request, render_template, redirect, url_for, session, current_app, jsonify
@@ -33,7 +34,7 @@ def register_api():
 
         # device_config = config.load_device_config()
         config.device_config.set_device_name(device_name)
-        config.device_config.set_device_region(session['admin-ntc-region'])
+        config.device_config.set_device_nro_id(session['admin-nro-id'])
 
         config.users_config.set_logged_user({
             "name": device_owner_info['name'],
@@ -43,7 +44,7 @@ def register_api():
         config.save()
         
         session['admin-token'] = None
-        session['admin-ntc-region'] = None
+        session['admin-nro-id'] = None
         session['admin-ntc-region-name'] = None
 
         return jsonify(html=render_template('device_registration_done.html',
@@ -59,14 +60,16 @@ def register_api():
             if "detail" in error_json:
                 error = error_json["detail"]
             else:
-                error = req.text
+                error = str(ex)
         except ValueError:
-            error = req.text
+            error = str(ex)
             
         return jsonify(error=error), 400
+    except requests.exceptions.ConnectionError as e:
+        return jsonify(error="Connection error. Please check your Internet, and try again."), 500
     except requests.exceptions.RequestException as ex:
         print(ex)
-        return jsonify(error=req.text), 400
+        return jsonify(error=str(ex)), 400
     except Exception as ex:
         print("ex", ex)
         return jsonify(error=str(ex)), 400
@@ -80,8 +83,8 @@ def register_device_page():
     # device_config = config.load_device_config()
 
     device_name = config.device_config.get_device_name()
-    region = config.device_config.get_device_region()
-    if device_name and region:
+    nro_id = config.device_config.get_device_nro_id()
+    if device_name and nro_id:
         return redirect(url_for('users.login_page'))
 
     return render_template('register_device.html',
@@ -99,7 +102,7 @@ def log_admin():
     admin_email = request.form.get('admin-email')
     admin_password = request.form.get('admin-password')
 
-    print(admin_email, admin_password)
+    # print(admin_email, admin_password)
 
     r = None
     users_response = []
@@ -118,27 +121,29 @@ def log_admin():
         print(admin_response)
 
         token = admin_response['token']
-        ntc_region = admin_response['user']['ntc_region']
-        ntc_regions = dict(netmesh_location.get_philippine_regions())
+        # ntc_region = admin_response['user']['nro']['region']
+        # ntc_regions = dict(netmesh_location.get_philippine_regions())
 
-        print("ntc_region", ntc_region)
+        # print("ntc_region", ntc_region)
 
         session['admin-token'] = token
-        session['admin-ntc-region'] = ntc_region
-        session['admin-ntc-region-name'] = ntc_regions[ntc_region]
+        session['admin-nro-id'] = str(admin_response['user']['nro']['id'])
+        session['admin-ntc-region-name'] = admin_response['user']['nro']['description']
         print(session['admin-ntc-region-name'])
 
         r = requests.get(
             url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/manage/",
             params={
-                "ntc_region": ntc_region
+                "nro": session['admin-nro-id']
             },
             headers={'Authorization': f"Token { session['admin-token'] }"}
         )
         r.raise_for_status()
 
         users_response = r.json()
-    except requests.exceptions.RequestException as ex:
+    except requests.exceptions.HTTPError as ex:
+        print(ex)
+        print("HTTP error")
         error = "Unexpected error"
         try:
             error_json = json.loads(r.content)
@@ -149,51 +154,60 @@ def log_admin():
             else:
                 error = r.content
         except Exception as ex2:
-            print(ex2)
-            error = str(ex2)
+            print(ex or ex2)
+            error = str(ex or ex2)
+            
+        return render_template('device_admin_credentials.html', error=error, admin_email=admin_email, admin_password=admin_password), 400
+    except requests.exceptions.ConnectionError as ex:
+        print(ex)
+        print(ex.strerror)
+        return render_template('device_admin_credentials.html', error=str(ex), admin_email=admin_email, admin_password=admin_password), 400
+    except requests.exceptions.RequestException as ex:
+        print(ex.response)
+        
 
-        return render_template('device_admin_credentials.html', error=error), 400
+        return render_template('device_admin_credentials.html', error=str(ex), admin_email=admin_email, admin_password=admin_password), 400
 
     return render_template('device_details_form.html', region_name=session['admin-ntc-region-name'], users=users_response)
 
 
-@device_registration.route('/get-device-details-template', methods=['POST'])
-def get_device_details_template():
-    region = session['admin-ntc-region']
-    region_name = session['admin-ntc-region-name']
+# @device_registration.route('/get-device-details-template', methods=['POST'])
+# def get_device_details_template():
+#     nro_id = session['admin-nro-id']
+#     region_name = session['admin-ntc-region-name']
 
-    print("ntc_region", region)
-    print("token", session['admin-token'])
+#     # print("ntc_region", region)
+#     print("token", session['admin-token'])
 
-    regions = netmesh_location.get_philippine_regions()
-    try:
-        r = requests.get(
-            url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/manage/",
-            params={
-                "ntc_region": region
-            },
-            headers={'Authorization': f"Token { session['admin-token'] }"}
-        )
-        r.raise_for_status()
+#     # regions = netmesh_location.get_philippine_regions()
+#     try:
+#         r = requests.get(
+#             url=f"{current_app.config['RESULTS_SERVER_API_URI']}/user/manage/",
+#             params={
+#                 "nro": nro_id
+#             },
+#             headers={'Authorization': f"Token { session['admin-token'] }"}
+#         )
+#         r.raise_for_status()
 
-        print("users")
-        print(r.text)
-    except requests.exceptions.RequestException as re:
-        error = "Unexpected error"
-        try:
-            error_json = json.loads(r.content)
-            if "non_field_errors" in error_json:
-                error = error_json["non_field_errors"]
-            else:
-                error = r.content
-        except Exception as ex:
-            print(ex)
-            error = str(re)
+#         print("users")
+#         print(r.text)
+#     except requests.exceptions.RequestException as re:
+#         error = "Unexpected error"
+#         try:
+#             error_json = json.loads(r.content)
+#             if "non_field_errors" in error_json:
+#                 error = error_json["non_field_errors"]
+#             else:
+#                 error = r.content
+#         except Exception as ex:
+#             print(ex)
+#             error = str(re)
 
-        # TODO: show error on modal admin credentials
-        return render_template('device_region.html', regions=regions, error=error), 400
+#         # TODO: show error on modal admin credentials
+#         return render_template('device_details_form.html', error=error), 400
 
-    return render_template('device_details_form.html', users=r.json(), region_name=region_name)
+#     return render_template('device_details_form.html', users=r.json(), region_name=region_name)
 
 
 @device_registration.route('/device-confirmation-template', methods=['POST'])
@@ -219,44 +233,3 @@ def reset_registration():
         return jsonify(), 200
     except Exception as ex:
         return jsonify(error=str(ex)), 400
-
-
-# @device_registration.route('/device-details', methods=['GET'])
-# def device_details():
-#     return render_template('device_details_form.html', users=[
-#         {
-#             "ntc_region": "3",
-#             "id": 1_000_001,
-#             "email": "romano.bourgeois@example.com",
-#             "first_name": "Romano",
-#             "last_name": "Bourgeois"
-#         },
-#         {
-#             "ntc_region": "3",
-#             "id": 1_000_002,
-#             "email": "peyton.vasquez@example.com",
-#             "first_name": "Peyton",
-#             "last_name": "Vasquez"
-#         },
-#         {
-#             "ntc_region": "3",
-#             "id": 1_000_003,
-#             "email": "gavin.cole@example.com",
-#             "first_name": "Gavin",
-#             "last_name": "Cole"
-#         },
-#         {
-#             "ntc_region": "3",
-#             "id": 1_000_004,
-#             "email": "audrey.tucker@example.com",
-#             "first_name": "Audrey",
-#             "last_name": "Tucker"
-#         },
-#         {
-#             "ntc_region": "3",
-#             "id": 1_000_005,
-#             "email": "jill.pearson@example.com",
-#             "first_name": "Jill",
-#             "last_name": "Pearson"
-#         }
-#     ])

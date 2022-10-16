@@ -68,11 +68,11 @@ class NetMeshConfigFile:
         def get_device_name(self):
             return self._get_value(self.section_name, "device_name")
 
-        def set_device_region(self, region: str):
-            self._set_value(self.section_name, "device_region", region)
+        def set_device_nro_id(self, nro_id):
+            self._set_value(self.section_name, "device_nro_id", nro_id)
 
-        def get_device_region(self):
-            return self._get_value(self.section_name, "device_region")
+        def get_device_nro_id(self):
+            return self._get_value(self.section_name, "device_nro_id")
 
     class __NetMeshUsersConfig(__NetMeshSectionConfig):
         section_name = "USERS"

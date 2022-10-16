@@ -20,8 +20,8 @@ def login_page():
     # users_config = config.load_users_config()
     
     device_name = config.device_config.get_device_name()
-    region = config.device_config.get_device_region()
-    if not device_name or not region:
+    nro_id = config.device_config.get_device_nro_id()
+    if not device_name or not nro_id:
         return redirect(url_for('device_registration.register_device_page'))
     
     return render_template('login.html',

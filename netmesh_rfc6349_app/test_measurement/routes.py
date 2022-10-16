@@ -326,14 +326,18 @@ def connect_to_test_server():
             "mode": mode
         }
         headers = {
-            "Authorization": "Bearer " + session['api_session_token']
+            "Authorization": "Token " + session['api_session_token']
         }
+        print(test_server_url)
+        
+        print(f'{test_server_url}/api/auth/verify-test')
         
         r = requests.post(
             url=f'{test_server_url}/api/auth/verify-test',
             json=json_data,
             headers=headers,
         )
+        
         r.raise_for_status()
         return r.text, 200
     except requests.exceptions.HTTPError as ex:

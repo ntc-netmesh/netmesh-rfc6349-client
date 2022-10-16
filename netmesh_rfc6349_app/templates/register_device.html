@@ -110,7 +110,7 @@
 	</div>
 </div>
 
-<div id="admin-credentials-modal" class="modal" tabindex="-1" data-bs-keyboard="false" data-bs-backdrop="static" aria-labelledby="admin-credentials-modal-label" aria-hidden="true">
+<div id="admin-credentials-modal" class="modal" tabindex="-1" data-bs-keyboard="true" data-bs-backdrop="static" aria-labelledby="admin-credentials-modal-label" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <form class="modal-content" action="{{ url_for('device_registration.log_admin') }}" method="POST">
       <div class="modal-header">
@@ -175,6 +175,7 @@
 							$('#device-details-content').html(response);
 
 							$registrationCarousel.carousel('next');
+							
 							$adminCredentailsModal.modal('hide');
 						},
 						error: function (jqXHR, textStatus, errorThrown) {
@@ -190,14 +191,17 @@
 				
 				$adminCredentailsModal.on('show.bs.modal', function (ev) {
 					$('.alert').remove();
+					$('#admin-password').attr('type', 'password');
 					$adminCredentailsForm.trigger("reset");
 				});
+
+				$adminCredentailsModal.on('hide.bs.modal', function (ev) {
+					adminCredentailsAjax?.abort();
+				});
+
 				$adminCredentailsModal.on('shown.bs.modal', function (ev) {
 					$('#admin-email').focus();
 				});
-				$('#admin-credentials-modal .btn-close').on('click', function () {
-					adminCredentailsAjax?.abort();
-				})
 
 
 				// const $submitRegionButton = $('#submit-region-button');
@@ -244,7 +248,7 @@
 						document.getElementById('device-owner').classList.add('is-invalid');
 					}
 
-					const laptopName = $('#device-name').val();
+					const laptopName = $('#device-name').data('name');
 					if (laptopName) {
 						document.getElementById('device-name').classList.remove('is-invalid');
 					} else {
@@ -288,13 +292,12 @@
 						dataType: 'json',
 						data: {
 							adminEmail: $('#admin-email').val(),
-							// region: $('#ntc-region option:selected').val(),
 							deviceOwnerInfo: JSON.stringify({
-								user_id: $('#device-owner option:selected').val(),
-								name: $('#device-owner option:selected').text(),
+								user_id: selectedOwner.id,
+								name: selectedOwner.text,
 								email: selectedOwner.email
 							}),
-							deviceName: $('#device-name').val()
+							deviceName: $('#device-name').data('name')
 						},
 						success: function (response) {
 							$deviceConfirmationModal.modal('hide');
@@ -304,7 +307,7 @@
 							$registrationCarousel.carousel('next');
 						},
 						error: function (jqXHR, textStatus, errorThrown) {
-							alert(`Error: ${jqXHR.responseText}`);
+							alert(jqXHR.responseJSON?.error ?? "Unknown error occured");
 							console.error({jqXHR, textStatus, errorThrown});
 							// $('#ntc-region-selection-content').html(jqXHR.responseText);
 						}
