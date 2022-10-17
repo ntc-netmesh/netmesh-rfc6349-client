@@ -75,6 +75,14 @@
               <select class="form-select" id="netType">
               </select>
               <button type="button" class="btn btn-sm btn-link small p-0" id="btn-scan-connected-devices">Scan for connected devices</button>
+              <div id="check-ethernet-connection-alert" class="alert alert-warning p-0 mt-1" style="display: none;" role="alert">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
+                  <div class="small lh-1 message">
+                    Please check your Ethernet connection.<br>Make sure you have access to the Internet
+                  </div>
+                </div>
+              </div>
               <div id="net-warning" class="alert alert-warning p-0 m-1 d-none" role="alert">
                 <div class="d-flex align-items-center">
                   <i class="bi bi-exclamation-circle-fill mx-2 my-1"></i>
@@ -139,7 +147,7 @@
               <div class="position-relative border">
                 <div id="map-snippet">
                 </div>
-                <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 400;">
+                <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 1000;">
                   <button id="btnMapClear" type="button" class="btn btn-sm btn-primary opacity-75 p-0 px-2">Clear</button>
                 </div>
                 <div id="gpsInputSelection" class="position-absolute top-50 start-50 translate-middle">
@@ -190,13 +198,14 @@
                 </div>
                 <div class="position-absolute bottom-0">
                   <div id="gpsError" class="alert alert-danger alert-dismissable fade show overflow-auto p-1 px-2 m-0 mt-2 d-none" style="max-height: 80px;" role="alert">
-                    Cannot get GPS coordinates
+                    <span class="message">Cannot get GPS coordinates</span>
+                    <button type="button" class="btn-close" aria-label="Close"></button>
                   </div>
                 </div>
               </div>
               <input type="text" name="coordinates" id="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
               <input type="text" name="coordinates" id="lon" class="form-control form-control-sm d-none" autocomplete="off" required />
-              <div class="invalid-feedback">
+              <div class="invalid-feedback" id="invalid-feedback-coordinates">
                 Invalid Location
               </div>
             </div>
@@ -561,22 +570,10 @@
         </div>
         <div class="card-footer">
           <div class="d-flex align-items-center my-2">
-            <div class="p-0 me-auto mx-2">
+            <div class="p-0 mx-1">
               <button id="btnBackToTop" class="btn btn-link p-0" role="button" type="button">Back to top</button>
             </div>
-            <button id="btnSaveAsPdf" class="btn btn-primary mx-2 d-none" type="button">
-              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-              <i class="bi bi-filetype-pdf"></i>
-              Save as PDF
-            </button>
-            <div id="pdfSaved" class="d-none  mx-2">
-              <span class="text-success text-right">Successfully saved!</span>
-              <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary" role="button">
-                <i class="bi bi-folder2"></i>
-                Open
-              </a>
-            </div>
-            <div id="test-success-options" class="btn-group dropup mx-2 test-complete-options d-none">
+            <div id="test-success-options" class="btn-group dropup mx-0 test-complete-options d-none">
               <button type="button" class="btn btn-outline-secondary btn-close-test">
                 <i class="bi bi-x-lg"></i> Close Test
               </button>
@@ -602,7 +599,7 @@
                 </button> -->
               </ul>
             </div>
-            <div id="test-failed-options" class="btn-group dropup mx-2 test-complete-options d-none">
+            <div id="test-failed-options" class="btn-group dropup mx-0 test-complete-options d-none">
               <button type="button" class="btn btn-outline-secondary btn-repeat-test">
                 <i class="bi bi-arrow-counterclockwise"></i> Restart Test
               </button>
@@ -628,6 +625,21 @@
                 </button> -->
               </ul>
             </div>
+            <button id="btnSaveAsPdf" class="btn btn-primary ms-auto mx-2 d-none" type="button">
+              <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+              <i class="bi bi-filetype-pdf"></i>
+              Save as PDF
+            </button>
+            <div id="pdfSaved" class="d-none ms-auto mx-2">
+              <span class="text-success text-right">Successfully saved!</span>
+              <a href="javascript:void(0);" id="btnOpenDownloadsFolder" class="btn btn-link text-primary" role="button">
+                <i class="bi bi-folder2"></i>
+                Open
+              </a>
+            </div>
+            <!-- <button type="button" id="btnSavePartialResults" class="btn btn-sm btn-link text-primary d-none ms-auto mx-2" role="button">
+              Save partial results
+            </button> -->
           </div>
         </div>
       </div>

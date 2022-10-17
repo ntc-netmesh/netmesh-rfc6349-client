@@ -298,8 +298,8 @@
 		$('#login-modal').on('shown.bs.modal', function () {
 			if ($userEmail.attr('disabled')) {
 				$('#user-password-eye').val(false).trigger('change');
-				$('input[name="user-password"]').focus();
 				$('#login-error').hide();
+				$('input[name="user-password"]').focus();
 			} else {
 				$userEmail.focus();
 			}
@@ -348,6 +348,9 @@
 
 		$('#login-modal .btn-close').on('click', function () {
 			loginAjax?.abort();
+			
+			$('#login-modal input, #login-modal button:not(.btn-close)').prop("disabled", false);
+			$('#login-submit .spinner-border').prop('hidden', true);
 		});
 
 		$('#user-password-eye').on('change', function () {

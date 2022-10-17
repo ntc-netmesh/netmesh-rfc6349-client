@@ -377,10 +377,7 @@ def connect_to_test_server():
         error = "Unexpected error"
 
         log_settings.log_error(error + " " + str(ex))
-        return Response(json.dumps({
-            "error": error,
-            "message": str(ex)
-        }), ex.response.status_code)
+        return jsonify(error=error, message=str(ex)), ex.response.status_code if ex.response else 400
     except Exception as ex:
         error = "Unexpected error"
 
@@ -517,6 +514,13 @@ def check_status():
             headers={"Authorization": "Bearer "+session['api_session_token']}
         )
         r.raise_for_status()
+        
+        if r.text == "failed":
+            return Response(json.dumps({
+                "error": "Queue failed",
+                "message": "Failed to enqueue this client in the server"
+            }), 500)
+            
         return Response(r.text)
     except requests.exceptions.HTTPError as ex:
         status_code = ex.response.status_code
@@ -1037,8 +1041,8 @@ def open_downloads_folder():
         laptop_info.get_downloads_folder_path(), file_name)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = file_explorer_process.communicate()
     if stderr:
-        print(stderr)
-
+        return jsonify(), 500
+    return jsonify(), 200
 
 @test_measurement.route('/open-logs-folder', methods=['POST'])
 def open_logs_folder():
@@ -1046,4 +1050,5 @@ def open_logs_folder():
         ['nautilus', '--browser', '/var/log/netmesh_rfc6349_app'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = file_explorer_process.communicate()
     if stderr:
-        print(stderr)
+        return jsonify(), 500
+    return jsonify(), 200

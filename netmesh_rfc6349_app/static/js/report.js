@@ -107,19 +107,53 @@ pdfMake.tableLayouts = {
     paddingBottom: function (i, node) {
       return 5;
     }
-  }
+  },
+  borderless: {
+    hLineWidth: function (i, node) {
+      return 0;
+    },
+    vLineWidth: function (i, node) {
+      return 0;
+    },
+    paddingLeft: function (i) {
+      return 0;
+    },
+    paddingRight: function (i, node) {
+      return 0;
+    },
+    paddingTop: function (i) {
+      return 0;
+    },
+    paddingBottom: function (i, node) {
+      return 0;
+    }
+  },
 };
 
-async function generateReport(testInputs, testSessionTime, testClient, results, summaryChartImageUris) {
-  const testRepeatCount = results?.length ?? 0;
+// type:
+// a - all
+// i - individual
+// p - partial
+async function generateReport(testInputs, testSessionTime, testClient, methods, results, startIndex, endNumber, type, summaryChartImageUris) {
+  console.log('pidiep', {testInputs, testSessionTime, testClient, methods, results, startIndex, endNumber, summaryChartImageUris});
+  // const testRepeatCount = results?.length ?? 0;
+  const testRepeatCount = endNumber - startIndex;
 
   const fileNameTimestamp = moment(testSessionTime.startedOn).format("YYYY-MM-DD-HHmmss");
-  const defaultFileName = `netmesh-rfc-6349_${testInputs.mode.name}_${fileNameTimestamp}_tr${numeral(testRepeatCount).format("00")}.pdf`;
+  let defaultFileName;
+  switch (type) {
+    case "i":
+      defaultFileName = `netmesh-rfc-6349_${testInputs.mode.name}_${methods[0]}-test_${fileNameTimestamp}.pdf`;
+      break;
+    default:
+      defaultFileName = `netmesh-rfc-6349_${testInputs.mode.name}_${fileNameTimestamp}_tr${numeral(testRepeatCount).format("00")}.pdf`;
+      break;
+  }
 
   let resultsBody = [];
   
-  for (let tn = 0; tn < testRepeatCount; tn++) {
-    const methods = Object.keys(results[tn]);
+  for (let tn = startIndex; tn < endNumber; tn++) {
+    // const methods = Object.keys(results[tn]);
 
     for (let i = 0; i < methods.length; i++) {
       const method = methods[i];
@@ -206,14 +240,29 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
         }
       ];
 
-      if (testRepeatCount > 1) {
-        resultsContent.push({
-          text: `Test #${tn + 1}`,
-          fontSize: 9,
-          bold: true,
-          color: '#606060'
-        });  
-      }
+      resultsContent.push({
+        layout: 'borderless',
+        table: {
+          widths: ['*', 'auto'],
+          body: [
+            [
+              {
+                text: testRepeatCount > 1 ? `Test #${tn + 1}` : "",
+                fontSize: 9,
+                bold: true,
+                color: '#606060'
+              },
+              {
+                text: `Test ID: ${dResults.test_id}`,
+                fontSize: 9,
+                bold: true,
+                color: '#606060',
+                alignment: 'right'
+              },
+            ],
+          ]
+        }
+      })
 
       resultsContent.push(...[
         {
@@ -254,9 +303,7 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
       resultsBody.push(resultsContent);
     }
   }
-
-  const summaryPage = generateTestExecutionSummaryReport(testInputs.mode.methods, results, summaryChartImageUris);
-
+  
   // ----------------------------------------------------------------
   // LAYOUT REPORT
   // ----------------------------------------------------------------
@@ -267,7 +314,50 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
   const pageMarginPixels = pageMarginInches * 72;
 
   const reportContent = [];
-  reportContent.push(...[
+  const testExecutionInfo = [];
+  if (type == "a") {
+    testExecutionInfo.push([
+      'Count',
+      testRepeatCount
+    ]);
+  }
+  testExecutionInfo.push(...[
+    [
+      'Started on:',
+      testSessionTime.startedOn
+    ],
+    [
+      'Finished on:',
+      testSessionTime.finishedOn
+    ],
+    [
+      'Duration:',
+      testSessionTime.totalDuration
+    ]
+  ]);
+
+  const centerTitle = [
+    {
+      text: "RFC-6349 APP TEST RESULTS",
+      fontSize: 12,
+      alignment: 'center',
+      bold: true,
+    },
+  ]
+  
+  if (type == "i") {
+    centerTitle.push( {
+      text: `(${methods[0]} test only)`,
+      fontSize: 10,
+      alignment: 'center',
+      bold: true,
+      margin: [0, 8, 0, 12]
+    })
+  } else {
+    centerTitle[0].margin = [0, 0, 0, 12]
+  }
+
+  reportContent.push(...[ 
     {
       columns: [
         {
@@ -295,13 +385,7 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
       columnGap: 10,
       margin: [0, 0, 0, 10]
     },
-    {
-      text: "RFC-6349 TEST RESULTS",
-      fontSize: 12,
-      alignment: 'center',
-      bold: true,
-      margin: [0, 0, 0, 12]
-    },
+    ...centerTitle,
     {
       text: "TEST DETAILS",
       decoration: 'underline',
@@ -421,7 +505,7 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
       margin: [0, 0, 0, 10]
     },
     {
-      text: "TEST EXECUTION",
+      text: type == "a" ? "TEST EXECUTION" : "TEST TIMES",
       fontSize: 10,
       lineHeight: 1.5,
       bold: true,
@@ -431,30 +515,14 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
       table: {
         headerRows: 0,
         widths: [150, '*'],
-        body: [
-          [
-            'Count',
-            testRepeatCount
-          ],
-          [
-            'Started on:',
-            testSessionTime.startedOn
-          ],
-          [
-            'Finished on:',
-            testSessionTime.finishedOn
-          ],
-          [
-            'Duration:',
-            testSessionTime.totalDuration
-          ],
-        ]
+        body: testExecutionInfo
       },
       margin: [0, 0, 0, 10]
     },
   ]);
 
   if (testRepeatCount > 1) {
+    const summaryPage = generateTestExecutionSummaryReport(testInputs.mode.methods, results, summaryChartImageUris);
     reportContent.push(...summaryPage);
   }
 
@@ -479,13 +547,14 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
     // ${nowProper} | ISR: ${_cir} Mbps | ${_netTypeName} | ${_testServer.nickname}
     footer: function(currentPage, pageCount) {
       const testInfo = {
-        text: `${testSessionTime.finishedOn} | ISR: ${testInputs.isr} Mbps | ${testInputs.networkConnectionTypeName} | ${testInputs.mode.titleCase}\n${testInputs.testServer.nickname}`,
-        width: '*',
+        text: `${testSessionTime.finishedOn} | ISR: ${testInputs.isr} Mbps | ${testInputs.networkConnectionTypeName} | ${testInputs.mode.titleCase} ${type == "i" ? `(${methods[0]} test only)` : ""}\n${testInputs.testServer.nickname}`,
+        width: 'auto',
       };
       const pageInfo = {
         text: `\nPage ${currentPage.toString()} of ${pageCount}`,
         alignment: 'right',
         fontSize: 8,
+        width: '*'
       };
 
       return  {
@@ -503,7 +572,16 @@ async function generateReport(testInputs, testSessionTime, testClient, results, 
   // ----------------------------------------------------------------
   
   const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-  pdfDocGenerator.download(defaultFileName);
+  
+  await new Promise((resolve, reject) => {
+    try {
+      pdfDocGenerator.download(defaultFileName, () => {
+        resolve();
+      });
+    } catch (ex) {
+      reject(ex)
+    }
+  })
 
   console.log("docDefinition", docDefinition);
 

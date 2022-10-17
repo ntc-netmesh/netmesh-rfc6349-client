@@ -17,6 +17,7 @@ const summaryChartImageUris = Object.seal({
       lat: null,
       lon: null,
       name: null,
+      withinPH: false,
       reverseGeoLicense: "",
     },
     mapImage: {
@@ -28,6 +29,7 @@ const summaryChartImageUris = Object.seal({
     // get networkConnectionType() {
     //   return NETWORK_CONNECTION_TYPES[this.networkConnectionTypeName];
     // },
+    autoRepeatCount: 1,
     get mode() {
       return TEST_MODES[this.modeName];
     },
@@ -38,16 +40,19 @@ const summaryChartImageUris = Object.seal({
     },
   });
 
+  const getDurationText = (start, end) => {
+    const elapsedSeconds = parseFloat(moment(end).diff(moment(start), 'seconds'));
+    const minutes = Math.floor(elapsedSeconds / 60);
+    const seconds = elapsedSeconds % 60;
+
+    return `${numeral(minutes).format("0")}m ${numeral(seconds).format("00")}s`;
+  };
 
   const testSessionTime = Object.seal({
     startedOn: '',
     finishedOn: '',
     get totalDuration() {
-      const elapsedSeconds = parseFloat(moment(this.finishedOn).diff(moment(this.startedOn), 'seconds'));
-      const minutes = Math.floor(elapsedSeconds / 60);
-      const seconds = elapsedSeconds % 60;
-
-      return `${numeral(minutes).format("0")}:${numeral(seconds).format("00")}`;
+      return getDurationText(this.startedOn, this.finishedOn)
     }
   });
 
@@ -102,13 +107,12 @@ const summaryChartImageUris = Object.seal({
 
   // let postThoughputScriptData = {};
   
-  let measurementTimes = {
-    upload: [],
-    download: []
-  };
+  let measurementTimes = {}
   
   let currentTestDirection = "";
+  let testNumberStartTime;;
   let currentProcessIndex = 0;
+  let currentDirectionIndex = 0;
   
   let appState = APP_STATE.Ready;
 
@@ -190,7 +194,9 @@ const summaryChartImageUris = Object.seal({
         },
         error: function (err) {
           console.log(err.responseText);
-          $('#gpsError').text(err.responseText);
+          $('#gpsError').show();
+
+          $('#gpsError .message').text(err.responseText);
           $('#gpsError').removeClass("d-none");
         },
         complete: function () {
@@ -199,6 +205,10 @@ const summaryChartImageUris = Object.seal({
         }
       })
     });
+    
+    $('#gpsError .btn-close').click(function () {
+      $('#gpsError').hide();
+    })
 
     // Set on click: Show Location Help button
     $('#btnGpsHelp').on('click', function () {
@@ -254,7 +264,7 @@ const summaryChartImageUris = Object.seal({
       // $('#measurement-failed-card').hide();
 
       $('#net-warning').addClass('d-none');
-      $('#btnMapClear').removeClass('d-none');
+      $('#mapOptions').removeClass('d-none');
     });
   
     // Set on click: Close Test button
@@ -289,6 +299,17 @@ const summaryChartImageUris = Object.seal({
     $('#btnSaveAsPdf').on('click', async function () {
       await saveAsPdf();
     });
+
+
+    // $('#btnSavePartialResults').on('click', async function () {
+
+    //   generateReport(testInputs, {
+    //     startedOn: moment(start).format('YYYY-MM-DD HH:mm:ss'),
+    //     finishedOn: moment(end).format('YYYY-MM-DD HH:mm:ss'),
+    //     totalDuration: getDurationText(start, end)
+    //   }, testClient, [method], testResults, 0, currentAutoRepeatIndex + 1, "a", summaryChartImageUris 
+    //   );
+    // });
 
     // Set on click: Open Downloads Folder button
     $('#btnOpenDownloadsFolder').on('click', function () {
@@ -391,7 +412,12 @@ const summaryChartImageUris = Object.seal({
     });
 
     $('#process-error').on('click', 'button.btn-restart-test', async function () {
-      await startTestExecution(autoRepeatIndex);
+      await startTestExecution(autoRepeatIndex, true);
+    });
+
+    $('#process-error').on('click', 'button.btn-restart-test-2', async function () {
+      currentProcessIndex = 0;
+      await startTestExecution(autoRepeatIndex, true);
     });
 
     // window.onbeforeunload = (event) => {
@@ -616,73 +642,122 @@ const summaryChartImageUris = Object.seal({
             </option>`
           );
         }
+        if (ethernets.length == 0) {
+          $('#check-ethernet-connection-alert').show();
+          $('#btn-scan-connected-devices').hide();
+        } else {
+          $('#check-ethernet-connection-alert').hide();
+          $('#btn-scan-connected-devices').show();
+        }
       },
       error: function (jqXHR, textStatus, errorThrown) {
+        $('#check-ethernet-connection-alert').show();
+        $('#btn-scan-connected-devices').hide();
         console.error({jqXHR, textStatus, errorThrown})
       }
     });
   }
   
-  function createMeasurementProcessesTable(methods, testNumber) {
-    
-    $(`#measurement-processes-timeline-${testNumber}`).html('');
-    $(`#measurement-results-${testNumber}`).html('');
+  function createMeasurementProcessesTable(methods, testNumber, isRetry = false) {
     $(`#process-error`).html('');
-  
-    for (const dName of methods) {
-      console.log(dName);
-      const testMethod = TEST_METHODS[dName];
-  
-      $(`#measurement-processes-timeline-${testNumber}`).append(`
-        <h6 class="small text-uppercase m-1">${testMethod.name} test</h6>
-        <table id="${testMethod.name}-measurement-processes-${testNumber}" class="table table-sm table-borderless table-hover mb-3">
-          <tbody class="align-middle">
-          </tbody>
-        </table>
-      `);
-  
-      $measurementTimeline = $(`#${testMethod.name}-measurement-processes-${testNumber} tbody`);
-      $measurementTimeline.html('');
-      for (let i = 0; i < MEASUREMENT_PROCESSES.length; i++) {
-        const process = MEASUREMENT_PROCESSES[i];
-        $measurementTimeline.append(`
-          <tr>
-            <td class="p-0 d-flex inline-block" style="min-width: 56px;">
-              <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration.timeColon : ""}</span>
-            </td>
-            <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0">
-              <i class="bi bi-circle text-muted"></i>
-            </td>
-            <td class="p-0 w-100">
-              <span id="${testMethod.name}-process-label-${i}-test-${testNumber}" class="text-muted mx-2">${process.label}</span>
-            </td>
-            <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end">
-              
-            </td>
-          </tr>
+
+    if (!isRetry) {
+      for (const dName of methods) {
+        $(`#measurement-processes-timeline-${testNumber}`).append(`
+          <h6 class="small text-uppercase m-1">${dName} test</h6>
+          <table id="${dName}-measurement-processes-${testNumber}" class="table table-sm table-borderless table-hover mb-3">
+            <tbody class="align-middle">
+            </tbody>
+          </table>
         `);
+      }
+    }
+
+    for (const dName of methods) {
+      if (methods.indexOf(dName) < currentDirectionIndex) {
+        continue;
+      }
+
+      const testMethod = TEST_METHODS[dName];
+      if (!isRetry) {
+        $(`#measurement-results-${testNumber}`).append(`<div id="measurement-results-${testNumber}-${dName}"></div>`);
       }
   
       const directionRgb = dName == "upload" ? '72, 36, 255' : '0, 140, 167';
-      $(`#measurement-results-${testNumber}`).append(`
-        <div>
-          <div class="mt-2" style="border: 1px solid rgba(${directionRgb}, 0.25);">
-            <div class="p-2" style="background-color: rgba(${directionRgb}, 0.1);">
-              <div class="d-flex align-items-center">
-                <h6 class="mb-0">
-                  <span id="${dName}-test-results-status-${testNumber}" class="me-1">
-                    <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-                  </span>
-                  ${testMethod.titleCase} Test...
-                </h6>
-              </div>
-            </div>
-            <div id="${dName}-measurement-results-${testNumber}">
-              
-            </div>
+      $(`#measurement-results-${testNumber}-${dName}`).html(`
+        <div class="mt-2" style="border: 1px solid rgba(${directionRgb}, 0.25);">
+        <div class="p-2" style="background-color: rgba(${directionRgb}, 0.1);">
+          <div class="d-flex align-items-center">
+            <h6 class="mb-0">
+              <span id="${dName}-test-results-status-${testNumber}" class="me-1">
+                <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+              </span>
+              ${testMethod.titleCase} Test...
+            </h6>
           </div>
         </div>
+        <div id="${dName}-measurement-results-${testNumber}">
+          
+        </div>
+      </div>
       `);
+    }
+
+
+    for (const dName of methods) {
+      if (methods.indexOf(dName) < currentDirectionIndex) {
+        continue;
+      }
+
+      console.log(dName);
+      const testMethod = TEST_METHODS[dName];
+      
+      if (currentProcessIndex == 0) {
+        for (let i = 0; i < MEASUREMENT_PROCESSES.length; i++) {
+          $(`#${testMethod.name}-measurement-processes-${testNumber} tbody`).append(`<tr id="measurement-process-row-${i + 1}-${dName}-test-${testNumber}"></tr>`)
+        }
+      }
+  
+      // $measurementTimeline = $(`#${testMethod.name}-measurement-processes-${testNumber} tbody`);
+      // $measurementTimeline.html('');
+
+      for (let i = 0; i < MEASUREMENT_PROCESSES.length; i++) {
+        if (i < currentProcessIndex) {
+          continue;
+        }
+
+        const process = MEASUREMENT_PROCESSES[i];
+        $(`#measurement-process-row-${i + 1}-${dName}-test-${testNumber}`).html(`
+          <td class="p-0 d-flex inline-block" style="min-width: 56px;">
+            <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration.timeColon : ""}</span>
+          </td>
+          <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0">
+            <i class="bi bi-circle text-muted"></i>
+          </td>
+          <td class="p-0 w-100">
+            <span id="${testMethod.name}-process-label-${i}-test-${testNumber}" class="text-muted mx-2">${process.label}</span>
+          </td>
+          <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end">
+            
+          </td>
+        `)
+        // $measurementTimeline.append(`
+        //   <tr>
+        //     <td class="p-0 d-flex inline-block" style="min-width: 56px;">
+        //       <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration.timeColon : ""}</span>
+        //     </td>
+        //     <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0">
+        //       <i class="bi bi-circle text-muted"></i>
+        //     </td>
+        //     <td class="p-0 w-100">
+        //       <span id="${testMethod.name}-process-label-${i}-test-${testNumber}" class="text-muted mx-2">${process.label}</span>
+        //     </td>
+        //     <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end">
+              
+        //     </td>
+        //   </tr>
+        // `);
+      }
       
   
       // $(`#${testMethod.name}-measurement-results-table tbody`).html('');
@@ -713,8 +788,6 @@ const summaryChartImageUris = Object.seal({
   }
   
   async function startTest() {
-    appState = APP_STATE.Testing;
-
     // const isr = $('#isr').val();
     // const netTypeName = $('#netType').val();
     
@@ -733,6 +806,8 @@ const summaryChartImageUris = Object.seal({
     testInputs.modeName = $('input[name="radTestMode"]:checked').val();
     testInputs.location.lat = $('#lat').val();
     testInputs.location.lon = $('#lon').val();
+    testInputs.autoRepeatCount = Math.min(30, Math.max(parseInt($('#auto-repeat-count').val()), 1));
+    $('#auto-repeat-count').val(testInputs.autoRepeatCount);
 
     $('#btnStartTest').attr('disabled', true);
     $('#btnStartTest .spinner-border').removeClass('d-none');
@@ -813,13 +888,20 @@ const summaryChartImageUris = Object.seal({
     } else {
       $('input[name="radTestModeHidden"]').addClass('is-invalid');
     }
-    
-    if (testInputs.location.lat && testInputs.location.lon
-      && testInputs.location.lat >= -90 && testInputs.location.lat <= 90
-      && testInputs.location.lon >= -180 && testInputs.location.lon <= 180)  {
-        $('input[name="coordinates"]').removeClass('is-invalid');
-    } else {
+
+
+
+    if (!testInputs.location.withinPH) {
       $('input[name="coordinates"]').addClass('is-invalid');
+      $('#invalid-feedback-coordinates').text('Cannot test outside the Philippines');
+    }
+    else if (!(testInputs.location.lat && testInputs.location.lon
+      && testInputs.location.lat >= -90 && testInputs.location.lat <= 90
+      && testInputs.location.lon >= -180 && testInputs.location.lon <= 180))  {
+        $('input[name="coordinates"]').addClass('is-invalid');
+        $('#invalid-feedback-coordinates').text('Invalid Location');
+    } else {
+      $('input[name="coordinates"]').removeClass('is-invalid');
     }
     
     const canStartTest = $('#mainForm').find('.is-invalid')?.length === 0;
@@ -912,6 +994,7 @@ const summaryChartImageUris = Object.seal({
     $('#btnSaveAsPdf').addClass('d-none');
     $('#measurement-card').removeClass('d-none');
     $('#btnBackToTop').removeClass('d-none');
+    $('#btnBackToTop').show();
 
     $('#mapOptions').addClass("d-none");
 
@@ -920,12 +1003,25 @@ const summaryChartImageUris = Object.seal({
     // alert(autoRepeatCount);
 
     testResults = [];
-    testSessionTime.startedOn = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
+    for (let i = 0; i < testInputs.autoRepeatCount; i++) {
+      const methods = {};
+      for (const method of testInputs.mode.methods) {
+        methods[method] = {};
+      }
+      testResults.push(methods);
+    }
+    testNumberStartTime = Date.now();
+    testSessionTime.startedOn = moment(testNumberStartTime).format('YYYY-MM-DD HH:mm:ss');
+
+    currentProcessIndex = 0;
+    currentDirectionIndex = 0;
 
     return await startTestExecution(0);
   }
 
-  async function startTestExecution(currentAutoRepeatIndex) {
+  async function startTestExecution(currentAutoRepeatIndex, isRetry = false) {
+    appState = APP_STATE.Testing;
+
     $("#measurement-card .card-header h5").text(`Testing ${testInputs.mode.titleCase} mode...`);
 
     // $('#btnCancelTest').addClass('d-none');
@@ -933,8 +1029,7 @@ const summaryChartImageUris = Object.seal({
     // $('#btnCloseTest').addClass('d-none');
     $('.test-complete-options').addClass('d-none');
 
-    const autoRepeatCount = Math.min(30, Math.max(parseInt($('#auto-repeat-count').val()), 1));
-    $('#auto-repeat-count').val(autoRepeatCount);
+    const autoRepeatCount = testInputs.autoRepeatCount;
 
     autoRepeatIndex = currentAutoRepeatIndex;
 
@@ -944,7 +1039,7 @@ const summaryChartImageUris = Object.seal({
       $('#speedtest-pills-tab').addClass('d-none');
     }
 
-    if (autoRepeatIndex == 0) {
+    if (autoRepeatIndex == 0 && !isRetry) {
       $('#speedtest-pills-tab').html('');
       $('#speedtest-pills-tabContent').html('');
 
@@ -973,6 +1068,7 @@ const summaryChartImageUris = Object.seal({
             </button>
           </li>
         `);
+        
         $('#speedtest-pills-tabContent').append(`
           <div class="tab-pane fade" id="pills-speedtest-${testNumber}" role="tabpanel" aria-labelledby="pills-speedtest-${testNumber}-tab">
           </div>
@@ -980,32 +1076,34 @@ const summaryChartImageUris = Object.seal({
       }
     }
     
-    for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
-      if (i == autoRepeatCount && autoRepeatCount == 1) {
-        break;
+    if (!isRetry) {
+      for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
+        if (i == autoRepeatCount && autoRepeatCount == 1) {
+          break;
+        }
+  
+        let testNumber = i + 1;
+        if (testNumber > autoRepeatCount) {
+          testNumber = "summary"
+        }
+  
+        $(`#pills-speedtest-${testNumber}`).html('');
+  
+        // $(`#test-tab-${testNumber}`).append(`
+        //   <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
+        //     <div class="position-relative">
+        //       <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
+        //         <div class="spinner-border spinner-border text-info" role="status">
+        //           <span class="visually-hidden">Loading...</span>
+        //         </div>
+        //       </div>
+        //       <div class="px-1">
+        //         ${testNumber == "summary" ? "Summary" : testNumber}
+        //       </div>
+        //     </div>
+        //   </button>
+        // `);
       }
-
-      let testNumber = i + 1;
-      if (testNumber > autoRepeatCount) {
-        testNumber = "summary"
-      }
-
-      $(`#pills-speedtest-${testNumber}`).html('');
-
-      // $(`#test-tab-${testNumber}`).append(`
-      //   <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
-      //     <div class="position-relative">
-      //       <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
-      //         <div class="spinner-border spinner-border text-info" role="status">
-      //           <span class="visually-hidden">Loading...</span>
-      //         </div>
-      //       </div>
-      //       <div class="px-1">
-      //         ${testNumber == "summary" ? "Summary" : testNumber}
-      //       </div>
-      //     </div>
-      //   </button>
-      // `);
     }
 
     // for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
@@ -1052,6 +1150,9 @@ const summaryChartImageUris = Object.seal({
 
     let isFailed = false;
     while (autoRepeatIndex < autoRepeatCount + 1) {
+      if (!isRetry) {
+        testNumberStartTime = Date.now();
+      }
       const testNumber = autoRepeatIndex + 1;
 
       if (testNumber > 1) {
@@ -1061,13 +1162,17 @@ const summaryChartImageUris = Object.seal({
           $(`#pills-speedtest-${testNumber - 1}-tab`).removeClass('active');
           $(`#pills-speedtest-${testNumber - 1}`).removeClass('show active');
         }
+
+        // $('#btnSavePartialResults').removeClass('d-none');
       }
 
       if (testNumber > autoRepeatCount) {
         $("#measurement-card .card-header h5").text(`Finished`);
 
         $('#btnBackToTop').addClass('d-none');
+        $('#btnBackToTop').hide();
         $('#btnSaveAsPdf').removeClass('d-none');
+        // $('#btnSavePartialResults').addClass('d-none');
         // $('#btnCloseTest').removeClass('d-none');
         $('#test-success-options').removeClass('d-none');
         $('#test-failed-options').addClass('d-none');
@@ -1083,70 +1188,96 @@ const summaryChartImageUris = Object.seal({
         }));
       }
 
-      $(`#pills-speedtest-${testNumber}`).html(`
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item p-0 pb-3">
-            <div id="measurement-processes-timeline-${testNumber}" class="px-2">
-            </div>
-          </li>
-          <li id="test-results-${testNumber}" class="list-group-item py-3 px-2">
-          </li>
-        </ul>
-      `);
+      if (!isRetry) {
+        $(`#pills-speedtest-${testNumber}`).html(`
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item p-0 pb-3">
+              <div id="measurement-processes-timeline-${testNumber}" class="px-2">
+              </div>
+            </li>
+            <li id="test-results-${testNumber}" class="list-group-item py-3 px-2">
+            </li>
+          </ul>
+        `); 
+      }
 
       $(`#test-executing-indicator-${testNumber}`).removeClass('d-none');
       $(`#pills-speedtest-${testNumber}-tab`).removeClass('disabled');
-      $(`#pills-speedtest-${testNumber}-tab`).addClass('active');
-      $(`#pills-speedtest-${testNumber}`).addClass('show active');
 
-      try {
-        const response = await $.ajax({
-          url: 'get-test-results-template',
-          method: 'GET',
-          data: {
-            testNumber
-          },
-          dataType: 'html',
-        });
-
-        $(`#test-results-${testNumber}`).html(response);
-      } catch (ex) {
-        $(`#test-results-${testNumber}`).html('');
+      // check if other tab is selected and last test is not selected
+      const selectedTab = $('#speedtest-pills-tab .nav-link.active').first();
+      console.log(selectedTab.length > 0);
+      if (selectedTab.length > 0) {
+        const id = selectedTab.attr('id');
+        const tnum = id.split('-')[2];
+        if (testNumber - 1 == tnum) {
+          $(`#pills-speedtest-${testNumber}-tab`).addClass('active');
+          $(`#pills-speedtest-${testNumber}`).addClass('show active');
+        }
+      } else {
+        $(`#pills-speedtest-${testNumber}-tab`).addClass('active');
+        $(`#pills-speedtest-${testNumber}`).addClass('show active');
       }
 
-      measurementTimes = {
-        upload: [],
-        download: []
-      };
+      if (!isRetry) {
+        try {
+          const response = await $.ajax({
+            url: 'get-test-results-template',
+            method: 'GET',
+            data: {
+              testNumber
+            },
+            dataType: 'html',
+          });
+  
+          $(`#test-results-${testNumber}`).html(response);
+        } catch (ex) {
+          $(`#test-results-${testNumber}`).html('');
+        }
+      }
+
+      if (!isRetry) {
+        // measurementTimes = {
+        //   upload: [],
+        //   download: []
+        // };
+        measurementTimes = {};
+        for (const method of testInputs.mode.methods) {
+          measurementTimes[method] = [];
+          for (let i = 0; i < MEASUREMENT_PROCESSES.length; i++) {
+            measurementTimes[method].push([null, null])
+          }
+        } 
+        console.log(measurementTimes);
+      }
       
       currentTestDuration.reset();
-      const startTime = Date.now();
       const timerInterval = setInterval(function () {
-        currentTestDuration.totalSeconds = (Date.now() - startTime) / 1000.0;
+        currentTestDuration.totalSeconds = (Date.now() - testNumberStartTime) / 1000.0;
 
         $(`#${currentTestDirection}-process-time-${currentProcessIndex}-test-${autoRepeatIndex + 1}`)
           .text(currentTestDuration.timeColon);
       }, 100);
 
-      $(`#summary-test-started-on-${testNumber}`).text(moment(startTime).format('YYYY-MM-DD HH:mm:ss'));
+      $(`#summary-test-started-on-${testNumber}`).text(moment(testNumberStartTime).format('YYYY-MM-DD HH:mm:ss'));
 
-      createMeasurementProcessesTable(testInputs.mode.methods, testNumber);
+      createMeasurementProcessesTable(testInputs.mode.methods, testNumber, isRetry);
       
       if (testInputs.mode.name === "normal" || testInputs.mode.name === "reverse") {
         let methodName = testInputs.mode.methods[0];
-        if (testResults.length == autoRepeatIndex) {
-          testResults.push({
-            [methodName]: {
-              startedOn: Date.now(),
-              endedOn: null
-            }
-          });
-        }
+        testResults[autoRepeatIndex][methodName]['startedOn'] = testNumberStartTime;
 
-        await executeMeasurements(testInputs.testServer, methodName)
+        // if (testResults.length == autoRepeatIndex) {
+        //   testResults.push({
+        //     [methodName]: {
+        //       startedOn: testNumberStartTime,
+        //       endedOn: null
+        //     }
+        //   });
+        // }
+
+        await executeMeasurements(testInputs.testServer, methodName, currentProcessIndex)
           .then(resultsHtml =>  {
-            appState = APP_STATE.TestFinished;
-
             clearInterval(timerInterval);
             
             const measurementLength = measurementTimes[methodName].length;
@@ -1159,7 +1290,11 @@ const summaryChartImageUris = Object.seal({
 
             console.log("testResults", testResults);
             
+            currentProcessIndex = 0;
+
             autoRepeatIndex++;
+
+            isFailed = false;
           })
           .catch(async (err) => {
             console.log("normal/reverse");
@@ -1176,73 +1311,185 @@ const summaryChartImageUris = Object.seal({
           }
       }
       else if (testInputs.mode.name === "bidirectional") {
-        let directionIndex = 0;
-        let currentMethodName = testInputs.mode.methods[directionIndex];
-
-        if (testResults.length == autoRepeatIndex) {
-          testResults.push({
-            [currentMethodName]: {
-              startedOn: Date.now(),
-              endedOn: null
-            }
-          });
-        }
+        // let directionIndex = currentDirectionIndex;
+        // let currentMethodName = testInputs.mode.methods[0];
         
-        await executeMeasurements(testInputs.testServer, currentMethodName)
-          .then(async (resultsHtml) => {
-            const measurementLength = measurementTimes[currentMethodName].length;
-            testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
-
-            showTestResults(resultsHtml, currentMethodName, testNumber);
-            directionIndex++;
-
-            currentMethodName = testInputs.mode.methods[directionIndex];
-
-            testResults[autoRepeatIndex][currentMethodName] = {
-              startedOn: Date.now(),
-              endedOn: null
-            };
-
-            return executeMeasurements(testInputs.testServer, currentMethodName);
-          })
-          .then(resultsHtml => {
-            appState = APP_STATE.TestFinished;
-            
-            clearInterval(timerInterval);
-
-            const measurementLength = measurementTimes[currentMethodName].length;
-            testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
-
-            showTestResults(resultsHtml, currentMethodName, testNumber);
-
-            setTestFinishTimes(currentMethodName, testNumber);
-            testSessionTime.finishedOn = moment(measurementTimes[currentMethodName][measurementLength - 1][1]).format('YYYY-MM-DD HH:mm:ss');
-
-            console.log("testResults", testResults);
-
-            autoRepeatIndex++;
-          })
-          .catch(async (err) => {
-            appState = APP_STATE.TestFinished;
-
-            console.log(err);
-            clearInterval(timerInterval);
-            
-            isFailed = true;
-
-            await showTestFailed(err, currentProcessIndex, directionIndex, testNumber);
-          });
-
-          if (isFailed) {
-            break;
+        for (const methodName of testInputs.mode.methods.slice(currentDirectionIndex)) {
+          // if (testResults.length == autoRepeatIndex) {
+          //   if (currentDirectionIndex == 0) {
+          //     testResults.push({
+          //       [methodName]: {
+          //         startedOn: testNumberStartTime,
+          //         endedOn: null
+          //       }
+          //     });
+          //   }
+          // }
+          console.log(testResults);
+          if (currentDirectionIndex == 0) {
+            testResults[autoRepeatIndex][methodName]['startedOn'] = testNumberStartTime;
+          } else if (currentDirectionIndex == 1) {
+            testResults[autoRepeatIndex][methodName]['startedOn'] = Date.now();
           }
+          // testResults[autoRepeatIndex][methodName] = {
+          //   startedOn: Date.now(),
+          //   endedOn: null
+          // };
+
+          await executeMeasurements(testInputs.testServer, methodName, currentProcessIndex)
+            .then(async (resultsHtml) => {
+              const measurementLength = measurementTimes[methodName].length;
+              console.log("bidirectional measurementTimes endedOn", measurementTimes[methodName][measurementLength - 1][1], measurementTimes);
+              testResults[autoRepeatIndex][methodName]['endedOn'] = measurementTimes[methodName][measurementLength - 1][1];
+
+              showTestResults(resultsHtml, methodName, testNumber);
+
+              currentDirectionIndex++;
+              currentProcessIndex = 0;
+
+              isFailed = false;
+            })
+            // .then(resultsHtml => {
+            //   appState = APP_STATE.TestFinished;
+              
+            //   clearInterval(timerInterval);
+
+            //   const measurementLength = measurementTimes[currentMethodName].length;
+            //   testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
+
+            //   showTestResults(resultsHtml, currentMethodName, testNumber);
+
+            //   setTestFinishTimes(currentMethodName, testNumber);
+            //   testSessionTime.finishedOn = moment(measurementTimes[currentMethodName][measurementLength - 1][1]).format('YYYY-MM-DD HH:mm:ss');
+
+            //   console.log("testResults", testResults);
+              
+            //   currentProcessIndex = 0;
+
+            //   autoRepeatIndex++;
+            // })
+            .catch(async (err) => {
+              appState = APP_STATE.TestFinished;
+
+              console.log(err);
+              clearInterval(timerInterval);
+              
+              isFailed = true;
+
+              await showTestFailed(err, currentProcessIndex, currentDirectionIndex, testNumber);
+            });
+
+            if (isFailed) {
+              break;
+            }
+        }
+
+
+        
+        // await executeMeasurements(testInputs.testServer, currentMethodName, currentProcessIndex)
+        //   .then(async (resultsHtml) => {
+        //     if (currentDirectionIndex == 0) {
+        //       const measurementLength = measurementTimes[currentMethodName].length;
+        //       testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
+  
+        //       showTestResults(resultsHtml, currentMethodName, testNumber);
+        //       directionIndex++;
+  
+        //       currentMethodName = testInputs.mode.methods[directionIndex];
+  
+        //       testResults[autoRepeatIndex][currentMethodName] = {
+        //         startedOn: Date.now(),
+        //         endedOn: null
+        //       };
+  
+        //       currentDirectionIndex = directionIndex;
+        //       currentProcessIndex = 0;
+        //     }
+
+        //     return executeMeasurements(testInputs.testServer, currentMethodName, currentProcessIndex);
+        //   })
+        //   .then(resultsHtml => {
+        //     appState = APP_STATE.TestFinished;
+            
+        //     clearInterval(timerInterval);
+
+        //     const measurementLength = measurementTimes[currentMethodName].length;
+        //     testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
+
+        //     showTestResults(resultsHtml, currentMethodName, testNumber);
+
+        //     setTestFinishTimes(currentMethodName, testNumber);
+        //     testSessionTime.finishedOn = moment(measurementTimes[currentMethodName][measurementLength - 1][1]).format('YYYY-MM-DD HH:mm:ss');
+
+        //     console.log("testResults", testResults);
+            
+        //     currentProcessIndex = 0;
+
+        //     autoRepeatIndex++;
+        //   })
+        //   .catch(async (err) => {
+        //     appState = APP_STATE.TestFinished;
+
+        //     console.log(err);
+        //     clearInterval(timerInterval);
+            
+        //     isFailed = true;
+
+        //     await showTestFailed(err, currentProcessIndex, directionIndex, testNumber);
+        //   });
+
+        if (isFailed) {
+          break;
+        }
+
+        clearInterval(timerInterval);
+
+        const currentMethodName = testInputs.mode.methods[1];
+
+        const measurementLength = measurementTimes[currentMethodName].length;
+        console.log("measurementTimes bidirectional done", measurementTimes, autoRepeatIndex);
+        testSessionTime.finishedOn = moment(measurementTimes[currentMethodName][measurementLength - 1][1]).format('YYYY-MM-DD HH:mm:ss');
+
+        setTestFinishTimes(currentMethodName, testNumber);
+
+        autoRepeatIndex++;
+        currentDirectionIndex = 0;
+
+        isRetry = false;
+        
+        function delay(ms) {
+          return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        await delay(750);
       }
     }
 
     if (!isFailed && autoRepeatCount > 1) {
       $(`#pills-speedtest-summary-tab`).removeClass('disabled');
-      $(`#pills-speedtest-summary-tab`).addClass('active');
-      $(`#pills-speedtest-summary`).addClass('show active');
+      
+      const selectedTab = $('#speedtest-pills-tab .nav-link.active').first();
+      console.log("selectedTab", selectedTab);
+      if (selectedTab.length > 0) {
+        const id = selectedTab.attr('id');
+        const tnum = id.split('-')[2];
+        console.log("tnum", tnum, autoRepeatCount);
+        if (tnum == autoRepeatCount) {
+          $(`#pills-speedtest-summary-tab`).addClass('active');
+          $(`#pills-speedtest-summary`).addClass('show active');
+        }
+        else {
+          $(`#pills-speedtest-${tnum}-tab`).removeClass('active');
+          $(`#pills-speedtest-${tnum}`).removeClass('show active');
+          
+          $(`#pills-speedtest-summary-tab`).addClass('active');
+          $(`#pills-speedtest-summary`).addClass('show active');
+        }
+      }
+      else {
+        $(`#pills-speedtest-summary-tab`).addClass('active');
+        $(`#pills-speedtest-summary`).addClass('show active');
+      }
   
       try {
         const response = await $.ajax({
@@ -1268,6 +1515,8 @@ const summaryChartImageUris = Object.seal({
     } else {
       $(`#test-executing-indicator-${autoRepeatIndex + 1}`).addClass('d-none');
     }
+
+    appState = APP_STATE.TestFinished;
   
     return false;
   }
@@ -1282,16 +1531,17 @@ const summaryChartImageUris = Object.seal({
     $(`#summary-test-duration-${testNumber}`).html(currentTestDuration.timeText);
   }
   
-  async function executeMeasurements(testServer, methodName) {
+  async function executeMeasurements(testServer, methodName, processIndex) {
     console.log("autoRepeatIndex", autoRepeatIndex);
     const testMethod = TEST_METHODS[methodName];
     currentTestDirection = methodName;
-    currentProcessIndex = 0;
+    currentProcessIndex = processIndex;
 
     const markAsDone = (process) => {
       console.log("testResults", testResults);
       console.log("chartImageUris", chartImageUris)
       measurementTimes[methodName][currentProcessIndex][1] = Date.now();
+      console.log("measurementTimes", measurementTimes);
 
       const startedOn = moment(measurementTimes[methodName][currentProcessIndex][0]);
       const endedOn = moment(measurementTimes[methodName][currentProcessIndex][1]);
@@ -1314,35 +1564,56 @@ const summaryChartImageUris = Object.seal({
       currentProcessIndex++;
     }
 
-    const connectToServer = async (process) => {
-      return new Promise(function (resolve, reject) {
-        measurementTimes[methodName].push([Date.now(), null]);
+    const connectToServer = (process) => {
+      return new Promise(async function (resolve, reject) {
+        measurementTimes[methodName][currentProcessIndex][0] = Date.now();
+        // measurementTimes[methodName].push([Date.now(), null]);
 
-        $.ajax({
-          url: 'connect-to-test-server',
-          method: 'POST',
-          data: {
-            lat: testInputs.location.lat,
-            lon: testInputs.location.lon,
-            testServerName: testServer.nickname,
-            testServerUrl: testServer.hostname,
-            mode: testMethod.mode,
-            serverId: testServer.id == 0 ? 1 : testServer.id
-          },
-          dataType: 'json',
-          timeout: MEASUREMENT_TIMEOUT,
-          success: function (data) {
-            console.log(data);
+        $(`#${methodName}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).removeClass("text-muted");
+        $(`#${methodName}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="small">Connecting...</i>');
+        $(`#${methodName}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
+          <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        `);
 
-            markAsDone(process);
-            resolve(data);
-          },
-          error: function (jqXHR, textStatus, errorThrown) {
-            console.log("connect-to-server error");
-            console.log({jqXHR, textStatus, errorThrown});
-            reject(jqXHR);
-          }
-        });
+        let retryCount = 0;
+        const maxRetryCount = 5;
+        const testServerAjax = () => {
+          $.ajax({
+            url: 'connect-to-test-server',
+            method: 'POST',
+            data: {
+              lat: testInputs.location.lat,
+              lon: testInputs.location.lon,
+              testServerName: testServer.nickname,
+              testServerUrl: testServer.hostname,
+              mode: testMethod.mode,
+              serverId: testServer.id == 0 ? 1 : testServer.id
+            },
+            dataType: 'json',
+            timeout: MEASUREMENT_TIMEOUT,
+            success: function (data) {
+              console.log(data);
+  
+              markAsDone(process);
+              resolve(data);
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+              console.log("connect-to-server error");
+              console.log({jqXHR, textStatus, errorThrown});
+
+              retryCount++;
+              if (jqXHR.readyState === 0 && retryCount < maxRetryCount) {
+                testServerAjax();
+              }
+              else {
+                reject(jqXHR);
+              }
+            }
+          });
+        }
+        testServerAjax();
       });
     };
   
@@ -1352,7 +1623,7 @@ const summaryChartImageUris = Object.seal({
   
       const getProcessInfo = async (processId) => {
         console.log({ processId });
-  
+        
         const directExecutions = ['mtu', 'rtt', 'analysis', 'finish-test'];
         return new Promise(async function (resolve, reject) {
           if (directExecutions.includes(processId)) {
@@ -1360,66 +1631,85 @@ const summaryChartImageUris = Object.seal({
             return;
           }
 
-          // const processResponse = await fetch('process', {
-          //   method: 'GET',
+          let retryCount = 0;
+          const maxRetryCount = 5;
+          const processAjax = () => {
+            $.ajax({
+              url: 'process',
+              method: 'GET',
+              data: {
+                testServerName: testServer.nickname,
+                testServerUrl: testServer.hostname,
+                mode: testMethod.mode,
+                processId: process.processId,
+                requiredParams: JSON.stringify(getRequiredGetParameters(processId, testMethod))
+              },
+              dataType: 'json',
+              timeout: MEASUREMENT_TIMEOUT,
+              success: function (data) {
+                resolve(data);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                console.log("GET process error");
+                console.log({jqXHR, textStatus, errorThrown});
 
-          // });
-  
-          $.ajax({
-            url: 'process',
-            method: 'GET',
-            data: {
-              testServerName: testServer.nickname,
-              testServerUrl: testServer.hostname,
-              mode: testMethod.mode,
-              processId: process.processId,
-              requiredParams: JSON.stringify(getRequiredGetParameters(processId, testMethod))
-            },
-            dataType: 'json',
-            timeout: MEASUREMENT_TIMEOUT,
-            success: function (data) {
-              resolve(data);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-              console.log("GET process error");
-              console.log({jqXHR, textStatus, errorThrown});
-              reject(jqXHR);
-            }
-          });
+                retryCount++;
+                if (jqXHR.readyState === 0 && retryCount < maxRetryCount) {
+                  processAjax();
+                }
+                else {
+                  reject(jqXHR);
+                }
+              }
+            });
+          }
+          processAjax();
         });
       };
   
       const checkStatus = async (jobId) => {
-        const statusCheckingInterval = 2.5 /*seconds*/ * 1000;
+        const statusCheckingInterval = 2 /*seconds*/ * 1000;
         return new Promise((resolve, reject) => {
           if (jobId == null) {
             resolve("started");
           }
-  
-          $.ajax({
-            url: 'check-status',
-            method: 'GET',
-            data: {
-              testServerName: testServer.nickname,
-              testServerUrl: testServer.hostname,
-              mode: testMethod.mode,
-              jobId,
-              measurementTestName: process.label
-            },
-            dataType: 'json',
-            timeout: MEASUREMENT_TIMEOUT,
-            success: function (data) {
-              setTimeout(function () {
-                console.log("yeahhhhh", data);
-                resolve(data);
-              }, statusCheckingInterval);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-              console.log("GET checkStatus error");
-              console.log({jqXHR, textStatus, errorThrown});
-              reject(jqXHR);
-            }
-          });
+
+          let retryCount = 0;
+          const maxRetryCount = 5;
+          const checkStatusAjax = () => {
+            $.ajax({
+              url: 'check-status',
+              method: 'GET',
+              data: {
+                testServerName: testServer.nickname,
+                testServerUrl: testServer.hostname,
+                mode: testMethod.mode,
+                jobId,
+                measurementTestName: process.label
+              },
+              dataType: 'json',
+              timeout: MEASUREMENT_TIMEOUT,
+              success: function (data) {
+                setTimeout(function () {
+                  console.log("yeahhhhh", data);
+                  resolve(data);
+                }, statusCheckingInterval);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                console.log("GET checkStatus error");
+                console.log({jqXHR, textStatus, errorThrown});
+
+                retryCount++;
+                if (jqXHR.readyState === 0 && retryCount < maxRetryCount) {
+                  checkStatusAjax();
+                }
+                else {
+                  reject(jqXHR);
+                }
+              }
+            });
+          }
+          checkStatusAjax();
         });
       }
   
@@ -1454,21 +1744,35 @@ const summaryChartImageUris = Object.seal({
   
       const runScriptProcess = async (processId, port, jobId) => {
         return new Promise(function (resolve, reject) {
-          $.ajax({
-            url: `run-process-${processId}`,
-            method: 'POST',
-            data: getRequiredScriptParameters(processId, port, testMethod, jobId),
-            dataType: 'json',
-            timeout: MEASUREMENT_TIMEOUT,
-            success: function (scriptData) {
-              resolve(scriptData);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-              console.log("GET runScriptProcess error");
-              console.log({jqXHR, textStatus, errorThrown});
-              reject(jqXHR);
-            }
-          });
+          
+          let retryCount = 0;
+          const maxRetryCount = 5;
+          const runProcessAjax = () => {
+            $.ajax({
+              url: `run-process-${processId}`,
+              method: 'POST',
+              data: getRequiredScriptParameters(processId, port, testMethod, jobId),
+              dataType: 'json',
+              timeout: MEASUREMENT_TIMEOUT,
+              success: function (scriptData) {
+                resolve(scriptData);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                console.log("GET runScriptProcess error");
+                console.log({jqXHR, textStatus, errorThrown});
+
+                retryCount++;
+                if (jqXHR.readyState === 0 && retryCount < maxRetryCount) {
+                  // $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`<i class="small text-primary text-nowrap"><span class="text-warning">(Attempt ${retryCount} of ${maxRetryCount})</span> Measuring...</i>`);
+                  runProcessAjax();
+                }
+                else {
+                  reject(jqXHR);
+                }
+              }
+            });
+          }
+          runProcessAjax();
         });
       }
   
@@ -1508,27 +1812,39 @@ const summaryChartImageUris = Object.seal({
           console.log({processScriptData});
           // console.log({postThoughputScriptData});
           
-          $.ajax({
-            url: 'process',
-            method: 'POST',
-            data: {
-              testServerName: testServer.nickname,
-              testServerUrl: testServer.hostname,
-              mode: testMethod.mode,
-              processId: process.processId,
-              scriptData: JSON.stringify(processScriptData)
-            },
-            dataType: 'json',
-            timeout: MEASUREMENT_TIMEOUT,
-            success: function () {
-              resolve();
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-              console.log("POST postProcess error");
-              console.log({jqXHR, textStatus, errorThrown});
-              reject(jqXHR);
-            }
-          });
+          let retryCount = 0;
+          const maxRetryCount = 1;
+          const postProcessAjax = () => {
+            $.ajax({
+              url: 'process',
+              method: 'POST',
+              data: {
+                testServerName: testServer.nickname,
+                testServerUrl: testServer.hostname,
+                mode: testMethod.mode,
+                processId: process.processId,
+                scriptData: JSON.stringify(processScriptData)
+              },
+              dataType: 'json',
+              timeout: MEASUREMENT_TIMEOUT,
+              success: function () {
+                resolve();
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                console.log("POST postProcess error");
+                console.log({jqXHR, textStatus, errorThrown});
+
+                retryCount++;
+                if (jqXHR.readyState === 0 && retryCount < maxRetryCount) {
+                  postProcessAjax();
+                }
+                else {
+                  reject(jqXHR);
+                }
+              }
+            });
+          }
+          postProcessAjax();
         });
       };
   
@@ -1552,7 +1868,8 @@ const summaryChartImageUris = Object.seal({
             }
           })
           .then(response => {
-            measurementTimes[methodName].push([Date.now(), null]);
+            // measurementTimes[methodName].push([Date.now(), null]);
+            measurementTimes[methodName][currentProcessIndex][0] = Date.now();
 
             $(`#${testMethod.name}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="small text-primary text-nowrap">Measuring...</i>');
             $(`#${testMethod.name}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
@@ -1586,32 +1903,54 @@ const summaryChartImageUris = Object.seal({
   
     const getTestResults = async function (process) {
       return new Promise(function (resolve, reject) {
-        measurementTimes[methodName].push([Date.now(), null]);
-        setTimeout(() => {
-          $.ajax({
-            url: 'finish-test',
-            method: 'POST',
-            data: {
-              testServerName: testServer.nickname,
-              testServerUrl: testServer.hostname,
-              mode: testMethod.mode,
-              testNumber: autoRepeatIndex + 1
-            },
-            dataType: 'json',
-            timeout: MEASUREMENT_TIMEOUT,
-            success: function (response) {
-              console.log({response});
-              // console.log(testResults);
-              testResults[autoRepeatIndex][response.method]['results'] = response.results;
-              
-              markAsDone(process);
+        // measurementTimes[methodName].push([Date.now(), null]);
+        measurementTimes[methodName][currentProcessIndex][0] = Date.now();
 
-              resolve(response.html);
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-              reject(jqXHR);
-            }
-          });
+        $(`#${methodName}-process-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).removeClass("text-muted").addClass('text-primary');
+        $(`#${methodName}-process-status-label-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html('<i class="small text-primary">Getting results...</i>');
+        $(`#${methodName}-process-status-${currentProcessIndex}-test-${autoRepeatIndex + 1}`).html(`
+          <div class="spinner-border spinner-border-sm text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        `);
+
+        setTimeout(() => {
+          let retryCount = 0;
+          const maxRetryCount = 5;
+
+          const finishTestAjax = () => {
+            $.ajax({
+              url: 'finish-test',
+              method: 'POST',
+              data: {
+                testServerName: testServer.nickname,
+                testServerUrl: testServer.hostname,
+                mode: testMethod.mode,
+                testNumber: autoRepeatIndex + 1
+              },
+              dataType: 'json',
+              timeout: MEASUREMENT_TIMEOUT,
+              success: function (response) {
+                console.log({response});
+                // console.log(testResults);
+                testResults[autoRepeatIndex][response.method]['results'] = response.results;
+                
+                markAsDone(process);
+  
+                resolve(response.html);
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                retryCount++;
+                if (jqXHR.readyState === 0 && retryCount < maxRetryCount) {
+                  finishTestAjax();
+                }
+                else {
+                  reject(jqXHR);
+                }
+              }
+            });
+          }
+          finishTestAjax();
         }, 1000);
         // setTimeout(function () {
         //   $.ajax({
@@ -1666,26 +2005,39 @@ const summaryChartImageUris = Object.seal({
     //   })
     // }
   
-    return new Promise((resolve, reject) => {
-      MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
-        await previousPromise;
+    return new Promise(async (resolve, reject) => {
+      let retryCount = 0;
+      const maxRetryCount = 5;
 
-        if (['verify-test'].includes(nextProcess.processId)) {
-          return connectToServer(nextProcess);
-        }
+      const execute = () => {
+        MEASUREMENT_PROCESSES.slice(currentProcessIndex).reduce(async (previousPromise, nextProcess) => {
+          await previousPromise;
+  
+          if (['verify-test'].includes(nextProcess.processId)) {
+            return connectToServer(nextProcess);
+          }
+  
+          if (['finish-test'].includes(nextProcess.processId)) {
+            return getTestResults(nextProcess);
+          }
+          
+          return executeProcess(nextProcess);
+        }, Promise.resolve())
+          .then(results => {
+            resolve(results);
+          })
+          .catch(err => {
+            retryCount++;
+            if (retryCount < maxRetryCount) {
+              execute();
+            }
+            else {
+              reject(err);
+            }
+          });
+      }
 
-        if (['finish-test'].includes(nextProcess.processId)) {
-          return getTestResults(nextProcess);
-        }
-        
-        return executeProcess(nextProcess);
-      }, Promise.resolve())
-        .then(results => {
-          resolve(results);
-        })
-        .catch(err => {
-          reject(err);
-        });
+      execute();
     })
   }
   
@@ -1764,6 +2116,40 @@ const summaryChartImageUris = Object.seal({
       ? '<i class="bi bi-arrow-up-circle"></i>'
       : '<i class="bi bi-arrow-down-circle"></i>';
     $(`#${methodName}-test-results-status-${testNumber}`).html(successIconHtml);
+
+    if (testInputs.autoRepeatCount > 1 || testInputs.mode.name == "bidirectional") {
+      $(`#btn-save-${methodName}-test-${testNumber}`).show();
+
+      $(`#btn-save-${methodName}-test-${testNumber}`).click(async function () {
+        const method = $(this).data('method');
+        const testNumber = parseInt($(this).data('test-number'));
+        const testIndex = testNumber - 1;
+  
+        const start = testResults[testIndex][method].startedOn;
+        const end = testResults[testIndex][method].endedOn;
+        console.log(method, testNumber);
+        const pdfReportFileName = await generateReport(testInputs, {
+          startedOn: moment(start).format('YYYY-MM-DD HH:mm:ss'),
+          finishedOn: moment(end).format('YYYY-MM-DD HH:mm:ss'),
+          totalDuration: getDurationText(start, end)
+        }, testClient, [method], testResults, testIndex, testNumber, "i", summaryChartImageUris 
+        );
+
+        $this = $(this);
+        $.post("/open-downloads-folder",
+          {
+            fileName: pdfReportFileName
+          },
+          function(data, status){
+            $this.attr('disabled', true);
+            $this.text("Saved!");
+          }
+        );
+      });
+
+    } else {
+      $(`#btn-save-${methodName}-test-${testNumber}`).hide();
+    }
   }
   
   async function showTestFailed(err, processIndex, directionIndex, testNumber) {
@@ -1821,6 +2207,9 @@ const summaryChartImageUris = Object.seal({
 
       $('#test-failed-options').removeClass('d-none');
       $('#test-success-options').addClass('d-none');
+
+      $('#btnBackToTop').addClass('d-none');
+      $('#btnBackToTop').hide();
     }
     
     const now = moment();
@@ -1831,6 +2220,7 @@ const summaryChartImageUris = Object.seal({
     $(`#summary-test-duration-${testNumber}`).html(`<span class="text-secondary">${currentTestDuration.timeText}</span>`);
   
     const autoRepeatCount = $('#auto-repeat-count').val();
+    
     $(`#process-error`).html(`
       <div class="border border-danger bg-light mt-1 mx-2">
         <div class="accordion border-0" id="accordionError">
@@ -1855,7 +2245,12 @@ const summaryChartImageUris = Object.seal({
                   </tbody>
                 </table>
                 <div class="d-flex align-content-center mt-2">
-                  <button type="button" class="btn-restart-test btn btn-sm btn-primary align-self-center ms-start">${autoRepeatCount == 1 ? "Restart Test" : `Restart Test #${testNumber}`}</button>
+                  <button type="button" class="btn-restart-test btn btn-sm btn-primary align-self-center ms-start">
+                    Retry ${process.label} - ${TEST_METHODS[methodName].titleCase} Test${autoRepeatCount == 1 ? '' : ` #${testNumber}`}
+                  </button>
+                  <button type="button" class="btn-restart-test-2 btn btn-sm btn-outline-primary align-self-center ms-1" ${autoRepeatCount == 1 ? "hidden" : ""}>
+                    ${`Restart Test #${testNumber}`}
+                  </button>
                   <a href="javascript:void(0);" id="btnOpenLogsFolder" class="btn btn-sm btn-link text-primary p-0 align-self-center ms-auto" role="button" onclick="openLogsFolder()">Open logs folder</a>
                 </div>
               </div>
@@ -1863,6 +2258,7 @@ const summaryChartImageUris = Object.seal({
           </div>
         </div>
       </div>
+      <div class="mx-2 my-1 mb-2">
       <div class="mx-2 my-1 mb-2">
         ${errorButtonsHtml}
       </div>
@@ -1892,7 +2288,7 @@ const summaryChartImageUris = Object.seal({
   
   function backToTop() {
     $('html, body').animate({
-      scrollTop: $('#measurement-card').offset().top - 72
+      scrollTop: $('#measurement-card .card-body').offset().top - 72
     }, 200);
   }
   
@@ -1938,6 +2334,7 @@ const summaryChartImageUris = Object.seal({
   async function saveAsPdf() {
     $('#btnSaveAsPdf').attr('disabled', true);
     $('#btnSaveAsPdf .spinner-border').removeClass('d-none');
+    $('#test-success-options button').attr('disabled', true);
 
     const response = await fetch('get-ntc-office-address');
     
@@ -1948,12 +2345,13 @@ const summaryChartImageUris = Object.seal({
       }
     }
 
-    pdfReportFileName = await generateReport(testInputs, testSessionTime, testClient, testResults, summaryChartImageUris);
+    pdfReportFileName = await generateReport(testInputs, testSessionTime, testClient, testInputs.mode.methods, testResults, 0, testResults.length, "a", summaryChartImageUris);
   
     $('#btnSaveAsPdf').attr('disabled', false);
     $('#btnSaveAsPdf .spinner-border').addClass('d-none');
     $('#btnSaveAsPdf').addClass('d-none');
     $('#pdfSaved').removeClass('d-none');
+    $('#test-success-options button').attr('disabled', false);
   }
 
   function setManualGpsCoordinates() {
@@ -2083,6 +2481,8 @@ const summaryChartImageUris = Object.seal({
       nominatimGetRequestDelay = setTimeout(function () {
         nominatimGetRequest = $.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`, function (result) {
           console.log("reverse-geo", result);
+
+          testInputs.location.withinPH = result?.address?.country_code == "ph";
 
           if ("error" in result) {
             $('#location-name-container').html(`<span class="w-100 small text-muted">(undetected address)</span>`);

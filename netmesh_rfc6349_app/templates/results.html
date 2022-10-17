@@ -11,6 +11,9 @@
       <tbody>
       </tbody>
     </table>
+    <div class="d-flex justify-content-end">
+      <button type="button" id="btn-save-{{ method }}-test-{{ test_number }}" class="btn btn-link btn-sm p-1" data-test-number="{{ test_number }}" data-method="{{ method }}">Save this result</button>
+    </div>
   </div>
 </div>
 
@@ -55,7 +58,7 @@
           const relative_buf_delay = decimalValue == -1 ? NaN : decimalValue >= 0 ? decimalValue : (1 / (1 + decimalValue)) - 1;
           quantityHtml = `<td>
             <div>
-              ${measurementText}<small class="text-muted ps-1">Average RTT is ${decimalValue === 0 ? "same as" : (`${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%') }${decimalValue < 0 ? "faster than" : "slower than"}`)} Baseline RTT</small>
+              ${measurementText}<small class="text-muted ps-1">Average RTT is ${decimalValue === 0 ? "same as" : (`${isNaN(relative_buf_delay) ? "infinitely" : numeral(relative_buf_delay).format('0.[00]%') } ${decimalValue < 0 ? "faster than" : "slower than"}`)} Baseline RTT</small>
             </div>
           </td>`;
           break;
