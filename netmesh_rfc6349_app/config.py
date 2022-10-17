@@ -3,7 +3,7 @@ from base64 import b64encode
 import os
 
 class Config:
-    FLASK_DEBUG = 1
+    FLASK_DEBUG = 0
     PERMANENT_SESSION_LIFETIME = timedelta(days=100)
     # SECRET_KEY = 'H3kur3WoOqAt3yFIOqTwXog4'
     # SECRET_KEY = b64encode(os.urandom(24)).decode('utf-8')
