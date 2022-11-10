@@ -28,6 +28,9 @@ while [ $# -gt 0 ]; do
     --mode=*)
       _mode="${1#*=}"
       ;;
+    --window=*)
+      _window="${1#*=}"
+      ;;
     *)
       printf "***************************\n"
       printf "* Error: Invalid argument.*\n"
@@ -37,7 +40,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [[ -z "$_mtu" || -z "$_rtt" || -z "$_ip" || -z "$_port" || -z "$_rwnd" || -z "$_ideal" || -z "$_mode" ]]
+if [[ -z "$_mtu" || -z "$_rtt" || -z "$_ip" || -z "$_port" || -z "$_rwnd" || -z "$_ideal" || -z "$_mode" || -z "$_window" ]]
 then
 echo "Normal Mode Throughput Test"
 echo "Usage: ./thpt.sh --rtt=<rtt> --mtu=<mtu> --rwnd=<rwnd> --ideal=<ideal> --ip=<ip> --port=<port> --mode=<mode>"
@@ -47,6 +50,7 @@ echo "<ideal> subscription plan in Mbps"
 echo "<ip> in server ip"
 echo "<port> provided port by server"
 echo "<mode> normal/reverse"
+echo "<window> window size"
 echo "Example: ./thpt.sh --mtu=1500 --rtt=30 --rwnd=2000 --ideal=100 --ip=127.0.0.1 --port=8888 --mode=normal"
 exit 1;
 
@@ -68,7 +72,7 @@ else
   exit 1;
 fi
 
-OUT=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --format m --json \
+OUT=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --window $_window --set-mss 1460 --format m --json \
   | jq '.end | { "bytes" : .sum_sent.bytes, "thpt" : .sum_sent.bits_per_second, "retx": .sum_sent.retransmits } + { "mean_rtt" : .streams[].sender.mean_rtt }') 
 
 AVE_THPT=$(echo $OUT | jq '.thpt/1000000')

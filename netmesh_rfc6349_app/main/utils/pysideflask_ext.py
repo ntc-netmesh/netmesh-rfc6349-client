@@ -15,7 +15,8 @@ from PySide2.QtGui import QScreen
 import socket
 
 from netmesh_rfc6349_app import has_pyi_splash
-from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version, update_app
+from netmesh_rfc6349_app.main.utils import connected_to_the_internet, sync_time
+from netmesh_rfc6349_app.main.utils.netmesh_installer import check_app_latest_version, get_app_current_version, update_app
 
 if has_pyi_splash():
     import pyi_splash
@@ -66,10 +67,7 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
         return super(WebPage, self).acceptNavigationRequest(url, kind, is_main_frame)
 
 
-def init_gui(application, port=0, width=800, height=600,
-             window_title="App", icon="static/images/netmesh-icon.webp", argv=None, has_update=False,
-             latest_version=get_app_current_version(), download_path=""):
-    
+def init_gui(application, port=0, width=800, height=600, icon="static/images/netmesh-icon.webp", argv=None, download_path=""):
     try:
         if argv is None:
             argv = sys.argv
@@ -94,6 +92,25 @@ def init_gui(application, port=0, width=800, height=600,
         qtapp.aboutToQuit.connect(webapp.terminate)
 
         print("Application level good")
+        
+        if not connected_to_the_internet():
+            QMessageBox.critical(None,
+                                 "No Internet",
+                                 f"{application.config['APP_TITLE']} requires internet. Please check your Internet connection, and open this app again.")
+            return
+        
+        sync_time()
+
+        if has_pyi_splash():
+            pyi_splash.update_text("Checking update...")
+
+        has_update, current_version, latest_version = check_app_latest_version(application)
+        app_version = current_version
+
+        if has_pyi_splash():
+            pyi_splash.update_text("Opening the app...")
+            
+        window_title = f"{application.config['APP_TITLE']} ({app_version})"
 
         # Main Window Level
         window = MainGUI()
@@ -203,8 +220,9 @@ def init_gui(application, port=0, width=800, height=600,
         #         # sys.exit()
         # # else:
         # window.has_update = False
+            
         
-        web_view_delay_ms = 100
+        web_view_delay_ms = 250
         sleep(web_view_delay_ms / 1000)
         
         load_page(webView, page)

@@ -9,14 +9,16 @@ export _rtt="$1"
 export _ip="$2" 
 export _port="$3"
 export _mode="$4"
-if [[ -z "$_rtt" || -z "$_ip" || -z "$_port"  || -z "$_mode" ]]
+export _bitrate="$5"
+if [[ -z "$_rtt" || -z "$_ip" || -z "$_port"  || -z "$_mode" || -z "$_bitrate" ]]
 then
 echo "Normal Mode BB finder"
 echo "Usage: ./bb.sh <rtt> <ip> <port>"
 echo "<rtt> in milliseconds"
 echo "<ip> in server ip"
 echo "<port> provided port by server"
-echo "Example: ./bb.sh 30 192.168.1.55 8888"
+echo "<bitrate> bitrate"
+echo "Example: ./bb.sh 30 192.168.1.55 8888 5"
 exit 1;
 
 fi
@@ -39,7 +41,7 @@ fi
 #  | sed -e '1,/Jitter/ d; /sec/!d' | awk -F" " '{print $7}')
 #echo "bb: $BB Mbits/sec"
 
-BB=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --format m --bandwidth 1000M \
+BB=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --bitrate $_bitrate --pacing-timer 100 --format m --bandwidth 1000M \
   | sed -n -e '/sender/p' | awk -F" " '{print $7}')
 echo "bb: $BB Mbits/sec"
 

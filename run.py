@@ -12,23 +12,8 @@ from netmesh_rfc6349_app.main.utils.laptop_info import get_downloads_folder_path
 def run_on_desktop():
     app = create_app()
     app.secret_key = os.urandom(24)
-    
-    if has_pyi_splash():
-        print("Opening splash...")
-        import pyi_splash
 
-    if has_pyi_splash():
-        pyi_splash.update_text("Checking update...")
-
-    has_update, current_version, latest_version = check_app_latest_version(app)
-    app_version = current_version
-
-    if has_pyi_splash():
-        pyi_splash.update_text("Opening the app...")
-
-    pysideflask_ext.init_gui(application=app, port=5000, width=1440, height=900,
-                             window_title=f'{app.config["APP_TITLE"]} ({app_version})',
-                             has_update=has_update, latest_version=latest_version, download_path=get_downloads_folder_path())
+    pysideflask_ext.init_gui(application=app, port=5000, width=1440, height=900, download_path=get_downloads_folder_path())
     sys.exit()
 
 

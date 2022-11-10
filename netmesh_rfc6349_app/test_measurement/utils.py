@@ -8,6 +8,8 @@ import requests
 import psutil
 import netifaces
 
+import math
+
 from flask import Response, abort, session, jsonify, current_app
 
 from netmesh_rfc6349_app import app_resource_path
@@ -239,3 +241,12 @@ def get_default_gateway():
         return None
 
     return gateways['default'][netifaces.AF_INET][0]
+
+def calculate_window_size(bdp):
+    # mss = 1460
+    # 64240 = (65535 // mss) * mss
+    min_window_size = 560
+    
+    max_iteration = 0 if bdp == 0 else math.floor(math.log(bdp / 64240, 2))
+    
+    return max(min_window_size, math.trunc(64240 * (2 ** max_iteration)))

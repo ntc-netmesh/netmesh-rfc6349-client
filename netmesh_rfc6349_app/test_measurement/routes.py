@@ -16,7 +16,7 @@ from flask import Blueprint, Response, render_template, request, redirect, url_f
 from netmesh_rfc6349_app import app_resource_path
 
 
-from netmesh_rfc6349_app.test_measurement.utils import run_process_script, get_ethernet_connections, get_default_gateway
+from netmesh_rfc6349_app.test_measurement.utils import calculate_window_size, run_process_script, get_ethernet_connections, get_default_gateway
 
 from netmesh_rfc6349_app.main.utils.netmesh_installer import get_app_current_version
 from netmesh_rfc6349_app.main.utils import laptop_info
@@ -515,7 +515,9 @@ def check_status():
         )
         r.raise_for_status()
         
-        if r.text == "failed":
+        status = r.json()
+        
+        if status == "failed":
             return Response(json.dumps({
                 "error": "Queue failed",
                 "message": "Failed to enqueue this client in the server"
@@ -800,10 +802,13 @@ def run_process_rtt():
 def run_process_bdp():
     mode = request.form['mode']
     rtt = request.form['rtt']
+    isr = request.form['isr']
     server_ip = request.form['serverIP']
     port = request.form['port']
+    
+    bitrate = int(isr) / 100
 
-    command_array = ['sudo', './bb.sh', rtt, server_ip, port, mode]
+    command_array = ['sudo', './bb.sh', rtt, server_ip, port, mode, str(bitrate)]
     
     print(command_array)
     output_params = [
@@ -820,13 +825,19 @@ def run_process_thpt():
     mode = request.form['mode']
     mtu = request.form['mtu']
     rtt = request.form['rtt']
+    bdp = int(request.form['bdp'])
     rwnd = request.form['rwnd']
     ideal = request.form['ideal']
     server_ip = request.form['serverIP']
     port = request.form['port']
+    
+    window = calculate_window_size(bdp)
+    print("WINDOW SIZE CALC")
+    print("bdp", bdp)
+    print("window_size", window)
 
     command_array = ['sudo', './thpt.sh', f'--mtu={mtu}', f'--rtt={rtt}', f'--rwnd={rwnd}',
-                     f'--ideal={ideal}', f'--ip={server_ip}', f'--port={port}', f'--mode={mode}']
+                     f'--ideal={ideal}', f'--ip={server_ip}', f'--port={port}', f'--mode={mode}', f'--window={window}']
     # name - from script output
     # key - based from Required_User_Body in /thpt POST request
     # Must be IN EXACT ORDER
@@ -878,15 +889,15 @@ def run_process_analysis():
 def get_isp():
     error = None
     try:
-        # main_url = "http://www.speedtest.net/speedtest-config.php"
-        main_url = 'http://ip-api.com/json/?fields=org,query'
+        main_url = 'http://ip-api.com/json/?fields=as,query'
         r = requests.get(
             url=main_url,
         )
         r.raise_for_status()
         response = json.loads(r.text)
-
-        isp = response["org"]
+        
+        as_value = response["as"]
+        isp = ' '.join(as_value.split(' ')[1:])
         public_ip = response["query"]
 
         return Response(json.dumps({

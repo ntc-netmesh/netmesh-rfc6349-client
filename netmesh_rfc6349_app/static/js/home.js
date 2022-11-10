@@ -96,6 +96,7 @@ const summaryChartImageUris = Object.seal({
   let requiredGetParamaters = {
     mtu: null,
     rtt: null,
+    bdp: null,
     rwnd: null,
     tx_bytes: null,
     ideal_thpt: null,
@@ -104,8 +105,6 @@ const summaryChartImageUris = Object.seal({
     ave_rtt: null,
     retx_bytes: null,
   };
-
-  // let postThoughputScriptData = {};
   
   let measurementTimes = {}
   
@@ -121,16 +120,7 @@ const summaryChartImageUris = Object.seal({
   let nominatimGetRequest = null;
   let nominatimGetRequestDelay = null;
 
-  // $('#net-warning').hide();
-  // $('#btnGetGpsCoordinates .spinner-grow').hide();
   $('#btnStartTest').attr('disabled', true);
-  
-  // $('#btnSaveAsPdf .spinner-border').hide();
-  // $('#pdfSaved').hide();
-  // $('#modalPdfReport .btn-close').hide();
-  // $('#measurement-card').hide();
-  
-  // $('#measurement-failed-card').hide();
 
   $(async function () {
     testClient.fullName = document.getElementById('loggedUserFullName').innerText.trim();
@@ -150,26 +140,6 @@ const summaryChartImageUris = Object.seal({
     $('.btn-refresh-networks').on('click', function() {
       setEthernets();
     });
-    
-    // Render Network Connection Type selection
-    // for (const netType of Object.keys(NETWORK_CONNECTION_TYPES)) {
-    //   $('#netType').append(`
-    //     <option value="${netType}" ${netType == "Ethernet" ? "selected" : ""}> 
-    //       ${netType}
-    //     </option>`
-    //   );
-    // }
-    // $('#netType').on('change', function () {
-    //   const selectedNetType = $(this).val();
-    //   if (selectedNetType === "Ethernet") {
-    //     $('#net-warning').addClass('d-none');
-    //   } else {
-    //     $('#net-warning .message').text(`RFC-6349 methodology focuses on Ethernet-terminated services`);
-    //     $('#net-warning').removeClass('d-none');
-    //   }
-    //   // scanForConnectedDevices(selectedNetType);
-    // });
-    // $('#netType').val("Ethernet").trigger('change');
 
     // Render Get Location button
     $('#btnGetGpsCoordinates').on('click', function () {
@@ -279,14 +249,6 @@ const summaryChartImageUris = Object.seal({
   
     // Set on click: Close Test button
     $('.btn-clear-test').click(async function () {
-      // $('#modalReenterPassword .modal-title').text('Conduct New Test');
-      // $('#modalReenterPassword .btn').text('Submit');
-  
-      // await passwordModal().then(() => {
-      //   closeTest();
-      // }).catch((e) => {
-      //   console.log("baka nga error", e);
-      // });
       clearTest();
     });
   
@@ -299,17 +261,6 @@ const summaryChartImageUris = Object.seal({
     $('#btnSaveAsPdf').on('click', async function () {
       await saveAsPdf();
     });
-
-
-    // $('#btnSavePartialResults').on('click', async function () {
-
-    //   generateReport(testInputs, {
-    //     startedOn: moment(start).format('YYYY-MM-DD HH:mm:ss'),
-    //     finishedOn: moment(end).format('YYYY-MM-DD HH:mm:ss'),
-    //     totalDuration: getDurationText(start, end)
-    //   }, testClient, [method], testResults, 0, currentAutoRepeatIndex + 1, "a", summaryChartImageUris 
-    //   );
-    // });
 
     // Set on click: Open Downloads Folder button
     $('#btnOpenDownloadsFolder').on('click', function () {
@@ -419,33 +370,6 @@ const summaryChartImageUris = Object.seal({
       currentProcessIndex = 0;
       await startTestExecution(autoRepeatIndex, true);
     });
-
-    // window.onbeforeunload = (event) => {
-    //   event.preventDefault();
-    //   return event.returnValue = "Are you sure you want to exit?";
-    // };
-
-    // Prompt when window is being reloaded
-    // window.onbeforeunload = function (e) {
-    //   console.log("onbeforeunload");
-    //   e = e || window.event;
-
-    //   let message = "Close this app?";
-    //   switch (appState) {
-    //     case APP_STATE.Testing:
-    //       message = "Test is ongoing.\n\nClose this app anyway?"
-    //       break;
-    //   }
-
-    //   // For IE and Firefox prior to version 4
-    //   if (e) {
-    //     e.returnValue = message;
-    //   }
-
-    //   console.log(message);
-    //   // For Safari
-    //   return message;
-    // };
   });
 
   function scanForConnectedDevices(typeName) {
@@ -455,7 +379,7 @@ const summaryChartImageUris = Object.seal({
     
     $('#modalScanForConnectedDevices').modal('show');
 
-    $('#connected-devices-title').html(`Scanning connected devices to ${typeName}...`);
+    $('#connected-devices-title').html(`Scanning connected devices to the router...`);
     $('#scanning-devices-progress').removeClass('d-none');
     $('#connected-devices-table-container').addClass('d-none');
     $('#connected-devices-table tbody').html('');
@@ -579,14 +503,6 @@ const summaryChartImageUris = Object.seal({
           server.hostname = hostname;
           return server;
         });
-        
-        
-        // testServers.push({
-        //   id: 0,
-        //   nickname: 'Local server ko :D',
-        //   hostname: 'http://202.90.158.6',
-        //   ip_address: '202.90.158.6'
-        // })
   
         for (let i = 0; i < testServers.length; i++) {
           const server = testServers[i];
@@ -596,8 +512,6 @@ const summaryChartImageUris = Object.seal({
             </option>`
           );
         }
-        // $testServers.append('<option value="custom">Custom test server...</option>');
-
         
         $('#btnStartTest').attr('disabled', false);
       },
@@ -717,9 +631,6 @@ const summaryChartImageUris = Object.seal({
           $(`#${testMethod.name}-measurement-processes-${testNumber} tbody`).append(`<tr id="measurement-process-row-${i + 1}-${dName}-test-${testNumber}"></tr>`)
         }
       }
-  
-      // $measurementTimeline = $(`#${testMethod.name}-measurement-processes-${testNumber} tbody`);
-      // $measurementTimeline.html('');
 
       for (let i = 0; i < MEASUREMENT_PROCESSES.length; i++) {
         if (i < currentProcessIndex) {
@@ -740,39 +651,8 @@ const summaryChartImageUris = Object.seal({
           <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end">
             
           </td>
-        `)
-        // $measurementTimeline.append(`
-        //   <tr>
-        //     <td class="p-0 d-flex inline-block" style="min-width: 56px;">
-        //       <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration.timeColon : ""}</span>
-        //     </td>
-        //     <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0">
-        //       <i class="bi bi-circle text-muted"></i>
-        //     </td>
-        //     <td class="p-0 w-100">
-        //       <span id="${testMethod.name}-process-label-${i}-test-${testNumber}" class="text-muted mx-2">${process.label}</span>
-        //     </td>
-        //     <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end">
-              
-        //     </td>
-        //   </tr>
-        // `);
+        `);
       }
-      
-  
-      // $(`#${testMethod.name}-measurement-results-table tbody`).html('');
-      // for (const [key, value] of Object.entries(resultsParameters)) {
-      //   $(`#${testMethod.name}-measurement-results-table tbody`).append(`
-      //     <tr>
-      //       <td>${value.name}</td>
-      //       <td id="${testMethod.name}-results-param-${key}" data-has-value="false">
-      //         <div class="placeholder-glow">
-      //           <span class="placeholder bg-secondary" style="width: 72px;"></span>
-      //         </div>
-      //       </td>
-      //     </tr>
-      //   `);
-      // }
     }
   
     $(`#summary-test-finished-on-${autoRepeatIndex + 1}`).html(`
@@ -788,18 +668,6 @@ const summaryChartImageUris = Object.seal({
   }
   
   async function startTest() {
-    // const isr = $('#isr').val();
-    // const netTypeName = $('#netType').val();
-    
-    // const testServerIndex = $('#testServers').val();
-    // const testServer = testServers[testServerIndex];
-    
-    // const modeName = $('input[name="radTestMode"]:checked').val();
-    // const lon = $('#lon').val();
-    // const lat = $('#lat').val();
-
-    // testInputs.networkConnectionTypeName = $('#netType').val();
-
     testInputs.isr = $('#isr').val();
     testInputs.ethernetName = $('#netType option:selected').data('name');
     testInputs.networkConnectionTypeName = $('#netType option:selected').data('type');
@@ -915,17 +783,6 @@ const summaryChartImageUris = Object.seal({
 
     $('#custom-server-ip-address').removeClass('is-invalid');
     $('#custom-server-port').removeClass('is-invalid');
-
-    // let gpsSuccess = false;
-    // await setGpsInfo(testInputs.location.lat, testInputs.location.lon, testInputs.location.name)
-    //   .then(status => {
-    //     gpsSuccess = true;
-    //   });
-
-    // if (!gpsSuccess) {
-    //   alert("gps failed.");
-    //   return;
-    // }
 
     getIspInfo()
       .then(({isp, publicIP}) => {
@@ -1088,65 +945,8 @@ const summaryChartImageUris = Object.seal({
         }
   
         $(`#pills-speedtest-${testNumber}`).html('');
-  
-        // $(`#test-tab-${testNumber}`).append(`
-        //   <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
-        //     <div class="position-relative">
-        //       <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
-        //         <div class="spinner-border spinner-border text-info" role="status">
-        //           <span class="visually-hidden">Loading...</span>
-        //         </div>
-        //       </div>
-        //       <div class="px-1">
-        //         ${testNumber == "summary" ? "Summary" : testNumber}
-        //       </div>
-        //     </div>
-        //   </button>
-        // `);
       }
     }
-
-    // for (let i = autoRepeatIndex; i < autoRepeatCount + 1; i++) {
-    //   if (i == autoRepeatCount && autoRepeatCount == 1) {
-    //     break;
-    //   }
-      
-    //   let testNumber = i + 1;
-    //   if (testNumber > autoRepeatCount) {
-    //     testNumber = "summary"
-    //   }
-
-    //   $('#speedtest-pills-tab').append(`
-    //     <li id="test-tab-${testNumber}" class="nav-item" role="presentation">
-    //       <button class="nav-link ${testNumber <= autoRepeatIndex + 1 ? "" : "disabled"} px-2 py-1 m-1 position-relative" id="pills-speedtest-${testNumber}-tab" data-test-number="${testNumber}" data-bs-toggle="pill" data-bs-target="#pills-speedtest-${testNumber}" type="button" role="tab" aria-controls="pills-speedtest-${testNumber}" aria-selected="${ testNumber == autoRepeatIndex + 1 ? "true" : "false" }">
-    //         <div class="position-relative">
-    //           <div id="test-executing-indicator-${testNumber}" class="position-absolute top-50 start-50 translate-middle pt-1 d-none">
-    //             <div class="spinner-border spinner-border text-info" role="status">
-    //               <span class="visually-hidden">Loading...</span>
-    //             </div>
-    //           </div>
-    //           <div class="px-1">
-    //             ${testNumber == "summary" ? "Summary" : testNumber}
-    //           </div>
-    //         </div>
-    //       </button>
-    //     </li>
-    //   `);
-
-    //   $('#speedtest-pills-tabContent').append(`
-    //     <div class="tab-pane fade" id="pills-speedtest-${testNumber}" role="tabpanel" aria-labelledby="pills-speedtest-${testNumber}-tab">
-    //     </div>
-    //   `);
-    // }
-
-    // $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function(event) {
-    //   const selected = $(event.target).data("test-number");
-    //   if (isNaN(selected)) {
-    //     selectedTestNumber = 0;
-    //   } else {
-    //     selectedTestNumber = parseInt(selected);
-    //   }
-    // });
 
     let isFailed = false;
     while (autoRepeatIndex < autoRepeatCount + 1) {
@@ -1267,15 +1067,6 @@ const summaryChartImageUris = Object.seal({
         let methodName = testInputs.mode.methods[0];
         testResults[autoRepeatIndex][methodName]['startedOn'] = testNumberStartTime;
 
-        // if (testResults.length == autoRepeatIndex) {
-        //   testResults.push({
-        //     [methodName]: {
-        //       startedOn: testNumberStartTime,
-        //       endedOn: null
-        //     }
-        //   });
-        // }
-
         await executeMeasurements(testInputs.testServer, methodName, currentProcessIndex)
           .then(resultsHtml =>  {
             clearInterval(timerInterval);
@@ -1311,30 +1102,13 @@ const summaryChartImageUris = Object.seal({
           }
       }
       else if (testInputs.mode.name === "bidirectional") {
-        // let directionIndex = currentDirectionIndex;
-        // let currentMethodName = testInputs.mode.methods[0];
-        
         for (const methodName of testInputs.mode.methods.slice(currentDirectionIndex)) {
-          // if (testResults.length == autoRepeatIndex) {
-          //   if (currentDirectionIndex == 0) {
-          //     testResults.push({
-          //       [methodName]: {
-          //         startedOn: testNumberStartTime,
-          //         endedOn: null
-          //       }
-          //     });
-          //   }
-          // }
           console.log(testResults);
           if (currentDirectionIndex == 0) {
             testResults[autoRepeatIndex][methodName]['startedOn'] = testNumberStartTime;
           } else if (currentDirectionIndex == 1) {
             testResults[autoRepeatIndex][methodName]['startedOn'] = Date.now();
           }
-          // testResults[autoRepeatIndex][methodName] = {
-          //   startedOn: Date.now(),
-          //   endedOn: null
-          // };
 
           await executeMeasurements(testInputs.testServer, methodName, currentProcessIndex)
             .then(async (resultsHtml) => {
@@ -1349,25 +1123,6 @@ const summaryChartImageUris = Object.seal({
 
               isFailed = false;
             })
-            // .then(resultsHtml => {
-            //   appState = APP_STATE.TestFinished;
-              
-            //   clearInterval(timerInterval);
-
-            //   const measurementLength = measurementTimes[currentMethodName].length;
-            //   testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
-
-            //   showTestResults(resultsHtml, currentMethodName, testNumber);
-
-            //   setTestFinishTimes(currentMethodName, testNumber);
-            //   testSessionTime.finishedOn = moment(measurementTimes[currentMethodName][measurementLength - 1][1]).format('YYYY-MM-DD HH:mm:ss');
-
-            //   console.log("testResults", testResults);
-              
-            //   currentProcessIndex = 0;
-
-            //   autoRepeatIndex++;
-            // })
             .catch(async (err) => {
               appState = APP_STATE.TestFinished;
 
@@ -1383,60 +1138,6 @@ const summaryChartImageUris = Object.seal({
               break;
             }
         }
-
-
-        
-        // await executeMeasurements(testInputs.testServer, currentMethodName, currentProcessIndex)
-        //   .then(async (resultsHtml) => {
-        //     if (currentDirectionIndex == 0) {
-        //       const measurementLength = measurementTimes[currentMethodName].length;
-        //       testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
-  
-        //       showTestResults(resultsHtml, currentMethodName, testNumber);
-        //       directionIndex++;
-  
-        //       currentMethodName = testInputs.mode.methods[directionIndex];
-  
-        //       testResults[autoRepeatIndex][currentMethodName] = {
-        //         startedOn: Date.now(),
-        //         endedOn: null
-        //       };
-  
-        //       currentDirectionIndex = directionIndex;
-        //       currentProcessIndex = 0;
-        //     }
-
-        //     return executeMeasurements(testInputs.testServer, currentMethodName, currentProcessIndex);
-        //   })
-        //   .then(resultsHtml => {
-        //     appState = APP_STATE.TestFinished;
-            
-        //     clearInterval(timerInterval);
-
-        //     const measurementLength = measurementTimes[currentMethodName].length;
-        //     testResults[autoRepeatIndex][currentMethodName]['endedOn'] = measurementTimes[currentMethodName][measurementLength - 1][1];
-
-        //     showTestResults(resultsHtml, currentMethodName, testNumber);
-
-        //     setTestFinishTimes(currentMethodName, testNumber);
-        //     testSessionTime.finishedOn = moment(measurementTimes[currentMethodName][measurementLength - 1][1]).format('YYYY-MM-DD HH:mm:ss');
-
-        //     console.log("testResults", testResults);
-            
-        //     currentProcessIndex = 0;
-
-        //     autoRepeatIndex++;
-        //   })
-        //   .catch(async (err) => {
-        //     appState = APP_STATE.TestFinished;
-
-        //     console.log(err);
-        //     clearInterval(timerInterval);
-            
-        //     isFailed = true;
-
-        //     await showTestFailed(err, currentProcessIndex, directionIndex, testNumber);
-        //   });
 
         if (isFailed) {
           break;
@@ -1505,10 +1206,6 @@ const summaryChartImageUris = Object.seal({
   
         console.log("summary-response", response);
         $(`#pills-speedtest-summary`).html(response);
-      
-        // setTimeout(function () {
-        //   generateTestExecutionSummaryReport(testInputs.mode.methods, testResults, summaryChartImageUris);
-        // }, 3000);
       } catch (ex) {
         $(`#pills-speedtest-summary`).html(`error: ${ex.toString()}`);
       }
@@ -1791,26 +1488,7 @@ const summaryChartImageUris = Object.seal({
         return new Promise((resolve, reject) => {
           let processScriptData = scriptData;
 
-          // if (process.processId == "analysis") {
-          //   // processScriptData = {
-          //   //   mode: testMethod.mode,
-          //   //   rtt: requiredGetParamaters.rtt
-          //   // };
-          //   postThoughputScriptData = Object.assign(postThoughputScriptData, scriptData);
-          //   processScriptData = postThoughputScriptData;
-          // } else if (process.processId == "thpt") {
-          //   postThoughputScriptData = scriptData;
-          //   resolve();
-          //   return;
-          // }
-          // else {
-          //   processScriptData = scriptData;
-          // }
-
-          // processScriptData = scriptData
-
           console.log({processScriptData});
-          // console.log({postThoughputScriptData});
           
           let retryCount = 0;
           const maxRetryCount = 1;
@@ -1952,58 +1630,8 @@ const summaryChartImageUris = Object.seal({
           }
           finishTestAjax();
         }, 1000);
-        // setTimeout(function () {
-        //   $.ajax({
-        //     url: 'get-results',
-        //     method: "GET",
-        //     data: {
-        //       testServerName: testServer.nickname,
-        //       testServerUrl: testServer.hostname,
-        //       mode: testMethod.mode,
-        //       testNumber: autoRepeatIndex + 1
-        //     },
-        //     dataType: 'json',
-        //     timeout: MEASUREMENT_TIMEOUT,
-        //     success: function (response) {
-        //       console.log(testResults);
-        //       testResults[autoRepeatIndex][response.method]['results'] = response.results;
-              
-        //       resolve(response.html);
-        //     },
-        //     error: function (jqXHR, textStatus, errorThrown) {
-        //       console.log('GET get-results error');
-        //       console.log({jqXHR, textStatus, errorThrown});
-        //       reject(jqXHR);
-        //     }
-        //   });
-        // }, 500);
       });
     }
-  
-    // const executeAllProcesses = async () => {
-    //   // postThoughputScriptData = {};
-    //   return new Promise((resolve, reject) => {
-    //     MEASUREMENT_PROCESSES.reduce(async (previousPromise, nextProcess) => {
-    //       await previousPromise;
-
-    //       if (['verify-test'].includes(nextProcess.processId)) {
-    //         return connectToServer(nextProcess);
-    //       }
-
-    //       if (['finish-test'].includes(nextProcess.processId)) {
-    //         return getTestResults(nextProcess);
-    //       }
-          
-    //       return executeProcess(nextProcess);
-    //     }, Promise.resolve())
-    //       .then(results => {
-    //         resolve(results);
-    //       })
-    //       .catch(err => {
-    //         reject(err);
-    //       });
-    //   })
-    // }
   
     return new Promise(async (resolve, reject) => {
       let retryCount = 0;
@@ -2046,7 +1674,7 @@ const summaryChartImageUris = Object.seal({
     switch (processId) {
       case "bdp":
         data = {
-          rtt: requiredGetParamaters.rtt
+          rtt: requiredGetParamaters.rtt,
         }
         break;
       case "thpt":
@@ -2077,6 +1705,7 @@ const summaryChartImageUris = Object.seal({
         data = {
           mode: testMethod.mode,
           rtt: requiredGetParamaters.rtt,
+          isr: testInputs.isr,
           serverIP: testInputs.testServer.ip_address,
           port,
         }
@@ -2086,6 +1715,7 @@ const summaryChartImageUris = Object.seal({
           mode: testMethod.mode,
           mtu: requiredGetParamaters.mtu,
           rtt: requiredGetParamaters.rtt,
+          bdp: requiredGetParamaters.bdp,
           rwnd: requiredGetParamaters.rwnd,
           ideal: testInputs.isr,
           serverIP: testInputs.testServer.ip_address,
@@ -2561,26 +2191,6 @@ const summaryChartImageUris = Object.seal({
       });
     });
   }
-
-  // function setGpsInfo(lat, lon, location) {
-  //   return new Promise(function (resolve, reject) {
-  //     $.ajax({
-  //       url: 'set-gps-info',
-  //       method: 'POST',
-  //       dataType: 'json',
-  //       data: {
-  //         lat, lon, location
-  //       },
-  //       success: function (response) {
-  //         console.log("response", response);
-  //         resolve(response);
-  //       },
-  //       error: function (err) {
-  //         reject(err);
-  //       }
-  //     });
-  //   });
-  // }
   
   function passwordModal() {
     return new Promise(function (resolve, reject) {
@@ -2646,9 +2256,6 @@ const summaryChartImageUris = Object.seal({
       },
       error: function (err) {
         console.log(err);
-        // const responseJSON = JSON.parse(err.responseText);
-        // $('#modalReenterPassword .alert-danger').text(responseJSON?.error ?? "Unexpected error occured");
-        // $('#modalReenterPassword .alert-danger').removeClass("d-none");
       }
     });
   }

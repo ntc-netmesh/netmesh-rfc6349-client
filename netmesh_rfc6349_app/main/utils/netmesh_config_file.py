@@ -1,10 +1,11 @@
 import os
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import json
 
 import configparser
+from netmesh_rfc6349_app.main.utils import get_time_now
 
 from netmesh_rfc6349_app.main.utils.laptop_info import get_ubuntu_home_user
 
@@ -98,18 +99,21 @@ class NetMeshConfigFile:
                 user: dict
                 for i, user in enumerate(logged_users):
                     if "token_expiry" in user:
-                        utc_now = datetime.now(
-                            timezone.utc).replace(tzinfo=None)
+                        datetime_now = get_time_now()
                         extracted_datetime = datetime.strptime(
-                            user['token_expiry'], "%Y-%m-%dT%H:%M:%S.%fZ")
+                            user['token_expiry'], "%Y-%m-%dT%H:%M:%S.%f%z")
+                        
                         token_expiry_seconds = (
-                            extracted_datetime - utc_now).total_seconds()
-
+                            extracted_datetime - datetime_now).total_seconds()
+                        
+                        print("token_expiry_seconds", token_expiry_seconds)
                         user.update(
                             {'token_expiry_seconds': token_expiry_seconds})
                         logged_users[i] = user
             except Exception as ex:
                 print(ex)
+                
+            print("logged_users", logged_users)
 
             return logged_users
 
