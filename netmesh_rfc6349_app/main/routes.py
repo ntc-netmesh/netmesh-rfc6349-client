@@ -31,4 +31,7 @@ def index_page():
 @main.route('/home')
 @wrappers.require_api_token
 def home_page():
-    return render_template('home.html', email=session['email'], full_name=session['name'], app_version=get_app_current_version())
+    config = NetMeshConfigFile()
+    rfc_settings = config.settings_config.get_all_settings()
+    
+    return render_template('home.html', email=session['email'], full_name=session['name'], app_version=get_app_current_version(), rfc_settings=rfc_settings)

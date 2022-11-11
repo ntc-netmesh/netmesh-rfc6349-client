@@ -14,6 +14,7 @@ import folium
 
 from flask import Blueprint, Response, render_template, request, redirect, url_for, abort, session, jsonify, current_app, g
 from netmesh_rfc6349_app import app_resource_path
+from netmesh_rfc6349_app.main.utils.netmesh_config_file import NetMeshConfigFile
 
 
 from netmesh_rfc6349_app.test_measurement.utils import calculate_window_size, run_process_script, get_ethernet_connections, get_default_gateway
@@ -26,6 +27,29 @@ import netmesh_rfc6349_app.main.utils.log_settings as log_settings
 import netmesh_rfc6349_app.main.utils.netmesh_location as netmesh_location
 
 test_measurement = Blueprint('test_measurement', __name__)
+
+@test_measurement.route('/save-rfc-settings', methods=['POST'])
+def save_rfc_settings():
+    print(request.form.keys())
+    thpt_phase_duration_seconds = int(request.form['thptPhaseDuration'])
+    
+    try:
+        config = NetMeshConfigFile()
+        config.settings_config.set_thpt_phase_duration_seconds(thpt_phase_duration_seconds)
+        config.save()
+        
+        return jsonify(success=True)
+    except Exception as ex:
+        return jsonify(success=False, msg=str(ex))
+
+@test_measurement.route('/get-rfc-settings')
+def get_rfc_settings():
+    try:
+        config = NetMeshConfigFile()
+        return json.dumps(config.settings_config.get_all_settings())
+    
+    except Exception as ex:
+        return jsonify(success=False, msg=str(ex))
 
 @test_measurement.route('/report-data', methods=['POST'])
 def report_data():
@@ -835,9 +859,12 @@ def run_process_thpt():
     print("WINDOW SIZE CALC")
     print("bdp", bdp)
     print("window_size", window)
+    
+    config = NetMeshConfigFile()
+    duration = config.settings_config.get_thpt_phase_duration_seconds()
 
     command_array = ['sudo', './thpt.sh', f'--mtu={mtu}', f'--rtt={rtt}', f'--rwnd={rwnd}',
-                     f'--ideal={ideal}', f'--ip={server_ip}', f'--port={port}', f'--mode={mode}', f'--window={window}']
+                     f'--ideal={ideal}', f'--ip={server_ip}', f'--port={port}', f'--mode={mode}', f'--window={window}', f'--dur={duration}']
     # name - from script output
     # key - based from Required_User_Body in /thpt POST request
     # Must be IN EXACT ORDER
@@ -950,6 +977,8 @@ def get_connected_devices():
 
         # get network interface ip
         ethernet_ip = request.form["ethernetIP"]
+        scan_duration_seconds = int(request.form["scanDurationSeconds"])
+
 
         gateway_ip = get_default_gateway()
 
@@ -958,7 +987,9 @@ def get_connected_devices():
         nmap = nmap3.Nmap()
         # ps = nmap3.PortScanner()
         # results = ps.scan(ethernet_ip, arguments='-sT -O', sudo=True)
-        results = nmap.nmap_os_detection(f'{ethernet_ip}/24', "-sT -O")
+        # results = nmap.nmap_os_detection(f'{ethernet_ip}/24', f"-sT -O", f"--script-timeout {scan_duration_seconds}")
+        element_results = nmap.scan_command(f'{ethernet_ip}/24', 'nmap -O -sT', timeout=scan_duration_seconds)
+        results = nmap.parser.os_identifier_parser(element_results)
         runtime = results.pop("runtime")
         stats = results.pop("stats")
         print(results)
@@ -973,11 +1004,11 @@ def get_connected_devices():
             "stats": stats
         }))
     except nmap3.NmapExecutionError as ex:
-        print("nmap3", ex)
-        raise ex
+        print(ex)
+        return jsonify(error=str(ex)), 400
     except Exception as ex:
         print(ex)
-        raise ex
+        return jsonify(error=str(ex)), 400
 
 
 @test_measurement.route('/send-error', methods=['POST'])

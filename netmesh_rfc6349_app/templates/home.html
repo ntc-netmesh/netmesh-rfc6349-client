@@ -34,6 +34,22 @@
   #process-error .accordion-button::after {
     content: none;
   }
+
+  #tickmarks {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    writing-mode: vertical-lr;
+    text-align: center;
+    width: 81.67%;
+    margin-left: 18.33%;
+    font-size: 0.9rem;
+  }
+  
+  #tickmarks option {
+    padding: 0;
+    rotate: -90deg;
+  }
 </style>
 
 {% endblock %}
@@ -51,7 +67,10 @@
       novalidate
     >
       <fieldset class="card shadow mb-4">
-        <h5 class="card-header">Test Measurement Details</h5>
+        <div class="card-header d-flex align-items-center ps-3 pe-2">
+          <h5 class="m-0">Test Measurement Details</h5>
+          <button id="btnShowRfcSettings" type="button" class="btn btn-sm btn-outline-secondary py-1 ms-auto"><i class="bi bi-gear-fill"></i></button>
+        </div>
         <div class="card-body">
           <div class="row">
             <div class="form-group mb-3">
@@ -789,6 +808,10 @@
         <div id="scanning-devices-progress" class="progress">
           <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
+        <div id="nmap-timer-container" class="text-secondary p-1">
+          <span>Scan time automatically ends in: </span>
+          <span id="nmap-timer-countdown" class="fw-bold"></span>
+        </div>
         <div id="connected-devices-info" class="alert alert-warning d-none" role="alert">
           <i id="connected-devices-info-icon" class="bi bi-exclamation-triangle-fill"></i>
           <span id="connected-devices-count">
@@ -835,6 +858,47 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-outline-primary" type="button" data-bs-dismiss="modal" aria-label="Close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalRfcSettings" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" role="dialog" aria-labelledby="modalRfcSettings" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Test Measurement Settings</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card">
+          <div class="card-body">
+            <h6 for="thptDurationRange" class="card-title">Throughput phase duration</h6>
+            <div>
+              <b id="thptDurationText">15</b> seconds
+            </div>
+            <input id="thptDurationRange" type="range" class="w-100" min="0" max="15" step="1" value="{{ rfc_settings['thpt_phase_duration_seconds'] }}" list="tickmarks">
+            <datalist id="tickmarks" class="text-secondary">
+              <option value="3" label="3"></option>
+              <option value="4" label="4" style="color: transparent;"></option>
+              <option value="5" label="5"></option>
+              <option value="6" label="6" style="color: transparent;"></option>
+              <option value="7" label="7" style="color: transparent;"></option>
+              <option value="8" label="8" style="color: transparent;"></option>
+              <option value="9" label="9" style="color: transparent;"></option>
+              <option value="10" label="10" class="fw-bold"></option>
+              <option value="11" label="11" style="color: transparent;"></option>
+              <option value="12" label="12" style="color: transparent;"></option>
+              <option value="13" label="13" style="color: transparent;"></option>
+              <option value="14" label="14" style="color: transparent;"></option>
+              <option value="15" label="15"></option>
+            </datalist>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveRfcSettings" class="btn btn-primary" type="button">Save</button>
+        <button class="btn btn-outline-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>

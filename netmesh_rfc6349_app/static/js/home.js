@@ -109,7 +109,7 @@ const summaryChartImageUris = Object.seal({
   let measurementTimes = {}
   
   let currentTestDirection = "";
-  let testNumberStartTime;;
+  let testNumberStartTime;
   let currentProcessIndex = 0;
   let currentDirectionIndex = 0;
   
@@ -267,6 +267,59 @@ const summaryChartImageUris = Object.seal({
       openDownloadsFolder();
     });
 
+    $('#btnShowRfcSettings').on('click', async function () {
+      const request = await fetch('/get-rfc-settings');
+      const response = await request.json();
+
+      if (request.ok) {
+        if (response.hasOwnProperty('thpt_phase_duration_seconds')) {
+          $('#thptDurationRange').val(response['thpt_phase_duration_seconds']).trigger('change');
+        } else {
+          // show default value
+          $('#thptDurationRange').val(15).trigger('change');
+        }
+      } else {
+        alert(response.json());
+      }
+
+      $('#modalRfcSettings').modal('show');
+    });
+
+    $('#thptDurationRange').on('input change', function (e) {
+      const seconds = $(this).val();
+      if (seconds < 3) {
+        e.preventDefault();
+        $(this).val(3);
+        return;
+      }
+      $('#thptDurationText').text(`${seconds}`);
+    });
+
+    $('#btnSaveRfcSettings').on('click', async function () {
+      const settings = new FormData();
+      settings.append('thptPhaseDuration', $('#thptDurationRange').val());
+
+      try {
+        const request = await fetch('/save-rfc-settings', {
+          method: 'POST',
+          body: settings
+        });
+        const response = await request.json();
+
+        if (request.ok) {
+          console.log("rfc-settings", response);
+        }
+        else {
+          alert(response.msg);
+        }
+      }
+      catch (ex) {
+        alert(ex);
+      }
+
+      $('#modalRfcSettings').modal('hide');
+    });
+
     // Focus on ISR field when window is loaded
     $('#isr').focus();
   
@@ -376,22 +429,53 @@ const summaryChartImageUris = Object.seal({
     if (!$('#netType').val()) {
       return;
     }
+
+    let currentScanDuration = Object.seal({
+      maxScanDurationSeconds: 180,
+      totalSeconds: 0,
+      get remainingTime() {
+        const remaining = this.maxScanDurationSeconds - this.totalSeconds + 1;
+        const minutes = Math.trunc(remaining / 60);
+        const seconds = Math.trunc(remaining % 60);
+        
+        return {minutes, seconds};
+      },
+      get remainingTimeText() {
+        if (this.totalSeconds >= this.maxScanDurationSeconds) {
+          return "Please wait...";
+        }
+        return `${numeral(this.remainingTime.minutes).format("0")}m ${numeral(this.remainingTime.seconds).format("00")}s`;
+      },
+      reset() {
+        this.totalSeconds = 0;
+      }
+    });
     
+    currentScanDuration.reset();
+    $('#nmap-timer-container').show();
+
+    const scanStartedNow = Date.now();
+    let scanTimerInterval = setInterval(function () {
+      currentScanDuration.totalSeconds = (Date.now() - scanStartedNow) / 1000.0;
+      $('#nmap-timer-countdown').text(currentScanDuration.remainingTimeText);
+    }, 100);
+
     $('#modalScanForConnectedDevices').modal('show');
 
-    $('#connected-devices-title').html(`Scanning connected devices to the router...`);
+    $('#connected-devices-title').html(`Scanning devices connected to the router...`);
     $('#scanning-devices-progress').removeClass('d-none');
     $('#connected-devices-table-container').addClass('d-none');
     $('#connected-devices-table tbody').html('');
     $('#connected-devices-info').addClass('d-none');
     $('#connected-devices-error-info').addClass('d-none');
 
-    $.ajax({
+    const scanAjax = $.ajax({
       url: 'get-connected-devices',
       method: 'POST',
       dataType: 'json',
       data: {
-        ethernetIP: $('#netType').val()
+        ethernetIP: $('#netType').val(),
+        scanDurationSeconds: currentScanDuration.maxScanDurationSeconds,
       },
       // data: {
       //   networkConnectionTypeName: typeName,
@@ -404,7 +488,7 @@ const summaryChartImageUris = Object.seal({
 
         $('#connected-devices-info').removeClass('d-none');
         $('#connected-devices-table-container').removeClass('d-none');
-        $('#connected-devices-title').html(scannedIPsCount === 0 ? "" : `Devices connected to ${typeName}`);
+        $('#connected-devices-title').html(scannedIPsCount === 0 ? "" : `Devices connected to the router`);
 
         $('#nmap-version').text(data.stats.version);
         $('#nmap-scan-started-on').text(data.stats.startstr);
@@ -431,6 +515,7 @@ const summaryChartImageUris = Object.seal({
           $('#connected-devices-info').removeClass('alert-warning').addClass('alert-primary');
           $('#connected-devices-info-icon').removeClass('bi-exclamation-triangle-fill').addClass('bi-check-circle');
         } else {
+          scanAjax?.abort();
           // $('#connected-devices-card').removeClass('border-primary').addClass('border-warning');
           $('#connected-devices-info').removeClass('border-primary').addClass('border-warning');
           $('#connected-devices-info').removeClass('alert-primary').addClass('alert-warning');
@@ -460,9 +545,15 @@ const summaryChartImageUris = Object.seal({
         $('#connected-devices-error-message').text(err.responseJSON?.error ?? "Unknown error occured");
       },
       complete: function () {
+        clearInterval(scanTimerInterval);
+        $('#nmap-timer-container').hide();
         $('#scanning-devices-progress').addClass('d-none');
       }
-    })
+    });
+
+    $('#modalScanForConnectedDevices').on('hide.bs.modal', function () {
+      scanAjax?.abort();
+    });
   }
   
   function setTestServers() {
@@ -2080,31 +2171,36 @@ const summaryChartImageUris = Object.seal({
         boxZoom: false
       });
       
-      const layerInstance = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        minZoom: 16,
-        maxZoom: 16,
-      }).addTo(map);
-
-      layerInstance.on('load', function (e) {
-        $('#map-snippet .spinner-border').remove();
-      });
+      try {
+        const layerInstance = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          minZoom: 16,
+          maxZoom: 16,
+        }).addTo(map);
   
-      L.marker([lat, lon], {
-        keyboard: false,
-      }).addTo(map);
-
-      leafletImage(map, function(err, canvas) {
-        if (!map) {
-          return;
-        }
-        
-        const dimensions = map.getSize();
-        testInputs.mapImage.dataUri =  canvas.toDataURL();
-        testInputs.mapImage.width =  dimensions.x;
-        testInputs.mapImage.height =  dimensions.y;
-      });
+        layerInstance.on('load', function (e) {
+          $('#map-snippet .spinner-border').remove();
+        });
+    
+        L.marker([lat, lon], {
+          keyboard: false,
+        }).addTo(map);
   
+        leafletImage(map, function(err, canvas) {
+          if (!map) {
+            return;
+          }
+          
+          const dimensions = map.getSize();
+          testInputs.mapImage.dataUri =  canvas.toDataURL();
+          testInputs.mapImage.width =  dimensions.x;
+          testInputs.mapImage.height =  dimensions.y;
+        });
+      } catch {
+
+      }
+      
+      $('#map-snippet .spinner-border').remove();
       $('#mapOptions').removeClass('d-none');
 
       $('#location-name-container').html(`<div class="placeholder-wave"><span class="w-100 placeholder"></span></div>`);

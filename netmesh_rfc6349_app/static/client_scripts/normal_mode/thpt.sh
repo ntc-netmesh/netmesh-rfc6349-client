@@ -31,6 +31,9 @@ while [ $# -gt 0 ]; do
     --window=*)
       _window="${1#*=}"
       ;;
+    --dur=*)
+      _dur="${1#*=}"
+    ;;
     *)
       printf "***************************\n"
       printf "* Error: Invalid argument.*\n"
@@ -40,7 +43,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [[ -z "$_mtu" || -z "$_rtt" || -z "$_ip" || -z "$_port" || -z "$_rwnd" || -z "$_ideal" || -z "$_mode" || -z "$_window" ]]
+if [[ -z "$_mtu" || -z "$_rtt" || -z "$_ip" || -z "$_port" || -z "$_rwnd" || -z "$_ideal" || -z "$_mode" || -z "$_window" || -z "$_dur" ]]
 then
 echo "Normal Mode Throughput Test"
 echo "Usage: ./thpt.sh --rtt=<rtt> --mtu=<mtu> --rwnd=<rwnd> --ideal=<ideal> --ip=<ip> --port=<port> --mode=<mode>"
@@ -51,9 +54,17 @@ echo "<ip> in server ip"
 echo "<port> provided port by server"
 echo "<mode> normal/reverse"
 echo "<window> window size"
-echo "Example: ./thpt.sh --mtu=1500 --rtt=30 --rwnd=2000 --ideal=100 --ip=127.0.0.1 --port=8888 --mode=normal"
+echo "<dur> duration in seconds minimum of 5 max of 15"
+echo "Example: ./thpt.sh --mtu=1500 --rtt=30 --rwnd=2000 --ideal=100 --ip=127.0.0.1 --port=8888 --mode=normal --window=64240 --dur=5"
 exit 1;
 
+fi
+
+# check duration val
+if [ "${_dur}" -lt 3 ] || [ "${_dur}" -gt 15 ];
+then
+  echo "invalid duration, must be 3 <= dur <= 15"
+  exit 1;
 fi
 
 # iperf3 
@@ -72,7 +83,7 @@ else
   exit 1;
 fi
 
-OUT=$(iperf3 $_mode --client $_ip --port $_port --time 10 --omit 5 --window $_window --set-mss 1460 --format m --json \
+OUT=$(iperf3 $_mode --client $_ip --port $_port --time $_dur --omit 3 --window $_window --set-mss 1460 --format m --json \
   | jq '.end | { "bytes" : .sum_sent.bytes, "thpt" : .sum_sent.bits_per_second, "retx": .sum_sent.retransmits } + { "mean_rtt" : .streams[].sender.mean_rtt }') 
 
 AVE_THPT=$(echo $OUT | jq '.thpt/1000000')

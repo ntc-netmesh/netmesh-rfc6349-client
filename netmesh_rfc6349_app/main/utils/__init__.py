@@ -1,7 +1,5 @@
 from datetime import datetime, timezone, timedelta
 
-import ntplib
-
 import subprocess
 
 import urllib.request
@@ -40,8 +38,6 @@ def get_time_now():
         
     return datetime_now
 
-
-    
 
 # if __name__ == "__main__":
     # time_info = get_netmesh_time()

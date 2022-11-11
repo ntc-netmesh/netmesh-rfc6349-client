@@ -29,6 +29,7 @@ class NetMeshConfigFile:
 
         self.device_config = self.__NetMeshDeviceConfig(self._config)
         self.users_config = self.__NetMeshUsersConfig(self._config)
+        self.settings_config = self.__NetMeshSettingsConfig(self._config)
 
     def save(self):
         with open(self.__CONFIG_FILE_PATH, 'w') as cf:
@@ -143,3 +144,32 @@ class NetMeshConfigFile:
 
             self._config.set("USERS", "logged_users",
                              json.dumps(remaining_logged_users))
+
+    class __NetMeshSettingsConfig(__NetMeshSectionConfig):
+        section_name = "SETTINGS"
+        
+        default_settings = {
+            "thpt_phase_duration_seconds": 10
+        }
+
+        def __init__(self, config: configparser.ConfigParser):
+            self._config = config
+
+        def set_thpt_phase_duration_seconds(self, duration_seconds: int):
+            self._set_value(self.section_name, "thpt_phase_duration_seconds", str(duration_seconds))
+
+        def get_thpt_phase_duration_seconds(self):
+            value = self._get_value(self.section_name, "thpt_phase_duration_seconds")
+            
+            # return default value if not set
+            if not value:
+                value = str(self.default_settings['thpt_phase_duration_seconds'])
+            
+            return value
+        
+        def get_all_settings(self):
+            if not self.section_name in self._config.sections():
+                self._config.add_section(self.section_name)
+                return self.default_settings
+                
+            return dict(self._config.items(self.section_name))

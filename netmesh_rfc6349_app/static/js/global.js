@@ -1,4 +1,4 @@
-const MEASUREMENT_TIMEOUT = 30 /*seconds*/ * 1000;
+const MEASUREMENT_TIMEOUT = 60 /*seconds*/ * 1000;
 const BLANK_IMAGE_ENCODED = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==';
 
 const TEST_METHODS = Object.freeze({
