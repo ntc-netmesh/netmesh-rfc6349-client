@@ -48,7 +48,7 @@
   
   #tickmarks option {
     padding: 0;
-    rotate: -90deg;
+    transform: rotate(-90deg);
   }
 </style>
 
@@ -166,7 +166,7 @@
               <div class="position-relative border">
                 <div id="map-snippet">
                 </div>
-                <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 1000;">
+                <div id="mapOptions" class="position-absolute top-0 end-0 translate-middle-y m-2 mt-3 d-none" style="z-index: 1049;">
                   <button id="btnMapClear" type="button" class="btn btn-sm btn-primary opacity-75 p-0 px-2">Clear</button>
                 </div>
                 <div id="gpsInputSelection" class="position-absolute top-50 start-50 translate-middle">
@@ -221,6 +221,10 @@
                     <button type="button" class="btn-close" aria-label="Close"></button>
                   </div>
                 </div>
+              </div>
+              <div id="android-gps-info" class="text-secondary small m-1 d-none">
+                <div class="small"><i id="android-gps-label"></i></div>
+                <div id="android-gps-coordinates"></div>
               </div>
               <input type="text" name="coordinates" id="lat" class="form-control form-control-sm d-none" autocomplete="off" required />
               <input type="text" name="coordinates" id="lon" class="form-control form-control-sm d-none" autocomplete="off" required />

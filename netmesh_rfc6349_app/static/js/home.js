@@ -39,6 +39,10 @@ const summaryChartImageUris = Object.seal({
       return `${this.location.lat}°${latDirection}, ${this.location.lon}°${lonDirection}`;
     },
   });
+  
+  const rfcSettings = Object.seal({
+    thptPhaseDurationSeconds: 10,
+  })
 
   const getDurationText = (start, end) => {
     const elapsedSeconds = parseFloat(moment(end).diff(moment(start), 'seconds'));
@@ -152,14 +156,21 @@ const summaryChartImageUris = Object.seal({
         success: function (coordinates) {
           const lat = coordinates[0];
           const lon = coordinates[1];
-    
+
+          const numericalLat = lat.replaceAll("*", "0");
+          const numericalLon = lon.replaceAll("*", "0");
+
           if (lat && lon) {
-            $('#lat').val(lat);
-            $('#lon').val(lon).change();
+            $('#lat').val(numericalLat);
+            $('#lon').val(numericalLon).change();
+
+            $('#android-gps-label').text('Actual output of GPS coordinates from your Android phone');
+            $('#android-gps-coordinates').text(`${lat},${lon}`);
           } else {
             $('#modalGpsProblem').modal('show');
           }
-  
+
+          $('#android-gps-info').removeClass('d-none');
           $('#gpsError').addClass("d-none");
         },
         error: function (err) {
@@ -168,6 +179,8 @@ const summaryChartImageUris = Object.seal({
 
           $('#gpsError .message').text(err.responseText);
           $('#gpsError').removeClass("d-none");
+
+          $('#android-gps-info').addClass('d-none');
         },
         complete: function () {
           $('#btnGetGpsCoordinates, #btnStartTest').attr('disabled', false);
@@ -192,6 +205,7 @@ const summaryChartImageUris = Object.seal({
 
     // Set on click: Clear Map button, Enter GPS Coordinates Manually - Back button
     $('#btnMapClear, #btnManualGpsCancel').on('click', function () {
+      $('#android-gps-info').addClass('d-none');
       backToGpsInputSelection();
     });
 
@@ -319,6 +333,17 @@ const summaryChartImageUris = Object.seal({
 
       $('#modalRfcSettings').modal('hide');
     });
+
+    const request = await fetch('/get-rfc-settings');
+    const response = await request.json();
+
+    if (request.ok) {
+      if (response.hasOwnProperty('thpt_phase_duration_seconds')) {
+        rfcSettings.thptPhaseDurationSeconds = response['thpt_phase_duration_seconds'];
+      }
+    } else {
+      alert(response.json());
+    }
 
     // Focus on ISR field when window is loaded
     $('#isr').focus();
@@ -730,16 +755,16 @@ const summaryChartImageUris = Object.seal({
 
         const process = MEASUREMENT_PROCESSES[i];
         $(`#measurement-process-row-${i + 1}-${dName}-test-${testNumber}`).html(`
-          <td class="p-0 d-flex inline-block" style="min-width: 56px;">
+          <td class="p-0 d-flex inline-block align-baseline" style="min-width: 56px;">
             <span id="${testMethod.name}-process-time-${i}-test-${testNumber}" class="text-muted ms-3 me-2">${dName === methods[0] && i === 0 ? currentTestDuration.timeColon : ""}</span>
           </td>
-          <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0">
+          <td id="${testMethod.name}-process-status-${i}-test-${testNumber}" class="p-0 align-baseline">
             <i class="bi bi-circle text-muted"></i>
           </td>
-          <td class="p-0 w-100">
+          <td class="p-0 w-100 align-baseline">
             <span id="${testMethod.name}-process-label-${i}-test-${testNumber}" class="text-muted mx-2">${process.label}</span>
           </td>
-          <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end">
+          <td id="${testMethod.name}-process-status-label-${i}-test-${testNumber}" class="p-0 text-end align-baseline">
             
           </td>
         `);
@@ -2089,6 +2114,10 @@ const summaryChartImageUris = Object.seal({
       $('#lat').val(latManual);
       $('#lon').val(lonManual).trigger('change');
 
+      $('#android-gps-info').removeClass('d-none');
+      $('#android-gps-label').text('Manually entered GPS coordinates');
+      $('#android-gps-coordinates').text(`${latManual},${lonManual}`);
+
       $('#gpsManualInput').addClass("d-none");
     } else {
       $('input[name="coordinates"]').addClass('is-invalid');
@@ -2160,18 +2189,18 @@ const summaryChartImageUris = Object.seal({
         $('#btnStartTest').attr('disabled', false);
         $('#btnStartTest').attr('cursor', 'default');
       }
-  
-      map = L.map('map-snippet', {
-        center: [lat, lon],
-        zoom: 16,
-        zoomControl: false,
-        dragging: false,
-        tap: false,
-        doubleClickZoom: false,
-        boxZoom: false
-      });
       
       try {
+        map = L.map('map-snippet', {
+          center: [lat, lon],
+          zoom: 16,
+          zoomControl: false,
+          dragging: false,
+          tap: false,
+          doubleClickZoom: false,
+          boxZoom: false
+        });
+
         const layerInstance = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           minZoom: 16,
@@ -2197,7 +2226,7 @@ const summaryChartImageUris = Object.seal({
           testInputs.mapImage.height =  dimensions.y;
         });
       } catch {
-
+        
       }
       
       $('#map-snippet .spinner-border').remove();

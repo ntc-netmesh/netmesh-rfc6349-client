@@ -25,6 +25,9 @@ while [ $# -gt 0 ]; do
     --retx_bytes=*)
       _retx_bytes="${1#*=}"
       ;;
+    --dur=*)
+      _dur="${1#*=}"
+      ;;
     *)
       printf "***************************\n"
       printf "* Error: Invalid argument.*\n"
@@ -34,7 +37,7 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-if [[ -z "$_data_sent" || -z "$_ideal_thpt" || -z "$_ave_thpt" || -z "$_base_rtt" || -z "$_ave_rtt" || -z "$_retx_bytes" ]]
+if [[ -z "$_data_sent" || -z "$_ideal_thpt" || -z "$_ave_thpt" || -z "$_base_rtt" || -z "$_ave_rtt" || -z "$_retx_bytes" || -z "$_dur" ]]
 then
 echo "Throughput Analysis"
 echo "Usage: ./analysis.sh --data_sent=<total_data_sent> --ideal_thpt=<ideal_thpt> --ave_thpt=<ave_thpt> --base_rtt=<baseline_rtt> --ave_rtt=<average_rtt> --retx_bytes=<retransmitted_bytes> "
@@ -60,18 +63,18 @@ base_rtt= float(sys.argv[4])
 ave_rtt= float(sys.argv[5])
 retx_bytes= float(sys.argv[6])
 ideal_time = (data_sent * 8) / ideal_thpt
-actual_time = 10
+actual_time = float(sys.argv[7])
 ttr = actual_time / ideal_time
 buf_del = ( (ave_rtt - base_rtt) / base_rtt ) * 100
 tcp_eff= ( ( (data_sent * 1000000) - retx_bytes) / (data_sent * 1000000) ) * 100
-print("transfer_avg: 10 seconds")
-print("transfer_ideal: " + str(ideal_time)+" seconds")
+print("transfer_avg: " + str(actual_time) + " seconds")
+print("transfer_ideal: " + str(ideal_time) + " seconds")
 print("tcp_ttr: " + str(ttr))
 print("buffer_delay: " + str(buf_del)+"%")
 print("tcp_efficiency: " + str(tcp_eff)+"%")
 
 EOF
 chmod +x thpt_extract.py
-python3 thpt_extract.py $_data_sent $_ideal_thpt $_ave_thpt $_base_rtt $_ave_rtt $_retx_bytes
+python3 thpt_extract.py $_data_sent $_ideal_thpt $_ave_thpt $_base_rtt $_ave_rtt $_retx_bytes $_dur
 rm thpt_extract.py
 

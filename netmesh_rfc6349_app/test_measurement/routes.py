@@ -281,16 +281,16 @@ def get_test_servers():
         )
         r.raise_for_status()
         
-        # local_test_servers = list(filter(lambda x: (x['type'] == "local"), json.loads(r.text)))
-        test_servers = json.loads(r.text)
+        rfc_test_servers = list(filter(lambda x: (x['server_type'] == "rfc"), json.loads(r.text)))
+        # test_servers = json.loads(r.text)
         if current_app.config['FLASK_DEBUG'] == 1:
-            test_servers.append({
+            rfc_test_servers.append({
                 "id": "custom",
                 "hostname": "Custom",
                 "nickname": "Custom test server..."
             })
             
-        return Response(json.dumps(test_servers))
+        return Response(json.dumps(rfc_test_servers))
     except requests.exceptions.HTTPError as eh:
         status_code = eh.response.status_code
 
@@ -895,9 +895,12 @@ def run_process_analysis():
     base_rtt = request.form['base_rtt']
     ave_rtt = request.form['ave_rtt']
     retx_bytes = request.form['retx_bytes']
+    
+    config = NetMeshConfigFile()
+    duration = config.settings_config.get_thpt_phase_duration_seconds()
 
     command_array = ['sudo', './analysis.sh', f'--data_sent={data_sent}', f'--ideal_thpt={ideal_thpt}',
-                     f'--ave_thpt={ave_thpt}', f'--base_rtt={base_rtt}', f'--ave_rtt={ave_rtt}', f'--retx_bytes={retx_bytes}']
+                     f'--ave_thpt={ave_thpt}', f'--base_rtt={base_rtt}', f'--ave_rtt={ave_rtt}', f'--retx_bytes={retx_bytes}', f'--dur={duration}']
     # name - from script output
     # key - based from Required_User_Body in /thpt POST request
     # Must be IN EXACT ORDER
