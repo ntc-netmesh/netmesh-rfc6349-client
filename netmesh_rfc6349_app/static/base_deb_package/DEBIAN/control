@@ -3,5 +3,17 @@ Version: $version
 Architecture: $arch
 Maintainer: DOST-ASTI
 Description: NetMesh RFC-6349 App
-  This application tool serves as a framework for measured end-to-end TCP throughput in a managed IP Network. This is to be used internally by the National Telecommunications Commission (NTC)
+ This application tool serves as a framework for measured end-to-end TCP throughput in a managed IP Network. This is to be used internally by the National Telecommunications Commission (NTC)
+ .
+ UPDATES
+ .Bug fixes
+ .- Fix ISP name detection
+ .- Show the “Queue failed” error if enqueuing is unsuccessful
+ .Improvements
+ .- Add timer on network scan (max scan duration is 3 minutes before timeout)
+ .- Reduce measurement timeout from 5 minutes to 1 minute
+ .- Show recorded GPS coordinates from the connected Android phone
+ .- Detect Ethernet connection during app startup
+ .Speed test algorithm
+ .- Adjust TCP stack for the speed test process (set buffer sizes, set TCP congestion algorithm to "reno")
 Depends: jq, iperf3, adb, nmap, python3-pip, python3-tk, libqt5svg5, libxcb-xinerama0

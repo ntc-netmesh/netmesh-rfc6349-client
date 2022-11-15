@@ -17,6 +17,7 @@ import socket
 from netmesh_rfc6349_app import has_pyi_splash
 from netmesh_rfc6349_app.main.utils import connected_to_the_internet, sync_time
 from netmesh_rfc6349_app.main.utils.netmesh_installer import check_app_latest_version, get_app_current_version, update_app
+from netmesh_rfc6349_app.test_measurement.utils import get_ethernet_connections
 
 if has_pyi_splash():
     import pyi_splash
@@ -93,11 +94,13 @@ def init_gui(application, port=0, width=800, height=600, icon="static/images/net
 
         print("Application level good")
         
-        if not connected_to_the_internet():
-            QMessageBox.critical(None,
-                                 "No Internet",
-                                 f"{application.config['APP_TITLE']} requires internet. Please check your Internet connection, and open this app again.")
-            return
+        if application.config['FLASK_DEBUG'] == 0:
+            ethernets = get_ethernet_connections(app=application)
+            if not ethernets or len(ethernets) == 0:
+                QMessageBox.critical(None,
+                                    "Please use Ethernet connection",
+                                    f"{application.config['APP_TITLE']} requires Ethernet connection. Use an Ethernet cable to connect this laptop to a router. Then, open this app again.")
+                return
         
         sync_time()
 

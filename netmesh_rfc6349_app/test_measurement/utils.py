@@ -206,14 +206,14 @@ def get_network_interface(network_connection_type_name, network_prefix):
             "message": stderr.decode()
         }), 500))
         
-def get_ethernet_connections():
+def get_ethernet_connections(app=current_app):
     addresses = psutil.net_if_addrs()
     stats = psutil.net_if_stats()
     
     connection_types = {
         "en": "Ethernet",
     }
-    if current_app.config['FLASK_DEBUG'] == 1:
+    if app.config['FLASK_DEBUG'] == 1:
         connection_types.update({
             "wl": "Wi-Fi"
         })
