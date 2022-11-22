@@ -157,10 +157,10 @@ const summaryChartImageUris = Object.seal({
           const lat = coordinates[0];
           const lon = coordinates[1];
 
-          const numericalLat = lat.replaceAll("*", "0");
-          const numericalLon = lon.replaceAll("*", "0");
-
           if (lat && lon) {
+            const numericalLat = lat.toString().includes("*") ? lat.toString().replaceAll("*", "0") : lat;
+            const numericalLon = lon.toString().includes("*") ? lon.toString().replaceAll("*", "0") : lon;
+
             $('#lat').val(numericalLat);
             $('#lon').val(numericalLon).change();
 
