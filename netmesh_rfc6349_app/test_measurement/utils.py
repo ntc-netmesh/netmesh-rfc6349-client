@@ -213,10 +213,10 @@ def get_ethernet_connections(app=current_app):
     connection_types = {
         "en": "Ethernet",
     }
-    if app.config['FLASK_DEBUG'] == 1:
-        connection_types.update({
-            "wl": "Wi-Fi"
-        })
+    # if app.config['FLASK_DEBUG'] == 1:
+    #     connection_types.update({
+    #         "wl": "Wi-Fi"
+    #     })
         
     ethernets = []
     for intface, addr_list in addresses.items():

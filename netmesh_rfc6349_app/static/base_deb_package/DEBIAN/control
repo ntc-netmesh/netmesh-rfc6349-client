@@ -6,6 +6,6 @@ Description: NetMesh RFC-6349 App
  This application tool serves as a framework for measured end-to-end TCP throughput in a managed IP Network. This is to be used internally by the National Telecommunications Commission (NTC)
  .
  UPDATES
- .Additional features
- .- Add input for custom test server
+ .Improvements
+ .- Remove restriction for network connection (reallow any type of connection - i.e. Wi-Fi)
 Depends: jq, iperf3, adb, nmap, python3-pip, python3-tk, libqt5svg5, libxcb-xinerama0

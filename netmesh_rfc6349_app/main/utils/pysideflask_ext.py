@@ -94,13 +94,13 @@ def init_gui(application, port=0, width=800, height=600, icon="static/images/net
 
         print("Application level good")
         
-        if application.config['FLASK_DEBUG'] == 0:
-            ethernets = get_ethernet_connections(app=application)
-            if not ethernets or len(ethernets) == 0:
-                QMessageBox.critical(None,
-                                    "Please use Ethernet connection",
-                                    f"{application.config['APP_TITLE']} requires Ethernet connection. Use an Ethernet cable to connect this laptop to a router. Then, open this app again.")
-                return
+        # if application.config['FLASK_DEBUG'] == 0:
+        #     ethernets = get_ethernet_connections(app=application)
+        #     if not ethernets or len(ethernets) == 0:
+        #         QMessageBox.critical(None,
+        #                             "Please use Ethernet connection",
+        #                             f"{application.config['APP_TITLE']} requires Ethernet connection. Use an Ethernet cable to connect this laptop to a router. Then, open this app again.")
+        #         return
         
         sync_time()
 
