@@ -10,7 +10,9 @@ from netmesh_rfc6349_app.main.utils.laptop_info import get_ubuntu_home_user
 
 
 class NetMeshConfigFile:
-    __CONFIG_FILE_DIRECTORY = '/etc/netmesh-rfc6349-app'
+    #__CONFIG_FILE_DIRECTORY = '/etc/netmesh-rfc6349-app'
+    #__CONFIG_FILE_PATH = f'{__CONFIG_FILE_DIRECTORY}/nmrfc.ini'
+    __CONFIG_FILE_DIRECTORY = '.'
     __CONFIG_FILE_PATH = f'{__CONFIG_FILE_DIRECTORY}/nmrfc.ini'
 
     def __init__(self) -> None:

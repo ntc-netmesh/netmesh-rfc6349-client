@@ -937,7 +937,8 @@ def send_error():
             url=main_url,
             headers={"Authorization": "Bearer "+session['api_session_token']},
             files={'file': open(
-                f'{"/var/log/netmesh_rfc6349_app"}/{error_file_name}.log', 'rb')}
+                f'{current_app.APP_DIRECTORY_PATH}/log/{error_file_name}.log', 'rb')}
+                #f'{"/var/log/netmesh_rfc6349_app"}/{error_file_name}.log', 'rb')}
         )
 
         r.raise_for_status()
@@ -1003,7 +1004,8 @@ def open_downloads_folder():
 @test_measurement.route('/open-logs-folder', methods=['POST'])
 def open_logs_folder():
     file_explorer_process = subprocess.Popen(
-        ['nautilus', '--browser', '/var/log/netmesh_rfc6349_app'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #['nautilus', '--browser', '/var/log/netmesh_rfc6349_app'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        ['nautilus', '--browser', f'{current_app.APP_DIRECTORY_PATH}/log/netmesh_rfc6349_app'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = file_explorer_process.communicate()
     if stderr:
         print(stderr)
